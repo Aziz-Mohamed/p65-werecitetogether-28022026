@@ -1,21 +1,34 @@
 <!--
   SYNC IMPACT REPORT
   ==================
-  Version change: 0.0.0 (template) → 1.0.0 (initial ratification)
+  Version change: 1.0.0 → 2.0.0 (MAJOR)
 
-  Modified principles: N/A (first constitution)
+  Bump rationale: Backward-incompatible governance changes —
+  Principle I completely redefined (multi-tenant → single-tenant),
+  Principle II redefined (4 roles → 5 roles), Principle VII
+  materially changed (auth patterns), new principle added (IX),
+  project identity changed (Quran School → WeReciteTogether).
+
+  Modified principles:
+  - I: "Multi-Tenant by Default" → "Single-Tenant, Program-Scoped"
+  - II: "Role-Based Access (4 Roles)" → "Role-Based Access (5 Roles)"
+  - VII: "Supabase-Native Patterns" → updated auth and RLS patterns
+
+  Unchanged principles:
+  - III: TypeScript-First, Strict Mode
+  - IV: Feature Colocation
+  - V: Logical CSS Only (RTL/LTR)
+  - VI: i18n Mandatory
+  - VIII: Minimal Animation, Maximum Responsiveness
 
   Added sections:
-  - Core Principles (8 principles derived from PRD)
-  - Technology & Architecture Constraints
-  - Development Workflow
-  - Governance
+  - Principle IX: External Meeting Integration (Zero Streaming Cost)
 
-  Removed sections: N/A
+  Removed sections: None
 
   Templates requiring updates:
   - .specify/templates/plan-template.md: ✅ No update needed
-    (Constitution Check section already references constitution file dynamically)
+    (Constitution Check section references constitution dynamically)
   - .specify/templates/spec-template.md: ✅ No update needed
     (Spec template is generic; principles enforced at plan/task level)
   - .specify/templates/tasks-template.md: ✅ No update needed
@@ -28,27 +41,33 @@
   Follow-up TODOs: None
 -->
 
-# Quran School Constitution
+# WeReciteTogether Constitution
 
 ## Core Principles
 
-### I. Multi-Tenant by Default
+### I. Single-Tenant, Program-Scoped
 
-Every school-scoped table MUST include a `school_id` foreign key.
-All Row Level Security (RLS) policies MUST enforce school-scoping
-via `get_user_school_id()`. Global tables (`trophies`,
-`achievements`, `levels`) are the only exceptions. No query from
-the application layer may return data across school boundaries
-unless explicitly operating at the platform level.
+WeReciteTogether operates as a single organization (مقرأة
+إلكترونية). There is no `school_id` or multi-tenant scoping.
+Instead, all data MUST be scoped by `program_id`. Every
+program-scoped table MUST include a `program_id` foreign key.
+All Row Level Security (RLS) policies MUST enforce program-scoping
+via `get_user_programs()` for non-master-admin roles. Global
+tables (platform config, shared reference data) are the only
+exceptions. Master Admins bypass program scoping and see all data.
 
-### II. Role-Based Access (4 Roles)
+### II. Role-Based Access (5 Roles)
 
-The system recognizes exactly four roles: `student`, `teacher`,
-`parent`, `admin`. Every RLS policy and application-level guard
-MUST be scoped to one or more of these roles using
-`get_user_role()`. Role assignment occurs at the `profiles` table
-level. No implicit role escalation is permitted — a user MUST
-have the declared role to access role-gated functionality.
+The system recognizes exactly five roles: `student`, `teacher`,
+`supervisor`, `program_admin`, `master_admin`. Every RLS policy
+and application-level guard MUST be scoped to one or more of
+these roles using `get_user_role()`. Role assignment occurs at
+the `profiles` table level. The `program_roles` junction table
+governs which users hold which roles within specific programs.
+No implicit role escalation is permitted — a user MUST have the
+declared role to access role-gated functionality. Program Admins
+and Supervisors MUST only access data within their assigned
+programs.
 
 ### III. TypeScript-First, Strict Mode
 
@@ -88,14 +107,15 @@ switching MUST trigger RTL/LTR layout reconfiguration via
 
 ### VII. Supabase-Native Patterns
 
-Authentication MUST use Supabase Auth (`signUp`,
-`signInWithPassword`, `resetPasswordForEmail`). Data access MUST
-use the Supabase JS SDK directly in service files — no ORM or
-repository abstraction layer. RLS MUST be enabled on every table.
-Migrations MUST be applied via Supabase migration tooling.
-Functions MUST include `SET search_path = public` for security
-compliance. Tables MUST be created before functions that reference
-them.
+Authentication MUST use Supabase Auth. Students self-register
+via email or phone-based auth — no synthetic email patterns.
+Teachers, supervisors, and admins are created by higher-level
+admins. Data access MUST use the Supabase JS SDK directly in
+service files — no ORM or repository abstraction layer. RLS
+MUST be enabled on every table. Migrations MUST be applied via
+Supabase migration tooling. Functions MUST include
+`SET search_path = public` for security compliance. Tables MUST
+be created before functions that reference them.
 
 ### VIII. Minimal Animation, Maximum Responsiveness
 
@@ -105,6 +125,17 @@ feedback, pull-to-refresh, progress fills) are encouraged.
 Full-screen celebrations, heavy Lottie/Rive packs, particle
 effects, and animations that block user interaction are prohibited.
 The app MUST feel alive and responsive, not animated and heavy.
+
+### IX. External Meeting Integration (Zero Streaming Cost)
+
+All live voice/video communication MUST happen via external
+tools (Google Meet, Zoom, Jitsi, or any URL). The app MUST NOT
+host, proxy, or stream any audio or video content (voice memos
+stored in Supabase Storage are the sole exception). Each teacher
+stores a persistent meeting link in their profile. The app
+reveals and deep-links to this URL when a student joins a session.
+Session outcomes (scores, notes, attendance) are logged in-app
+after the external session concludes.
 
 ## Technology & Architecture Constraints
 
@@ -128,11 +159,13 @@ The app MUST feel alive and responsive, not animated and heavy.
   - `is_active` is a status flag, not soft-delete; RLS does NOT
     filter by `is_active` — app layer handles it
   - `updated_at` triggers on tables that need them
+  - Program-scoped tables MUST include `program_id` FK
 
 ## Development Workflow
 
 - **Routing**: File-based via Expo Router. Route groups map to
-  roles: `(auth)`, `(student)`, `(teacher)`, `(parent)`, `(admin)`.
+  roles: `(auth)`, `(student)`, `(teacher)`, `(supervisor)`,
+  `(program-admin)`, `(master-admin)`.
 - **Query keys**: Follow `[feature, ...params]` convention
 - **Services**: Each feature has a `.service.ts` file that wraps
   Supabase SDK calls. Services MUST NOT throw raw errors.
@@ -147,13 +180,14 @@ The app MUST feel alive and responsive, not animated and heavy.
   prefix for hooks, `.service.ts` suffix for services,
   `.types.ts` suffix for types, kebab-case for route files,
   UPPER_SNAKE_CASE for constants.
-- **Git commits**: No AI attribution in commit messages. Write
-  commit messages as if a human developer wrote them.
+- **Git commits**: Conventional Commits format. No AI attribution
+  in commit messages. Write commit messages as if a human
+  developer wrote them.
 
 ## Governance
 
 This constitution is the authoritative reference for all
-architectural and code-quality decisions in the Quran School
+architectural and code-quality decisions in the WeReciteTogether
 project. It supersedes ad-hoc practices and local conventions.
 
 - **Amendments**: Any change to a principle MUST be documented
@@ -167,8 +201,9 @@ project. It supersedes ad-hoc practices and local conventions.
   task lists MUST pass a Constitution Check before implementation
   begins. The plan template's "Constitution Check" section
   validates alignment with these principles.
-- **Source of truth**: The PRD at `memory-bank/PRD.md` is the
-  product-level source of truth. This constitution governs
-  technical execution of that PRD.
+- **Source of truth**: The PRD at
+  `memory-bank/PRD_WeReciteTogether.md` is the product-level
+  source of truth. This constitution governs technical execution
+  of that PRD.
 
-**Version**: 1.0.0 | **Ratified**: 2026-02-08 | **Last Amended**: 2026-02-08
+**Version**: 2.0.0 | **Ratified**: 2026-02-08 | **Last Amended**: 2026-02-28
