@@ -12,6 +12,8 @@
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS "pg_cron" WITH SCHEMA cron;
+CREATE EXTENSION IF NOT EXISTS "http" WITH SCHEMA extensions;
 
 -- =============================================================================
 -- Section 2: Tables (20 tables in FK dependency order)
@@ -504,7 +506,7 @@ DECLARE
   edge_function_url TEXT;
   payload JSONB;
 BEGIN
-  edge_function_url := 'https://zngiszdfdowjvwxqmexl.supabase.co/functions/v1/send-notification';
+  edge_function_url := 'https://cwakivlyvnxdeqrkbzxc.supabase.co/functions/v1/send-notification';
 
   payload := jsonb_build_object(
     'type', 'INSERT',
@@ -1492,7 +1494,7 @@ SELECT cron.schedule(
   '*/15 * * * *',
   $$
   SELECT extensions.http_post(
-    url := 'https://zngiszdfdowjvwxqmexl.supabase.co/functions/v1/generate-sessions',
+    url := 'https://cwakivlyvnxdeqrkbzxc.supabase.co/functions/v1/generate-sessions',
     body := '{"time": "' || now()::text || '"}'::jsonb,
     headers := '{"Content-Type": "application/json"}'::jsonb
   );
@@ -1504,7 +1506,7 @@ SELECT cron.schedule(
   '*/15 * * * *',
   $$
   SELECT extensions.http_post(
-    url := 'https://zngiszdfdowjvwxqmexl.supabase.co/functions/v1/teacher-daily-summary',
+    url := 'https://cwakivlyvnxdeqrkbzxc.supabase.co/functions/v1/teacher-daily-summary',
     body := '{"time": "' || now()::text || '"}'::jsonb,
     headers := '{"Content-Type": "application/json"}'::jsonb
   );
