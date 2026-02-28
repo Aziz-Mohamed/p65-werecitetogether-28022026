@@ -53,6 +53,37 @@ class AuthService {
     }
   }
 
+  async signInWithPassword(
+    email: string,
+    password: string,
+  ): Promise<AuthResult<Session>> {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { error: { message: error.message, code: error.code } };
+      }
+
+      if (!data.session) {
+        return { error: { message: 'No session returned' } };
+      }
+
+      return { data: data.session };
+    } catch (error) {
+      return {
+        error: {
+          message:
+            error instanceof Error
+              ? error.message
+              : 'An unexpected error occurred',
+        },
+      };
+    }
+  }
+
   async signOut(): Promise<void> {
     await supabase.auth.signOut();
   }

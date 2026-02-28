@@ -12,6 +12,14 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
+  "expo": {
+    "autolinking": {
+      "exclude": [
+        "expo-apple-authentication",
+        "expo-notifications"
+      ]
+    }
+  },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
     "@expo/vector-icons": "^15.0.3",

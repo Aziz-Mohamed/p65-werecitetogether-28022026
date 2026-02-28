@@ -52,20 +52,11 @@
       "expo-font",
       "@react-native-community/datetimepicker",
       [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon.png",
-          "sounds": []
-        }
-      ],
-      [
         "expo-av",
         {
           "microphonePermission": "We need microphone access to record voice memos for your sessions."
         }
-      ],
-      "expo-apple-authentication",
-      "@react-native-google-signin/google-signin"
+      ]
     ]
   }
 }
