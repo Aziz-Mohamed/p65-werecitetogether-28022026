@@ -1,88 +1,97 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Pressable, Image } from 'react-native';
-import { Link } from 'expo-router';
+import { StyleSheet, View, Text, Image, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
-import { TextField } from '@/components/ui';
 import { Button } from '@/components/ui';
 import { LanguageToggleButton } from '@/components/ui/LanguageToggleButton';
-import { useLogin } from '@/features/auth/hooks/useLogin';
+import { authService } from '@/features/auth/services/auth.service';
 import { useAuthStore } from '@/stores/authStore';
 import { typography } from '@/theme/typography';
-import { lightTheme, accent, semantic, secondary } from '@/theme/colors';
+import { lightTheme, neutral } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
 import { normalize } from '@/theme/normalize';
 
-// ─── Dev Quick Login ──────────────────────────────────────────────────────────
-
-const DEV_ACCOUNTS = [
-  { label: 'Admin', role: 'admin' as const, username: 'aliomar', schoolSlug: 'ahl-elquran', password: 'Test#123', color: accent.violet[500] },
-  { label: 'Teacher', role: 'teacher' as const, username: 'teacher_123', schoolSlug: 'ahl-elquran', password: 'Test#123', color: accent.blue[500] },
-  { label: 'Student', role: 'student' as const, username: 'student_123', schoolSlug: 'ahl-elquran', password: 'Test#123', color: semantic.success },
-  { label: 'Parent', role: 'parent' as const, username: 'parent_123', schoolSlug: 'ahl-elquran', password: 'Test#123', color: secondary[500] },
-] as const;
-
-// ─── Validation Schema ────────────────────────────────────────────────────────
-
-const createLoginSchema = (t: (key: string) => string) =>
-  z.object({
-    schoolSlug: z.string().min(1, t('auth.validation.schoolCodeRequired')),
-    username: z.string().min(1, t('auth.validation.usernameRequired')),
-    password: z.string().min(6, t('auth.validation.passwordMin')),
-  });
-
-type LoginFormData = z.infer<ReturnType<typeof createLoginSchema>>;
-
-// ─── Login Screen ─────────────────────────────────────────────────────────────
-
 export default function LoginScreen() {
   const { t } = useTranslation();
-  const { mutate: login, isPending } = useLogin();
-  const schoolSlug = useAuthStore((s) => s.schoolSlug);
-  const setSchoolSlug = useAuthStore((s) => s.setSchoolSlug);
+  const setSession = useAuthStore((s) => s.setSession);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const loginSchema = createLoginSchema(t);
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      schoolSlug: schoolSlug ?? '',
-      username: '',
-      password: '',
-    },
-  });
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsSigningIn(true);
+      setErrorMessage(null);
 
-  const quickLogin = (account: (typeof DEV_ACCOUNTS)[number]) => {
-    setErrorMessage(null);
-    setSchoolSlug(account.schoolSlug);
-    login(
-      { schoolSlug: account.schoolSlug, username: account.username, password: account.password },
-      {
-        onError: (error) => {
-          setErrorMessage(error.message || t('auth.loginError'));
-        },
-      },
-    );
+      // Get Google ID token using @react-native-google-signin/google-signin
+      const { GoogleSignin } = await import(
+        '@react-native-google-signin/google-signin'
+      );
+      await GoogleSignin.hasPlayServices();
+      const signInResult = await GoogleSignin.signIn();
+      const idToken = signInResult.data?.idToken;
+
+      if (!idToken) {
+        setErrorMessage(t('auth.signInFailed'));
+        return;
+      }
+
+      const result = await authService.signInWithGoogle(idToken);
+      if (result.error) {
+        setErrorMessage(result.error.message);
+        return;
+      }
+
+      if (result.data) {
+        setSession(result.data);
+      }
+    } catch (error: any) {
+      if (error?.code !== 'SIGN_IN_CANCELLED') {
+        setErrorMessage(t('auth.signInFailed'));
+      }
+    } finally {
+      setIsSigningIn(false);
+    }
   };
 
-  const onSubmit = (data: LoginFormData) => {
-    setErrorMessage(null);
-    setSchoolSlug(data.schoolSlug);
-    login(data, {
-      onError: (error) => {
-        setErrorMessage(error.message || t('auth.loginError'));
-      },
-    });
+  const handleAppleSignIn = async () => {
+    try {
+      setIsSigningIn(true);
+      setErrorMessage(null);
+
+      const AppleAuthentication = await import('expo-apple-authentication');
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (!credential.identityToken) {
+        setErrorMessage(t('auth.signInFailed'));
+        return;
+      }
+
+      const result = await authService.signInWithApple(
+        credential.identityToken,
+      );
+      if (result.error) {
+        setErrorMessage(result.error.message);
+        return;
+      }
+
+      if (result.data) {
+        setSession(result.data);
+      }
+    } catch (error: any) {
+      if (error?.code !== 'ERR_REQUEST_CANCELED') {
+        setErrorMessage(t('auth.signInFailed'));
+      }
+    } finally {
+      setIsSigningIn(false);
+    }
   };
 
   return (
@@ -98,8 +107,8 @@ export default function LoginScreen() {
           />
         </View>
 
-        <Text style={styles.title}>{t('auth.login')}</Text>
-        <Text style={styles.subtitle}>{t('auth.loginSubtitle')}</Text>
+        <Text style={styles.title}>{t('auth.signInTitle')}</Text>
+        <Text style={styles.subtitle}>{t('auth.signInSubtitle')}</Text>
 
         {errorMessage && (
           <View style={styles.errorContainer}>
@@ -107,119 +116,71 @@ export default function LoginScreen() {
           </View>
         )}
 
-        <View style={styles.form}>
-          <Controller
-            control={control}
-            name="schoolSlug"
-            render={({ field: { onChange, value } }) => (
-              <TextField
-                label={t('auth.schoolCode')}
-                placeholder={t('auth.schoolCodePlaceholder')}
-                value={value}
-                onChangeText={onChange}
-                autoCapitalize="none"
-                error={errors.schoolSlug?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="username"
-            render={({ field: { onChange, value } }) => (
-              <TextField
-                label={t('auth.username')}
-                placeholder={t('auth.usernamePlaceholder')}
-                value={value}
-                onChangeText={onChange}
-                autoCapitalize="none"
-                error={errors.username?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, value } }) => (
-              <TextField
-                label={t('auth.password')}
-                placeholder={t('auth.passwordPlaceholder')}
-                value={value}
-                onChangeText={onChange}
-                secureTextEntry
-                error={errors.password?.message}
-              />
-            )}
-          />
-
+        <View style={styles.buttons}>
           <Button
-            title={t('auth.signIn')}
-            onPress={handleSubmit(onSubmit)}
-            disabled={isPending}
-            loading={isPending}
+            title={t('auth.signInWithGoogle')}
+            onPress={handleGoogleSignIn}
+            variant="secondary"
+            disabled={isSigningIn}
+            loading={isSigningIn}
             fullWidth
-            style={styles.button}
+            icon={
+              <Ionicons
+                name="logo-google"
+                size={20}
+                color={lightTheme.text}
+              />
+            }
           />
-        </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>{t('auth.noSchool')}</Text>
-          <Link href="/(auth)/create-school" asChild>
-            <Pressable>
-              <Text style={styles.createLink}>{t('auth.createSchool')}</Text>
-            </Pressable>
-          </Link>
-        </View>
-
-      </View>
-
-      <View style={styles.devSection}>
-        <View style={styles.devPills}>
-          {DEV_ACCOUNTS.map((account) => (
-            <Pressable
-              key={account.role}
-              style={[styles.devPill, { borderColor: account.color }]}
-              onPress={() => quickLogin(account)}
-              disabled={isPending}
-            >
-              <View style={[styles.devDot, { backgroundColor: account.color }]} />
-              <Text style={styles.devPillText}>{account.label}</Text>
-            </Pressable>
-          ))}
+          {Platform.OS === 'ios' && (
+            <Button
+              title={t('auth.signInWithApple')}
+              onPress={handleAppleSignIn}
+              variant="secondary"
+              disabled={isSigningIn}
+              loading={isSigningIn}
+              fullWidth
+              icon={
+                <Ionicons
+                  name="logo-apple"
+                  size={20}
+                  color={lightTheme.text}
+                />
+              }
+            />
+          )}
         </View>
       </View>
     </Screen>
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingBlockStart: spacing.xl,
+    justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'center',
     marginBlockEnd: spacing.xl,
   },
   logo: {
-    width: normalize(100),
-    height: normalize(100),
+    width: normalize(120),
+    height: normalize(120),
   },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
+    textAlign: 'center',
     marginBlockEnd: spacing.xs,
   },
   subtitle: {
     ...typography.textStyles.body,
     color: lightTheme.textSecondary,
+    textAlign: 'center',
     marginBlockEnd: spacing.xl,
-  },
-  form: {
-    gap: spacing.base,
   },
   errorContainer: {
     backgroundColor: lightTheme.error + '20',
@@ -231,50 +192,9 @@ const styles = StyleSheet.create({
   errorText: {
     ...typography.textStyles.caption,
     color: lightTheme.error,
+    textAlign: 'center',
   },
-  button: {
-    marginBlockStart: spacing.base,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBlockStart: spacing.xl,
-    gap: spacing.xs,
-  },
-  footerText: {
-    ...typography.textStyles.body,
-    color: lightTheme.textSecondary,
-  },
-  createLink: {
-    ...typography.textStyles.label,
-    color: lightTheme.primary,
-  },
-  devSection: {
-    paddingBlockEnd: spacing.base,
-    alignItems: 'center',
-  },
-  devPills: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  devPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingBlock: normalize(6),
-    paddingInline: spacing.md,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: lightTheme.border,
-  },
-  devDot: {
-    width: normalize(6),
-    height: normalize(6),
-    borderRadius: normalize(3),
-  },
-  devPillText: {
-    fontSize: normalize(11),
-    color: lightTheme.textSecondary,
+  buttons: {
+    gap: spacing.md,
   },
 });

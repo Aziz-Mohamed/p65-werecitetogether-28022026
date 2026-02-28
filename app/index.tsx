@@ -1,11 +1,18 @@
 import { Redirect } from 'expo-router';
 
 import { useAuth } from '@/hooks/useAuth';
+import type { UserRole } from '@/types/common.types';
 
-// ─── Entry Point ──────────────────────────────────────────────────────────────
+const ROLE_ROUTES: Record<UserRole, string> = {
+  student: '/(student)/',
+  teacher: '/(teacher)/',
+  supervisor: '/(supervisor)/',
+  program_admin: '/(program-admin)/',
+  master_admin: '/(master-admin)/',
+};
 
 export default function Index() {
-  const { isAuthenticated, isLoading, role } = useAuth();
+  const { isAuthenticated, isLoading, role, onboardingCompleted } = useAuth();
 
   if (isLoading) {
     return null;
@@ -15,17 +22,14 @@ export default function Index() {
     return <Redirect href="/(auth)/login" />;
   }
 
-  // Redirect to role-based dashboard
-  switch (role) {
-    case 'student':
-      return <Redirect href="/(student)/" />;
-    case 'teacher':
-      return <Redirect href="/(teacher)/" />;
-    case 'parent':
-      return <Redirect href="/(parent)/" />;
-    case 'admin':
-      return <Redirect href="/(admin)/" />;
-    default:
-      return <Redirect href="/(auth)/login" />;
+  if (!onboardingCompleted) {
+    return <Redirect href="/(auth)/onboarding" />;
   }
+
+  const route = role ? ROLE_ROUTES[role] : null;
+  if (route) {
+    return <Redirect href={route as any} />;
+  }
+
+  return <Redirect href="/(auth)/login" />;
 }
