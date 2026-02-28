@@ -273,6 +273,115 @@ export function buildParentProfile(
 }
 
 /**
+ * Builds a realtime subscription for teacher_availability changes within a program.
+ * Used by student screens showing "Available Now" teacher lists.
+ * Debounce: 300ms (real-time-sensitive)
+ */
+export function buildTeacherAvailabilityProfile(
+  programId: string,
+): RoleSubscriptionProfile {
+  const subscriptions: SubscriptionConfig[] = [
+    {
+      table: 'teacher_availability',
+      event: '*',
+      filter: `program_id=eq.${programId}`,
+      queryKeys: [
+        ['teacher-availability', programId],
+      ],
+    },
+  ];
+
+  return {
+    channelName: `teacher-availability-${programId}`,
+    subscriptions,
+    debounceMs: 300,
+  };
+}
+
+/**
+ * Builds a realtime subscription for sessions involving a specific user.
+ * Listens for INSERT/UPDATE events on sessions filtered by teacher_id or student_id.
+ * Debounce: 300ms (real-time-sensitive)
+ */
+export function buildSessionsProfile(
+  userId: string,
+  filterColumn: 'teacher_id' | 'student_id',
+): RoleSubscriptionProfile {
+  const subscriptions: SubscriptionConfig[] = [
+    {
+      table: 'sessions',
+      event: '*',
+      filter: `${filterColumn}=eq.${userId}`,
+      queryKeys: [
+        ['sessions'],
+        ['teacher-dashboard'],
+        ['student-dashboard', userId],
+      ],
+    },
+  ];
+
+  return {
+    channelName: `sessions-${filterColumn}-${userId}`,
+    subscriptions,
+    debounceMs: 300,
+  };
+}
+
+/**
+ * Builds a realtime subscription for enrollment status changes for a student.
+ * Listens for UPDATE events on enrollments filtered by student_id.
+ * Debounce: 300ms (real-time-sensitive)
+ */
+export function buildEnrollmentsProfile(
+  studentId: string,
+): RoleSubscriptionProfile {
+  const subscriptions: SubscriptionConfig[] = [
+    {
+      table: 'enrollments',
+      event: '*',
+      filter: `student_id=eq.${studentId}`,
+      queryKeys: [
+        ['enrollments', 'student', studentId],
+        ['enrollments'],
+      ],
+    },
+  ];
+
+  return {
+    channelName: `enrollments-${studentId}`,
+    subscriptions,
+    debounceMs: 300,
+  };
+}
+
+/**
+ * Builds a realtime subscription for free_program_queue changes within a program.
+ * Used by student screens waiting for teacher availability.
+ * Debounce: 300ms (real-time-sensitive)
+ */
+export function buildQueueProfile(
+  programId: string,
+): RoleSubscriptionProfile {
+  const subscriptions: SubscriptionConfig[] = [
+    {
+      table: 'free_program_queue',
+      event: '*',
+      filter: `program_id=eq.${programId}`,
+      queryKeys: [
+        ['queue-position'],
+        ['queue-size', programId],
+      ],
+    },
+  ];
+
+  return {
+    channelName: `queue-${programId}`,
+    subscriptions,
+    debounceMs: 300,
+  };
+}
+
+/**
  * Builds subscription profile for an admin user.
  * Debounce: 500ms (dashboard views)
  */
