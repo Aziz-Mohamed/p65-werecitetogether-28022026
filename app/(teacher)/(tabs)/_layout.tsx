@@ -3,10 +3,7 @@ import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '@/theme/colors';
 import { CustomTabBar } from '@/components/layout/CustomTabBar';
-
-// ─── Teacher Tabs Layout ──────────────────────────────────────────────────────
 
 export default function TeacherTabsLayout() {
   const { t } = useTranslation();
@@ -14,52 +11,50 @@ export default function TeacherTabsLayout() {
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
+      screenOptions={{ headerShown: false }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: t('teacher.tabs.dashboard'),
+          title: t('dashboard.teacher.home'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="students"
         options={{
-          title: t('teacher.tabs.students'),
+          title: t('dashboard.teacher.students'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "people" : "people-outline"} size={24} color={color} />
+            <Ionicons name={focused ? 'people' : 'people-outline'} size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="sessions"
         options={{
-          title: t('teacher.tabs.sessions'),
+          title: t('dashboard.teacher.sessions'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "calendar" : "calendar-outline"} size={24} color={color} />
+            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="class-progress"
+        name="circles"
         options={{
-          title: t('reports.classProgress'),
+          title: t('dashboard.teacher.circles'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "bar-chart" : "bar-chart-outline"} size={24} color={color} />
+            <Ionicons name={focused ? 'ellipse' : 'ellipse-outline'} size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: t('teacher.tabs.profile'),
+          title: t('dashboard.teacher.profile'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
           ),
         }}
       />

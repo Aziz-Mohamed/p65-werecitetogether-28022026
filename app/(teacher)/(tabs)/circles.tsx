@@ -8,16 +8,18 @@ import { typography } from '@/theme/typography';
 import { lightTheme, neutral } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
-export default function AwardsScreen() {
+export default function TeacherCirclesScreen() {
   const { t } = useTranslation();
 
   return (
-    <Screen scroll>
+    <Screen scroll hasTabBar>
       <View style={styles.container}>
-        <Text style={styles.title}>{t('navigation.awards')}</Text>
+        <Text style={styles.title}>{t('dashboard.teacher.circles')}</Text>
         <View style={styles.placeholder}>
-          <Ionicons name="trophy-outline" size={48} color={neutral[300]} />
-          <Text style={styles.placeholderText}>{t('common.comingSoon')}</Text>
+          <Ionicons name="ellipse-outline" size={48} color={neutral[300]} />
+          <Text style={styles.placeholderText}>
+            {t('common.comingSoon')}
+          </Text>
         </View>
       </View>
     </Screen>
