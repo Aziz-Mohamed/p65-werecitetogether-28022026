@@ -1,18 +1,19 @@
 <!--
   SYNC IMPACT REPORT
   ==================
-  Version change: 1.0.0 → 2.0.0 (MAJOR)
+  Version change: 2.0.0 → 2.0.1 (PATCH)
 
-  Bump rationale: Backward-incompatible governance changes —
-  Principle I completely redefined (multi-tenant → single-tenant),
-  Principle II redefined (4 roles → 5 roles), Principle VII
-  materially changed (auth patterns), new principle added (IX),
-  project identity changed (Quran School → WeReciteTogether).
+  Bump rationale: Clarification — Principle VII auth method
+  updated from "email or phone-based auth" to "OAuth (Google +
+  Apple Sign-In)" to align with spec clarification decision
+  (OAuth-only, no email/password or phone/SMS).
 
   Modified principles:
-  - I: "Multi-Tenant by Default" → "Single-Tenant, Program-Scoped"
-  - II: "Role-Based Access (4 Roles)" → "Role-Based Access (5 Roles)"
-  - VII: "Supabase-Native Patterns" → updated auth and RLS patterns
+  - VII: Auth method clarified — "email or phone-based" → "OAuth (Google + Apple)"
+
+  Previous version history:
+  - 2.0.0: MAJOR — multi-tenant → single-tenant, 4 → 5 roles,
+    new Principle IX, Quran School → WeReciteTogether
 
   Unchanged principles:
   - III: TypeScript-First, Strict Mode
@@ -108,7 +109,8 @@ switching MUST trigger RTL/LTR layout reconfiguration via
 ### VII. Supabase-Native Patterns
 
 Authentication MUST use Supabase Auth. Students self-register
-via email or phone-based auth — no synthetic email patterns.
+via OAuth providers (Google Sign-In, Apple Sign-In) — no
+email/password or phone/SMS authentication.
 Teachers, supervisors, and admins are created by higher-level
 admins. Data access MUST use the Supabase JS SDK directly in
 service files — no ORM or repository abstraction layer. RLS
@@ -206,4 +208,4 @@ project. It supersedes ad-hoc practices and local conventions.
   source of truth. This constitution governs technical execution
   of that PRD.
 
-**Version**: 2.0.0 | **Ratified**: 2026-02-08 | **Last Amended**: 2026-02-28
+**Version**: 2.0.1 | **Ratified**: 2026-02-08 | **Last Amended**: 2026-02-28
