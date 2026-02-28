@@ -24,7 +24,7 @@ import { Badge } from '@/components/ui/Badge';
 import { useQuery } from '@tanstack/react-query';
 import { QuranRangePicker } from '@/features/memorization/components/QuranRangePicker';
 import { assignmentService } from '@/features/memorization/services/assignment.service';
-import { useRevisionHomework } from '@/features/gamification/hooks/useRevisionHomework';
+// useRevisionHomework removed with gamification feature — stub below
 import { useAllRubReferences, findRubForAyah } from '@/features/scheduling/hooks/useQuranRubReference';
 import { getSurah } from '@/lib/quran-metadata';
 import type { Tables } from '@/types/database.types';
@@ -113,8 +113,10 @@ export function RecitationPlanForm({
     staleTime: 1000 * 60,
   });
 
-  const { homeworkItems, pendingAssignments: hwAssignments, isLoading: loadingHomework } =
-    useRevisionHomework(studentId ?? undefined);
+  // Gamification feature removed — homework items stubbed as empty
+  const homeworkItems: { assignmentId: string; rubNumber: number; juz: number }[] = [];
+  const hwAssignments: { id: string; surah_number: number; from_ayah: number; to_ayah: number }[] | undefined = undefined;
+  const loadingHomework = false;
 
   const { data: rubData = [] } = useAllRubReferences();
 
