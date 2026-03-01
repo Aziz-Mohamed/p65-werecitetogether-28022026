@@ -20,6 +20,8 @@
 - Supabase PostgreSQL (remote) — 2 new tables, 5 dropped tables, 3 modified tables/functions (001-gamification-redesign)
 - TypeScript 5.9 (strict mode) + React Native 0.81.5, Expo ~54, Expo Router v6, React 19, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next, FlashList 2, expo-image 3, @gorhom/bottom-sheet 5, expo-av (to add), expo-notifications (001-platform-core)
 - Supabase PostgreSQL (remote), expo-secure-store (auth tokens), AsyncStorage (preferences), Supabase Storage (voice memos) (001-platform-core)
+- TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next, FlashList 2, react-native-svg 15, expo-file-system ~19, react-native-view-shot (NEW), react-native-qrcode-svg (NEW) (001-program-features)
+- Supabase PostgreSQL (remote) — 8 new tables, 0 modified tables. Supabase Storage — 1 new bucket (certificates). (001-program-features)
 
 ## Supabase Development Workflow (Local-First)
 - ALWAYS develop against the LOCAL Supabase instance (Docker). NEVER apply schema changes directly to production during development.
@@ -35,4 +37,5 @@
 - The app connects to local Supabase during development via `.env` (localhost URLs) and to production via production `.env`.
 
 ## Recent Changes
+- 001-program-features: Added TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next, FlashList 2, react-native-svg 15, expo-file-system ~19, react-native-view-shot (NEW), react-native-qrcode-svg (NEW)
 - 001-mvp-phase1: Added TypeScript 5.9 (strict mode) / React Native 0.83 / React 19 + Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next + react-i18next, FlashList 2, expo-image 3, react-native-calendars, victory-native, @gorhom/bottom-sheet 5
