@@ -12,33 +12,150 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
+      certifications: {
+        Row: {
+          certificate_number: string | null
+          chain_of_narration: string | null
+          created_at: string
+          description: string | null
+          enrollment_id: string | null
+          id: string
+          issue_date: string | null
+          issued_by: string | null
+          metadata: Json
+          program_id: string
+          recommended_by: string | null
+          rejection_reason: string | null
+          revocation_reason: string | null
+          revoked_by: string | null
+          status: string
+          student_id: string
+          supervisor_id: string | null
+          teacher_id: string
+          title: string
+          title_ar: string
+          track_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          certificate_number?: string | null
+          chain_of_narration?: string | null
+          created_at?: string
+          description?: string | null
+          enrollment_id?: string | null
+          id?: string
+          issue_date?: string | null
+          issued_by?: string | null
+          metadata?: Json
+          program_id: string
+          recommended_by?: string | null
+          rejection_reason?: string | null
+          revocation_reason?: string | null
+          revoked_by?: string | null
+          status?: string
+          student_id: string
+          supervisor_id?: string | null
+          teacher_id: string
+          title: string
+          title_ar: string
+          track_id?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          certificate_number?: string | null
+          chain_of_narration?: string | null
+          created_at?: string
+          description?: string | null
+          enrollment_id?: string | null
+          id?: string
+          issue_date?: string | null
+          issued_by?: string | null
+          metadata?: Json
+          program_id?: string
+          recommended_by?: string | null
+          rejection_reason?: string | null
+          revocation_reason?: string | null
+          revoked_by?: string | null
+          status?: string
+          student_id?: string
+          supervisor_id?: string | null
+          teacher_id?: string
+          title?: string
+          title_ar?: string
+          track_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certifications_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_recommended_by_fkey"
+            columns: ["recommended_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "program_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cohorts: {
         Row: {
           created_at: string
@@ -115,6 +232,89 @@ export type Database = {
             columns: ["track_id"]
             isOneToOne: false
             referencedRelation: "program_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curriculum_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          enrollment_id: string
+          id: string
+          last_reviewed_at: string | null
+          program_id: string
+          progress_type: string
+          reviewed_by: string | null
+          score: number | null
+          section_number: number
+          section_title: string | null
+          status: string
+          student_id: string
+          teacher_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          enrollment_id: string
+          id?: string
+          last_reviewed_at?: string | null
+          program_id: string
+          progress_type: string
+          reviewed_by?: string | null
+          score?: number | null
+          section_number: number
+          section_title?: string | null
+          status?: string
+          student_id: string
+          teacher_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          enrollment_id?: string
+          id?: string
+          last_reviewed_at?: string | null
+          program_id?: string
+          progress_type?: string
+          reviewed_by?: string | null
+          score?: number | null
+          section_number?: number
+          section_title?: string | null
+          status?: string
+          student_id?: string
+          teacher_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_progress_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_progress_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_progress_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_progress_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -284,6 +484,198 @@ export type Database = {
           },
         ]
       }
+      guardian_notification_preferences: {
+        Row: {
+          category: string
+          created_at: string
+          enabled: boolean
+          guardian_id: string
+          id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          enabled?: boolean
+          guardian_id: string
+          id?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          enabled?: boolean
+          guardian_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_notification_preferences_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "student_guardians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      himam_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_time: string
+          event_date: string
+          id: string
+          program_id: string
+          start_time: string
+          status: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_time?: string
+          event_date: string
+          id?: string
+          program_id: string
+          start_time?: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_time?: string
+          event_date?: string
+          id?: string
+          program_id?: string
+          start_time?: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "himam_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "himam_events_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      himam_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          juz_number: number
+          logged_by: string | null
+          notes: string | null
+          registration_id: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          juz_number: number
+          logged_by?: string | null
+          notes?: string | null
+          registration_id: string
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          juz_number?: number
+          logged_by?: string | null
+          notes?: string | null
+          registration_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "himam_progress_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "himam_progress_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "himam_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      himam_registrations: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          partner_id: string | null
+          status: string
+          student_id: string
+          time_slots: Json
+          track: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          partner_id?: string | null
+          status?: string
+          student_id: string
+          time_slots?: Json
+          track: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          partner_id?: string | null
+          status?: string
+          student_id?: string
+          time_slots?: Json
+          track?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "himam_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "himam_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "himam_registrations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "himam_registrations_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           category: string
@@ -310,6 +702,64 @@ export type Database = {
           {
             foreignKeyName: "notification_preferences_profile_id_fkey"
             columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      peer_pairings: {
+        Row: {
+          created_at: string
+          id: string
+          program_id: string
+          section_type: string
+          session_count: number
+          status: string
+          student_a_id: string
+          student_b_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          program_id: string
+          section_type: string
+          session_count?: number
+          status?: string
+          student_a_id: string
+          student_b_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          program_id?: string
+          section_type?: string
+          session_count?: number
+          status?: string
+          student_a_id?: string
+          student_b_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "peer_pairings_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "peer_pairings_student_a_id_fkey"
+            columns: ["student_a_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "peer_pairings_student_b_id_fkey"
+            columns: ["student_b_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -363,6 +813,7 @@ export type Database = {
           meeting_link: string | null
           meeting_platform: string | null
           onboarding_completed: boolean
+          peer_available: boolean
           phone: string | null
           region: string | null
           role: string
@@ -385,6 +836,7 @@ export type Database = {
           meeting_link?: string | null
           meeting_platform?: string | null
           onboarding_completed?: boolean
+          peer_available?: boolean
           phone?: string | null
           region?: string | null
           role?: string
@@ -407,6 +859,7 @@ export type Database = {
           meeting_link?: string | null
           meeting_platform?: string | null
           onboarding_completed?: boolean
+          peer_available?: boolean
           phone?: string | null
           region?: string | null
           role?: string
@@ -906,6 +1359,50 @@ export type Database = {
           },
         ]
       }
+      student_guardians: {
+        Row: {
+          created_at: string
+          guardian_email: string | null
+          guardian_name: string
+          guardian_phone: string | null
+          id: string
+          is_primary: boolean
+          relationship: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          guardian_email?: string | null
+          guardian_name: string
+          guardian_phone?: string | null
+          id?: string
+          is_primary?: boolean
+          relationship?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          guardian_email?: string | null
+          guardian_name?: string
+          guardian_phone?: string | null
+          id?: string
+          is_primary?: boolean
+          relationship?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_guardians_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teacher_availability: {
         Row: {
           available_since: string | null
@@ -1103,6 +1600,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_certification_eligibility: {
+        Args: { p_enrollment_id: string }
+        Returns: Json
+      }
       get_user_programs: { Args: never; Returns: string[] }
       get_user_role: { Args: never; Returns: string }
       is_master_admin: { Args: never; Returns: boolean }
@@ -1234,10 +1735,8 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
 } as const
+
