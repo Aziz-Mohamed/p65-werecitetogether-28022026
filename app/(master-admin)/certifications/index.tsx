@@ -1,56 +1,54 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 
 import { Screen } from '@/components/layout';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { useAuth } from '@/hooks/useAuth';
-import { useCertifications } from '@/features/certifications/hooks/useCertifications';
-import { CertificateCard } from '@/features/certifications/components/CertificateCard';
+import { useCertificationRequests } from '@/features/certifications/hooks/useCertificationRequests';
+import { CertificationRequestCard } from '@/features/certifications/components/CertificationRequestCard';
 import { typography } from '@/theme/typography';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
-export default function CertificatesScreen() {
+export default function MasterAdminCertificationsScreen() {
   const { t } = useTranslation();
-  const router = useRouter();
-  const { profile } = useAuth();
+
+  // Master admin sees certifications across all programs (read-only)
+  // TODO: Get programId from context/store — or query all programs
+  const programId = undefined as string | undefined;
 
   const {
-    data: certifications = [],
+    data: requests = [],
     isLoading,
     error,
     refetch,
-  } = useCertifications(profile?.id);
+  } = useCertificationRequests(programId);
 
-  if (isLoading) return <LoadingState />;
+  if (isLoading && programId) return <LoadingState />;
   if (error) return <ErrorState description={(error as Error).message} onRetry={refetch} />;
 
   return (
-    <Screen scroll={false} hasTabBar>
+    <Screen scroll={false}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>{t('certifications.myCertificates')}</Text>
+          <Text style={styles.title}>{t('certifications.title')}</Text>
         </View>
 
-        {certifications.length === 0 ? (
+        {!programId || requests.length === 0 ? (
           <EmptyState
             icon="ribbon-outline"
-            title={t('certifications.noCertificates')}
-            description={t('certifications.noCertificatesDesc')}
+            title={t('certifications.requests.empty')}
+            description={t('certifications.requests.emptyDesc')}
           />
         ) : (
           <FlashList
-            data={certifications}
+            data={requests}
             keyExtractor={(item) => item.id}
+
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
-              <CertificateCard
-                certification={item as any}
-                onPress={() => router.push(`/(student)/certificates/${item.id}`)}
-              />
+              <CertificationRequestCard request={item as any} />
             )}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
           />
