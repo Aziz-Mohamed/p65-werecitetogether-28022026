@@ -65,7 +65,10 @@
     "unexpectedError": "حدث خطأ غير متوقع",
     "unknownError": "حدث خطأ غير معروف",
     "validationFailed": "فشل التحقق",
-    "viewAll": "عرض الكل"
+    "viewAll": "عرض الكل",
+    "add": "إضافة",
+    "accept": "قبول",
+    "decline": "رفض"
   },
   "auth": {
     "sessionExpired": "انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.",
@@ -727,5 +730,260 @@
     },
     "topPerformers": "الأكثر تميّزاً",
     "topPerformersDesc": "الطلاب ذوو أعلى الدرجات"
+  },
+  "certifications": {
+    "title": "الشهادات",
+    "myCertificates": "شهاداتي",
+    "noCertificates": "لا توجد شهادات",
+    "noCertificatesDesc": "ستظهر شهاداتك هنا بعد إصدارها",
+    "certificateNumber": "رقم الشهادة",
+    "issueDate": "تاريخ الإصدار",
+    "issuedBy": "صادرة من",
+    "chainOfNarration": "سلسلة السند",
+    "chainOfNarrationAr": "السند",
+    "recommend": "ترشيح للإجازة",
+    "recommendDesc": "تقديم هذا الطالب لمراجعة الإجازة",
+    "review": "مراجعة الإجازة",
+    "approve": "قبول",
+    "reject": "رفض",
+    "issue": "إصدار الشهادة",
+    "revoke": "سحب الشهادة",
+    "rejectionReason": "سبب الرفض",
+    "rejectionReasonRequired": "سبب الرفض مطلوب",
+    "revocationReason": "سبب السحب",
+    "revocationReasonRequired": "سبب السحب مطلوب",
+    "share": "مشاركة الشهادة",
+    "verify": "التحقق من الشهادة",
+    "download": "تحميل الشهادة",
+    "status": {
+      "recommended": "مرشّح",
+      "supervisor_approved": "موافق عليه",
+      "issued": "صادرة",
+      "rejected": "مرفوض",
+      "revoked": "مسحوبة"
+    },
+    "type": {
+      "ijazah": "إجازة",
+      "completion": "إتمام",
+      "attendance": "حضور"
+    },
+    "eligibility": {
+      "title": "أهلية الإجازة",
+      "eligible": "مؤهل للإجازة",
+      "notEligible": "غير مؤهل بعد",
+      "progress": "{{completed}} من {{total}} أقسام مكتملة"
+    },
+    "requests": {
+      "title": "طلبات الإجازة",
+      "empty": "لا توجد طلبات معلّقة",
+      "emptyDesc": "ستظهر طلبات الإجازة هنا"
+    },
+    "verification": {
+      "title": "التحقق من الشهادة",
+      "valid": "شهادة صالحة",
+      "revoked": "تم سحب هذه الشهادة",
+      "notFound": "الشهادة غير موجودة"
+    }
+  },
+  "himam": {
+    "title": "فعاليات الهمم",
+    "events": "الفعاليات",
+    "upcomingEvents": "الفعاليات القادمة",
+    "noEvents": "لا توجد فعاليات",
+    "noEventsDesc": "ستظهر فعاليات ماراثون الهمم هنا",
+    "createEvent": "إنشاء فعالية",
+    "eventDate": "تاريخ الفعالية",
+    "eventDateHint": "يجب أن يكون يوم السبت",
+    "startTime": "وقت البداية",
+    "endTime": "وقت النهاية",
+    "timezone": "المنطقة الزمنية",
+    "cancelEvent": "إلغاء الفعالية",
+    "cancelEventConfirm": "هل أنت متأكد من إلغاء هذه الفعالية؟ سيتم إلغاء جميع التسجيلات.",
+    "register": "تسجيل",
+    "cancelRegistration": "إلغاء التسجيل",
+    "status": {
+      "upcoming": "قادمة",
+      "active": "نشطة",
+      "completed": "مكتملة",
+      "cancelled": "ملغاة"
+    },
+    "registration": {
+      "registered": "مسجّل",
+      "paired": "تم الربط",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "incomplete": "غير مكتمل",
+      "cancelled": "ملغى"
+    },
+    "tracks": {
+      "title": "اختر المسار",
+      "3_juz": "٣ أجزاء",
+      "5_juz": "٥ أجزاء",
+      "10_juz": "١٠ أجزاء",
+      "15_juz": "١٥ جزءاً",
+      "30_juz": "ختمة كاملة (٣٠ جزءاً)"
+    },
+    "partner": {
+      "title": "شريكك",
+      "noPartner": "لم يتم تعيين شريك بعد",
+      "meetingLink": "رابط الاجتماع",
+      "partnerAbsent": "الشريك غائب"
+    },
+    "timeSlots": {
+      "title": "الفترات الزمنية",
+      "selectSlots": "اختر الفترات المتاحة لديك",
+      "fajr_dhuhr": "الفجر – الظهر",
+      "dhuhr_asr": "الظهر – العصر",
+      "asr_maghrib": "العصر – المغرب",
+      "maghrib_isha": "المغرب – العشاء",
+      "isha_fajr": "العشاء – الفجر"
+    },
+    "progress": {
+      "title": "تقدم الأجزاء",
+      "juzNumber": "الجزء {{number}}",
+      "logCompletion": "تسجيل الإتمام",
+      "completed": "مكتمل",
+      "pending": "قيد الانتظار",
+      "partnerAbsent": "الشريك غائب"
+    },
+    "matching": {
+      "title": "ربط الشركاء",
+      "runMatching": "تشغيل الربط",
+      "paired": "تم ربط {{count}} أزواج",
+      "unmatched": "{{count}} بدون شريك"
+    },
+    "registrations": {
+      "title": "التسجيلات",
+      "empty": "لا توجد تسجيلات بعد"
+    }
+  },
+  "curriculumProgress": {
+    "title": "التقدم",
+    "sections": "الأقسام",
+    "progress": "التقدم",
+    "completionPercentage": "{{percentage}}٪ مكتمل",
+    "sectionNumber": "القسم {{number}}",
+    "lastReviewed": "آخر مراجعة: {{date}}",
+    "notReviewed": "لم تتم المراجعة بعد",
+    "updateSection": "تحديث القسم",
+    "batchUpdate": "تحديث أقسام متعددة",
+    "score": "الدرجة",
+    "teacherNotes": "ملاحظات المعلم",
+    "teacherNotesPlaceholder": "أضف ملاحظات حول هذا القسم...",
+    "status": {
+      "not_started": "لم يبدأ",
+      "in_progress": "قيد التقدم",
+      "memorized": "محفوظ",
+      "certified": "معتمد",
+      "passed": "ناجح",
+      "failed": "راسب",
+      "label": "الحالة"
+    },
+    "progressType": {
+      "mutoon": "متون",
+      "qiraat": "قراءات",
+      "arabic": "اللغة العربية"
+    },
+    "scoring": {
+      "mutoon": "الدرجة (٠-٥)",
+      "qiraat": "ناجح / راسب",
+      "arabic": "الدرجة (٠-١٠٠)",
+      "passingThreshold": "حد النجاح: {{threshold}}"
+    },
+    "eligibility": {
+      "title": "أهلية الإجازة",
+      "eligible": "هذا الطالب مؤهل للإجازة",
+      "notEligible": "أكمل جميع الأقسام للتأهل",
+      "recommend": "ترشيح للإجازة",
+      "threshold": "حد النجاح: {{threshold}}"
+    },
+    "teacherWorkspace": "مساحة عمل المنهج",
+    "myProgress": "تقدمي",
+    "noSections": "لا توجد أقسام",
+    "notes": "ملاحظات",
+    "notesPlaceholder": "أضف ملاحظات..."
+  },
+  "guardians": {
+    "title": "أولياء الأمور",
+    "addGuardian": "إضافة ولي أمر",
+    "editGuardian": "تعديل ولي الأمر",
+    "removeGuardian": "إزالة ولي الأمر",
+    "removeConfirm": "هل أنت متأكد من إزالة ولي الأمر؟",
+    "noGuardians": "لا يوجد أولياء أمور",
+    "noGuardiansDesc": "أضف ولي أمر لهذا الطالب",
+    "primaryGuardian": "ولي الأمر الرئيسي",
+    "name": "اسم ولي الأمر",
+    "phone": "رقم الهاتف",
+    "email": "البريد الإلكتروني",
+    "phoneOrEmailRequired": "مطلوب إدخال رقم الهاتف أو البريد الإلكتروني على الأقل",
+    "relationship": {
+      "title": "صلة القرابة",
+      "parent": "والد/والدة",
+      "guardian": "وصي",
+      "grandparent": "جد/جدة",
+      "sibling": "أخ/أخت",
+      "other": "أخرى"
+    },
+    "notifications": {
+      "title": "تفضيلات الإشعارات",
+      "attendance": "إشعارات الحضور",
+      "session_outcomes": "إشعارات نتائج الحصص",
+      "milestones": "إشعارات الإنجازات"
+    },
+    "namePlaceholder": "أدخل اسم ولي الأمر",
+    "phonePlaceholder": "أدخل رقم الهاتف",
+    "emailPlaceholder": "أدخل البريد الإلكتروني",
+    "isPrimary": "ولي أمر أساسي",
+    "primary": "أساسي",
+    "removeTitle": "إزالة ولي الأمر",
+    "relationships": {
+      "parent": "والد/والدة",
+      "guardian": "ولي أمر",
+      "grandparent": "جد/جدة",
+      "sibling": "أخ/أخت",
+      "other": "أخرى"
+    },
+    "notificationCategories": {
+      "attendance": "الحضور",
+      "session_outcomes": "نتائج الحصص",
+      "milestones": "الإنجازات"
+    }
+  },
+  "peerPairing": {
+    "title": "التلاوة الجماعية",
+    "availability": "متاح للمقارنة",
+    "availabilityDesc": "فعّل للظهور في قائمة الشركاء المتاحين",
+    "findPartner": "ابحث عن شريك",
+    "requestPairing": "طلب مقارنة",
+    "activePairings": "المقارنات النشطة",
+    "pairingHistory": "سجل المقارنات",
+    "noPairings": "لا توجد مقارنات نشطة",
+    "noPairingsDesc": "ابحث عن شريك لممارسة التلاوة معاً",
+    "noAvailablePartners": "لا يوجد شركاء متاحون حالياً",
+    "sessionCount": "{{count}} جلسات مسجلة",
+    "logSession": "تسجيل جلسة",
+    "completePairing": "إتمام المقارنة",
+    "cancelPairing": "إلغاء المقارنة",
+    "status": {
+      "pending": "قيد الانتظار",
+      "active": "نشطة",
+      "completed": "مكتملة",
+      "cancelled": "ملغاة"
+    },
+    "sectionType": {
+      "quran": "القرآن",
+      "mutoon": "المتون"
+    },
+    "request": {
+      "sent": "تم إرسال طلب المقارنة",
+      "received": "لديك طلب مقارنة جديد",
+      "accept": "قبول",
+      "decline": "رفض"
+    },
+    "noAvailablePeers": "لا يوجد زملاء متاحون",
+    "joinMeeting": "انضمام للاجتماع",
+    "markComplete": "إكمال",
+    "availablePeers": "الزملاء المتاحون",
+    "noProgram": "انضم لبرنامج للعثور على زملاء"
   }
 }

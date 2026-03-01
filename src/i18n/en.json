@@ -65,7 +65,10 @@
     "unexpectedError": "An unexpected error occurred",
     "unknownError": "An unknown error occurred",
     "validationFailed": "Validation failed",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "add": "Add",
+    "accept": "Accept",
+    "decline": "Decline"
   },
   "auth": {
     "sessionExpired": "Your session has expired. Please sign in again.",
@@ -727,5 +730,260 @@
     },
     "topPerformers": "Top Performers",
     "topPerformersDesc": "Students with the highest scores"
+  },
+  "certifications": {
+    "title": "Certificates",
+    "myCertificates": "My Certificates",
+    "noCertificates": "No Certificates",
+    "noCertificatesDesc": "Your certificates will appear here once issued",
+    "certificateNumber": "Certificate Number",
+    "issueDate": "Issue Date",
+    "issuedBy": "Issued By",
+    "chainOfNarration": "Chain of Narration",
+    "chainOfNarrationAr": "السند",
+    "recommend": "Recommend for Certification",
+    "recommendDesc": "Submit this student for certification review",
+    "review": "Review Certification",
+    "approve": "Approve",
+    "reject": "Reject",
+    "issue": "Issue Certificate",
+    "revoke": "Revoke Certificate",
+    "rejectionReason": "Rejection Reason",
+    "rejectionReasonRequired": "Rejection reason is required",
+    "revocationReason": "Revocation Reason",
+    "revocationReasonRequired": "Revocation reason is required",
+    "share": "Share Certificate",
+    "verify": "Verify Certificate",
+    "download": "Download Certificate",
+    "status": {
+      "recommended": "Recommended",
+      "supervisor_approved": "Approved",
+      "issued": "Issued",
+      "rejected": "Rejected",
+      "revoked": "Revoked"
+    },
+    "type": {
+      "ijazah": "Ijazah",
+      "completion": "Completion",
+      "attendance": "Attendance"
+    },
+    "eligibility": {
+      "title": "Certification Eligibility",
+      "eligible": "Eligible for Certification",
+      "notEligible": "Not Yet Eligible",
+      "progress": "{{completed}} of {{total}} sections completed"
+    },
+    "requests": {
+      "title": "Certification Requests",
+      "empty": "No pending requests",
+      "emptyDesc": "Certification requests will appear here"
+    },
+    "verification": {
+      "title": "Certificate Verification",
+      "valid": "Valid Certificate",
+      "revoked": "This certificate has been revoked",
+      "notFound": "Certificate not found"
+    }
+  },
+  "himam": {
+    "title": "Himam Events",
+    "events": "Events",
+    "upcomingEvents": "Upcoming Events",
+    "noEvents": "No Events",
+    "noEventsDesc": "Himam marathon events will appear here",
+    "createEvent": "Create Event",
+    "eventDate": "Event Date",
+    "eventDateHint": "Must be a Saturday",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "timezone": "Timezone",
+    "cancelEvent": "Cancel Event",
+    "cancelEventConfirm": "Are you sure you want to cancel this event? All registrations will be cancelled.",
+    "register": "Register",
+    "cancelRegistration": "Cancel Registration",
+    "status": {
+      "upcoming": "Upcoming",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "registration": {
+      "registered": "Registered",
+      "paired": "Paired",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "incomplete": "Incomplete",
+      "cancelled": "Cancelled"
+    },
+    "tracks": {
+      "title": "Select Track",
+      "3_juz": "3 Juz'",
+      "5_juz": "5 Juz'",
+      "10_juz": "10 Juz'",
+      "15_juz": "15 Juz'",
+      "30_juz": "Full Khatmah (30 Juz')"
+    },
+    "partner": {
+      "title": "Your Partner",
+      "noPartner": "No partner assigned yet",
+      "meetingLink": "Meeting Link",
+      "partnerAbsent": "Partner Absent"
+    },
+    "timeSlots": {
+      "title": "Time Slots",
+      "selectSlots": "Select your available time slots",
+      "fajr_dhuhr": "Fajr – Dhuhr",
+      "dhuhr_asr": "Dhuhr – Asr",
+      "asr_maghrib": "Asr – Maghrib",
+      "maghrib_isha": "Maghrib – Isha",
+      "isha_fajr": "Isha – Fajr"
+    },
+    "progress": {
+      "title": "Juz' Progress",
+      "juzNumber": "Juz' {{number}}",
+      "logCompletion": "Log Completion",
+      "completed": "Completed",
+      "pending": "Pending",
+      "partnerAbsent": "Partner Absent"
+    },
+    "matching": {
+      "title": "Partner Matching",
+      "runMatching": "Run Matching",
+      "paired": "{{count}} pairs matched",
+      "unmatched": "{{count}} unmatched"
+    },
+    "registrations": {
+      "title": "Registrations",
+      "empty": "No registrations yet"
+    }
+  },
+  "curriculumProgress": {
+    "title": "Progress",
+    "sections": "Sections",
+    "progress": "Progress",
+    "completionPercentage": "{{percentage}}% Complete",
+    "sectionNumber": "Section {{number}}",
+    "lastReviewed": "Last reviewed: {{date}}",
+    "notReviewed": "Not yet reviewed",
+    "updateSection": "Update Section",
+    "batchUpdate": "Update Multiple Sections",
+    "score": "Score",
+    "teacherNotes": "Teacher Notes",
+    "teacherNotesPlaceholder": "Add notes about this section...",
+    "status": {
+      "not_started": "Not Started",
+      "in_progress": "In Progress",
+      "memorized": "Memorized",
+      "certified": "Certified",
+      "passed": "Passed",
+      "failed": "Failed",
+      "label": "Status"
+    },
+    "progressType": {
+      "mutoon": "Mutoon",
+      "qiraat": "Qiraat",
+      "arabic": "Arabic Language"
+    },
+    "scoring": {
+      "mutoon": "Score (0-5)",
+      "qiraat": "Pass / Fail",
+      "arabic": "Score (0-100)",
+      "passingThreshold": "Passing threshold: {{threshold}}"
+    },
+    "eligibility": {
+      "title": "Certification Eligibility",
+      "eligible": "This student is eligible for certification",
+      "notEligible": "Complete all sections to become eligible",
+      "recommend": "Recommend for Certification",
+      "threshold": "Passing threshold: {{threshold}}"
+    },
+    "teacherWorkspace": "Curriculum Workspace",
+    "myProgress": "My Progress",
+    "noSections": "No sections found",
+    "notes": "Notes",
+    "notesPlaceholder": "Add notes..."
+  },
+  "guardians": {
+    "title": "Guardians",
+    "addGuardian": "Add Guardian",
+    "editGuardian": "Edit Guardian",
+    "removeGuardian": "Remove Guardian",
+    "removeConfirm": "Are you sure you want to remove this guardian?",
+    "noGuardians": "No Guardians",
+    "noGuardiansDesc": "Add a guardian for this student",
+    "primaryGuardian": "Primary Guardian",
+    "name": "Guardian Name",
+    "phone": "Phone Number",
+    "email": "Email Address",
+    "phoneOrEmailRequired": "At least one of phone or email is required",
+    "relationship": {
+      "title": "Relationship",
+      "parent": "Parent",
+      "guardian": "Guardian",
+      "grandparent": "Grandparent",
+      "sibling": "Sibling",
+      "other": "Other"
+    },
+    "notifications": {
+      "title": "Notification Preferences",
+      "attendance": "Attendance Notifications",
+      "session_outcomes": "Session Outcome Notifications",
+      "milestones": "Milestone Notifications"
+    },
+    "namePlaceholder": "Enter guardian name",
+    "phonePlaceholder": "Enter phone number",
+    "emailPlaceholder": "Enter email address",
+    "isPrimary": "Primary Guardian",
+    "primary": "Primary",
+    "removeTitle": "Remove Guardian",
+    "relationships": {
+      "parent": "Parent",
+      "guardian": "Guardian",
+      "grandparent": "Grandparent",
+      "sibling": "Sibling",
+      "other": "Other"
+    },
+    "notificationCategories": {
+      "attendance": "Attendance",
+      "session_outcomes": "Session Outcomes",
+      "milestones": "Milestones"
+    }
+  },
+  "peerPairing": {
+    "title": "Peer Recitation",
+    "availability": "Available for Pairing",
+    "availabilityDesc": "Toggle to appear in the available partners list",
+    "findPartner": "Find a Partner",
+    "requestPairing": "Request Pairing",
+    "activePairings": "Active Pairings",
+    "pairingHistory": "Pairing History",
+    "noPairings": "No Active Pairings",
+    "noPairingsDesc": "Find a partner to practice recitation together",
+    "noAvailablePartners": "No available partners at the moment",
+    "sessionCount": "{{count}} sessions logged",
+    "logSession": "Log Session",
+    "completePairing": "Complete Pairing",
+    "cancelPairing": "Cancel Pairing",
+    "status": {
+      "pending": "Pending",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "sectionType": {
+      "quran": "Quran",
+      "mutoon": "Mutoon"
+    },
+    "request": {
+      "sent": "Pairing request sent",
+      "received": "You have a new pairing request",
+      "accept": "Accept",
+      "decline": "Decline"
+    },
+    "noAvailablePeers": "No available peers",
+    "joinMeeting": "Join Meeting",
+    "markComplete": "Complete",
+    "availablePeers": "Available Peers",
+    "noProgram": "Join a program to find peers"
   }
 }
