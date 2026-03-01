@@ -78,7 +78,7 @@ export function NotificationPreferences() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('notifications.preferences')}</Text>
+      <Text style={styles.title}>{t('notifications.preferences.title')}</Text>
       <FlatList
         data={categories}
         keyExtractor={(item) => item.id}
