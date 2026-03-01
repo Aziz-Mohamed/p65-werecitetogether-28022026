@@ -27,6 +27,14 @@ The core platform (001-platform-core) delivered: 5-role RBAC, enrollment, sessio
 - Q: How is the total section/recitation count per track defined? → A: Pre-defined in the track's curriculum metadata (program_tracks.curriculum JSONB) by program admins. Teachers select from the defined list. This ensures consistent completion percentage calculations. Note: the app uses "recitation" terminology consistently — not "lesson."
 - Q: What format should the certificate number follow? → A: Org-year-sequential format: WRT-2026-00001. Human-readable, sortable by year, avoids cross-year collisions.
 - Q: At what granularity are Qiraat sections tracked? → A: Per Juz' (30 sections per Riwayah). Standard Ijazah granularity, manageable UI, aligns with existing Quran memorization tracking.
+- Q: How are prayer-time blocks defined for Himam time slots? → A: Five blocks mapped to the five daily prayers: Fajr→Dhuhr, Dhuhr→Asr, Asr→Maghrib, Maghrib→Isha, Isha→Fajr. Boundaries are approximate and timezone-aware (using the event's timezone field).
+- Q: Where is the Arabic Language passing threshold stored? → A: In `program_tracks.curriculum` JSONB metadata alongside the recitation list (e.g., `{ "passing_score": 60, "sections": [...] }`). Defaults to 60 if not specified.
+- Q: How is peer practice availability tracked? → A: Stored in `profiles.metadata` JSONB as `{ "peer_available": true/false }`. Default is false (opt-in). The getAvailablePartners query includes this filter.
+- Q: What happens to Himam registrations when an event is cancelled? → A: All non-completed registrations are bulk-updated to status 'cancelled'. Paired partners are notified. Completed registrations retain their status.
+- Q: What happens when a Himam partner matching has an odd number of registrants? → A: The unmatched student retains 'registered' status and is eligible for re-pairing in subsequent matching runs or manual pairing by the program admin.
+- Q: What notifications fire on certification revocation? → A: The student is notified that a certificate has been revoked (they can see it marked as revoked in their view). The teacher who originally recommended is also notified.
+- Q: What happens to peer pairings when a student un-enrolls? → A: All pending/active pairings for that student in the program are automatically cancelled. The partner is notified.
+- Q: What happens when a paired Himam partner's profile is deleted? → A: The partner_id becomes NULL (ON DELETE SET NULL). The remaining student's status reverts to 'registered' and they become eligible for re-pairing.
 
 ## User Scenarios & Testing
 

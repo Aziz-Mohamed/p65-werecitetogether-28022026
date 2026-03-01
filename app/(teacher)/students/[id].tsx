@@ -12,6 +12,7 @@ import { LoadingState, ErrorState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
 import { MemorizationProgressBar } from '@/features/memorization';
 import { useTeacherStudentDetail } from '@/features/students/hooks/useTeacherStudentDetail';
+import { useCertificationEligibility } from '@/features/certifications/hooks/useCertifications';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { formatSessionDate } from '@/lib/helpers';
@@ -105,6 +106,9 @@ export default function TeacherStudentDetailScreen() {
             </Card>
           </>
         )}
+
+        {/* Certification Eligibility — shown when enrollment context is available */}
+        {/* TODO: Wire enrollmentId from the student's active enrollment */}
 
         {/* Recent Sessions */}
         <View style={styles.sectionHeader}>

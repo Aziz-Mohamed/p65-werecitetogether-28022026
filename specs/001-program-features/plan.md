@@ -11,7 +11,7 @@ Add program-specific features to the WeReciteTogether platform: a certification/
 
 **Language/Version**: TypeScript 5.9 (strict mode)
 **Primary Dependencies**: React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next, FlashList 2, react-native-svg 15, expo-file-system ~19, react-native-view-shot (NEW), react-native-qrcode-svg (NEW)
-**Storage**: Supabase PostgreSQL (remote) — 8 new tables, 0 modified tables. Supabase Storage — 1 new bucket (certificates).
+**Storage**: Supabase PostgreSQL (remote) — 8 new tables, 1 modified table (profiles: add peer_available). Supabase Storage — 1 new bucket (certificates).
 **Testing**: Jest + React Native Testing Library (unit/integration)
 **Target Platform**: iOS 15+ / Android 10+ (mobile-first)
 **Project Type**: Mobile (Expo managed workflow)

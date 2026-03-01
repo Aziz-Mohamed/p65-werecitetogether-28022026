@@ -49,6 +49,7 @@
 - **Table**: `certifications`
 - **Operation**: UPDATE
 - **Fields**: `status → 'revoked', revocation_reason = reason, revoked_by`
+- **Side effect**: Notify the student (certificate now marked as revoked in their view) and the recommending teacher
 - **Used by**: Program admin revocation
 
 ## Edge Function: verify-certificate
@@ -56,5 +57,6 @@
 - **Path**: `/functions/v1/verify-certificate/{certificate_number}`
 - **Method**: GET
 - **Auth**: None (public, `verify_jwt: false`)
-- **Response**: HTML page with certificate details or error
+- **Response**: HTML page with certificate details, "revoked" warning if applicable, or "not found" error for invalid numbers
 - **Query**: `certifications` table by `certificate_number`, joined with student/program/teacher names
+- **Rate limit**: 10 requests/minute per IP to prevent enumeration

@@ -19,10 +19,17 @@
 
 ### getAvailablePartners(programId: string, sectionType: string, excludeStudentId: string)
 - **Table**: `profiles`
-- **Filter**: Students enrolled in `programId` with active enrollment, not already in an active/pending pairing for the same `section_type`, excluding `excludeStudentId`
+- **Filter**: Students enrolled in `programId` with active enrollment, `peer_available = true`, not already in an active/pending pairing for the same `section_type`, excluding `excludeStudentId`
 - **Select**: `id, full_name, display_name, avatar_url`
 - **Order**: `full_name ASC`
 - **Used by**: Partner selection list
+
+### togglePeerAvailability(studentId: string, available: boolean)
+- **Table**: `profiles`
+- **Operation**: UPDATE
+- **Fields**: `peer_available = available`
+- **Validation**: Only the student themselves can toggle
+- **Used by**: Student peer recitation screen availability toggle (FR-039)
 
 ### getPairingHistory(studentId: string, programId: string)
 - **Table**: `peer_pairings`

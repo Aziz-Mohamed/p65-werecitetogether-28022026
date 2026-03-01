@@ -37,6 +37,7 @@ Stores certification lifecycle from recommendation to issuance.
 | updated_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 
 **Indexes**: `(student_id, program_id)`, `(status)`, `(certificate_number)`
+**Constraints**: `CHECK (status != 'rejected' OR rejection_reason IS NOT NULL)`, `CHECK (status != 'revoked' OR revocation_reason IS NOT NULL)`
 **Trigger**: `updated_at` auto-update, certificate_number generation on INSERT when status = 'issued'
 
 **State machine**:
@@ -60,7 +61,7 @@ Weekly marathon events.
 | start_time | TIME | NOT NULL DEFAULT '05:00' | Fajr |
 | end_time | TIME | NOT NULL DEFAULT '05:00' | Next day Fajr (24h window) |
 | status | TEXT | NOT NULL DEFAULT 'upcoming', CHECK (status IN ('upcoming', 'active', 'completed', 'cancelled')) | |
-| timezone | TEXT | NOT NULL | From platform_config.settings |
+| timezone | TEXT | NOT NULL | From program's organization timezone; falls back to 'Asia/Riyadh' if unset |
 | created_by | UUID | FK → profiles(id) ON DELETE SET NULL | |
 | created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 | updated_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
@@ -157,6 +158,7 @@ Parent/guardian information linked to children's student profiles.
 | updated_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 
 **Indexes**: `(student_id)`
+**Constraint**: `CHECK (guardian_phone IS NOT NULL OR guardian_email IS NOT NULL)`
 
 ### 7. guardian_notification_preferences
 
@@ -192,7 +194,15 @@ Student-to-student peer recitation matches.
 
 ## Modified Tables (0)
 
-No existing tables are modified. All new features build on top of existing `profiles`, `programs`, `program_tracks`, and `enrollments` tables via foreign keys.
+## Modified Tables (1)
+
+### profiles (ALTER)
+
+| Column | Type | Change | Notes |
+|--------|------|--------|-------|
+| peer_available | BOOLEAN | ADD, NOT NULL DEFAULT false | Opt-in toggle for peer recitation availability (FR-039) |
+
+All other new features build on top of existing `profiles`, `programs`, `program_tracks`, and `enrollments` tables via foreign keys only.
 
 ## New Database Functions
 

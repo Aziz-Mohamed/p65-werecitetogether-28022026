@@ -57,20 +57,27 @@
 - **Fields**: `time_slots = timeSlots`
 - **Used by**: Partner time slot selection
 
-### logBlockCompletion(registrationId: string, juzNumber: number, loggedBy: string, notes?: string)
+### logBlockCompletion(registrationId: string, juzNumber: number, loggedBy: string, status: 'completed' | 'partner_absent', notes?: string)
 - **Table**: `himam_progress`
 - **Operation**: UPDATE
 - **Filter**: `registration_id = registrationId`, `juz_number = juzNumber`
-- **Fields**: `status → 'completed', completed_at = now(), logged_by, notes`
-- **Side effect**: Check if all Juz' completed → update registration status to 'completed'
+- **Fields**: `status → status, completed_at = now() (if completed), logged_by, notes`
+- **Side effect**: If status is 'completed', check if all Juz' completed → update registration status to 'completed'. Blocks logged as 'partner_absent' do NOT count toward track completion.
 - **Used by**: Partner block completion logging
 
 ### cancelRegistration(registrationId: string)
 - **Table**: `himam_registrations`
 - **Operation**: UPDATE
 - **Fields**: `status → 'cancelled'`
-- **Side effect**: If paired, set partner's `partner_id = NULL` and notify partner
+- **Side effect**: If paired, set partner's `partner_id = NULL`, revert partner status to 'registered', and notify partner
 - **Used by**: Student cancellation
+
+### cancelEvent(eventId: string)
+- **Table**: `himam_events`
+- **Operation**: UPDATE
+- **Fields**: `status → 'cancelled'`
+- **Side effect**: Bulk-update all non-completed registrations to `status → 'cancelled'`. Notify all affected participants.
+- **Used by**: Program admin event cancellation
 
 ## Edge Function: himam-partner-matching
 
@@ -78,7 +85,7 @@
 - **Method**: POST
 - **Auth**: Service role (admin-only invocation)
 - **Body**: `{ event_id: string }`
-- **Logic**: Query unmatched registrations → pair by track (FIFO) → update partner_id on both → send notifications
+- **Logic**: All operations execute in a single transaction. Query unmatched registrations → pair by track (FIFO) → update partner_id on both → set status → 'paired' → send notifications. Odd-number registrants in a track remain at 'registered' status and are eligible for re-pairing in subsequent runs.
 - **Response**: `{ paired: number, unmatched: number }`
 
 ## Edge Function: himam-event-lifecycle (Scheduled)
@@ -88,7 +95,7 @@
 - **Auth**: Service role (scheduled invocation via pg_cron or Supabase cron)
 - **Schedule**: Hourly
 - **Logic**:
-  1. Query events where `status = 'upcoming'` and `event_date + start_time <= now()` → update `status → 'active'`
+  1. Query events where `status = 'upcoming'` and `event_date + start_time <= now()` → update `status → 'active'`, and transition all 'paired' registrations for that event to `status → 'in_progress'`
   2. Query events where `status = 'active'` and `event_date + end_time + 24h <= now()` → update `status → 'completed'`, mark all non-completed registrations as `status → 'incomplete'`
   3. Query events where `status = 'upcoming'` and `event_date - interval '24 hours' <= now()` and reminder not yet sent → send event reminder notifications to all registered participants (FR-021)
 - **Response**: `{ activated: number, completed: number, reminders_sent: number }`
