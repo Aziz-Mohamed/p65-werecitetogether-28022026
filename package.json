@@ -10,7 +10,14 @@
     "lint": "expo lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:gen-types": "supabase gen types typescript --local > src/types/database.types.ts",
+    "supabase:gen-types:remote": "supabase gen types typescript --linked > src/types/database.types.ts",
+    "supabase:diff": "supabase db diff",
+    "supabase:push": "supabase db push"
   },
   "expo": {
     "autolinking": {

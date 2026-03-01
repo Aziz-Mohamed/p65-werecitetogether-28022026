@@ -21,5 +21,18 @@
 - TypeScript 5.9 (strict mode) + React Native 0.81.5, Expo ~54, Expo Router v6, React 19, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next, FlashList 2, expo-image 3, @gorhom/bottom-sheet 5, expo-av (to add), expo-notifications (001-platform-core)
 - Supabase PostgreSQL (remote), expo-secure-store (auth tokens), AsyncStorage (preferences), Supabase Storage (voice memos) (001-platform-core)
 
+## Supabase Development Workflow (Local-First)
+- ALWAYS develop against the LOCAL Supabase instance (Docker). NEVER apply schema changes directly to production during development.
+- Local Supabase: `npm run supabase:start` to start, `npm run supabase:stop` to stop.
+- Schema changes MUST be written as migration files in `supabase/migrations/`. Apply locally with `npm run supabase:reset`.
+- After ANY local schema change, ALWAYS regenerate types: `npm run supabase:gen-types` (generates from local DB).
+- `src/types/database.types.ts` is AUTO-GENERATED — NEVER edit it manually.
+- Do NOT create types in `supabase/types/`. All generated types go to `src/types/database.types.ts`.
+- When development is complete and tested locally, push migrations to production: `npm run supabase:push`
+- After pushing to production, verify types match: `npm run supabase:gen-types:remote`
+- Preview schema diff between local migrations and remote: `npm run supabase:diff`
+- NEVER use MCP `apply_migration` — it applies directly to production and causes drift. ALL schema changes must go through local migration files.
+- The app connects to local Supabase during development via `.env` (localhost URLs) and to production via production `.env`.
+
 ## Recent Changes
 - 001-mvp-phase1: Added TypeScript 5.9 (strict mode) / React Native 0.83 / React 19 + Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next + react-i18next, FlashList 2, expo-image 3, react-native-calendars, victory-native, @gorhom/bottom-sheet 5
