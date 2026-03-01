@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { I18nManager, StyleSheet, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLogout } from '@/features/auth/hooks/useLogout';
 import { useChangeLanguage } from '@/hooks/useChangeLanguage';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
+import { useGuardians, useAddGuardian, useUpdateGuardian, useRemoveGuardian } from '@/features/guardians/hooks/useGuardians';
+import { GuardianList } from '@/features/guardians/components/GuardianList';
+import { GuardianForm } from '@/features/guardians/components/GuardianForm';
+import type { StudentGuardian } from '@/features/guardians/types/guardians.types';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -22,6 +26,13 @@ export default function StudentProfile() {
   const theme = useRoleTheme();
   const { logout, isPending: isLoggingOut } = useLogout();
   const { locale, toggleLanguage } = useChangeLanguage();
+  const [showGuardianForm, setShowGuardianForm] = useState(false);
+  const [editingGuardian, setEditingGuardian] = useState<StudentGuardian | null>(null);
+
+  const { data: guardians = [] } = useGuardians(profile?.id);
+  const addGuardianMutation = useAddGuardian();
+  const updateGuardianMutation = useUpdateGuardian(profile?.id);
+  const removeGuardianMutation = useRemoveGuardian(profile?.id);
 
   const displayName = profile?.display_name || profile?.full_name || '';
 
@@ -80,6 +91,59 @@ export default function StudentProfile() {
             />
           )}
         </Card>
+
+        {/* Guardians Section */}
+        <View style={styles.guardianHeader}>
+          <Text style={styles.sectionTitle}>{t('guardians.title')}</Text>
+          <Button
+            variant="secondary"
+            size="sm"
+            onPress={() => {
+              setEditingGuardian(null);
+              setShowGuardianForm(!showGuardianForm);
+            }}
+            title={showGuardianForm ? t('common.cancel') : t('guardians.addGuardian')}
+          />
+        </View>
+
+        {showGuardianForm && (
+          <Card variant="default" style={styles.infoCard}>
+            <GuardianForm
+              studentId={profile?.id}
+              mode={editingGuardian ? 'edit' : 'create'}
+              initialValues={editingGuardian ? {
+                guardian_name: editingGuardian.guardian_name,
+                guardian_phone: editingGuardian.guardian_phone ?? '',
+                guardian_email: editingGuardian.guardian_email ?? '',
+                relationship: editingGuardian.relationship as any,
+                is_primary: editingGuardian.is_primary,
+              } : undefined}
+              loading={addGuardianMutation.isPending || updateGuardianMutation.isPending}
+              onSubmit={(values) => {
+                if (editingGuardian) {
+                  updateGuardianMutation.mutate(
+                    { guardianId: editingGuardian.id, input: values },
+                    { onSuccess: () => { setShowGuardianForm(false); setEditingGuardian(null); } },
+                  );
+                } else {
+                  addGuardianMutation.mutate(values as any, {
+                    onSuccess: () => setShowGuardianForm(false),
+                  });
+                }
+              }}
+            />
+          </Card>
+        )}
+
+        <GuardianList
+          guardians={guardians}
+          onEdit={(guardian) => {
+            setEditingGuardian(guardian);
+            setShowGuardianForm(true);
+          }}
+          onRemove={(id) => removeGuardianMutation.mutate(id)}
+          removeLoading={removeGuardianMutation.isPending}
+        />
 
         <Text style={styles.sectionTitle}>{t('common.settings')}</Text>
 
@@ -173,6 +237,12 @@ const styles = StyleSheet.create({
     color: lightTheme.text,
     marginTop: spacing.md,
     fontSize: normalize(16),
+  },
+  guardianHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.md,
   },
   infoCard: {
     padding: spacing.lg,

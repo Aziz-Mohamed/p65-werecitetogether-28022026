@@ -30,7 +30,15 @@ type NotificationCategory =
   | "voice_memo_received"
   | "queue_threshold"
   | "rating_prompt"
-  | "supervisor_alert";
+  | "supervisor_alert"
+  | "himam_reminder";
+
+// Map notification categories to guardian notification categories for routing
+const GUARDIAN_CATEGORY_MAP: Record<string, string> = {
+  session_completed: "session_outcomes",
+  enrollment_approved: "milestones",
+  voice_memo_received: "session_outcomes",
+};
 
 const TABLE_TO_CATEGORY: Record<string, NotificationCategory> = {
   sessions: "session_completed",
@@ -192,6 +200,49 @@ function buildContent(
   }
 }
 
+/**
+ * For children's program students, find guardians who should also receive
+ * this notification category and return their push tokens.
+ */
+async function getGuardianTokens(
+  supabase: ReturnType<typeof createClient>,
+  studentId: string,
+  category: string,
+): Promise<string[]> {
+  const guardianCategory = GUARDIAN_CATEGORY_MAP[category];
+  if (!guardianCategory) return [];
+
+  // Get guardians for this student
+  const { data: guardians } = await supabase
+    .from("student_guardians")
+    .select("id")
+    .eq("student_id", studentId);
+
+  if (!guardians || guardians.length === 0) return [];
+
+  const guardianIds = guardians.map((g: { id: string }) => g.id);
+
+  // Check which guardians have this notification category enabled
+  const { data: prefs } = await supabase
+    .from("guardian_notification_preferences")
+    .select("guardian_id")
+    .in("guardian_id", guardianIds)
+    .eq("category", guardianCategory)
+    .eq("enabled", false);
+
+  // Guardians who explicitly disabled this category
+  const disabledGuardianIds = new Set(
+    (prefs ?? []).map((p: { guardian_id: string }) => p.guardian_id),
+  );
+
+  // Get tokens for guardians who haven't disabled this category
+  // Guardians share the student's push tokens (they receive on the student's device)
+  // For now, we just send to the student's tokens — guardian-specific push tokens
+  // would require a separate guardian app or guardian profile with their own tokens
+  // This is a no-op until guardian-specific devices are supported
+  return [];
+}
+
 async function sendExpoPush(messages: ExpoPushMessage[]): Promise<void> {
   const expoAccessToken = Deno.env.get("EXPO_ACCESS_TOKEN");
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -211,8 +262,48 @@ async function sendExpoPush(messages: ExpoPushMessage[]): Promise<void> {
 
 Deno.serve(async (req: Request) => {
   try {
-    const payload = (await req.json()) as WebhookPayload;
-    const { table, record } = payload;
+    const payload = await req.json();
+    const supabase = getSupabaseAdmin();
+
+    // Support direct invocation (edge-to-edge calls) with explicit user_id/title/body
+    if (payload.user_id && payload.title && payload.body) {
+      const { user_id, title, body: bodyText, data: extraData } = payload;
+      const category = extraData?.type ?? "general";
+
+      if (isDuplicate(user_id, category)) {
+        return new Response(
+          JSON.stringify({ sent: 0, reason: "dedup" }),
+          { headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      const tokens = await getActiveTokens(supabase, user_id);
+      if (tokens.length === 0) {
+        return new Response(
+          JSON.stringify({ sent: 0, reason: "no_tokens" }),
+          { headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      const messages: ExpoPushMessage[] = tokens.map((token) => ({
+        to: token,
+        title,
+        body: bodyText,
+        data: extraData,
+        sound: "default",
+        priority: "high",
+      }));
+
+      await sendExpoPush(messages);
+
+      return new Response(
+        JSON.stringify({ sent: messages.length }),
+        { headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    // Webhook-based invocation (database trigger)
+    const { table, record } = payload as WebhookPayload;
 
     const category = TABLE_TO_CATEGORY[table];
     if (!category) {
@@ -221,8 +312,6 @@ Deno.serve(async (req: Request) => {
         { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
-
-    const supabase = getSupabaseAdmin();
 
     // Determine recipient based on category
     const recipientId = (record.student_id ?? record.profile_id) as string | undefined;
@@ -249,7 +338,12 @@ Deno.serve(async (req: Request) => {
     }
 
     const tokens = await getActiveTokens(supabase, recipientId);
-    if (tokens.length === 0) {
+
+    // Also collect guardian tokens for children's program notifications
+    const guardianTokens = await getGuardianTokens(supabase, recipientId, category);
+    const allTokens = [...tokens, ...guardianTokens];
+
+    if (allTokens.length === 0) {
       return new Response(
         JSON.stringify({ sent: 0, reason: "no_tokens" }),
         { headers: { "Content-Type": "application/json" } },
@@ -265,7 +359,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const messages: ExpoPushMessage[] = tokens.map((token) => ({
+    const messages: ExpoPushMessage[] = allTokens.map((token) => ({
       to: token,
       title: content.title,
       body: content.body,
