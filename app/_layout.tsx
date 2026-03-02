@@ -1,31 +1,42 @@
 import 'react-native-reanimated';
 import 'react-native-gesture-handler';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { I18nManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SplashScreen from 'expo-splash-screen';
 import { I18nextProvider } from 'react-i18next';
 
 import { useAuthStore, type Profile } from '@/stores/authStore';
 import { useLocaleStore } from '@/stores/localeStore';
-import { useWorkspaceDraftStore } from '@/stores/workspaceDraftStore';
 import { useAuth } from '@/hooks/useAuth';
 import i18n from '@/i18n/config';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
-import { useRealtimeManager, useRealtimeReconnect } from '@/features/realtime';
-import { useNotificationSetup } from '@/features/notifications/hooks/useNotificationSetup';
-import { useNotificationHandler } from '@/features/notifications/hooks/useNotificationHandler';
-import { NotificationSoftAsk } from '@/features/notifications/components/NotificationSoftAsk';
-import { InAppBanner } from '@/features/notifications/components/InAppBanner';
-import type { UserRole, NotificationPayload } from '@/features/notifications/types/notifications.types';
+import type { UserRole } from '@/types/common.types';
+
+const asyncStoragePersister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  key: 'wrt-query-cache',
+});
 
 // ─── Keep Splash Screen Visible ──────────────────────────────────────────────
 
 SplashScreen.preventAutoHideAsync();
+
+// ─── Role → Route Group Mapping ──────────────────────────────────────────────
+
+const ROLE_ROUTES: Record<UserRole, string> = {
+  student: '/(student)/',
+  teacher: '/(teacher)/',
+  supervisor: '/(supervisor)/',
+  program_admin: '/(program-admin)/',
+  master_admin: '/(master-admin)/',
+};
 
 // ─── Root Layout ──────────────────────────────────────────────────────────────
 
@@ -33,16 +44,12 @@ export default function RootLayout() {
   const [storeHydrated, setStoreHydrated] = useState(false);
   const isRTL = useLocaleStore((s) => s.isRTL);
 
-  // Wait for Zustand locale store to hydrate from AsyncStorage,
-  // then sync i18n language and native RTL state with the persisted preference.
   useEffect(() => {
     const syncLocale = () => {
       const { locale, isRTL: storedRTL } = useLocaleStore.getState();
       if (i18n.language !== locale) {
         i18n.changeLanguage(locale);
       }
-      // Sync native I18nManager with persisted locale so that native
-      // components (tab bar, navigation) and future app launches are correct.
       if (I18nManager.isRTL !== storedRTL) {
         I18nManager.allowRTL(storedRTL);
         I18nManager.forceRTL(storedRTL);
@@ -61,8 +68,6 @@ export default function RootLayout() {
   useEffect(() => {
     if (storeHydrated) {
       SplashScreen.hideAsync();
-      // Clean up workspace drafts older than 7 days
-      useWorkspaceDraftStore.getState().clearStaleDrafts();
     }
   }, [storeHydrated]);
 
@@ -70,12 +75,9 @@ export default function RootLayout() {
     return null;
   }
 
-  // `direction` on the root View controls layout for the entire React tree.
-  // `I18nManager.forceRTL()` (called above) handles native components outside
-  // this tree (tab bar, navigation transitions) and persists for next launch.
   return (
     <GestureHandlerRootView style={{ flex: 1, direction: isRTL ? 'rtl' : 'ltr' }}>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: asyncStoragePersister }}>
         <I18nextProvider i18n={i18n}>
           <AuthGuard>
             <Stack screenOptions={{ headerShown: false }}>
@@ -83,13 +85,14 @@ export default function RootLayout() {
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(student)" />
               <Stack.Screen name="(teacher)" />
-              <Stack.Screen name="(parent)" />
-              <Stack.Screen name="(admin)" />
+              <Stack.Screen name="(supervisor)" />
+              <Stack.Screen name="(program-admin)" />
+              <Stack.Screen name="(master-admin)" />
               <Stack.Screen name="+not-found" />
             </Stack>
           </AuthGuard>
         </I18nextProvider>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </GestureHandlerRootView>
   );
 }
@@ -99,50 +102,8 @@ export default function RootLayout() {
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
   const router = useRouter();
-  const { isAuthenticated, isLoading, role, profile } = useAuth();
+  const { isAuthenticated, isLoading, role, profile, onboardingCompleted } = useAuth();
 
-  // ─── Realtime Subscriptions ─────────────────────────────────────────────────
-  useRealtimeReconnect();
-  useRealtimeManager();
-
-  // ─── Push Notifications ───────────────────────────────────────────────────
-  const {
-    showSoftAsk,
-    dismissSoftAsk,
-    requestPermissions,
-  } = useNotificationSetup({
-    userId: profile?.id,
-    isAuthenticated,
-  });
-
-  const handleEnableNotifications = async () => {
-    dismissSoftAsk();
-    await requestPermissions();
-  };
-
-  // ─── Notification Handler (tap + foreground) ──────────────────────────────
-  const [bannerNotification, setBannerNotification] = useState<NotificationPayload | null>(null);
-
-  const handleForegroundNotification = useCallback((payload: NotificationPayload) => {
-    setBannerNotification(payload);
-  }, []);
-
-  const { navigateToNotification } = useNotificationHandler({
-    isAuthenticated,
-    onForegroundNotification: handleForegroundNotification,
-  });
-
-  const handleBannerPress = useCallback(
-    (payload: NotificationPayload) => {
-      setBannerNotification(null);
-      navigateToNotification(payload.data);
-    },
-    [navigateToNotification],
-  );
-
-  const handleBannerDismiss = useCallback(() => {
-    setBannerNotification(null);
-  }, []);
   const initialize = useAuthStore((s) => s.initialize);
   const setSession = useAuthStore((s) => s.setSession);
   const setProfile = useAuthStore((s) => s.setProfile);
@@ -151,11 +112,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   // ─── Initialize Auth Listener ───────────────────────────────────────────────
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
-        // Fetch profile
         supabase
           .from('profiles')
           .select('*')
@@ -172,18 +131,15 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Listen to auth changes (T116: handle token expiry)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
-        // Token expired or user signed out — clear auth state
+      if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
         clearAuth();
         return;
       }
       if (session) {
-        // Fetch profile on sign in or token refresh
         supabase
           .from('profiles')
           .select('*')
@@ -207,59 +163,32 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   // ─── Auth Guard Logic ────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!isAuthenticated) {
-      // Not authenticated - redirect to login unless already in auth group
       if (!inAuthGroup) {
         router.replace('/(auth)/login');
       }
     } else {
-      // Wait for profile to be fetched before routing by role
-      if (!profile) {
-        return;
-      }
+      if (!profile) return;
 
-      // Authenticated - redirect to role-based dashboard if in auth group
       if (inAuthGroup) {
-        switch (role) {
-          case 'student':
-            router.replace('/(student)/');
-            break;
-          case 'teacher':
-            router.replace('/(teacher)/');
-            break;
-          case 'parent':
-            router.replace('/(parent)/');
-            break;
-          case 'admin':
-            router.replace('/(admin)/');
-            break;
-          default:
-            router.replace('/(auth)/login');
+        if (!onboardingCompleted) {
+          router.replace('/(auth)/onboarding');
+          return;
+        }
+
+        const route = role ? ROLE_ROUTES[role] : null;
+        if (route) {
+          router.replace(route as any);
+        } else {
+          router.replace('/(auth)/login');
         }
       }
     }
-  }, [isAuthenticated, isLoading, role, profile, segments, router]);
+  }, [isAuthenticated, isLoading, role, profile, onboardingCompleted, segments, router]);
 
-  return (
-    <>
-      {children}
-      <NotificationSoftAsk
-        visible={showSoftAsk && isAuthenticated && !!profile}
-        role={(role as UserRole) ?? 'student'}
-        onEnable={handleEnableNotifications}
-        onDismiss={dismissSoftAsk}
-      />
-      <InAppBanner
-        notification={bannerNotification}
-        onPress={handleBannerPress}
-        onDismiss={handleBannerDismiss}
-      />
-    </>
-  );
+  return <>{children}</>;
 }

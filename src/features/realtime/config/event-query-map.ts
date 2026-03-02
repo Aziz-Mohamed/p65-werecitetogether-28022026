@@ -112,6 +112,36 @@ export function getQueryKeysForEvent(
     case 'classes':
       return [['classes'], ['admin-dashboard'], ['teacher-dashboard']];
 
+    case 'teacher_availability': {
+      const programId = newRecord.program_id as string | undefined;
+      return programId
+        ? [
+            ['teacher-availability', programId],
+            ['teacher-dashboard'],
+          ]
+        : [['teacher-availability'], ['teacher-dashboard']];
+    }
+
+    case 'enrollments': {
+      const enrollStudentId = newRecord.student_id as string | undefined;
+      const cohortId = newRecord.cohort_id as string | undefined;
+      return [
+        ...(enrollStudentId ? [['enrollments', 'student', enrollStudentId]] : [['enrollments']]),
+        ...(cohortId ? [['enrollments', 'cohort', cohortId], ['enrollments', 'pending', cohortId]] : []),
+      ];
+    }
+
+    case 'free_program_queue': {
+      const queueProgramId = newRecord.program_id as string | undefined;
+      const queueStudentId = newRecord.student_id as string | undefined;
+      return [
+        ...(queueProgramId ? [['queue-size', queueProgramId]] : [['queue-size']]),
+        ...(queueStudentId && queueProgramId
+          ? [['queue-position', queueStudentId, queueProgramId]]
+          : [['queue-position']]),
+      ];
+    }
+
     default:
       return [];
   }

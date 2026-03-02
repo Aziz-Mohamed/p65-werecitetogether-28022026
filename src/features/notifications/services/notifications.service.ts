@@ -1,107 +1,84 @@
 import { supabase } from '@/lib/supabase';
-import type { NotificationPreferences } from '../types/notifications.types';
+import type { ServiceResult } from '@/types/common.types';
+import type { NotificationPreference } from '../types/notifications.types';
 
 class NotificationsService {
-  /**
-   * Register a push token for the current user.
-   * Uses upsert on the unique token constraint to handle re-registration.
-   */
-  async registerToken(
-    userId: string,
-    token: string,
+  async registerPushToken(
+    profileId: string,
+    expoToken: string,
     platform: 'ios' | 'android',
-  ): Promise<void> {
+  ): Promise<ServiceResult<null>> {
     const { error } = await supabase
       .from('push_tokens')
       .upsert(
-        { user_id: userId, token, platform, is_active: true },
-        { onConflict: 'token' },
+        {
+          profile_id: profileId,
+          token: expoToken,
+          platform,
+        },
+        { onConflict: 'profile_id,token' },
       );
 
     if (error) {
-      if (__DEV__) {
-        console.log('[Notifications] registerToken error:', error.message);
-      }
-      throw error;
+      return { error: { message: error.message, code: error.code } };
     }
+
+    return { data: null };
   }
 
-  /**
-   * Remove a specific push token (e.g., on logout from current device).
-   */
-  async removeToken(token: string): Promise<void> {
-    const { error } = await supabase
-      .from('push_tokens')
-      .delete()
-      .eq('token', token);
-
-    if (error) {
-      if (__DEV__) {
-        console.log('[Notifications] removeToken error:', error.message);
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Remove all push tokens for a user (e.g., account deletion).
-   */
-  async removeAllUserTokens(userId: string): Promise<void> {
-    const { error } = await supabase
-      .from('push_tokens')
-      .delete()
-      .eq('user_id', userId);
-
-    if (error) {
-      if (__DEV__) {
-        console.log('[Notifications] removeAllUserTokens error:', error.message);
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Get notification preferences for a user.
-   * Returns null if no preferences row exists yet.
-   */
-  async getPreferences(userId: string): Promise<NotificationPreferences | null> {
+  async getPreferences(
+    profileId: string,
+  ): Promise<ServiceResult<NotificationPreference[]>> {
     const { data, error } = await supabase
       .from('notification_preferences')
       .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
+      .eq('profile_id', profileId);
 
     if (error) {
-      if (__DEV__) {
-        console.log('[Notifications] getPreferences error:', error.message);
-      }
-      throw error;
+      return { error: { message: error.message, code: error.code } };
     }
 
-    return data;
+    return { data: data ?? [] };
   }
 
-  /**
-   * Create or update notification preferences for a user.
-   * Uses upsert on user_id PK to handle first-time creation.
-   */
-  async upsertPreferences(
-    userId: string,
-    prefs: Partial<Omit<NotificationPreferences, 'user_id' | 'created_at' | 'updated_at'>>,
-  ): Promise<void> {
+  async updatePreference(
+    profileId: string,
+    category: string,
+    enabled: boolean,
+  ): Promise<ServiceResult<null>> {
     const { error } = await supabase
       .from('notification_preferences')
       .upsert(
-        { user_id: userId, ...prefs },
-        { onConflict: 'user_id' },
+        {
+          profile_id: profileId,
+          category,
+          enabled,
+        },
+        { onConflict: 'profile_id,category' },
       );
 
     if (error) {
-      if (__DEV__) {
-        console.log('[Notifications] upsertPreferences error:', error.message);
-      }
-      throw error;
+      return { error: { message: error.message, code: error.code } };
     }
+
+    return { data: null };
+  }
+
+  async removePushToken(
+    profileId: string,
+    expoToken: string,
+  ): Promise<ServiceResult<null>> {
+    const { error } = await supabase
+      .from('push_tokens')
+      .delete()
+      .eq('profile_id', profileId)
+      .eq('token', expoToken);
+
+    if (error) {
+      return { error: { message: error.message, code: error.code } };
+    }
+
+    return { data: null };
   }
 }
 

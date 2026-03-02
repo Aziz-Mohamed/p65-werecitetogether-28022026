@@ -5,13 +5,12 @@ interface UseRoleReturn {
   role: UserRole | null;
   isStudent: boolean;
   isTeacher: boolean;
-  isParent: boolean;
-  isAdmin: boolean;
+  isSupervisor: boolean;
+  isProgramAdmin: boolean;
+  isMasterAdmin: boolean;
+  onboardingCompleted: boolean;
 }
 
-/**
- * Returns the current user's role along with boolean convenience flags.
- */
 export const useRole = (): UseRoleReturn => {
   const profile = useAuthStore((state) => state.profile);
   const role = (profile?.role as UserRole) ?? null;
@@ -20,7 +19,14 @@ export const useRole = (): UseRoleReturn => {
     role,
     isStudent: role === 'student',
     isTeacher: role === 'teacher',
-    isParent: role === 'parent',
-    isAdmin: role === 'admin',
+    isSupervisor: role === 'supervisor',
+    isProgramAdmin: role === 'program_admin',
+    isMasterAdmin: role === 'master_admin',
+    onboardingCompleted: profile?.onboarding_completed ?? false,
   };
 };
+
+export const useIsTeacher = () => useRole().isTeacher;
+export const useIsSupervisor = () => useRole().isSupervisor;
+export const useIsProgramAdmin = () => useRole().isProgramAdmin;
+export const useIsMasterAdmin = () => useRole().isMasterAdmin;

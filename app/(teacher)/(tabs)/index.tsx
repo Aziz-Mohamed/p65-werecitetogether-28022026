@@ -1,57 +1,84 @@
-import React from 'react';
-import { I18nManager, StyleSheet, View, Text } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, View, Text, FlatList, Switch } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui';
-import { LoadingState, ErrorState } from '@/components/feedback';
-import { useAuth } from '@/hooks/useAuth';
-import { useTeacherDashboard } from '@/features/dashboard/hooks/useTeacherDashboard';
-import { useTeacherUpcomingSessions } from '@/features/scheduling/hooks/useScheduledSessions';
-import { GpsCheckinCard } from '@/features/work-attendance/components/GpsCheckinCard';
+import { useAuthStore } from '@/stores/authStore';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
-import { useLocalizedName } from '@/hooks/useLocalizedName';
+import {
+  useToggleAvailability,
+} from '@/features/teacher-availability/hooks/useTeacherAvailability';
+import { RatingStatsDisplay } from '@/features/teacher-ratings/components/RatingStatsDisplay';
+import { sessionsService } from '@/features/sessions/services/sessions.service';
+import { useSessionsRealtime } from '@/features/realtime';
+import { useQuery } from '@tanstack/react-query';
 import { typography } from '@/theme/typography';
-import { lightTheme, colors, semantic } from '@/theme/colors';
+import { lightTheme, primary, accent, neutral, semantic } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { radius } from '@/theme/radius';
 import { normalize } from '@/theme/normalize';
-
-const STATUS_BADGE_VARIANT: Record<string, 'sky' | 'warning' | 'success' | 'default'> = {
-  scheduled: 'sky',
-  in_progress: 'warning',
-  completed: 'success',
-  cancelled: 'default',
-  missed: 'warning',
-};
-
-// ─── Teacher Dashboard ────────────────────────────────────────────────────────
 
 export default function TeacherDashboard() {
   const { t } = useTranslation();
-  const { profile, schoolId } = useAuth();
-  const router = useRouter();
+  const profile = useAuthStore((s) => s.profile);
   const theme = useRoleTheme();
-  const { resolveFirstName, resolveName } = useLocalizedName();
+  const teacherId = profile?.id ?? '';
+  const displayName = profile?.display_name ?? profile?.full_name ?? '';
 
-  const { data, isLoading, error, refetch } = useTeacherDashboard(profile?.id);
-  const { data: upcomingSessions = [] } = useTeacherUpcomingSessions(profile?.id, schoolId ?? undefined);
+  // For MVP, we use the first program the teacher is associated with
+  // A full program selector can be added later
+  const [selectedProgramId] = useState<string | undefined>(undefined);
 
-  const nextSession = upcomingSessions[0] ?? null;
+  const toggleAvailability = useToggleAvailability();
 
-  const handleNextSession = () => {
-    if (nextSession) {
-      router.push(`/(teacher)/schedule/${nextSession.id}`);
-    } else {
-      router.navigate('/(teacher)/(tabs)/sessions');
-    }
-  };
+  // Track whether teacher is currently available
+  const [isAvailable, setIsAvailable] = useState(false);
 
-  if (isLoading) return <LoadingState />;
-  if (error) return <ErrorState description={error.message} onRetry={refetch} />;
+  // Realtime sessions subscription
+  useSessionsRealtime(teacherId || undefined, 'teacher_id');
+
+  // Today's completed count
+  const { data: todayCount = 0 } = useQuery({
+    queryKey: ['sessions', 'today-completed', teacherId],
+    queryFn: async () => {
+      const result = await sessionsService.getTodayCompletedCount(teacherId);
+      if (result.error) throw new Error(result.error.message);
+      return result.data!;
+    },
+    enabled: !!teacherId,
+    staleTime: 30_000,
+  });
+
+  // Recent sessions
+  const { data: recentSessions = [] } = useQuery({
+    queryKey: ['sessions', 'teacher', teacherId],
+    queryFn: async () => {
+      const result = await sessionsService.getSessionsByTeacher(teacherId);
+      if (result.error) throw new Error(result.error.message);
+      return result.data!;
+    },
+    enabled: !!teacherId,
+    staleTime: 30_000,
+  });
+
+  const draftSessions = recentSessions.filter((s) => s.status === 'draft');
+
+  const handleToggle = useCallback(
+    (value: boolean) => {
+      if (!selectedProgramId) return;
+      setIsAvailable(value);
+      toggleAvailability.mutate(
+        { programId: selectedProgramId, isAvailable: value },
+        {
+          onError: () => setIsAvailable(!value),
+        },
+      );
+    },
+    [selectedProgramId, toggleAvailability],
+  );
 
   return (
     <Screen scroll hasTabBar>
@@ -60,151 +87,125 @@ export default function TeacherDashboard() {
         <View style={styles.header}>
           <View style={styles.headerContent}>
             <Text style={styles.greeting}>
-              {t('dashboard.welcome', { name: resolveFirstName(profile?.name_localized, profile?.full_name) })} 👋
+              {t('dashboard.welcome', { name: displayName })}
             </Text>
-            <Text style={styles.subtitle}>{t('teacher.dashboard.readyToTeach')}</Text>
           </View>
-          <Badge label={t('roles.teacher')} variant={theme.tag} size="md" />
+          <Badge label={t('roles.teacher')} variant="violet" size="md" />
         </View>
 
-        {/* GPS Check-in / Check-out */}
-        <GpsCheckinCard />
+        {/* Availability Toggle */}
+        <Card variant="primary-glow" style={styles.availabilityCard}>
+          <View style={styles.availabilityRow}>
+            <View style={styles.availabilityInfo}>
+              <Ionicons
+                name={isAvailable ? 'radio-button-on' : 'radio-button-off'}
+                size={24}
+                color={isAvailable ? semantic.success : neutral[400]}
+              />
+              <View>
+                <Text style={styles.availabilityTitle}>
+                  {isAvailable
+                    ? t('teacherAvailability.available')
+                    : t('teacherAvailability.unavailable')}
+                </Text>
+                <Text style={styles.availabilityHint}>
+                  {isAvailable
+                    ? t('teacherAvailability.goUnavailable')
+                    : t('teacherAvailability.goAvailable')}
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={isAvailable}
+              onValueChange={handleToggle}
+              trackColor={{ false: neutral[200], true: primary[200] }}
+              thumbColor={isAvailable ? primary[500] : neutral[400]}
+              disabled={!selectedProgramId}
+            />
+          </View>
+        </Card>
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
           <Card variant="default" style={styles.statCard}>
-            <Text style={[styles.statValue, { color: theme.primary }]}>{data?.todaySessionCount ?? 0}</Text>
-            <Text style={styles.statLabel}>{t('teacher.dashboard.sessionsToday')}</Text>
+            <Text style={[styles.statValue, { color: theme.primary }]}>
+              {todayCount}
+            </Text>
+            <Text style={styles.statLabel}>
+              {t('sessions.todayCompleted', { count: todayCount })}
+            </Text>
           </Card>
           <Card variant="default" style={styles.statCard}>
-            <Text style={[styles.statValue, { color: colors.accent.sky[500] }]}>{data?.todayStudentsSeen ?? 0}</Text>
-            <Text style={styles.statLabel}>{t('teacher.dashboard.studentsSeen')}</Text>
+            <Text style={[styles.statValue, { color: accent.sky[500] }]}>
+              {draftSessions.length}
+            </Text>
+            <Text style={styles.statLabel}>{t('sessions.draft')}</Text>
           </Card>
         </View>
 
-        {/* Quick Actions */}
-        <Text style={styles.sectionTitle}>{t('dashboard.quickActions')}</Text>
-        <View style={styles.actionsRow}>
-          <Button
-            title={t('scheduling.nextSession')}
-            onPress={handleNextSession}
-            variant={theme.tag}
-            size="md"
-            icon={<Ionicons name="arrow-forward-circle" size={20} color={colors.white} />}
-            style={styles.actionButton}
-          />
-          <Button
-            title={t('teacher.awardSticker')}
-            onPress={() => router.push('/(teacher)/awards')}
-            variant="ghost"
-            size="md"
-            icon={<Ionicons name="star" size={20} color={colors.secondary[500]} />}
-            style={[styles.actionButton, { backgroundColor: colors.secondary[50] }]}
-          />
-        </View>
+        {/* Rating Stats */}
+        {selectedProgramId && (
+          <>
+            <Text style={styles.sectionTitle}>{t('ratings.myRatings')}</Text>
+            <RatingStatsDisplay teacherId={teacherId} programId={selectedProgramId} />
+          </>
+        )}
 
-        {/* My Schedule */}
-        <Card
-          variant="glass"
-          onPress={() => router.navigate('/(teacher)/(tabs)/sessions')}
-          style={styles.scheduleCard}
-        >
-          <View style={styles.scheduleRow}>
-            <View style={[styles.insightIcon, { backgroundColor: colors.accent.indigo[50] }]}>
-              <Ionicons name="calendar" size={22} color={colors.accent.indigo[500]} />
-            </View>
-            <View style={styles.scheduleInfo}>
-              <Text style={styles.scheduleLabel}>{t('scheduling.mySchedule')}</Text>
-              <Text style={styles.scheduleHint}>{t('scheduling.viewUpcoming')}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
-          </View>
-        </Card>
-
-        {/* Student Insights */}
-        <Text style={styles.sectionTitle}>{t('teacher.todayOverview')}</Text>
-        <View style={styles.actionsRow}>
-          <Card
-            variant="glass"
-            onPress={() => router.push('/(teacher)/students/top-performers')}
-            style={styles.insightCard}
-          >
-            <View style={[styles.insightIcon, { backgroundColor: colors.secondary[50] }]}>
-              <Ionicons name="trophy" size={22} color={colors.secondary[500]} />
-            </View>
-            <Text style={styles.insightLabel}>{t('teacher.topPerformers')}</Text>
-          </Card>
-          <Card
-            variant="glass"
-            onPress={() => router.push('/(teacher)/students/needs-support')}
-            style={styles.insightCard}
-          >
-            <View style={[styles.insightIcon, { backgroundColor: colors.accent.rose[50] }]}>
-              <Ionicons name="hand-left-outline" size={22} color={semantic.warning} />
-            </View>
-            <Text style={styles.insightLabel}>{t('teacher.needsSupport')}</Text>
-          </Card>
-        </View>
-
-        {/* Recent Sessions */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('dashboard.recentSessions')}</Text>
-          <Badge label={String(data?.totalStudents ?? 0)} variant="sky" />
-        </View>
-        {(data?.recentSessions ?? []).length === 0 ? (
-          <Card variant="outlined" style={styles.emptyCard}>
-            <Text style={styles.emptyText}>{t('teacher.dashboard.noRecentSessions')}</Text>
-          </Card>
-        ) : (
-          data?.recentSessions.map((session) => {
-            const score = session.evaluation?.memorization_score;
-            return (
-              <Card
-                key={session.id}
-                variant="default"
-                onPress={() => router.push(`/(teacher)/schedule/${session.id}`)}
-                style={styles.recentCard}
-              >
-                <View style={styles.recentCardRow}>
-                  <View style={styles.recentCardInfo}>
-                    <Text style={styles.recentCardTitle} numberOfLines={1}>
-                      {resolveName(session.class?.name_localized, session.class?.name) ?? t('scheduling.individualSession')}
-                    </Text>
-                    <Text style={styles.recentCardMeta}>
-                      {session.start_time?.slice(0, 5)} – {session.end_time?.slice(0, 5)}
-                      {session.student?.profiles?.full_name
-                        ? `  ·  ${resolveName(session.student.profiles?.name_localized, session.student.profiles.full_name)}`
-                        : ''}
-                    </Text>
-                  </View>
-                  {score != null && (
-                    <Badge
-                      label={`${score}/5`}
-                      variant={score >= 4 ? 'success' : 'warning'}
-                      size="sm"
+        {/* Active Draft Sessions */}
+        {draftSessions.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>
+              {t('sessions.recentSessions')}
+            </Text>
+            <FlatList
+              data={draftSessions.slice(0, 5)}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              renderItem={({ item }) => (
+                <Card variant="outlined" style={styles.sessionCard}>
+                  <View style={styles.sessionRow}>
+                    <Ionicons
+                      name="time-outline"
+                      size={20}
+                      color={accent.sky[500]}
                     />
-                  )}
-                  <Badge
-                    label={t(`scheduling.status.${session.status}`)}
-                    variant={STATUS_BADGE_VARIANT[session.status] ?? 'default'}
-                    size="sm"
-                  />
-                  <Ionicons
-                    name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
-                    size={16}
-                    color={colors.neutral[300]}
-                  />
-                </View>
-              </Card>
-            );
-          })
+                    <View style={styles.sessionInfo}>
+                      <Text style={styles.sessionStudent} numberOfLines={1}>
+                        {t('sessions.draft')}
+                      </Text>
+                      <Text style={styles.sessionMeta}>
+                        {new Date(item.created_at).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </Text>
+                    </View>
+                    <Badge label={t('sessions.draft')} variant="sky" size="sm" />
+                  </View>
+                </Card>
+              )}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+            />
+          </>
+        )}
+
+        {/* Empty state when no drafts */}
+        {draftSessions.length === 0 && (
+          <Card variant="outlined" style={styles.emptyCard}>
+            <Ionicons
+              name="calendar-outline"
+              size={32}
+              color={neutral[300]}
+            />
+            <Text style={styles.emptyText}>
+              {t('sessions.noSessions')}
+            </Text>
+          </Card>
         )}
       </View>
     </Screen>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   container: {
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: spacing.xs,
+    marginBlockEnd: spacing.xs,
   },
   headerContent: {
     flex: 1,
@@ -226,10 +227,26 @@ const styles = StyleSheet.create({
     color: lightTheme.text,
     fontSize: normalize(22),
   },
-  subtitle: {
+  availabilityCard: {
+    padding: spacing.base,
+  },
+  availabilityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  availabilityInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  availabilityTitle: {
+    ...typography.textStyles.bodyMedium,
+    color: lightTheme.text,
+  },
+  availabilityHint: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
-    marginTop: normalize(2),
   },
   statsRow: {
     flexDirection: 'row',
@@ -238,7 +255,7 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: spacing.lg,
+    paddingBlock: spacing.lg,
   },
   statValue: {
     ...typography.textStyles.display,
@@ -246,93 +263,46 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     ...typography.textStyles.label,
-    color: colors.neutral[500],
-    marginTop: spacing.xs,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: spacing.sm,
+    color: neutral[500],
+    marginBlockStart: spacing.xs,
+    textAlign: 'center',
   },
   sectionTitle: {
     ...typography.textStyles.subheading,
     color: lightTheme.text,
   },
-  actionsRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  actionButton: {
-    flex: 1,
-    borderRadius: normalize(16),
-  },
-  scheduleCard: {
+  sessionCard: {
     padding: spacing.md,
   },
-  scheduleRow: {
+  sessionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
   },
-  scheduleInfo: {
+  sessionInfo: {
     flex: 1,
+    gap: 2,
   },
-  scheduleLabel: {
+  sessionStudent: {
     ...typography.textStyles.bodyMedium,
-    color: colors.neutral[900],
+    color: lightTheme.text,
   },
-  scheduleHint: {
-    ...typography.textStyles.label,
-    color: colors.neutral[500],
-    marginTop: normalize(2),
-  },
-  insightCard: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-    gap: spacing.sm,
-  },
-  insightIcon: {
-    width: normalize(44),
-    height: normalize(44),
-    borderRadius: normalize(22),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  insightLabel: {
-    ...typography.textStyles.label,
-    color: colors.neutral[700],
-    textAlign: 'center',
-  },
-  recentCard: {
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  recentCardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  recentCardInfo: {
-    flex: 1,
-    gap: normalize(3),
-  },
-  recentCardTitle: {
-    ...typography.textStyles.bodyMedium,
-    color: colors.neutral[900],
-  },
-  recentCardMeta: {
+  sessionMeta: {
     ...typography.textStyles.caption,
-    color: colors.neutral[400],
+    color: lightTheme.textSecondary,
+  },
+  separator: {
+    height: spacing.sm,
   },
   emptyCard: {
     padding: spacing.xl,
     alignItems: 'center',
+    gap: spacing.md,
     borderStyle: 'dashed',
   },
   emptyText: {
     ...typography.textStyles.body,
     color: lightTheme.textSecondary,
+    textAlign: 'center',
   },
 });

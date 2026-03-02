@@ -1,6 +1,6 @@
 export type {
-  ProfileViewData,
+  Profile,
   UpdateProfileInput,
 } from './types/profile.types';
 
-export { ProfileService, profileService } from './services/profile.service';
+export { profileService } from './services/profile.service';

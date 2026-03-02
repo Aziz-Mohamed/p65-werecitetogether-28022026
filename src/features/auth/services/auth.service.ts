@@ -1,319 +1,102 @@
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
-import type {
-  LoginInput,
-  CreateSchoolInput,
-  CreateSchoolResponse,
-  CreateMemberInput,
-  CreateMemberResponse,
-  ResetMemberPasswordInput,
-  AuthResult,
-  Profile,
-} from '../types/auth.types';
-import { buildSyntheticEmail } from '../types/auth.types';
-import i18n from '@/i18n/config';
-
-const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL
-  ? `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1`
-  : '';
+import type { AuthResult } from '../types/auth.types';
 
 class AuthService {
-  /**
-   * Force-refresh the session and return a fresh access token.
-   * Needed because supabase.functions.invoke() may hold a stale token
-   * even when the REST client has auto-refreshed.
-   */
-  private async getFreshToken(): Promise<string> {
-    const { data, error } = await supabase.auth.refreshSession();
+  async signInWithGoogle(idToken: string): Promise<AuthResult<Session>> {
+    try {
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: idToken,
+      });
 
-    if (error || !data.session) {
-      if (__DEV__) {
-        console.log('[AuthService] refreshSession failed:', error?.message);
+      if (error) {
+        return { error: { message: error.message, code: error.code } };
       }
-      throw new Error(i18n.t('auth.sessionExpired'));
-    }
 
-    if (__DEV__) {
-      const exp = data.session.expires_at
-        ? new Date(data.session.expires_at * 1000).toISOString()
-        : 'unknown';
-      console.log('[AuthService] Token refreshed, expires:', exp);
-    }
+      if (!data.session) {
+        return { error: { message: 'No session returned' } };
+      }
 
-    return data.session.access_token;
+      return { data: data.session };
+    } catch (error) {
+      return {
+        error: {
+          message: error instanceof Error ? error.message : 'An unexpected error occurred',
+        },
+      };
+    }
   }
 
-  /**
-   * Sign in with username, password, and school slug.
-   * Builds a synthetic email internally.
-   */
-  async login(input: LoginInput): Promise<AuthResult<Session>> {
+  async signInWithApple(identityToken: string): Promise<AuthResult<Session>> {
     try {
-      const email = buildSyntheticEmail(input.username, input.schoolSlug);
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: identityToken,
+      });
 
+      if (error) {
+        return { error: { message: error.message, code: error.code } };
+      }
+
+      if (!data.session) {
+        return { error: { message: 'No session returned' } };
+      }
+
+      return { data: data.session };
+    } catch (error) {
+      return {
+        error: {
+          message: error instanceof Error ? error.message : 'An unexpected error occurred',
+        },
+      };
+    }
+  }
+
+  async signInWithPassword(
+    email: string,
+    password: string,
+  ): Promise<AuthResult<Session>> {
+    try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password: input.password,
+        password,
       });
 
       if (error) {
-        return {
-          error: {
-            message: error.message,
-            code: error.code,
-          },
-        };
+        return { error: { message: error.message, code: error.code } };
       }
 
       if (!data.session) {
-        return {
-          error: { message: 'No session returned' },
-        };
+        return { error: { message: 'No session returned' } };
       }
 
       return { data: data.session };
     } catch (error) {
       return {
         error: {
-          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
+          message:
+            error instanceof Error
+              ? error.message
+              : 'An unexpected error occurred',
         },
       };
     }
   }
 
-  /**
-   * Create a new school and admin account via Edge Function.
-   */
-  async createSchool(input: CreateSchoolInput): Promise<AuthResult<CreateSchoolResponse>> {
-    try {
-      const response = await fetch(`${FUNCTIONS_URL}/create-school`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        return {
-          error: {
-            message: result.error || i18n.t('auth.createSchoolFailed'),
-            code: result.code,
-          },
-        };
-      }
-
-      // Set the session in the Supabase client if we got one
-      if (result.session?.access_token) {
-        await supabase.auth.setSession({
-          access_token: result.session.access_token,
-          refresh_token: result.session.refresh_token,
-        });
-      }
-
-      return { data: result };
-    } catch (error) {
-      return {
-        error: {
-          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
-        },
-      };
-    }
+  async signOut(): Promise<void> {
+    await supabase.auth.signOut();
   }
 
-  /**
-   * Admin creates a new member via Edge Function.
-   * Requires the caller to be authenticated as an admin.
-   */
-  async createMember(input: CreateMemberInput): Promise<AuthResult<CreateMemberResponse>> {
-    try {
-      const token = await this.getFreshToken();
-
-      if (__DEV__) {
-        console.log('[AuthService] createMember called for role:', input.role);
-        console.log('[AuthService] token preview:', token.substring(0, 20) + '...');
-      }
-
-      const response = await fetch(`${FUNCTIONS_URL}/create-member`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'apikey': process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '',
-        },
-        body: JSON.stringify(input),
-      });
-
-      const result = await response.json();
-
-      if (__DEV__) {
-        console.log('[AuthService] createMember response status:', response.status);
-        console.log('[AuthService] createMember response body:', result);
-      }
-
-      if (!response.ok) {
-        return {
-          error: {
-            message: result.error || result.message || i18n.t('admin.createMemberFailed'),
-            code: result.code,
-          },
-        };
-      }
-
-      return { data: result as CreateMemberResponse };
-    } catch (error) {
-      return {
-        error: {
-          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
-        },
-      };
-    }
+  async getCurrentSession(): Promise<Session | null> {
+    const { data } = await supabase.auth.getSession();
+    return data.session;
   }
 
-  /**
-   * Admin resets a member's password via Edge Function.
-   */
-  async resetMemberPassword(input: ResetMemberPasswordInput): Promise<AuthResult> {
-    try {
-      const token = await this.getFreshToken();
-
-      const response = await fetch(`${FUNCTIONS_URL}/reset-member-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'apikey': process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '',
-        },
-        body: JSON.stringify(input),
-      });
-
-      if (!response.ok) {
-        const result = await response.json();
-        if (__DEV__) {
-          console.log('[AuthService] resetMemberPassword error:', result);
-        }
-        return {
-          error: {
-            message: result.error || result.message || i18n.t('admin.resetPassword.failed'),
-            code: result.code,
-          },
-        };
-      }
-
-      return {};
-    } catch (error) {
-      return {
-        error: {
-          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
-        },
-      };
-    }
-  }
-
-  /**
-   * Sign out the current user
-   */
-  async logout(): Promise<AuthResult> {
-    try {
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        return {
-          error: {
-            message: error.message,
-            code: error.code,
-          },
-        };
-      }
-
-      return {};
-    } catch (error) {
-      return {
-        error: {
-          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
-        },
-      };
-    }
-  }
-
-  /**
-   * Fetch user profile from database
-   */
-  async getProfile(userId: string): Promise<AuthResult<Profile>> {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        return {
-          error: {
-            message: error.message,
-            code: error.code,
-          },
-        };
-      }
-
-      if (!data) {
-        return {
-          error: { message: 'Profile not found' },
-        };
-      }
-
-      return { data };
-    } catch (error) {
-      return {
-        error: {
-          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
-        },
-      };
-    }
-  }
-
-  /**
-   * Get current session
-   */
-  async getSession(): Promise<AuthResult<Session>> {
-    try {
-      const { data, error } = await supabase.auth.getSession();
-
-      if (error) {
-        return {
-          error: {
-            message: error.message,
-            code: error.code,
-          },
-        };
-      }
-
-      if (!data.session) {
-        return {
-          error: { message: 'No active session' },
-        };
-      }
-
-      return { data: data.session };
-    } catch (error) {
-      return {
-        error: {
-          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
-        },
-      };
-    }
-  }
-
-  /**
-   * Subscribe to auth state changes
-   */
-  onAuthStateChange(
-    callback: (event: string, session: Session | null) => void
-  ) {
+  onAuthStateChange(callback: (event: string, session: Session | null) => void) {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       callback(event, session);
     });
-
     return data.subscription;
   }
 }

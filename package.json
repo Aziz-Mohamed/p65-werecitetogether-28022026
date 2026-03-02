@@ -10,7 +10,22 @@
     "lint": "expo lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:gen-types": "supabase gen types typescript --local > src/types/database.types.ts",
+    "supabase:gen-types:remote": "supabase gen types typescript --linked > src/types/database.types.ts",
+    "supabase:diff": "supabase db diff",
+    "supabase:push": "supabase db push"
+  },
+  "expo": {
+    "autolinking": {
+      "exclude": [
+        "expo-apple-authentication",
+        "expo-notifications"
+      ]
+    }
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
@@ -20,10 +35,16 @@
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",
     "@react-native-community/netinfo": "11.4.1",
+    "@react-native-google-signin/google-signin": "^16.1.1",
     "@shopify/flash-list": "2.0.2",
     "@supabase/supabase-js": "^2.95.3",
+    "@tanstack/query-async-storage-persister": "^5.90.23",
     "@tanstack/react-query": "^5.90.20",
+    "@tanstack/react-query-persist-client": "^5.90.23",
     "expo": "~54.0.33",
+    "expo-apple-authentication": "^55.0.8",
+    "expo-av": "^16.0.8",
+    "expo-clipboard": "~8.0.8",
     "expo-constants": "~18.0.13",
     "expo-device": "~8.0.10",
     "expo-file-system": "~19.0.21",
@@ -48,10 +69,12 @@
     "react-native": "0.81.5",
     "react-native-calendars": "^1.1314.0",
     "react-native-gesture-handler": "~2.28.0",
+    "react-native-qrcode-svg": "^6.3.21",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
     "react-native-svg": "15.12.1",
+    "react-native-view-shot": "4.0.3",
     "react-native-web": "^0.21.0",
     "react-native-worklets": "^0.5.1",
     "victory-native": "^41.20.2",
@@ -64,6 +87,7 @@
     "eslint": "^9.0.0",
     "eslint-config-expo": "~10.0.0",
     "jest-expo": "~54.0.17",
+    "supabase": "^2.76.15",
     "typescript": "~5.9.2"
   },
   "private": true

@@ -1,25 +1,24 @@
 /**
- * Design System — Color Tokens
+ * Design System — Color Tokens  (WeReciteTogether)
  *
- * Primary:   Emerald/Teal (Growth, Quranic gardens, trust)
- * Secondary: Amber/Gold  (Achievement, reward, warmth)
+ * Primary:   Teal/Emerald (Trust, Quranic serenity, growth)
+ * Secondary: Amber/Gold   (Achievement, warmth, recitation mastery)
  * Accents:   Indigo (Learning), Rose (Care), Violet (Spirituality)
- * Gamification: gold / silver / bronze / diamond
  */
 
 // ─── Shade Scales ────────────────────────────────────────────────────────────
 
 export const primary = {
-  50: '#F0FDF4',
-  100: '#DCFCE7',
-  200: '#BBF7D0',
-  300: '#86EFAC',
-  400: '#4ADE80',
-  500: '#22C55E', // Vibrant Green
-  600: '#16A34A',
-  700: '#15803D',
-  800: '#166534',
-  900: '#14532D',
+  50: '#F0FDFA',
+  100: '#CCFBF1',
+  200: '#99F6E4',
+  300: '#5EEAD4',
+  400: '#2DD4BF',
+  500: '#14B8A6', // Teal — WeReciteTogether brand
+  600: '#0D9488',
+  700: '#0F766E',
+  800: '#115E59',
+  900: '#134E4A',
 } as const;
 
 export const secondary = {
