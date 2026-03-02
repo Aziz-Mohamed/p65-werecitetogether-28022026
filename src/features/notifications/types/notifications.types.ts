@@ -16,6 +16,16 @@ export interface DeepLinkData {
   params?: Record<string, string>;
 }
 
+// ─── Queue Offer Data ───────────────────────────────────────────────────────
+
+export interface QueueOfferData {
+  teacherName: string;
+  platform: string;
+  expiresAt: string;
+  queueEntryId: string;
+  programId: string;
+}
+
 // ─── Notification Payload ────────────────────────────────────────────────────
 
 export interface NotificationPayload {
@@ -23,6 +33,7 @@ export interface NotificationPayload {
   body: string;
   data?: DeepLinkData;
   categoryId?: NotificationCategory;
+  queueOffer?: QueueOfferData;
 }
 
 // ─── Category Config ────────────────────────────────────────────────────────
