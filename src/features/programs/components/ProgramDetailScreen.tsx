@@ -87,7 +87,7 @@ export default function ProgramDetailScreen() {
         ) : (
           <View style={styles.trackList}>
             {tracks.map((track) => (
-              <TrackCard key={track.id} track={track} isArabic={isArabic} />
+              <TrackCard key={track.id} track={track} isArabic={isArabic} programId={id!} />
             ))}
           </View>
         )}
@@ -96,11 +96,29 @@ export default function ProgramDetailScreen() {
   );
 }
 
-function TrackCard({ track, isArabic }: { track: ProgramTrack; isArabic: boolean }) {
+function TrackCard({
+  track,
+  isArabic,
+  programId,
+}: {
+  track: ProgramTrack;
+  isArabic: boolean;
+  programId: string;
+}) {
   const { t } = useTranslation();
+  const router = useRouter();
   const trackName = isArabic ? track.name_ar : track.name;
   const trackDescription = isArabic ? track.description_ar : track.description;
   const trackType = (track.track_type ?? 'free') as TrackType;
+
+  const handlePress = () => {
+    if (trackType === 'free') {
+      router.push({
+        pathname: '/(student)/program/available-teachers',
+        params: { programId },
+      });
+    }
+  };
 
   return (
     <Card style={styles.trackCard}>
@@ -133,7 +151,7 @@ function TrackCard({ track, isArabic }: { track: ProgramTrack; isArabic: boolean
             ? t('programs.browseTeachers')
             : t('programs.enrollInTrack')
         }
-        onPress={() => {}}
+        onPress={handlePress}
         variant={trackType === 'free' ? 'secondary' : 'primary'}
         size="sm"
         fullWidth
