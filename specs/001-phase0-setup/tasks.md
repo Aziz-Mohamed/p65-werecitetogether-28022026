@@ -118,7 +118,7 @@ SQL comment format: `-- DEPRECATED: school_id scoping is deprecated. New tables 
 
 - [x] T024 Run TypeScript compilation check (`npx tsc --noEmit`) to verify zero build errors after all changes
 - [x] T025 Verify all 17 preserved feature directories exist in `src/features/` and all 5 route groups exist in `app/` — compare against PRD Section 0.2 list
-- [ ] T026 Launch the app and manually navigate all 4 role flows (student, teacher, parent, admin) to verify zero broken screens — check both English and Arabic locales with language switching
+- [x] T026 Launch the app and manually navigate all 4 role flows (student, teacher, parent, admin) to verify zero broken screens — check both English and Arabic locales with language switching
 
 ---
 
