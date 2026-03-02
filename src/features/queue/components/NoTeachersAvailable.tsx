@@ -8,9 +8,11 @@ import { Button } from '@/components/ui/Button';
 import {
   useQueueSize,
   useJoinQueue,
+  useLeaveQueue,
   useQueuePosition,
   useDailySessionCount,
 } from '../hooks/useQueue';
+import { useActiveDraftSession } from '@/features/sessions/hooks/useActiveDraftSession';
 import { typography } from '@/theme/typography';
 import { lightTheme, neutral, primary } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -29,12 +31,25 @@ export function NoTeachersAvailable({
   const { data: queueSize = 0 } = useQueueSize(programId);
   const { data: existingEntry } = useQueuePosition(studentId, programId);
   const { data: todayCount = 0 } = useDailySessionCount(studentId, programId);
+  const { data: activeDraft } = useActiveDraftSession(studentId);
   const joinQueue = useJoinQueue();
+  const leaveQueue = useLeaveQueue();
 
   const alreadyInQueue = !!existingEntry;
+  const hasActiveDraft = !!activeDraft;
 
   const handleJoinQueue = () => {
     joinQueue.mutate({ studentId, programId });
+  };
+
+  const handleLeaveQueue = () => {
+    if (existingEntry) {
+      leaveQueue.mutate({
+        queueEntryId: existingEntry.id,
+        studentId,
+        programId,
+      });
+    }
   };
 
   return (
@@ -58,6 +73,15 @@ export function NoTeachersAvailable({
         </View>
       )}
 
+      {alreadyInQueue && existingEntry && (
+        <View style={styles.queueInfo}>
+          <Ionicons name="time-outline" size={16} color={primary[500]} />
+          <Text style={styles.positionText}>
+            {t('queue.position', { position: existingEntry.position })}
+          </Text>
+        </View>
+      )}
+
       {todayCount > 0 && (
         <View style={styles.queueInfo}>
           <Ionicons name="today-outline" size={16} color={neutral[400]} />
@@ -67,16 +91,28 @@ export function NoTeachersAvailable({
         </View>
       )}
 
-      {!alreadyInQueue && (
+      {alreadyInQueue ? (
         <Button
-          title={t('queue.notifyMe')}
-          onPress={handleJoinQueue}
-          variant="primary"
+          title={t('queue.leaveQueue')}
+          onPress={handleLeaveQueue}
+          variant="ghost"
           size="sm"
-          loading={joinQueue.isPending}
+          loading={leaveQueue.isPending}
           fullWidth
           style={styles.button}
         />
+      ) : (
+        !hasActiveDraft && (
+          <Button
+            title={t('queue.notifyMe')}
+            onPress={handleJoinQueue}
+            variant="primary"
+            size="sm"
+            loading={joinQueue.isPending}
+            fullWidth
+            style={styles.button}
+          />
+        )
       )}
     </Card>
   );
@@ -107,6 +143,11 @@ const styles = StyleSheet.create({
   queueInfoText: {
     ...typography.textStyles.caption,
     color: neutral[500],
+  },
+  positionText: {
+    ...typography.textStyles.caption,
+    color: primary[600],
+    fontWeight: '600',
   },
   button: {
     marginBlockStart: spacing.sm,
