@@ -1,21 +1,34 @@
 <!--
   SYNC IMPACT REPORT
   ==================
-  Version change: 0.0.0 (template) → 1.0.0 (initial ratification)
+  Version change: 1.0.0 → 2.0.2
 
-  Modified principles: N/A (first constitution)
+  Bump rationale: MAJOR — multi-tenant → single-tenant evolution,
+  4 → 7 roles, new Principle IX, Quran School → WeReciteTogether.
+  PATCH — Principle I backward-compatibility clarification for
+  branch-and-customize workflow.
+
+  Modified principles:
+  - I: Multi-Tenant → Single-Tenant, Program-Scoped (with backward-compat)
+  - II: 4 Roles → 7 Roles (original 4 PRESERVED + 3 new)
+  - VII: Auth method expanded — password-based + OAuth (Google + Apple)
+
+  Unchanged principles:
+  - III: TypeScript-First, Strict Mode
+  - IV: Feature Colocation
+  - V: Logical CSS Only (RTL/LTR)
+  - VI: i18n Mandatory
+  - VIII: Minimal Animation, Maximum Responsiveness
 
   Added sections:
-  - Core Principles (8 principles derived from PRD)
-  - Technology & Architecture Constraints
-  - Development Workflow
-  - Governance
+  - Principle IX: External Meeting Integration (Zero Streaming Cost)
+  - Backward-compatibility notes throughout
 
-  Removed sections: N/A
+  Removed sections: None
 
   Templates requiring updates:
   - .specify/templates/plan-template.md: ✅ No update needed
-    (Constitution Check section already references constitution file dynamically)
+    (Constitution Check section references constitution dynamically)
   - .specify/templates/spec-template.md: ✅ No update needed
     (Spec template is generic; principles enforced at plan/task level)
   - .specify/templates/tasks-template.md: ✅ No update needed
@@ -28,27 +41,50 @@
   Follow-up TODOs: None
 -->
 
-# Quran School Constitution
+# WeReciteTogether Constitution
 
 ## Core Principles
 
-### I. Multi-Tenant by Default
+### I. Single-Tenant, Program-Scoped
 
-Every school-scoped table MUST include a `school_id` foreign key.
-All Row Level Security (RLS) policies MUST enforce school-scoping
-via `get_user_school_id()`. Global tables (`trophies`,
-`achievements`, `levels`) are the only exceptions. No query from
-the application layer may return data across school boundaries
-unless explicitly operating at the platform level.
+WeReciteTogether operates as a single organization (مقرأة
+إلكترونية). New features MUST be scoped by `program_id` rather
+than `school_id`. Every program-scoped table MUST include a
+`program_id` foreign key. All Row Level Security (RLS) policies
+for new tables MUST enforce program-scoping via
+`get_user_programs()` for non-master-admin roles. Global tables
+(platform config, shared reference data) are the only exceptions.
+Master Admins bypass program scoping and see all data.
 
-### II. Role-Based Access (4 Roles)
+**Backward Compatibility**: Legacy `school_id` references from
+the Quran School codebase are DEPRECATED but MUST be preserved
+for backward compatibility. Existing tables with `school_id`
+MUST NOT be dropped or altered to remove the column. Existing
+RLS policies using `get_user_school_id()` MUST NOT be deleted.
+New features MUST use `program_id` scoping exclusively. Removal
+of deprecated columns/tables is deferred to a dedicated cleanup
+spec after all features are migrated. See PRD Section 0.5 for
+full schema migration rules.
 
-The system recognizes exactly four roles: `student`, `teacher`,
-`parent`, `admin`. Every RLS policy and application-level guard
-MUST be scoped to one or more of these roles using
-`get_user_role()`. Role assignment occurs at the `profiles` table
-level. No implicit role escalation is permitted — a user MUST
-have the declared role to access role-gated functionality.
+### II. Role-Based Access (7 Roles)
+
+The system recognizes seven roles: `student`, `teacher`, `parent`,
+`admin` (original four, PRESERVED), plus `supervisor`,
+`program_admin`, `master_admin` (three new). Every RLS policy
+and application-level guard MUST be scoped to one or more of
+these roles using `get_user_role()`. Role assignment occurs at
+the `profiles` table level. The `program_roles` junction table
+governs which users hold which roles within specific programs.
+No implicit role escalation is permitted — a user MUST have the
+declared role to access role-gated functionality. Program Admins
+and Supervisors MUST only access data within their assigned
+programs.
+
+**Backward Compatibility**: The original `admin` and `parent`
+roles are preserved in the role CHECK constraint. Existing
+`app/(admin)/` and `app/(parent)/` route groups continue to
+function. New admin capabilities are added via `app/(master-admin)/`
+and `app/(program-admin)/` alongside the existing admin.
 
 ### III. TypeScript-First, Strict Mode
 
@@ -88,14 +124,18 @@ switching MUST trigger RTL/LTR layout reconfiguration via
 
 ### VII. Supabase-Native Patterns
 
-Authentication MUST use Supabase Auth (`signUp`,
-`signInWithPassword`, `resetPasswordForEmail`). Data access MUST
-use the Supabase JS SDK directly in service files — no ORM or
-repository abstraction layer. RLS MUST be enabled on every table.
-Migrations MUST be applied via Supabase migration tooling.
-Functions MUST include `SET search_path = public` for security
-compliance. Tables MUST be created before functions that reference
-them.
+Authentication MUST use Supabase Auth. For new users, OAuth
+providers (Google Sign-In, Apple Sign-In) are the primary
+authentication method. Existing password-based authentication
+from Quran School is PRESERVED during the transition period —
+both auth methods coexist until migration is complete.
+Teachers, supervisors, and admins are created by higher-level
+admins. Data access MUST use the Supabase JS SDK directly in
+service files — no ORM or repository abstraction layer. RLS
+MUST be enabled on every table. Migrations MUST be applied via
+Supabase migration tooling. Functions MUST include
+`SET search_path = public` for security compliance. Tables MUST
+be created before functions that reference them.
 
 ### VIII. Minimal Animation, Maximum Responsiveness
 
@@ -105,6 +145,17 @@ feedback, pull-to-refresh, progress fills) are encouraged.
 Full-screen celebrations, heavy Lottie/Rive packs, particle
 effects, and animations that block user interaction are prohibited.
 The app MUST feel alive and responsive, not animated and heavy.
+
+### IX. External Meeting Integration (Zero Streaming Cost)
+
+All live voice/video communication MUST happen via external
+tools (Google Meet, Zoom, Jitsi, or any URL). The app MUST NOT
+host, proxy, or stream any audio or video content (voice memos
+stored in Supabase Storage are the sole exception). Each teacher
+stores a persistent meeting link in their profile. The app
+reveals and deep-links to this URL when a student joins a session.
+Session outcomes (scores, notes, attendance) are logged in-app
+after the external session concludes.
 
 ## Technology & Architecture Constraints
 
@@ -128,11 +179,15 @@ The app MUST feel alive and responsive, not animated and heavy.
   - `is_active` is a status flag, not soft-delete; RLS does NOT
     filter by `is_active` — app layer handles it
   - `updated_at` triggers on tables that need them
+  - Program-scoped tables MUST include `program_id` FK
+  - New columns on existing tables MUST be NULLABLE
 
 ## Development Workflow
 
 - **Routing**: File-based via Expo Router. Route groups map to
-  roles: `(auth)`, `(student)`, `(teacher)`, `(parent)`, `(admin)`.
+  roles: `(auth)`, `(student)`, `(teacher)`, `(parent)` (preserved),
+  `(admin)` (preserved), `(supervisor)` (new), `(program-admin)`
+  (new), `(master-admin)` (new).
 - **Query keys**: Follow `[feature, ...params]` convention
 - **Services**: Each feature has a `.service.ts` file that wraps
   Supabase SDK calls. Services MUST NOT throw raw errors.
@@ -147,13 +202,14 @@ The app MUST feel alive and responsive, not animated and heavy.
   prefix for hooks, `.service.ts` suffix for services,
   `.types.ts` suffix for types, kebab-case for route files,
   UPPER_SNAKE_CASE for constants.
-- **Git commits**: No AI attribution in commit messages. Write
-  commit messages as if a human developer wrote them.
+- **Git commits**: Conventional Commits format. No AI attribution
+  in commit messages. Write commit messages as if a human
+  developer wrote them.
 
 ## Governance
 
 This constitution is the authoritative reference for all
-architectural and code-quality decisions in the Quran School
+architectural and code-quality decisions in the WeReciteTogether
 project. It supersedes ad-hoc practices and local conventions.
 
 - **Amendments**: Any change to a principle MUST be documented
@@ -167,8 +223,13 @@ project. It supersedes ad-hoc practices and local conventions.
   task lists MUST pass a Constitution Check before implementation
   begins. The plan template's "Constitution Check" section
   validates alignment with these principles.
-- **Source of truth**: The PRD at `memory-bank/PRD.md` is the
-  product-level source of truth. This constitution governs
-  technical execution of that PRD.
+- **Source of truth**: The PRD at
+  `memory-bank/PRD_WeReciteTogether.md` is the product-level
+  source of truth. This constitution governs technical execution
+  of that PRD.
+- **Branch strategy**: WeReciteTogether is a branch-and-customize
+  evolution of Quran School (see PRD Section 0). All specs MUST
+  respect the preservation rules in PRD Section 0.2 and removal
+  whitelist in PRD Section 0.3.
 
-**Version**: 1.0.0 | **Ratified**: 2026-02-08 | **Last Amended**: 2026-02-08
+**Version**: 2.0.2 | **Ratified**: 2026-02-08 | **Last Amended**: 2026-03-02
