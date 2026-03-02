@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "مدرسة القرآن",
+    "appName": "نتلو معاً",
     "loading": "جارٍ التحميل...",
     "error": "حدث خطأ ما",
     "retry": "إعادة المحاولة",
@@ -200,7 +200,7 @@
       },
       "share": "مشاركة",
       "shareTitle": "رحلتي مع القرآن",
-      "shareBranding": "مدرسة القرآن",
+      "shareBranding": "نتلو معاً",
       "shareCertified": "مُجاز",
       "shareComplete": "مكتمل",
       "shareReviews": "مراجعات"

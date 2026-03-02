@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Quran School",
+    "appName": "WeReciteTogether",
     "loading": "Loading...",
     "error": "Something went wrong",
     "retry": "Retry",
@@ -200,7 +200,7 @@
       },
       "share": "Share",
       "shareTitle": "My Quran Journey",
-      "shareBranding": "Quran School",
+      "shareBranding": "WeReciteTogether",
       "shareCertified": "certified",
       "shareComplete": "complete",
       "shareReviews": "reviews"

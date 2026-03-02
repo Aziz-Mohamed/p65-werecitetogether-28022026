@@ -6,7 +6,7 @@ import type {
 
 // ─── App ────────────────────────────────────────────────────────────────────
 
-export const APP_NAME = 'Quran School';
+export const APP_NAME = 'WeReciteTogether';
 
 export const MAX_STUDENTS_PER_CLASS = 20;
 
