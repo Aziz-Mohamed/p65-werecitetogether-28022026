@@ -12,7 +12,6 @@ import { LoadingState, ErrorState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeacherDashboard } from '@/features/dashboard/hooks/useTeacherDashboard';
 import { useTeacherUpcomingSessions } from '@/features/scheduling/hooks/useScheduledSessions';
-import { GpsCheckinCard } from '@/features/work-attendance/components/GpsCheckinCard';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
@@ -66,9 +65,6 @@ export default function TeacherDashboard() {
           </View>
           <Badge label={t('roles.teacher')} variant={theme.tag} size="md" />
         </View>
-
-        {/* GPS Check-in / Check-out */}
-        <GpsCheckinCard />
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
