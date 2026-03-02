@@ -1,18 +1,33 @@
 import React from 'react';
+import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
 import { CustomTabBar } from '@/components/layout/CustomTabBar';
+import { PostSessionPrompt } from '@/features/sessions/components/PostSessionPrompt';
+import { usePostSessionDetection } from '@/features/sessions/hooks/usePostSessionDetection';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function StudentTabsLayout() {
   const { t } = useTranslation();
+  const profile = useAuthStore((s) => s.profile);
+  const { showPrompt, activeSession, dismissPrompt } =
+    usePostSessionDetection(profile?.id);
 
   return (
-    <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
-    >
+    <View style={{ flex: 1 }}>
+      {showPrompt && activeSession && profile?.id && (
+        <PostSessionPrompt
+          session={activeSession}
+          studentId={profile.id}
+          onDismiss={dismissPrompt}
+        />
+      )}
+      <Tabs
+        tabBar={(props) => <CustomTabBar {...props} />}
+        screenOptions={{ headerShown: false }}
+      >
       <Tabs.Screen
         name="index"
         options={{
@@ -58,6 +73,7 @@ export default function StudentTabsLayout() {
           ),
         }}
       />
-    </Tabs>
+      </Tabs>
+    </View>
   );
 }
