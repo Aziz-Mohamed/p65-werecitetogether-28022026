@@ -421,6 +421,7 @@ CREATE TABLE session_recitation_plans (
 
 -- 3a. Helper Functions
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE this function — 33 RLS policies depend on it.
 CREATE OR REPLACE FUNCTION get_user_school_id()
 RETURNS uuid
 LANGUAGE sql
@@ -1244,12 +1245,14 @@ CREATE INDEX idx_teacher_work_schedules_teacher ON teacher_work_schedules USING 
 -- Section 5: RLS Enable + Policies (120 policies)
 -- =============================================================================
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- schools (2 policies)
 ALTER TABLE schools ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Members can read own school" ON schools FOR SELECT USING (id = get_user_school_id());
 CREATE POLICY "Admin can update own school" ON schools FOR UPDATE USING ((id = get_user_school_id()) AND (get_user_role() = 'admin'::text));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- profiles (5 policies)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
@@ -1259,6 +1262,7 @@ CREATE POLICY "Admin can insert profiles" ON profiles FOR INSERT WITH CHECK ((sc
 CREATE POLICY "Admin can delete profiles" ON profiles FOR DELETE USING ((school_id = get_user_school_id()) AND (get_user_role() = 'admin'::text));
 CREATE POLICY "Service role can insert profiles" ON profiles FOR INSERT WITH CHECK (id = auth.uid());
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- classes (5 policies)
 ALTER TABLE classes ENABLE ROW LEVEL SECURITY;
 
@@ -1268,6 +1272,7 @@ CREATE POLICY "Admin can update classes" ON classes FOR UPDATE USING ((school_id
 CREATE POLICY "Admin can delete classes" ON classes FOR DELETE USING ((school_id = get_user_school_id()) AND (get_user_role() = 'admin'::text));
 CREATE POLICY "Teacher can update own classes" ON classes FOR UPDATE USING ((school_id = get_user_school_id()) AND (teacher_id = auth.uid()) AND (get_user_role() = 'teacher'::text));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- students (7 policies)
 ALTER TABLE students ENABLE ROW LEVEL SECURITY;
 
@@ -1279,6 +1284,7 @@ CREATE POLICY "Teacher can read class students" ON students FOR SELECT USING ((s
 CREATE POLICY "Student can read own record" ON students FOR SELECT USING ((id = auth.uid()) AND (get_user_role() = 'student'::text));
 CREATE POLICY "Parent can read children" ON students FOR SELECT USING ((parent_id = auth.uid()) AND (get_user_role() = 'parent'::text));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- sessions (9 policies)
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 
@@ -1292,6 +1298,7 @@ CREATE POLICY "Teacher can update own sessions" ON sessions FOR UPDATE USING ((s
 CREATE POLICY "Student can read own sessions" ON sessions FOR SELECT USING ((school_id = get_user_school_id()) AND (student_id = auth.uid()) AND (get_user_role() = 'student'::text));
 CREATE POLICY "Parent can read children sessions" ON sessions FOR SELECT USING ((school_id = get_user_school_id()) AND (get_user_role() = 'parent'::text) AND (student_id IN ( SELECT students.id FROM students WHERE (students.parent_id = auth.uid()))));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- attendance (9 policies)
 ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
 
@@ -1310,6 +1317,7 @@ ALTER TABLE stickers ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Anyone can read stickers" ON stickers FOR SELECT USING (true);
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- student_stickers (7 policies)
 ALTER TABLE student_stickers ENABLE ROW LEVEL SECURITY;
 
@@ -1321,6 +1329,7 @@ CREATE POLICY "Teacher can award stickers" ON student_stickers FOR INSERT WITH C
 CREATE POLICY "Student can read own stickers" ON student_stickers FOR SELECT USING ((get_user_role() = 'student'::text) AND (student_id = auth.uid()));
 CREATE POLICY "Parent can read children stickers" ON student_stickers FOR SELECT USING ((get_user_role() = 'parent'::text) AND (student_id IN ( SELECT students.id FROM students WHERE (students.parent_id = auth.uid()))));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- teacher_checkins (8 policies)
 ALTER TABLE teacher_checkins ENABLE ROW LEVEL SECURITY;
 
@@ -1349,6 +1358,7 @@ CREATE POLICY "Users can insert own notification preferences" ON notification_pr
 CREATE POLICY "Users can update own notification preferences" ON notification_preferences FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete own notification preferences" ON notification_preferences FOR DELETE USING (auth.uid() = user_id);
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- teacher_work_schedules (5 policies)
 ALTER TABLE teacher_work_schedules ENABLE ROW LEVEL SECURITY;
 
@@ -1358,6 +1368,7 @@ CREATE POLICY "Admin can update work schedules" ON teacher_work_schedules FOR UP
 CREATE POLICY "Admin can delete work schedules" ON teacher_work_schedules FOR DELETE USING ((school_id = get_user_school_id()) AND (get_user_role() = 'admin'::text));
 CREATE POLICY "Teacher can read own work schedule" ON teacher_work_schedules FOR SELECT USING ((school_id = get_user_school_id()) AND (teacher_id = auth.uid()) AND (get_user_role() = 'teacher'::text));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- class_schedules (4 policies)
 ALTER TABLE class_schedules ENABLE ROW LEVEL SECURITY;
 
@@ -1366,6 +1377,7 @@ CREATE POLICY "Admin can insert class schedules" ON class_schedules FOR INSERT W
 CREATE POLICY "Admin can update class schedules" ON class_schedules FOR UPDATE USING ((school_id = get_user_school_id()) AND (get_user_role() = 'admin'::text));
 CREATE POLICY "Admin can delete class schedules" ON class_schedules FOR DELETE USING ((school_id = get_user_school_id()) AND (get_user_role() = 'admin'::text));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- scheduled_sessions (9 policies)
 ALTER TABLE scheduled_sessions ENABLE ROW LEVEL SECURITY;
 
@@ -1379,6 +1391,7 @@ CREATE POLICY "Teacher can update own scheduled sessions" ON scheduled_sessions 
 CREATE POLICY "Student can read own scheduled sessions" ON scheduled_sessions FOR SELECT USING ((school_id = get_user_school_id()) AND (get_user_role() = 'student'::text) AND (((session_type = 'class'::text) AND (class_id IN ( SELECT students.class_id FROM students WHERE (students.id = auth.uid())))) OR ((session_type = 'individual'::text) AND (student_id = auth.uid()))));
 CREATE POLICY "Parent can read children scheduled sessions" ON scheduled_sessions FOR SELECT USING ((school_id = get_user_school_id()) AND (get_user_role() = 'parent'::text) AND (((session_type = 'class'::text) AND (class_id IN ( SELECT students.class_id FROM students WHERE (students.parent_id = auth.uid())))) OR ((session_type = 'individual'::text) AND (student_id IN ( SELECT students.id FROM students WHERE (students.parent_id = auth.uid()))))));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- recitations (6 policies)
 ALTER TABLE recitations ENABLE ROW LEVEL SECURITY;
 
@@ -1389,6 +1402,7 @@ CREATE POLICY "Teacher can update own recitations" ON recitations FOR UPDATE USI
 CREATE POLICY "Student can read own recitations" ON recitations FOR SELECT USING ((school_id = get_user_school_id()) AND (student_id = auth.uid()) AND (get_user_role() = 'student'::text));
 CREATE POLICY "Parent can read children recitations" ON recitations FOR SELECT USING ((school_id = get_user_school_id()) AND (get_user_role() = 'parent'::text) AND (student_id IN ( SELECT students.id FROM students WHERE (students.parent_id = auth.uid()))));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- memorization_progress (6 policies)
 ALTER TABLE memorization_progress ENABLE ROW LEVEL SECURITY;
 
@@ -1399,6 +1413,7 @@ CREATE POLICY "Teacher can update school memorization progress" ON memorization_
 CREATE POLICY "Student can read own memorization progress" ON memorization_progress FOR SELECT USING ((school_id = get_user_school_id()) AND (student_id = auth.uid()) AND (get_user_role() = 'student'::text));
 CREATE POLICY "Parent can read children memorization progress" ON memorization_progress FOR SELECT USING ((school_id = get_user_school_id()) AND (get_user_role() = 'parent'::text) AND (student_id IN ( SELECT students.id FROM students WHERE (students.parent_id = auth.uid()))));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- memorization_assignments (8 policies)
 ALTER TABLE memorization_assignments ENABLE ROW LEVEL SECURITY;
 
@@ -1416,6 +1431,7 @@ ALTER TABLE quran_rub_reference ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Anyone can read rub reference" ON quran_rub_reference FOR SELECT USING (true);
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- student_rub_certifications (10 policies)
 ALTER TABLE student_rub_certifications ENABLE ROW LEVEL SECURITY;
 
@@ -1430,6 +1446,7 @@ CREATE POLICY "Teacher can delete class student certifications" ON student_rub_c
 CREATE POLICY "Student can read own certifications" ON student_rub_certifications FOR SELECT USING ((get_user_role() = 'student'::text) AND (student_id = auth.uid()));
 CREATE POLICY "Parent can read children certifications" ON student_rub_certifications FOR SELECT USING ((get_user_role() = 'parent'::text) AND (student_id IN ( SELECT students.id FROM students WHERE (students.parent_id = auth.uid()))));
 
+-- DEPRECATED: school_id scoping is deprecated. New tables MUST use program_id. DO NOT DELETE these policies.
 -- session_recitation_plans (11 policies)
 ALTER TABLE session_recitation_plans ENABLE ROW LEVEL SECURITY;
 

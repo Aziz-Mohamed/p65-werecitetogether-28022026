@@ -6,6 +6,7 @@ export type SelectionMode = 'ayah_range' | 'rub' | 'hizb' | 'juz' | 'surah';
 export type RecitationPlanType = 'new_hifz' | 'recent_review' | 'old_review';
 export type PlanSource = 'manual' | 'from_assignment' | 'student_suggestion';
 
+/** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
 export interface CreateRecitationPlanInput {
   school_id: string;
   scheduled_session_id: string;

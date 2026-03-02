@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import type { ClassScheduleInput } from '../types/scheduling.types';
 
 class ClassScheduleService {
+  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * Get all schedules for a class.
    */
@@ -14,6 +15,8 @@ class ClassScheduleService {
       .order('day_of_week', { ascending: true });
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
+  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * Get all schedules for a school (admin view).
    */
@@ -26,6 +29,8 @@ class ClassScheduleService {
       .order('day_of_week', { ascending: true });
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
+  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * Create or update a class schedule entry.
    */

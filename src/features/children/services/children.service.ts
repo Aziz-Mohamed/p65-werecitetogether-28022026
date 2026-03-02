@@ -49,6 +49,8 @@ class ChildrenService {
   /**
    * CH-003: Get anonymous class standing for a student.
    * Returns ranks with no names — only current student is identified.
+   *
+   * @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5.
    */
   async getClassStanding(studentId: string, classId: string) {
     const { data, error } = await supabase

@@ -53,6 +53,7 @@ export interface CreateSchoolResponse {
   };
 }
 
+/** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
 export interface CreateMemberResponse {
   profile: {
     id: string;

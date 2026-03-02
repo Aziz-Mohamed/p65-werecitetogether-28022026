@@ -1,5 +1,6 @@
 import type { Tables } from '@/types/database.types';
 
+/** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
 /** Input for marking attendance for multiple students at once */
 export interface BulkAttendanceInput {
   class_id: string;
@@ -25,6 +26,7 @@ export interface AttendanceCalendarDay {
   notes: string | null;
 }
 
+/** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
 /** Filters for querying attendance records */
 export interface AttendanceFilters {
   classId?: string;

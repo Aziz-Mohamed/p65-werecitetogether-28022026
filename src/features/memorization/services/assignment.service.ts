@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import type { CreateAssignmentInput, AssignmentFilters } from '../types/memorization.types';
 
 class AssignmentService {
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   async createAssignment(input: CreateAssignmentInput) {
     return supabase
       .from('memorization_assignments')

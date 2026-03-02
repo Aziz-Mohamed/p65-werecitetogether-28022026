@@ -72,6 +72,8 @@ class GamificationService {
 
   /**
    * GS-004: Get class leaderboard ranked by current_level (rubʿ-based).
+   *
+   * @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5.
    */
   async getLeaderboard(classId: string) {
     return supabase

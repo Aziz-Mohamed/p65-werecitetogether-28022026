@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 
 class CheckinService {
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   /**
    * TC-001: Check in the teacher.
    */

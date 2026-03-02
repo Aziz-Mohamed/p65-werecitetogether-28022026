@@ -4,6 +4,8 @@ import type { SchoolSettings } from '../types/school-settings.types';
 class SchoolSettingsService {
   /**
    * Get school settings JSONB.
+   *
+   * @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5.
    */
   async getSettings(schoolId: string) {
     return supabase
@@ -15,6 +17,8 @@ class SchoolSettingsService {
 
   /**
    * Update school settings (merges into existing JSONB).
+   *
+   * @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5.
    */
   async updateSettings(schoolId: string, updates: Partial<SchoolSettings>) {
     const { data: current } = await this.getSettings(schoolId);
