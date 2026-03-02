@@ -64,6 +64,8 @@ export type NotificationCategory =
   | 'enrollment'
   | 'session_reminder'
   | 'queue'
+  | 'queue_available'
+  | 'queue_threshold'
   | 'rating'
   | 'voice_memo'
   | 'waitlist'
