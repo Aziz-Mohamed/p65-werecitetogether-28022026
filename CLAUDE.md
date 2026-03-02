@@ -7,6 +7,34 @@
 - NEVER mention Claude, AI, or any AI assistant in commit messages, PR descriptions, or code comments.
 - Write commit messages as if a human developer wrote them.
 
+## Supabase Workflow
+
+### Local-First Development
+- ALL schema changes MUST be written as migration files in `supabase/migrations/` FIRST.
+- NEVER apply DDL changes directly to the remote database. The local `supabase/migrations/` folder is the single source of truth.
+- Test migrations locally with `supabase db reset` before considering remote deployment.
+
+### Remote Database Protection
+- NEVER use MCP tools (`apply_migration`, `execute_sql` with DDL) to modify the remote Supabase schema unless the user explicitly says to push/deploy.
+- Read-only queries (`SELECT`) via `execute_sql` are safe and do not require approval.
+- Before applying migrations to remote, list the migration names and summarize changes for user review.
+
+### Edge Functions
+- Develop edge functions locally in `supabase/functions/<name>/index.ts`.
+- NEVER deploy edge functions to remote unless the user explicitly asks to deploy.
+
+### Migration Naming
+- Follow the numbered pattern: `NNNNN_snake_case_description.sql` (e.g., `00004_add_badges_table.sql`).
+- Use `IF NOT EXISTS` / `IF EXISTS` where possible for idempotency.
+
+### TypeScript Types
+- After schema changes are applied to remote, regenerate types via the `generate_typescript_types` MCP tool.
+- Types live in `supabase/types/database.types.ts`.
+
+### Remote Project
+- Project ID: `cwakivlyvnxdeqrkbzxc`
+- Region: `ap-northeast-2`
+
 ## Active Technologies
 - TypeScript 5.9 (strict mode) / React Native 0.83 / React 19 + Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next + react-i18next, FlashList 2, expo-image 3, react-native-calendars, victory-native, @gorhom/bottom-sheet 5 (001-mvp-phase1)
 - Supabase PostgreSQL (remote), expo-secure-store (auth tokens), AsyncStorage (preferences) (001-mvp-phase1)
