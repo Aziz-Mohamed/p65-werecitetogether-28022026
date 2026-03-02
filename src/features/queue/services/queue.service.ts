@@ -7,6 +7,13 @@ class QueueService {
     studentId: string,
     programId: string,
   ): Promise<ServiceResult<QueueEntry>> {
+    // Cancel any existing active queue entries for this student across ALL programs
+    await supabase
+      .from('free_program_queue')
+      .update({ status: 'cancelled' })
+      .eq('student_id', studentId)
+      .in('status', ['waiting', 'notified']);
+
     // Calculate next position
     const { count, error: countError } = await supabase
       .from('free_program_queue')

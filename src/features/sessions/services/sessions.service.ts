@@ -194,6 +194,34 @@ class SessionsService {
     return { data: data ?? [] };
   }
 
+  async getActiveDraftSession(
+    studentId: string,
+  ): Promise<ServiceResult<SessionWithDetails | null>> {
+    const { data, error } = await supabase
+      .from('sessions')
+      .select(
+        `
+        *,
+        teacher_profile:profiles!sessions_teacher_id_fkey (
+          id, full_name, display_name, avatar_url,
+          meeting_link, meeting_platform
+        ),
+        attendance:session_attendance!inner (student_id)
+      `,
+      )
+      .eq('attendance.student_id', studentId)
+      .eq('status', 'draft')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      return { error: { message: error.message, code: error.code } };
+    }
+
+    return { data: data as unknown as SessionWithDetails | null };
+  }
+
   async getTodayCompletedCount(
     teacherId: string,
   ): Promise<ServiceResult<number>> {
