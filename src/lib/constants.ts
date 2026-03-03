@@ -17,6 +17,9 @@ export const ROLES: readonly UserRole[] = [
   'teacher',
   'parent',
   'admin',
+  'supervisor',
+  'program_admin',
+  'master_admin',
 ] as const;
 
 export const ATTENDANCE_STATUSES: readonly AttendanceStatus[] = [

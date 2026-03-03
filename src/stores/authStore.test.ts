@@ -30,7 +30,6 @@ describe('authStore', () => {
       const state = useAuthStore.getState();
       expect(state.session).toBeNull();
       expect(state.profile).toBeNull();
-      expect(state.schoolSlug).toBeNull();
       expect(state.isAuthenticated).toBe(false);
       expect(state.isLoading).toBe(true);
     });
@@ -63,18 +62,10 @@ describe('authStore', () => {
     });
   });
 
-  describe('setSchoolSlug', () => {
-    it('sets the school slug', () => {
-      useAuthStore.getState().setSchoolSlug('my-school');
-      expect(useAuthStore.getState().schoolSlug).toBe('my-school');
-    });
-  });
-
   describe('clearAuth', () => {
     it('resets session, profile, and isAuthenticated', () => {
       useAuthStore.getState().setSession(mockSession);
       useAuthStore.getState().setProfile(mockProfile);
-      useAuthStore.getState().setSchoolSlug('my-school');
 
       useAuthStore.getState().clearAuth();
       const state = useAuthStore.getState();
@@ -83,13 +74,6 @@ describe('authStore', () => {
       expect(state.profile).toBeNull();
       expect(state.isAuthenticated).toBe(false);
       expect(state.isLoading).toBe(false);
-    });
-
-    it('does not reset schoolSlug', () => {
-      useAuthStore.getState().setSchoolSlug('my-school');
-      useAuthStore.getState().clearAuth();
-      // schoolSlug persists for login convenience
-      expect(useAuthStore.getState().schoolSlug).toBe('my-school');
     });
   });
 

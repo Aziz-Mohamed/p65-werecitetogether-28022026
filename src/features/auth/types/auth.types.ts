@@ -1,22 +1,42 @@
 import type { Tables } from '@/types/database.types';
+import type { UserRole } from '@/types/common.types';
 
-// ─── Input Types ─────────────────────────────────────────────────────────────
+// ─── OAuth Types ─────────────────────────────────────────────────────────────
 
-export interface LoginInput {
-  username: string;
-  password: string;
-  schoolSlug: string;
+export type OAuthProvider = 'google' | 'apple';
+
+export interface OAuthLoginResult {
+  provider: OAuthProvider;
+  userId: string;
+  email: string;
+  isNewUser: boolean;
 }
 
-export interface CreateSchoolInput {
-  schoolName: string;
-  adminFullName: string;
-  username: string;
-  password: string;
-  schoolNameLocalized?: Record<string, string>;
-  adminNameLocalized?: Record<string, string>;
+// ─── Dev Login Types ─────────────────────────────────────────────────────────
+
+export interface DevLoginInput {
+  role: UserRole;
 }
 
+// ─── Role Update Types ───────────────────────────────────────────────────────
+
+export interface UpdateRoleInput {
+  action: 'update-role';
+  userId: string;
+  role: UserRole;
+}
+
+export interface UpdateRoleResponse {
+  profile: {
+    id: string;
+    role: string;
+    full_name: string;
+  };
+}
+
+// ─── Legacy Types (backward compat — used by admin create screens) ───────────
+
+/** @deprecated Member creation via password is removed (FR-022). */
 export interface CreateMemberInput {
   fullName: string;
   username: string;
@@ -28,32 +48,7 @@ export interface CreateMemberInput {
   nameLocalized?: Record<string, string>;
 }
 
-export interface ResetMemberPasswordInput {
-  userId: string;
-  newPassword: string;
-}
-
-// ─── Response Types ─────────────────────────────────────────────────────────
-
-export interface CreateSchoolResponse {
-  school: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-  session: {
-    access_token: string;
-    refresh_token: string;
-  } | null;
-  profile: {
-    id: string;
-    username: string;
-    role: 'admin';
-    full_name: string;
-  };
-}
-
-/** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
+/** @deprecated Member creation via password is removed (FR-022). */
 export interface CreateMemberResponse {
   profile: {
     id: string;
@@ -72,9 +67,12 @@ export interface CreateMemberResponse {
 
 // ─── Error Type ──────────────────────────────────────────────────────────────
 
+export type OAuthErrorCategory = 'network' | 'cancelled' | 'provider' | 'unknown';
+
 export interface AuthError {
   message: string;
   code?: string;
+  category?: OAuthErrorCategory;
 }
 
 // ─── Result Type ─────────────────────────────────────────────────────────────
@@ -87,9 +85,3 @@ export interface AuthResult<T = void> {
 // ─── Profile ─────────────────────────────────────────────────────────────────
 
 export type Profile = Tables<'profiles'>;
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-export function buildSyntheticEmail(username: string, schoolSlug: string): string {
-  return `${username}@${schoolSlug}.app`;
-}

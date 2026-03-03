@@ -1,16 +1,13 @@
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 import type {
-  LoginInput,
-  CreateSchoolInput,
-  CreateSchoolResponse,
+  UpdateRoleInput,
+  UpdateRoleResponse,
   CreateMemberInput,
   CreateMemberResponse,
-  ResetMemberPasswordInput,
   AuthResult,
   Profile,
 } from '../types/auth.types';
-import { buildSyntheticEmail } from '../types/auth.types';
 import i18n from '@/i18n/config';
 
 const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL
@@ -44,94 +41,14 @@ class AuthService {
   }
 
   /**
-   * Sign in with username, password, and school slug.
-   * Builds a synthetic email internally.
+   * Admin updates a user's role via the create-member Edge Function.
    */
-  async login(input: LoginInput): Promise<AuthResult<Session>> {
-    try {
-      const email = buildSyntheticEmail(input.username, input.schoolSlug);
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password: input.password,
-      });
-
-      if (error) {
-        return {
-          error: {
-            message: error.message,
-            code: error.code,
-          },
-        };
-      }
-
-      if (!data.session) {
-        return {
-          error: { message: 'No session returned' },
-        };
-      }
-
-      return { data: data.session };
-    } catch (error) {
-      return {
-        error: {
-          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
-        },
-      };
-    }
-  }
-
-  /**
-   * Create a new school and admin account via Edge Function.
-   */
-  async createSchool(input: CreateSchoolInput): Promise<AuthResult<CreateSchoolResponse>> {
-    try {
-      const response = await fetch(`${FUNCTIONS_URL}/create-school`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        return {
-          error: {
-            message: result.error || i18n.t('auth.createSchoolFailed'),
-            code: result.code,
-          },
-        };
-      }
-
-      // Set the session in the Supabase client if we got one
-      if (result.session?.access_token) {
-        await supabase.auth.setSession({
-          access_token: result.session.access_token,
-          refresh_token: result.session.refresh_token,
-        });
-      }
-
-      return { data: result };
-    } catch (error) {
-      return {
-        error: {
-          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
-        },
-      };
-    }
-  }
-
-  /**
-   * Admin creates a new member via Edge Function.
-   * Requires the caller to be authenticated as an admin.
-   */
-  async createMember(input: CreateMemberInput): Promise<AuthResult<CreateMemberResponse>> {
+  async updateRole(input: UpdateRoleInput): Promise<AuthResult<UpdateRoleResponse>> {
     try {
       const token = await this.getFreshToken();
 
       if (__DEV__) {
-        console.log('[AuthService] createMember called for role:', input.role);
-        console.log('[AuthService] token preview:', token.substring(0, 20) + '...');
+        console.log('[AuthService] updateRole called for user:', input.userId, 'to role:', input.role);
       }
 
       const response = await fetch(`${FUNCTIONS_URL}/create-member`, {
@@ -147,20 +64,19 @@ class AuthService {
       const result = await response.json();
 
       if (__DEV__) {
-        console.log('[AuthService] createMember response status:', response.status);
-        console.log('[AuthService] createMember response body:', result);
+        console.log('[AuthService] updateRole response status:', response.status);
       }
 
       if (!response.ok) {
         return {
           error: {
-            message: result.error || result.message || i18n.t('admin.createMemberFailed'),
+            message: result.error || result.message || i18n.t('admin.updateRoleFailed'),
             code: result.code,
           },
         };
       }
 
-      return { data: result as CreateMemberResponse };
+      return { data: result as UpdateRoleResponse };
     } catch (error) {
       return {
         error: {
@@ -171,43 +87,28 @@ class AuthService {
   }
 
   /**
-   * Admin resets a member's password via Edge Function.
+   * @deprecated Member creation via password is removed (FR-022).
+   * Existing admin screens still reference this method — returns an error.
    */
-  async resetMemberPassword(input: ResetMemberPasswordInput): Promise<AuthResult> {
-    try {
-      const token = await this.getFreshToken();
+  async createMember(_input: CreateMemberInput): Promise<AuthResult<CreateMemberResponse>> {
+    return {
+      error: {
+        message: 'Password-based member creation has been removed. Use OAuth sign-up instead.',
+        code: 'DEPRECATED',
+      },
+    };
+  }
 
-      const response = await fetch(`${FUNCTIONS_URL}/reset-member-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'apikey': process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '',
-        },
-        body: JSON.stringify(input),
-      });
-
-      if (!response.ok) {
-        const result = await response.json();
-        if (__DEV__) {
-          console.log('[AuthService] resetMemberPassword error:', result);
-        }
-        return {
-          error: {
-            message: result.error || result.message || i18n.t('admin.resetPassword.failed'),
-            code: result.code,
-          },
-        };
-      }
-
-      return {};
-    } catch (error) {
-      return {
-        error: {
-          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
-        },
-      };
-    }
+  /**
+   * @deprecated Password reset is removed (FR-022).
+   */
+  async resetMemberPassword(_input: { userId: string; newPassword: string }): Promise<AuthResult> {
+    return {
+      error: {
+        message: 'Password reset has been removed. Users sign in via OAuth.',
+        code: 'DEPRECATED',
+      },
+    };
   }
 
   /**

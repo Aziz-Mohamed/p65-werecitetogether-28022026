@@ -14,7 +14,6 @@ export type Profile = Tables<'profiles'>;
 interface AuthState {
   session: Session | null;
   profile: Profile | null;
-  schoolSlug: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
 }
@@ -22,7 +21,6 @@ interface AuthState {
 interface AuthActions {
   setSession: (session: Session | null) => void;
   setProfile: (profile: Profile | null) => void;
-  setSchoolSlug: (slug: string) => void;
   clearAuth: () => void;
   initialize: () => void;
 }
@@ -34,7 +32,6 @@ type AuthStore = AuthState & AuthActions;
 const initialState: AuthState = {
   session: null,
   profile: null,
-  schoolSlug: null,
   isLoading: true,
   isAuthenticated: false,
 };
@@ -56,9 +53,6 @@ export const useAuthStore = create<AuthStore>()(
       setProfile: (profile) =>
         set({ profile }),
 
-      setSchoolSlug: (slug) =>
-        set({ schoolSlug: slug }),
-
       clearAuth: () =>
         set({
           session: null,
@@ -74,10 +68,9 @@ export const useAuthStore = create<AuthStore>()(
       name: 'auth-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
-        // Persist profile and schoolSlug for login convenience.
+        // Persist profile for session restoration.
         // Session is managed by Supabase's own SecureStore adapter.
         profile: state.profile,
-        schoolSlug: state.schoolSlug,
       }),
     },
   ),
