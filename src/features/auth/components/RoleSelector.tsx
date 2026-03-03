@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Pressable, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui';
@@ -9,6 +9,7 @@ import type { UserRole } from '@/types/common.types';
 interface RoleSelectorProps {
   value: UserRole | null;
   onChange: (role: UserRole) => void;
+  allowedRoles?: UserRole[];
 }
 
 interface RoleOption {
@@ -17,28 +18,38 @@ interface RoleOption {
   labelKey: string;
 }
 
-const ROLE_OPTIONS: RoleOption[] = [
+const ALL_ROLE_OPTIONS: RoleOption[] = [
   { role: 'student', icon: 'school-outline', labelKey: 'auth.role.student' },
   { role: 'teacher', icon: 'person-outline', labelKey: 'auth.role.teacher' },
   { role: 'parent', icon: 'people-outline', labelKey: 'auth.role.parent' },
   { role: 'admin', icon: 'settings-outline', labelKey: 'auth.role.admin' },
+  { role: 'supervisor', icon: 'eye-outline', labelKey: 'auth.role.supervisor' },
+  { role: 'program_admin', icon: 'briefcase-outline', labelKey: 'auth.role.program_admin' },
+  { role: 'master_admin', icon: 'shield-outline', labelKey: 'auth.role.master_admin' },
 ];
 
-export const RoleSelector: React.FC<RoleSelectorProps> = ({ value, onChange }) => {
+export const RoleSelector: React.FC<RoleSelectorProps> = ({ value, onChange, allowedRoles }) => {
   const { t } = useTranslation();
+
+  const visibleOptions = allowedRoles
+    ? ALL_ROLE_OPTIONS.filter((option) => allowedRoles.includes(option.role))
+    : ALL_ROLE_OPTIONS;
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{t('auth.selectRole')}</Text>
       <View style={styles.grid}>
-        {ROLE_OPTIONS.map((option) => {
+        {visibleOptions.map((option) => {
           const isSelected = value === option.role;
-          
+
           return (
             <Pressable
               key={option.role}
               onPress={() => onChange(option.role)}
               style={styles.cardWrapper}
+              accessibilityLabel={t(option.labelKey)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
             >
               <Card
                 style={

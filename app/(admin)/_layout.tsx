@@ -28,6 +28,7 @@ export default function AdminLayout() {
         <Stack.Screen name="classes/[id]/schedule" />
         <Stack.Screen name="attendance/index" />
         <Stack.Screen name="members/reset-password" />
+        <Stack.Screen name="members/edit-role" />
         <Stack.Screen name="stickers/index" />
         <Stack.Screen name="stickers/create" />
         <Stack.Screen name="stickers/[id]/edit" />
