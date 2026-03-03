@@ -3,22 +3,25 @@ export { authService } from './services/auth.service';
 
 // Types
 export type {
-  LoginInput,
-  CreateSchoolInput,
-  CreateSchoolResponse,
-  CreateMemberInput,
-  CreateMemberResponse,
-  ResetMemberPasswordInput,
+  OAuthProvider,
+  OAuthLoginResult,
+  DevLoginInput,
+  UpdateRoleInput,
+  UpdateRoleResponse,
+  OAuthErrorCategory,
   AuthError,
   AuthResult,
   Profile,
+  CreateMemberInput,
+  CreateMemberResponse,
 } from './types/auth.types';
-export { buildSyntheticEmail } from './types/auth.types';
 
 // Hooks
-export { useLogin } from './hooks/useLogin';
+export { useOAuthLogin } from './hooks/useOAuthLogin';
+export { useDevLogin } from './hooks/useDevLogin';
 export { useLogout } from './hooks/useLogout';
 export { useCurrentUser } from './hooks/useCurrentUser';
 
 // Components
-export { AuthFormField } from './components/AuthFormField';
+export { OAuthButtons } from './components/OAuthButtons';
+export { DevRolePills } from './components/DevRolePills';
