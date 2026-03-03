@@ -103,49 +103,58 @@
     "medal": "Medal"
   },
   "auth": {
-    "login": "Login",
-    "loginSubtitle": "Sign in to your school account",
-    "loginError": "Invalid credentials. Please try again.",
-    "signIn": "Sign In",
-    "password": "Password",
-    "passwordPlaceholder": "Enter your password",
-    "username": "Username",
-    "usernamePlaceholder": "Enter your username",
-    "fullName": "Full Name",
-    "fullNamePlaceholder": "Enter your full name",
-    "schoolCode": "School Code",
-    "schoolCodePlaceholder": "e.g. al-noor-academy",
-    "schoolName": "School Name",
-    "schoolNamePlaceholder": "e.g. Al Noor Academy",
-    "createSchool": "Create a School",
-    "createSchoolSubtitle": "Set up your school and admin account",
-    "createSchoolButton": "Create School",
-    "noSchool": "Don't have a school?",
-    "alreadyHaveSchool": "Already have an account?",
-    "sessionExpired": "Session expired. Please log in again.",
-    "createSchoolFailed": "Failed to create school",
-    "selectRole": "Select your role",
+    "login": "Welcome",
+    "loginSubtitle": "Sign in to continue",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
+    "sessionExpired": "Session expired. Please sign in again.",
+    "selectRole": "Select role",
+    "devLogin": "Dev Login",
+    "signInAs": "Sign in as {{role}}",
+    "error": {
+      "network": "Check your internet connection and try again.",
+      "cancelled": "",
+      "provider": "Sign-in temporarily unavailable. Please try again later.",
+      "unknown": "Something went wrong. Please try again."
+    },
     "validation": {
-      "schoolCodeRequired": "School code is required",
-      "usernameRequired": "Username is required",
-      "passwordMin": "Password must be at least 6 characters",
-      "schoolNameMin": "School name must be at least 2 characters",
-      "fullNameMin": "Full name must be at least 2 characters",
-      "usernameMin": "Username must be at least 3 characters",
-      "usernameFormat": "Only lowercase letters, numbers, and underscores"
+      "fullNameMin": "Full name must be at least 2 characters"
     },
     "role": {
       "student": "Student",
       "teacher": "Teacher",
       "parent": "Parent",
-      "admin": "Admin"
-    }
+      "admin": "Admin",
+      "supervisor": "Supervisor",
+      "program_admin": "Program Admin",
+      "master_admin": "Master Admin"
+    },
+    "onboarding": {
+      "title": "Complete Your Profile",
+      "subtitle": "Tell us a little about yourself",
+      "displayName": "Display Name",
+      "displayNamePlaceholder": "Enter your name",
+      "language": "Preferred Language",
+      "bio": "Bio",
+      "bioPlaceholder": "Tell us about yourself (optional)",
+      "continue": "Continue",
+      "skip": "Skip"
+    },
+    "placeholder": {
+      "title": "{{role}} Dashboard",
+      "comingSoon": "Your dashboard is coming soon",
+      "description": "We're building something great for you."
+    },
+    "servicesUnavailable": "Sign-in services are temporarily unavailable. Please try again later."
   },
   "roles": {
     "student": "Student",
     "teacher": "Teacher",
     "parent": "Parent",
-    "admin": "Admin"
+    "admin": "Admin",
+    "supervisor": "Supervisor",
+    "program_admin": "Program Admin",
+    "master_admin": "Master Admin"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -513,6 +522,7 @@
       "manage": "Manage"
     },
     "createMemberFailed": "Failed to create member",
+    "updateRoleFailed": "Failed to update role",
     "addStudent": "Add Student",
     "addTeacher": "Add Teacher",
     "addParent": "Add Parent",

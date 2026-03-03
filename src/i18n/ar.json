@@ -103,49 +103,58 @@
     "medal": "ميدالية"
   },
   "auth": {
-    "login": "تسجيل الدخول",
-    "loginSubtitle": "سجّل الدخول إلى حساب مدرستك",
-    "loginError": "بيانات غير صحيحة. يرجى المحاولة مرة أخرى.",
-    "signIn": "تسجيل الدخول",
-    "password": "كلمة المرور",
-    "passwordPlaceholder": "أدخل كلمة المرور",
-    "username": "اسم المستخدم",
-    "usernamePlaceholder": "أدخل اسم المستخدم",
-    "fullName": "الاسم الكامل",
-    "fullNamePlaceholder": "أدخل اسمك الكامل",
-    "schoolCode": "رمز المدرسة",
-    "schoolCodePlaceholder": "مثلاً: أكاديمية-النور",
-    "schoolName": "اسم المدرسة",
-    "schoolNamePlaceholder": "مثلاً: أكاديمية النور",
-    "createSchool": "إنشاء مدرسة",
-    "createSchoolSubtitle": "أنشئ مدرستك وحساب المدير",
-    "createSchoolButton": "إنشاء المدرسة",
-    "noSchool": "ليس لديك مدرسة؟",
-    "alreadyHaveSchool": "لديك حساب بالفعل؟",
+    "login": "مرحباً",
+    "loginSubtitle": "سجّل الدخول للمتابعة",
+    "continueWithGoogle": "المتابعة مع جوجل",
+    "continueWithApple": "المتابعة مع أبل",
     "sessionExpired": "انتهت الجلسة. يرجى تسجيل الدخول مجدداً.",
-    "createSchoolFailed": "فشل إنشاء المدرسة",
-    "selectRole": "اختر دورك",
+    "selectRole": "اختر الدور",
+    "devLogin": "دخول تجريبي",
+    "signInAs": "تسجيل الدخول كـ {{role}}",
+    "error": {
+      "network": "تحقق من اتصالك بالإنترنت وحاول مرة أخرى.",
+      "cancelled": "",
+      "provider": "خدمة تسجيل الدخول غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.",
+      "unknown": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+    },
     "validation": {
-      "schoolCodeRequired": "رمز المدرسة مطلوب",
-      "usernameRequired": "اسم المستخدم مطلوب",
-      "passwordMin": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
-      "schoolNameMin": "اسم المدرسة يجب أن يكون حرفين على الأقل",
-      "fullNameMin": "الاسم الكامل يجب أن يكون حرفين على الأقل",
-      "usernameMin": "اسم المستخدم يجب أن يكون 3 أحرف على الأقل",
-      "usernameFormat": "أحرف صغيرة وأرقام وشرطات سفلية فقط"
+      "fullNameMin": "الاسم الكامل يجب أن يكون حرفين على الأقل"
     },
     "role": {
       "student": "طالب",
       "teacher": "معلّم",
       "parent": "ولي أمر",
-      "admin": "مدير"
-    }
+      "admin": "مدير",
+      "supervisor": "مشرف",
+      "program_admin": "مدير البرنامج",
+      "master_admin": "المدير العام"
+    },
+    "onboarding": {
+      "title": "أكمل ملفك الشخصي",
+      "subtitle": "أخبرنا قليلاً عن نفسك",
+      "displayName": "الاسم المعروض",
+      "displayNamePlaceholder": "أدخل اسمك",
+      "language": "اللغة المفضلة",
+      "bio": "نبذة",
+      "bioPlaceholder": "أخبرنا عن نفسك (اختياري)",
+      "continue": "متابعة",
+      "skip": "تخطي"
+    },
+    "placeholder": {
+      "title": "لوحة {{role}}",
+      "comingSoon": "لوحة التحكم قادمة قريباً",
+      "description": "نحن نبني شيئاً رائعاً لك."
+    },
+    "servicesUnavailable": "خدمات تسجيل الدخول غير متاحة مؤقتاً. يرجى المحاولة لاحقاً."
   },
   "roles": {
     "student": "طالب",
     "teacher": "معلّم",
     "parent": "وليّ أمر",
-    "admin": "مدير"
+    "admin": "مدير",
+    "supervisor": "مشرف",
+    "program_admin": "مدير البرنامج",
+    "master_admin": "المدير العام"
   },
   "navigation": {
     "dashboard": "لوحة التحكّم",
@@ -513,6 +522,7 @@
       "manage": "إدارة"
     },
     "createMemberFailed": "فشل إنشاء العضو",
+    "updateRoleFailed": "فشل تحديث الدور",
     "addStudent": "إضافة طالب",
     "addTeacher": "إضافة معلّم",
     "addParent": "إضافة وليّ أمر",
