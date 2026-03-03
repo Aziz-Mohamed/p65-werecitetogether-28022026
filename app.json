@@ -54,7 +54,8 @@
           "icon": "./assets/icon.png",
           "sounds": []
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin"
     ]
   }
 }
