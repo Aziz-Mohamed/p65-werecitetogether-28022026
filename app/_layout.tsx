@@ -21,7 +21,7 @@ import { useNotificationSetup } from '@/features/notifications/hooks/useNotifica
 import { useNotificationHandler } from '@/features/notifications/hooks/useNotificationHandler';
 import { NotificationSoftAsk } from '@/features/notifications/components/NotificationSoftAsk';
 import { InAppBanner } from '@/features/notifications/components/InAppBanner';
-import type { UserRole, NotificationPayload } from '@/features/notifications/types/notifications.types';
+import type { UserRole as NotifUserRole, NotificationPayload } from '@/features/notifications/types/notifications.types';
 
 // ─── Keep Splash Screen Visible ──────────────────────────────────────────────
 
@@ -85,6 +85,9 @@ export default function RootLayout() {
               <Stack.Screen name="(teacher)" />
               <Stack.Screen name="(parent)" />
               <Stack.Screen name="(admin)" />
+              <Stack.Screen name="(supervisor)" />
+              <Stack.Screen name="(program-admin)" />
+              <Stack.Screen name="(master-admin)" />
               <Stack.Screen name="+not-found" />
             </Stack>
           </AuthGuard>
@@ -95,6 +98,12 @@ export default function RootLayout() {
 }
 
 // ─── Auth Guard ───────────────────────────────────────────────────────────────
+
+/** Map extended roles to notification-compatible 4-role subset */
+function toNotifRole(role: string | null): NotifUserRole {
+  if (role === 'student' || role === 'teacher' || role === 'parent' || role === 'admin') return role;
+  return 'admin';
+}
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
@@ -177,7 +186,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
+      if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
         // Token expired or user signed out — clear auth state
         clearAuth();
         return;
@@ -224,8 +233,16 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // Check onboarding status — redirect to onboarding if not completed
+      const onboardingCompleted = (profile as Record<string, unknown>).onboarding_completed;
+      const inOnboarding = (segments as string[])[1] === 'onboarding';
+      if (!onboardingCompleted && !inOnboarding) {
+        router.replace('/(auth)/onboarding');
+        return;
+      }
+
       // Authenticated - redirect to role-based dashboard if in auth group
-      if (inAuthGroup) {
+      if (inAuthGroup && onboardingCompleted) {
         switch (role) {
           case 'student':
             router.replace('/(student)/');
@@ -239,6 +256,15 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
           case 'admin':
             router.replace('/(admin)/');
             break;
+          case 'supervisor':
+            router.replace('/(supervisor)/');
+            break;
+          case 'program_admin':
+            router.replace('/(program-admin)/');
+            break;
+          case 'master_admin':
+            router.replace('/(master-admin)/');
+            break;
           default:
             router.replace('/(auth)/login');
         }
@@ -251,7 +277,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       {children}
       <NotificationSoftAsk
         visible={showSoftAsk && isAuthenticated && !!profile}
-        role={(role as UserRole) ?? 'student'}
+        role={toNotifRole(role)}
         onEnable={handleEnableNotifications}
         onDismiss={dismissSoftAsk}
       />
