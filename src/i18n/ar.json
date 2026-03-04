@@ -16,6 +16,8 @@
     "confirm": "تأكيد",
     "active": "نشط",
     "inactive": "غير نشط",
+    "create": "إنشاء",
+    "add": "إضافة",
     "remove": "إزالة",
     "success": "نجاح",
     "signOut": "تسجيل الخروج",
@@ -190,6 +192,7 @@
       "revision": "المراجعة",
       "journey": "رحلتي",
       "stickers": "الملصقات",
+      "programs": "البرامج",
       "profile": "الملف الشخصي"
     },
     "journey": {
@@ -1355,6 +1358,143 @@
       "askTeacherDesc": "اطلب من معلّمك إضافة هذا إلى مراجعتك",
       "needsRecertNote": "هذا الربع يحتاج إعادة إجازة من معلّمك",
       "mushafPage": "صفحة المصحف"
+    }
+  },
+  "programs": {
+    "title": "البرامج",
+    "myPrograms": "برامجي",
+    "browsePrograms": "تصفح البرامج",
+    "programDetail": "تفاصيل البرنامج",
+    "category": {
+      "free": "حر",
+      "structured": "مقيّد",
+      "mixed": "مختلط"
+    },
+    "status": {
+      "pending": "بانتظار الموافقة",
+      "active": "نشط",
+      "completed": "مكتمل",
+      "dropped": "منسحب",
+      "waitlisted": "قائمة الانتظار"
+    },
+    "cohortStatus": {
+      "enrollment_open": "التسجيل مفتوح",
+      "enrollment_closed": "التسجيل مغلق",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "archived": "مؤرشف"
+    },
+    "actions": {
+      "enroll": "تسجيل",
+      "join": "انضمام",
+      "leave": "مغادرة البرنامج",
+      "approve": "موافقة",
+      "reject": "رفض",
+      "createCohort": "إنشاء دفعة",
+      "createProgram": "إنشاء برنامج",
+      "createTrack": "إضافة مسار",
+      "assignRole": "إضافة عضو",
+      "removeRole": "إزالة",
+      "deactivate": "تعطيل",
+      "reactivate": "تفعيل"
+    },
+    "labels": {
+      "tracks": "المسارات",
+      "cohorts": "الدفعات",
+      "enrollments": "التسجيلات",
+      "team": "الفريق",
+      "students": "الطلاب",
+      "capacity": "{{current}}/{{max}} طالب",
+      "noTracks": "لا توجد مسارات متاحة",
+      "noCohorts": "لا توجد دفعات متاحة — يُرجى المراجعة لاحقاً.",
+      "joined": "منضم",
+      "waitlistPosition": "ترتيب الانتظار: #{{position}}",
+      "sortOrder": "ترتيب العرض",
+      "maxStudents": "الحد الأقصى للطلاب",
+      "teacherAssignment": "المعلّم المعيّن",
+      "supervisorAssignment": "المشرف",
+      "meetingLink": "رابط الاجتماع",
+      "schedule": "الجدول",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "autoApprove": "الموافقة التلقائية على التسجيلات",
+      "maxPerTeacher": "الحد الأقصى للطلاب لكل معلّم",
+      "sessionDuration": "مدة الحصة (بالدقائق)",
+      "settings": "إعدادات البرنامج",
+      "full": "مكتمل",
+      "programName": "اسم البرنامج (إنجليزي)",
+      "programNameAr": "اسم البرنامج (عربي)",
+      "description": "الوصف (إنجليزي)",
+      "descriptionAr": "الوصف (عربي)",
+      "trackName": "اسم المسار (إنجليزي)",
+      "trackNameAr": "اسم المسار (عربي)",
+      "cohortName": "اسم الدفعة",
+      "selectTrack": "اختر المسار",
+      "selectTeacher": "اختر المعلّم",
+      "selectCategory": "اختر الفئة"
+    },
+    "empty": {
+      "programs": "لا توجد برامج متاحة",
+      "programsDesc": "ستظهر البرامج هنا بعد إعدادها.",
+      "enrollments": "لا توجد تسجيلات بعد",
+      "enrollmentsDesc": "تصفح البرامج وسجّل للبدء.",
+      "cohorts": "لا توجد دفعات بعد",
+      "cohortsDesc": "أنشئ دفعة لبدء قبول التسجيلات.",
+      "team": "لم يتم تعيين أعضاء الفريق",
+      "teamDesc": "أضف معلمين ومشرفين لهذا البرنامج."
+    },
+    "confirm": {
+      "enroll": "التسجيل في هذا البرنامج؟",
+      "enrollBody": "سيتم تسجيلك في {{program}}.",
+      "join": "الانضمام لهذا البرنامج؟",
+      "joinBody": "يمكنك المغادرة في أي وقت.",
+      "leave": "مغادرة هذا البرنامج؟",
+      "leaveBody": "سيتم تسجيل انسحابك.",
+      "approve": "الموافقة على هذا التسجيل؟",
+      "reject": "رفض هذا التسجيل؟",
+      "deactivate": "تعطيل هذا البرنامج؟",
+      "deactivateBody": "لن يظهر البرنامج للطلاب. التسجيلات الحالية تبقى.",
+      "removeRole": "إزالة هذا العضو من الفريق؟",
+      "bulkApprove": "الموافقة على جميع التسجيلات المعلّقة؟",
+      "bulkApproveBody": "سيتم تفعيل {{count}} تسجيل معلّق."
+    },
+    "errors": {
+      "programNotFound": "البرنامج غير موجود",
+      "trackNotFound": "المسار غير موجود",
+      "cohortRequired": "يجب اختيار دفعة للتسجيل في البرامج المقيّدة",
+      "cohortNotFound": "الدفعة غير موجودة",
+      "cohortClosed": "هذه الدفعة لم تعد تقبل التسجيلات",
+      "authRequired": "يُرجى تسجيل الدخول للتسجيل",
+      "studentsOnly": "التسجيل متاح للطلاب فقط",
+      "alreadyEnrolled": "أنت مسجّل بالفعل في هذا البرنامج"
+    },
+    "success": {
+      "enrolled": "تم التسجيل بنجاح!",
+      "joined": "تم الانضمام بنجاح!",
+      "left": "تمت المغادرة من البرنامج.",
+      "approved": "تمت الموافقة على التسجيل",
+      "rejected": "تم رفض التسجيل",
+      "cohortCreated": "تم إنشاء الدفعة بنجاح",
+      "programUpdated": "تم تحديث البرنامج",
+      "trackCreated": "تمت إضافة المسار",
+      "roleAssigned": "تم تعيين العضو",
+      "roleRemoved": "تمت إزالة العضو"
+    },
+    "roles": {
+      "teacher": "معلّم",
+      "supervisor": "مشرف",
+      "program_admin": "مدير البرنامج"
+    },
+    "admin": {
+      "programs": "البرامج",
+      "editProgram": "تعديل البرنامج",
+      "createProgram": "إنشاء برنامج",
+      "createCohort": "إنشاء دفعة",
+      "managePrograms": "إدارة البرامج",
+      "manageCohorts": "إدارة الدفعات",
+      "manageTeam": "إدارة الفريق",
+      "pendingApprovals": "الموافقات المعلّقة",
+      "allPrograms": "جميع البرامج"
     }
   }
 }

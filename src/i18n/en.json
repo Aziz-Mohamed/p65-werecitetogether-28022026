@@ -16,6 +16,8 @@
     "confirm": "Confirm",
     "active": "Active",
     "inactive": "Inactive",
+    "create": "Create",
+    "add": "Add",
     "remove": "Remove",
     "success": "Success",
     "signOut": "Sign Out",
@@ -190,6 +192,7 @@
       "revision": "Revision",
       "journey": "Journey",
       "stickers": "Stickers",
+      "programs": "Programs",
       "profile": "Profile"
     },
     "journey": {
@@ -1355,6 +1358,143 @@
       "askTeacherDesc": "Ask your teacher to add this to your revision",
       "needsRecertNote": "This rubʿ needs re-certification by your teacher",
       "mushafPage": "Mushaf Page"
+    }
+  },
+  "programs": {
+    "title": "Programs",
+    "myPrograms": "My Programs",
+    "browsePrograms": "Browse Programs",
+    "programDetail": "Program Detail",
+    "category": {
+      "free": "Free",
+      "structured": "Structured",
+      "mixed": "Mixed"
+    },
+    "status": {
+      "pending": "Pending Approval",
+      "active": "Active",
+      "completed": "Completed",
+      "dropped": "Dropped",
+      "waitlisted": "Waitlisted"
+    },
+    "cohortStatus": {
+      "enrollment_open": "Enrollment Open",
+      "enrollment_closed": "Enrollment Closed",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "archived": "Archived"
+    },
+    "actions": {
+      "enroll": "Enroll",
+      "join": "Join",
+      "leave": "Leave Program",
+      "approve": "Approve",
+      "reject": "Reject",
+      "createCohort": "Create Cohort",
+      "createProgram": "Create Program",
+      "createTrack": "Add Track",
+      "assignRole": "Add Member",
+      "removeRole": "Remove",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate"
+    },
+    "labels": {
+      "tracks": "Tracks",
+      "cohorts": "Cohorts",
+      "enrollments": "Enrollments",
+      "team": "Team",
+      "students": "Students",
+      "capacity": "{{current}}/{{max}} students",
+      "noTracks": "No tracks available",
+      "noCohorts": "No cohorts available — check back soon.",
+      "joined": "Joined",
+      "waitlistPosition": "Waitlist position: #{{position}}",
+      "sortOrder": "Sort Order",
+      "maxStudents": "Max Students",
+      "teacherAssignment": "Assigned Teacher",
+      "supervisorAssignment": "Supervisor",
+      "meetingLink": "Meeting Link",
+      "schedule": "Schedule",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "autoApprove": "Auto-approve enrollments",
+      "maxPerTeacher": "Max students per teacher",
+      "sessionDuration": "Session duration (minutes)",
+      "settings": "Program Settings",
+      "full": "Full",
+      "programName": "Program Name (English)",
+      "programNameAr": "Program Name (Arabic)",
+      "description": "Description (English)",
+      "descriptionAr": "Description (Arabic)",
+      "trackName": "Track Name (English)",
+      "trackNameAr": "Track Name (Arabic)",
+      "cohortName": "Cohort Name",
+      "selectTrack": "Select Track",
+      "selectTeacher": "Select Teacher",
+      "selectCategory": "Select Category"
+    },
+    "empty": {
+      "programs": "No programs available",
+      "programsDesc": "Programs will appear here once they are set up.",
+      "enrollments": "No enrollments yet",
+      "enrollmentsDesc": "Browse programs and enroll to get started.",
+      "cohorts": "No cohorts yet",
+      "cohortsDesc": "Create a cohort to start accepting enrollments.",
+      "team": "No team members assigned",
+      "teamDesc": "Add teachers and supervisors to this program."
+    },
+    "confirm": {
+      "enroll": "Enroll in this program?",
+      "enrollBody": "You will be enrolled in {{program}}.",
+      "join": "Join this program?",
+      "joinBody": "You can leave at any time.",
+      "leave": "Leave this program?",
+      "leaveBody": "Your enrollment will be marked as dropped.",
+      "approve": "Approve this enrollment?",
+      "reject": "Reject this enrollment?",
+      "deactivate": "Deactivate this program?",
+      "deactivateBody": "Students will no longer see this program. Existing enrollments remain.",
+      "removeRole": "Remove this team member?",
+      "bulkApprove": "Approve all pending enrollments?",
+      "bulkApproveBody": "{{count}} pending enrollments will be set to active."
+    },
+    "errors": {
+      "programNotFound": "Program not found",
+      "trackNotFound": "Track not found",
+      "cohortRequired": "A cohort is required for structured enrollment",
+      "cohortNotFound": "Cohort not found",
+      "cohortClosed": "This cohort is no longer accepting enrollments",
+      "authRequired": "Please sign in to enroll",
+      "studentsOnly": "Only students can enroll in programs",
+      "alreadyEnrolled": "You are already enrolled in this program"
+    },
+    "success": {
+      "enrolled": "Successfully enrolled!",
+      "joined": "Successfully joined!",
+      "left": "You have left the program.",
+      "approved": "Enrollment approved",
+      "rejected": "Enrollment rejected",
+      "cohortCreated": "Cohort created successfully",
+      "programUpdated": "Program updated",
+      "trackCreated": "Track added",
+      "roleAssigned": "Team member assigned",
+      "roleRemoved": "Team member removed"
+    },
+    "roles": {
+      "teacher": "Teacher",
+      "supervisor": "Supervisor",
+      "program_admin": "Program Admin"
+    },
+    "admin": {
+      "programs": "Programs",
+      "editProgram": "Edit Program",
+      "createProgram": "Create Program",
+      "createCohort": "Create Cohort",
+      "managePrograms": "Manage Programs",
+      "manageCohorts": "Manage Cohorts",
+      "manageTeam": "Manage Team",
+      "pendingApprovals": "Pending Approvals",
+      "allPrograms": "All Programs"
     }
   }
 }
