@@ -163,7 +163,7 @@
 
 - [x] T049 Add navigation links between screens — Programs tab header button to My Programs, program-admin dashboard card linking to program management, master-admin dashboard card linking to program management. Ensure all back buttons work correctly.
 - [x] T050 Add Realtime subscription consideration — add programs and enrollments tables to Supabase Realtime publication in migration (if not already). Ensure TanStack Query cache invalidation aligns with realtime events pattern from existing `src/features/realtime/`.
-- [ ] T051 Run quickstart.md validation — execute all verification checklist items: `supabase db reset` succeeds, 8 programs visible, 25 tracks correct, RLS blocks unauthorized access, `get_user_programs()` returns correct IDs, `enroll_student()` handles capacity, Programs tab renders, bilingual content works, RTL layout correct.
+- [x] T051 Run quickstart.md validation — execute all verification checklist items: `supabase db reset` succeeds, 8 programs visible, 25 tracks correct, RLS blocks unauthorized access, `get_user_programs()` returns correct IDs, `enroll_student()` handles capacity, Programs tab renders, bilingual content works, RTL layout correct.
 
 ---
 
