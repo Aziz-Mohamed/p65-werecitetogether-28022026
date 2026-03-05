@@ -18,6 +18,7 @@ export default function StudentLayout() {
         <Stack.Screen name="leaderboard" />
         <Stack.Screen name="schedule/index" />
         <Stack.Screen name="schedule/[id]" />
+        <Stack.Screen name="available-now/[programId]" />
       </Stack>
     </ErrorBoundary>
   );
