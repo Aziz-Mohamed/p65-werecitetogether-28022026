@@ -51,6 +51,8 @@
 - TypeScript 5.9 (strict mode) + Deno (Edge Functions) + React Native 0.83, Expo ~54, Expo Router v6, @supabase/supabase-js 2, @react-native-google-signin/google-signin, expo-apple-authentication, zustand 5, react-hook-form 7 + zod 4, i18next + react-i18nex (001-auth-evolution)
 - TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Supabase JS 2, Zustand 5, react-hook-form 7 + zod 4, i18next + react-i18next, FlashList 2, Ionicons (003-programs-enrollment)
 - Supabase PostgreSQL (remote) — 5 new tables, 0 modified tables (003-programs-enrollment)
+- TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Supabase JS 2, i18next, FlashList 2, react-hook-form 7 + zod 4 (004-teacher-availability)
+- Supabase PostgreSQL (remote) — 1 new table, 1 altered table, 3 new RPC functions, 1 trigger, 1 pg_cron job (004-teacher-availability)
 
 ## Recent Changes
 - 001-mvp-phase1: Added TypeScript 5.9 (strict mode) / React Native 0.83 / React 19 + Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next + react-i18next, FlashList 2, expo-image 3, react-native-calendars, victory-native, @gorhom/bottom-sheet 5
