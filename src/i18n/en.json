@@ -1496,5 +1496,39 @@
       "pendingApprovals": "Pending Approvals",
       "allPrograms": "All Programs"
     }
+  },
+  "availability": {
+    "title": "Availability",
+    "goAvailable": "Go Available",
+    "goOffline": "Go Offline",
+    "availableNow": "Available Now",
+    "teacherFull": "Teacher Full",
+    "noTeachersAvailable": "No teachers available right now — check back soon.",
+    "joinSession": "Join Session",
+    "meetingLinkNotConfigured": "Meeting link not configured",
+    "selectPrograms": "Select Programs",
+    "studentsCount": "{{current}}/{{max}} students",
+    "meetingLink": "Meeting Link",
+    "meetingLinkPlaceholder": "https://meet.google.com/...",
+    "meetingPlatform": "Meeting Platform",
+    "languages": "Languages",
+    "configureMeetingLink": "Please configure your meeting link before going available.",
+    "availabilityTimeout": "Your availability has expired after 4 hours.",
+    "newTeacher": "New",
+    "available": "Available",
+    "connectionLost": "Connection lost — availability data may be outdated.",
+    "joinFailed": "Could not join session. The teacher may be full or offline.",
+    "copyLink": "Copy Link",
+    "openLinkFailed": "Could not open meeting link. The link has been copied to your clipboard.",
+    "availableForPrograms": "Available for {{count}} programs",
+    "offline": "Offline",
+    "meetingSettings": "Meeting Settings",
+    "noFreePrograms": "You are not assigned to any free or mixed programs.",
+    "platformLabels": {
+      "google_meet": "Google Meet",
+      "zoom": "Zoom",
+      "jitsi": "Jitsi",
+      "other": "Other"
+    }
   }
 }
