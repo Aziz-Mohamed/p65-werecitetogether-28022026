@@ -12,6 +12,7 @@ import { LoadingState, ErrorState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeacherDashboard } from '@/features/dashboard/hooks/useTeacherDashboard';
 import { useTeacherUpcomingSessions } from '@/features/scheduling/hooks/useScheduledSessions';
+import { useMyAvailability } from '@/features/teacher-availability/hooks/useMyAvailability';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
@@ -38,7 +39,9 @@ export default function TeacherDashboard() {
 
   const { data, isLoading, error, refetch } = useTeacherDashboard(profile?.id);
   const { data: upcomingSessions = [] } = useTeacherUpcomingSessions(profile?.id, schoolId ?? undefined);
+  const { data: myAvailability = [] } = useMyAvailability();
 
+  const availableCount = myAvailability.filter((a) => a.is_available).length;
   const nextSession = upcomingSessions[0] ?? null;
 
   const handleNextSession = () => {
@@ -112,6 +115,28 @@ export default function TeacherDashboard() {
             <View style={styles.scheduleInfo}>
               <Text style={styles.scheduleLabel}>{t('scheduling.mySchedule')}</Text>
               <Text style={styles.scheduleHint}>{t('scheduling.viewUpcoming')}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+          </View>
+        </Card>
+
+        {/* Availability */}
+        <Card
+          variant="glass"
+          onPress={() => router.push('/(teacher)/availability')}
+          style={styles.scheduleCard}
+        >
+          <View style={styles.scheduleRow}>
+            <View style={[styles.insightIcon, { backgroundColor: availableCount > 0 ? '#DCFCE7' : colors.neutral[100] }]}>
+              <Ionicons name="radio-button-on" size={22} color={availableCount > 0 ? '#22C55E' : colors.neutral[400]} />
+            </View>
+            <View style={styles.scheduleInfo}>
+              <Text style={styles.scheduleLabel}>{t('availability.title')}</Text>
+              <Text style={styles.scheduleHint}>
+                {availableCount > 0
+                  ? t('availability.availableForPrograms', { count: availableCount })
+                  : t('availability.offline')}
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
           </View>
