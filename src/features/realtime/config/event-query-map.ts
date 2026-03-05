@@ -112,6 +112,9 @@ export function getQueryKeysForEvent(
     case 'classes':
       return [['classes'], ['admin-dashboard'], ['teacher-dashboard']];
 
+    case 'teacher_availability':
+      return [['available-teachers'], ['my-availability']];
+
     default:
       return [];
   }

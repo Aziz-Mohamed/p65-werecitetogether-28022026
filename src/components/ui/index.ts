@@ -9,3 +9,4 @@ export { Divider } from './Divider';
 export { StickerIcon } from './StickerIcon';
 export { ProgressBar } from './ProgressBar';
 export { LanguageToggleButton } from './LanguageToggleButton';
+export { GreenDotIndicator } from './GreenDotIndicator';
