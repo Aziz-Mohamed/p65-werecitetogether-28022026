@@ -51,7 +51,8 @@ type NotificationCategory =
   | "low_rating_alert"
   | "recovered_alert"
   | "queue_available"
-  | "teacher_demand";
+  | "teacher_demand"
+  | "supervisor_flag";
 
 // Direct notification categories (invoked via pg_net or Edge Functions, not standard webhooks)
 const DIRECT_CATEGORIES = new Set<string>([
@@ -59,6 +60,7 @@ const DIRECT_CATEGORIES = new Set<string>([
   "recovered_alert",
   "queue_available",
   "teacher_demand",
+  "supervisor_flag",
 ]);
 
 // ─── Table → Categories Mapping ─────────────────────────────────────────────
@@ -211,6 +213,42 @@ async function getRecipients(
           if (!recipients.includes(admin.id)) {
             recipients.push(admin.id);
           }
+        }
+      }
+    }
+
+    return recipients;
+  }
+
+  // Supervisor flag: notify all program_admins for the teacher's program
+  if (category === "supervisor_flag") {
+    const programId = record.program_id as string | undefined;
+    if (!programId) return recipients;
+
+    const { data: programAdmins } = await supabase
+      .from("program_roles")
+      .select("profile_id")
+      .eq("program_id", programId)
+      .eq("role", "program_admin");
+
+    if (programAdmins) {
+      for (const pa of programAdmins) {
+        if (!recipients.includes(pa.profile_id)) {
+          recipients.push(pa.profile_id);
+        }
+      }
+    }
+
+    // Also notify master admins
+    const { data: masterAdmins } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "master_admin");
+
+    if (masterAdmins) {
+      for (const ma of masterAdmins) {
+        if (!recipients.includes(ma.id)) {
+          recipients.push(ma.id);
         }
       }
     }
@@ -595,6 +633,37 @@ async function buildNotificationContent(
           : `${recTeacherName}'s average rating recovered to ${recAvgRating.toFixed(1)} — above 3.5 threshold`,
         data: {
           screen: `/(supervisor)/teachers/${recTeacherId}/reviews`,
+        },
+      };
+    }
+
+    case "supervisor_flag": {
+      const flagTeacherId = record.teacher_id as string;
+      const flagNote = record.note as string | undefined;
+      const flagSupervisorId = record.supervisor_id as string;
+      const { data: flagTeacher } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", flagTeacherId)
+        .single();
+      const { data: flagSupervisor } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", flagSupervisorId)
+        .single();
+      const flagTeacherName = flagTeacher?.full_name ?? "";
+      const flagSupervisorName = flagSupervisor?.full_name ?? "";
+      const notePreview = flagNote
+        ? (flagNote.length > 80 ? flagNote.substring(0, 80) + "…" : flagNote)
+        : "";
+
+      return {
+        title: lang === "ar" ? "إبلاغ من مشرف" : "Supervisor Flag",
+        body: lang === "ar"
+          ? `${flagSupervisorName} أبلغ عن مشكلة مع ${flagTeacherName}${notePreview ? `: ${notePreview}` : ""}`
+          : `${flagSupervisorName} flagged an issue with ${flagTeacherName}${notePreview ? `: ${notePreview}` : ""}`,
+        data: {
+          screen: `/(program-admin)/teachers/${flagTeacherId}`,
         },
       };
     }
