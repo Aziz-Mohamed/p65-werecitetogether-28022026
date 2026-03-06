@@ -15,6 +15,10 @@ import type { EnrichedCertification } from '@/features/gamification';
 import { getAttendanceBadge } from '@/features/attendance/utils/attendance-badge';
 import { useMemorizationStats } from '@/features/memorization';
 import { useStudentUpcomingSessions } from '@/features/scheduling/hooks/useScheduledSessions';
+import { useEnrollments } from '@/features/programs/hooks/useEnrollments';
+import { HimamDashboardCard } from '@/features/himam/components/HimamDashboardCard';
+import { useUpcomingEvent } from '@/features/himam/hooks/useUpcomingEvent';
+import { useMyRegistration } from '@/features/himam/hooks/useMyRegistration';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors, secondary } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -111,6 +115,18 @@ export default function StudentDashboard() {
     classIds,
     profile?.school_id ?? undefined,
   );
+
+  // Himam dashboard
+  const { data: enrollments } = useEnrollments(profile?.id);
+  const himamProgramId = useMemo(
+    () => enrollments?.find((e) =>
+      e.programs?.name?.toLowerCase().includes('himam') ||
+      e.programs?.name_ar?.includes('همم'),
+    )?.program_id,
+    [enrollments],
+  );
+  const { data: himamEvent } = useUpcomingEvent(himamProgramId);
+  const { data: himamRegistration } = useMyRegistration(himamEvent?.id, profile?.id);
 
   const homeworkRubSet = useMemo(
     () => new Set(homeworkItems.map((h) => h.rubNumber)),
@@ -310,7 +326,19 @@ export default function StudentDashboard() {
           </Card>
         )}
 
-        {/* 3c. Revision Homework */}
+        {/* 3c. Himam Marathon */}
+        {himamEvent && (
+          <HimamDashboardCard
+            event={himamEvent}
+            registration={himamRegistration}
+            onPress={() => router.push({
+              pathname: '/(student)/himam',
+              params: { programId: himamProgramId! },
+            })}
+          />
+        )}
+
+        {/* 3d. Revision Homework */}
         {homeworkItems.length > 0 && (
           <Card
             variant="default"
