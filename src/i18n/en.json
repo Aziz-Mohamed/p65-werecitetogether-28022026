@@ -1569,5 +1569,107 @@
   "notification": {
     "voiceMemoReceived": "Your teacher left you a voice memo",
     "draftsExpired": "{{count}} draft session(s) were removed after 7 days"
+  },
+  "ratings": {
+    "title": "Ratings",
+    "rateSession": "Rate Your Session",
+    "ratePrompt": "How was your session?",
+    "starLabel": "{{count}} star",
+    "starsLabel": "{{count}} stars",
+    "selectRating": "Tap to rate",
+    "positiveTags": "What went well?",
+    "constructiveTags": "What could improve?",
+    "commentPlaceholder": "Add a comment (optional)...",
+    "commentCharLimit": "{{count}}/500",
+    "submit": "Submit Rating",
+    "submitting": "Submitting...",
+    "submitSuccess": "Rating submitted!",
+    "alreadyRated": "You already rated this session",
+    "windowExpired": "Rating window has expired (48h)",
+    "newTeacher": "New teacher",
+    "reviews": "{{count}} reviews",
+    "noReviewsYet": "Not enough reviews yet",
+    "averageRating": "Average Rating",
+    "totalReviews": "Total Reviews",
+    "starDistribution": "Star Distribution",
+    "trend": {
+      "improving": "Improving",
+      "declining": "Declining",
+      "stable": "Stable"
+    },
+    "commonPositive": "Strengths",
+    "commonConstructive": "Areas to Improve",
+    "tags": {
+      "patient": "Patient",
+      "clearExplanation": "Clear Explanation",
+      "encouraging": "Encouraging",
+      "wellPrepared": "Well Prepared",
+      "goodListener": "Good Listener",
+      "sessionFeltRushed": "Session Felt Rushed",
+      "needsMorePractice": "Needs More Practice",
+      "unclearInstructions": "Unclear Instructions",
+      "lateStart": "Late Start"
+    },
+    "supervisor": {
+      "reviews": "Reviews",
+      "flagged": "Flagged",
+      "excluded": "Excluded",
+      "exclude": "Exclude",
+      "restore": "Restore",
+      "excludeTitle": "Exclude Review?",
+      "excludeMessage": "This review will be removed from the teacher's aggregate rating.",
+      "restoreTitle": "Restore Review?",
+      "restoreMessage": "This review will be included in the teacher's aggregate rating again.",
+      "reasonPlaceholder": "Reason for exclusion...",
+      "reasonRequired": "A reason is required",
+      "auditTrail": "Audit Trail",
+      "excludedBy": "Excluded by {{name}}",
+      "restoredBy": "Restored by {{name}}"
+    },
+    "errors": {
+      "sessionNotFound": "Session not found",
+      "notCompleted": "Session is not completed",
+      "notYourSession": "This is not your session",
+      "invalidRating": "Rating must be between 1 and 5",
+      "commentTooLong": "Comment must be 500 characters or less",
+      "submitFailed": "Failed to submit rating"
+    }
+  },
+  "queue": {
+    "title": "Queue",
+    "joinQueue": "Notify Me",
+    "joinQueueDesc": "Get notified when a teacher is available",
+    "joining": "Joining queue...",
+    "leaveQueue": "Leave Queue",
+    "leaveConfirm": "Leave the queue?",
+    "leaveConfirmBody": "You will lose your position.",
+    "position": "You are #{{position}} in line",
+    "estimatedWait": "Estimated wait: {{minutes}} min",
+    "expiresIn": "Queue expires in {{time}}",
+    "claimSlot": "Claiming your slot...",
+    "claimSuccess": "Slot claimed! Redirecting to session...",
+    "claimExpired": "Sorry, the claim window has expired. You have been re-queued.",
+    "noTeachersAvailable": "No teachers available right now",
+    "teacherAvailable": "A teacher is available!",
+    "tapToClaim": "Tap to join your session",
+    "fairUsage": {
+      "title": "Fair Usage",
+      "message": "You've had {{count}} sessions today.",
+      "softLimit": "You can still join if no one is waiting.",
+      "dailyLimit": "Daily Session Limit",
+      "threshold": "Queue Notification Threshold"
+    },
+    "demand": {
+      "studentsWaiting": "{{count}} students waiting",
+      "noStudentsWaiting": "No students waiting"
+    },
+    "errors": {
+      "notFreeProgram": "Queue is only available for free programs",
+      "alreadyInQueue": "You are already in the queue",
+      "notEnrolled": "You must be enrolled to join the queue",
+      "joinFailed": "Failed to join queue",
+      "leaveFailed": "Failed to leave queue",
+      "claimFailed": "Failed to claim slot"
+    }
   }
 }
