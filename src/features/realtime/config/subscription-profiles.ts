@@ -81,6 +81,26 @@ export function buildStudentProfile(
     ],
   });
 
+  // Queue entries — live position updates for student's queued programs
+  subscriptions.push({
+    table: 'program_queue_entries',
+    event: '*',
+    filter: `student_id=eq.${studentId}`,
+    queryKeys: [
+      ['queue-status'],
+    ],
+  });
+
+  // Teacher rating stats — badge updates on available-now list
+  subscriptions.push({
+    table: 'teacher_rating_stats',
+    event: '*',
+    queryKeys: [
+      ['teacher-rating-stats'],
+      ['available-teachers'],
+    ],
+  });
+
   // Scheduled sessions for the student's classes
   if (classId) {
     subscriptions.push({
@@ -367,6 +387,16 @@ export function buildAdminProfile(schoolId: string): RoleSubscriptionProfile {
       ],
     },
   ];
+
+  // Teacher ratings — supervisor review updates
+  subscriptions.push({
+    table: 'teacher_ratings',
+    event: '*',
+    queryKeys: [
+      ['teacher-reviews'],
+      ['teacher-rating-stats'],
+    ],
+  });
 
   return {
     channelName: `admin-${schoolId}`,

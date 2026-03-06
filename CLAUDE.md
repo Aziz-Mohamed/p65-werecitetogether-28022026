@@ -55,6 +55,8 @@
 - Supabase PostgreSQL (remote) — 1 new table, 1 altered table, 3 new RPC functions, 1 trigger, 1 pg_cron job (004-teacher-availability)
 - TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Supabase JS 2, expo-av (NEW), react-native-reanimated 4, react-hook-form 7 + zod 4, i18next, @gorhom/bottom-sheet 5 (005-session-evolution)
 - Supabase PostgreSQL (remote) — 1 altered table (sessions), 1 new table (session_voice_memos), 1 altered table (notification_preferences), 1 new Storage bucket (voice-memos) (005-session-evolution)
+- TypeScript 5.9 (strict mode) + Deno (Edge Functions) + React Native 0.81.5, Expo ~54, Expo Router v6, TanStack Query 5, Supabase JS 2, react-hook-form 7 + zod 4, i18next + react-i18next, FlashList 2, Ionicons, react-native-reanimated 4 (006-ratings-queue)
+- Supabase PostgreSQL (remote) — 5 new tables, 1 altered table, ~8 new RPC functions, 3 triggers, 1 new Edge Function (006-ratings-queue)
 
 ## Recent Changes
 - 001-mvp-phase1: Added TypeScript 5.9 (strict mode) / React Native 0.83 / React 19 + Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next + react-i18next, FlashList 2, expo-image 3, react-native-calendars, victory-native, @gorhom/bottom-sheet 5
