@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessions } from '@/features/sessions/hooks/useSessions';
+import { MicIndicator } from '@/features/voice-memos';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { formatSessionDate } from '@/lib/helpers';
@@ -84,11 +85,12 @@ export default function StudentSessionsScreen() {
                     </Text>
                   </View>
                   <View style={styles.scores}>
+                    <MicIndicator hasVoiceMemo={Array.isArray((item as any).session_voice_memos) && (item as any).session_voice_memos.length > 0} />
                     {item.memorization_score != null && (
-                      <Badge 
-                        label={`${item.memorization_score}/5`} 
-                        variant={item.memorization_score >= 4 ? "success" : "warning"} 
-                        size="sm" 
+                      <Badge
+                        label={`${item.memorization_score}/5`}
+                        variant={item.memorization_score >= 4 ? "success" : "warning"}
+                        size="sm"
                       />
                     )}
                     <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />

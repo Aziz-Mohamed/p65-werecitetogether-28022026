@@ -12,6 +12,8 @@ import { LoadingState, ErrorState } from '@/components/feedback';
 import { useSessionRecitations } from '@/features/memorization';
 import { RecitationTypeChip } from '@/features/memorization/components/RecitationTypeChip';
 import { useSessionById } from '@/features/sessions/hooks/useSessions';
+import { ProgramChip } from '@/features/sessions/components/ProgramChip';
+import { VoiceMemoPlayer, useVoiceMemo } from '@/features/voice-memos';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
 import { formatSessionDate } from '@/lib/helpers';
 import { getSurah, formatVerseRange } from '@/lib/quran-metadata';
@@ -30,6 +32,7 @@ export default function StudentSessionDetailScreen() {
 
   const { data: session, isLoading, error, refetch } = useSessionById(id);
   const { data: recitations = [] } = useSessionRecitations(id);
+  const { data: voiceMemo } = useVoiceMemo(id);
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState description={error.message} onRetry={refetch} />;
@@ -57,6 +60,14 @@ export default function StudentSessionDetailScreen() {
             </Text>
           </View>
         </View>
+
+        {/* Program */}
+        {(session as any).programs && (
+          <ProgramChip
+            programName={(session as any).programs.name}
+            programNameAr={(session as any).programs.name_ar}
+          />
+        )}
 
         {/* Scores */}
         <Card variant="default" style={styles.section}>
@@ -147,6 +158,14 @@ export default function StudentSessionDetailScreen() {
             <View style={styles.notesContainer}>
               <Text style={styles.notesText}>{session.notes}</Text>
             </View>
+          </Card>
+        )}
+
+        {/* Voice Memo */}
+        {voiceMemo && (
+          <Card variant="default" style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('voiceMemo.addVoiceMemo')}</Text>
+            <VoiceMemoPlayer sessionId={id!} />
           </Card>
         )}
 

@@ -44,7 +44,8 @@ type NotificationCategory =
   | "trophy_earned"
   | "achievement_unlocked"
   | "attendance_marked"
-  | "session_completed";
+  | "session_completed"
+  | "voice_memo_attached";
 
 // ─── Table → Category Mapping ───────────────────────────────────────────────
 
@@ -54,6 +55,7 @@ const TABLE_TO_CATEGORY: Record<string, NotificationCategory> = {
   student_achievements: "achievement_unlocked",
   attendance: "attendance_marked",
   sessions: "session_completed",
+  session_voice_memos: "voice_memo_attached",
 };
 
 // ─── Supabase Client ────────────────────────────────────────────────────────
@@ -73,6 +75,31 @@ async function getRecipients(
   record: Record<string, unknown>,
 ): Promise<string[]> {
   const recipients: string[] = [];
+
+  // Voice memo: look up student from the session
+  if (category === "voice_memo_attached") {
+    const sessionId = record.session_id as string;
+    const { data: session } = await supabase
+      .from("sessions")
+      .select("student_id")
+      .eq("id", sessionId)
+      .single();
+    if (!session?.student_id) return recipients;
+
+    recipients.push(session.student_id);
+
+    // Also notify parent
+    const { data: student } = await supabase
+      .from("students")
+      .select("parent_id")
+      .eq("id", session.student_id)
+      .single();
+    if (student?.parent_id) {
+      recipients.push(student.parent_id);
+    }
+
+    return recipients;
+  }
 
   // Get the student's user ID (students.id = profiles.id)
   const studentId = record.student_id as string | undefined;
@@ -115,7 +142,8 @@ async function shouldSendToRecipient(
   if (!prefs) return true;
 
   // Check if category is enabled
-  const categoryColumn = category as string;
+  // Map category to column name (voice_memo_attached uses voice_memo_received column)
+  const categoryColumn = category === "voice_memo_attached" ? "voice_memo_received" : category as string;
   if (prefs[categoryColumn] === false) return false;
 
   // Check quiet hours
@@ -307,6 +335,34 @@ async function buildNotificationContent(
       };
     }
 
+    case "voice_memo_attached": {
+      const sessionId = record.session_id as string;
+      const teacherId = record.teacher_id as string;
+      const { data: teacher } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", teacherId)
+        .single();
+      const teacherName = teacher?.full_name ?? "";
+
+      if (isParent) {
+        return {
+          title: lang === "ar" ? "رسالة صوتية جديدة" : "New Voice Memo",
+          body: lang === "ar"
+            ? `${teacherName} أرسل رسالة صوتية لـ${childName}`
+            : `${teacherName} sent a voice memo for ${childName}`,
+          data: { screen: `/(parent)/sessions/${sessionId}` },
+        };
+      }
+      return {
+        title: lang === "ar" ? "رسالة صوتية جديدة" : "New Voice Memo",
+        body: lang === "ar"
+          ? `${teacherName} أرسل لك رسالة صوتية`
+          : `${teacherName} sent you a voice memo`,
+        data: { screen: `/(student)/sessions/${sessionId}` },
+      };
+    }
+
     default:
       return null;
   }
@@ -479,12 +535,25 @@ Deno.serve(async (req: Request) => {
     }
 
     // Get school timezone for quiet hours check
-    const studentId = record.student_id as string;
-    const { data: student } = await supabase
-      .from("students")
-      .select("school_id")
-      .eq("id", studentId)
-      .single();
+    let resolvedStudentId = record.student_id as string | undefined;
+
+    // For voice memos, look up student_id from the session
+    if (!resolvedStudentId && record.session_id) {
+      const { data: memoSession } = await supabase
+        .from("sessions")
+        .select("student_id")
+        .eq("id", record.session_id as string)
+        .single();
+      resolvedStudentId = memoSession?.student_id ?? undefined;
+    }
+
+    const { data: student } = resolvedStudentId
+      ? await supabase
+          .from("students")
+          .select("school_id")
+          .eq("id", resolvedStudentId)
+          .single()
+      : { data: null };
     const { data: school } = await supabase
       .from("schools")
       .select("timezone")
@@ -524,7 +593,7 @@ Deno.serve(async (req: Request) => {
       }
 
       // Build content
-      const isParent = recipientId !== studentId;
+      const isParent = recipientId !== (resolvedStudentId ?? record.student_id);
       const content = await buildNotificationContent(
         supabase, category, record, recipientId, isParent,
       );

@@ -18,6 +18,10 @@ import {
 } from '@/features/scheduling/hooks/useScheduledSessions';
 import { useCanTeacherCreateSessions } from '@/features/schools';
 import { CreateSessionSheet } from '@/features/scheduling/components/CreateSessionSheet';
+import { useDraftSessions } from '@/features/sessions/hooks/useDraftSessions';
+import { DraftBadge } from '@/features/sessions/components/DraftBadge';
+import { ProgramChip } from '@/features/sessions/components/ProgramChip';
+import { MicIndicator } from '@/features/voice-memos';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -78,6 +82,7 @@ export default function SessionsScreen() {
 
   const upcoming = useTeacherUpcomingSessions(profile?.id, schoolId ?? undefined);
   const history = useTeacherSessionHistory(profile?.id, schoolId ?? undefined);
+  const { data: drafts = [] } = useDraftSessions();
 
   const upcomingItems = useMemo(() => groupByDate(upcoming.data ?? []), [upcoming.data]);
   const historyItems = useMemo(() => groupByDate(history.data ?? []), [history.data]);
@@ -106,6 +111,45 @@ export default function SessionsScreen() {
               </Pressable>
             )}
           </View>
+
+          {/* Drafts Section */}
+          {drafts.length > 0 && (
+            <View style={styles.draftsSection}>
+              <Text style={styles.draftsSectionTitle}>{t('sessions.draftsSection')}</Text>
+              {drafts.map((draft: any) => {
+                const draftStudentName = resolveName(
+                  draft.student?.profiles?.name_localized,
+                  draft.student?.profiles?.full_name,
+                ) ?? '—';
+                return (
+                  <Card
+                    key={draft.id}
+                    variant="default"
+                    style={styles.draftCard}
+                    onPress={() => router.push(`/(teacher)/sessions/${draft.id}`)}
+                  >
+                    <View style={styles.cardRow}>
+                      <View style={styles.cardInfo}>
+                        <Text style={styles.cardTitle} numberOfLines={1}>
+                          {draftStudentName}
+                        </Text>
+                        <Text style={styles.cardMeta}>
+                          {new Date(draft.created_at).toLocaleDateString()}
+                        </Text>
+                      </View>
+                      {draft.programs && (
+                        <ProgramChip
+                          programName={draft.programs.name}
+                          programNameAr={draft.programs.name_ar}
+                        />
+                      )}
+                      <DraftBadge />
+                    </View>
+                  </Card>
+                );
+              })}
+            </View>
+          )}
 
           {/* Tabs */}
           <View style={styles.tabBar}>
@@ -248,6 +292,7 @@ function SessionList({
                     : ''}
                 </Text>
               </View>
+              <MicIndicator hasVoiceMemo={Array.isArray(session.session_voice_memos) && session.session_voice_memos.length > 0} />
               {showScore && score != null && (
                 <Badge
                   label={`${score}/5`}
@@ -382,5 +427,23 @@ const styles = StyleSheet.create({
   cardMeta: {
     ...typography.textStyles.caption,
     color: colors.neutral[400],
+  },
+  draftsSection: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  draftsSectionTitle: {
+    ...typography.textStyles.label,
+    color: colors.neutral[500],
+    fontSize: normalize(13),
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  draftCard: {
+    padding: spacing.md,
+    backgroundColor: colors.neutral[50],
+    borderWidth: 1,
+    borderColor: colors.neutral[200],
   },
 });
