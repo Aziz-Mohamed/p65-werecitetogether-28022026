@@ -61,7 +61,8 @@ type NotificationCategory =
   | "certification_revoked"
   | "himam_partner_assigned"
   | "himam_event_reminder"
-  | "himam_event_cancelled";
+  | "himam_event_cancelled"
+  | "milestone_badge_earned";
 
 // Direct notification categories (invoked via pg_net or Edge Functions, not standard webhooks)
 const DIRECT_CATEGORIES = new Set<string>([
@@ -79,6 +80,7 @@ const DIRECT_CATEGORIES = new Set<string>([
   "himam_partner_assigned",
   "himam_event_reminder",
   "himam_event_cancelled",
+  "milestone_badge_earned",
 ]);
 
 // ─── Table → Categories Mapping ─────────────────────────────────────────────
@@ -431,6 +433,13 @@ async function getRecipients(
         }
       }
     }
+    return recipients;
+  }
+
+  // Milestone badge earned: notify student directly
+  if (category === "milestone_badge_earned") {
+    const studentId = record.student_id as string | undefined;
+    if (studentId) recipients.push(studentId);
     return recipients;
   }
 
@@ -959,6 +968,19 @@ async function buildNotificationContent(
           ? `تم إلغاء ماراثون همم بتاريخ ${eventDate}`
           : `Himam marathon on ${eventDate} has been cancelled`,
         data: { screen: "/(student)/himam" },
+      };
+    }
+
+    case "milestone_badge_earned": {
+      const badgeName = lang === "ar"
+        ? (record.badge_name_ar as string ?? "")
+        : (record.badge_name_en as string ?? "");
+      return {
+        title: lang === "ar" ? "وسام جديد!" : "New Badge Earned!",
+        body: lang === "ar"
+          ? `حصلت على وسام: ${badgeName}`
+          : `You earned a badge: ${badgeName}`,
+        data: { screen: "/(student)/profile/badges" },
       };
     }
 

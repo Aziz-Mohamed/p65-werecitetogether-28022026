@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { sessionsService } from '../services/sessions.service';
 import { mutationTracker } from '@/features/realtime';
+import { gamificationService } from '@/features/gamification/services/gamification.service';
 import type { CreateSessionInput, SessionFilters } from '../types/sessions.types';
 
 export const useCreateSession = () => {
@@ -18,6 +19,20 @@ export const useCreateSession = () => {
       queryClient.invalidateQueries({
         queryKey: ['student-dashboard', variables.student_id],
       });
+
+      // Check session milestones for badge awarding (fire-and-forget)
+      if (variables.program_id) {
+        gamificationService
+          .checkSessionMilestones(variables.student_id, variables.program_id)
+          .then(() => {
+            queryClient.invalidateQueries({
+              queryKey: ['gamification', 'badges', 'earned', variables.student_id],
+            });
+          })
+          .catch(() => {
+            // Non-critical: milestone check failure should not block session save
+          });
+      }
     },
   });
 };
