@@ -1564,7 +1564,10 @@
     "playbackSpeed": "Playback speed",
     "duration": "{{minutes}}:{{seconds}}",
     "retryPending": "{{count}} voice memo(s) pending upload",
-    "warning15s": "15 seconds remaining"
+    "warning15s": "15 seconds remaining",
+    "unavailableTitle": "Voice Memos Unavailable",
+    "unavailableMessage": "Voice memos require a development build. They are not supported in Expo Go.",
+    "unavailablePlayback": "Voice playback requires a development build"
   },
   "notification": {
     "voiceMemoReceived": "Your teacher left you a voice memo",

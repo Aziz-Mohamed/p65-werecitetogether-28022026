@@ -1564,7 +1564,10 @@
     "playbackSpeed": "سرعة التشغيل",
     "duration": "{{minutes}}:{{seconds}}",
     "retryPending": "{{count}} رسالة/رسائل صوتية بانتظار الرفع",
-    "warning15s": "١٥ ثانية متبقية"
+    "warning15s": "١٥ ثانية متبقية",
+    "unavailableTitle": "الرسائل الصوتية غير متاحة",
+    "unavailableMessage": "تتطلب الرسائل الصوتية نسخة تطوير. غير مدعومة في Expo Go.",
+    "unavailablePlayback": "تشغيل الصوت يتطلب نسخة تطوير"
   },
   "notification": {
     "voiceMemoReceived": "ترك لك معلمك رسالة صوتية",

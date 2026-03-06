@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
+
+// Safe require — expo-av native module may not be available (e.g. Expo Go)
+let Audio: typeof import('expo-av').Audio | null = null;
+try {
+  Audio = require('expo-av').Audio;
+} catch {
+  // Native module unavailable
+}
 import Slider from '@react-native-community/slider';
 import { useVoiceMemoUrl } from '../hooks/useVoiceMemo';
 import { typography } from '@/theme/typography';
@@ -20,7 +27,7 @@ const SPEED_OPTIONS = [1, 1.25, 1.5] as const;
 export function VoiceMemoPlayer({ sessionId }: VoiceMemoPlayerProps) {
   const { t } = useTranslation();
   const { data: memoUrl, isLoading } = useVoiceMemoUrl(sessionId);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const soundRef = useRef<any>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [positionMs, setPositionMs] = useState(0);
@@ -38,7 +45,7 @@ export function VoiceMemoPlayer({ sessionId }: VoiceMemoPlayerProps) {
     if (!memoUrl?.url) return;
 
     if (!soundRef.current) {
-      const { sound } = await Audio.Sound.createAsync(
+      const { sound } = await Audio!.Sound.createAsync(
         { uri: memoUrl.url },
         { shouldPlay: true, rate: SPEED_OPTIONS[speedIndex] },
         (status) => {
@@ -101,6 +108,15 @@ export function VoiceMemoPlayer({ sessionId }: VoiceMemoPlayerProps) {
     const secs = totalSecs % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  if (!Audio) {
+    return (
+      <View style={styles.expiredContainer}>
+        <Ionicons name="mic-off-outline" size={20} color={colors.neutral[400]} />
+        <Text style={styles.expiredText}>{t('voiceMemo.unavailablePlayback')}</Text>
+      </View>
+    );
+  }
 
   if (isLoading) {
     return (

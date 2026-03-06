@@ -22,7 +22,7 @@ import {
 import type { EnrichedCertification, CertGroup } from '@/features/gamification';
 import { colors } from '@/theme/colors';
 import { normalize } from '@/theme/normalize';
-import { styles } from './revision.styles';
+import { styles } from '@/styles/revision.styles';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

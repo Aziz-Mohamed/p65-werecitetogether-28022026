@@ -16,7 +16,7 @@ import { formatSessionDate } from '@/lib/helpers';
 import { colors, semantic } from '@/theme/colors';
 import type { ChildQuickStatus, RecentSessionEntry } from '@/features/dashboard/types/dashboard.types';
 import { getAttendanceBadge } from '@/features/attendance/utils/attendance-badge';
-import { styles } from './parent-dashboard.styles';
+import { styles } from '@/styles/parent-dashboard.styles';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
