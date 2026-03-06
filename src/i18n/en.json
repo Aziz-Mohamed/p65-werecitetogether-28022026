@@ -1530,5 +1530,44 @@
       "jitsi": "Jitsi",
       "other": "Other"
     }
+  },
+  "sessions": {
+    "program": "Program",
+    "draft": "Draft",
+    "draftBadge": "Draft",
+    "saveDraft": "Save Draft",
+    "submitSession": "Submit",
+    "draftsSection": "Drafts",
+    "noDrafts": "No drafts",
+    "deleteDraft": "Delete Draft",
+    "deleteDraftConfirm": "Are you sure you want to delete this draft?",
+    "programUnavailable": "Program unavailable"
+  },
+  "voiceMemo": {
+    "record": "Record",
+    "skip": "Skip",
+    "send": "Send",
+    "reRecord": "Re-record",
+    "preview": "Preview",
+    "uploading": "Uploading voice memo...",
+    "uploadSuccess": "Voice memo sent successfully",
+    "uploadFailed": "Voice memo upload failed. Will retry later.",
+    "expired": "Voice memo expired",
+    "expiredWithDate": "Voice memo expired on {{date}}",
+    "availableFor": "Available for {{days}} days",
+    "addVoiceMemo": "Add voice memo",
+    "recordPrompt": "Record a voice memo for {{name}}?",
+    "timeRemaining": "{{time}} remaining",
+    "speed": "Speed",
+    "micPermissionDenied": "Microphone access is required to record voice memos.",
+    "openSettings": "Open Settings",
+    "playbackSpeed": "Playback speed",
+    "duration": "{{minutes}}:{{seconds}}",
+    "retryPending": "{{count}} voice memo(s) pending upload",
+    "warning15s": "15 seconds remaining"
+  },
+  "notification": {
+    "voiceMemoReceived": "Your teacher left you a voice memo",
+    "draftsExpired": "{{count}} draft session(s) were removed after 7 days"
   }
 }
