@@ -12,6 +12,12 @@ export type {
   EnrichedCertification,
   RubProgressItem,
   CertificationInput,
+  BadgeCategory,
+  MilestoneBadge,
+  StudentBadgeDisplay,
+  ProgramLeaderboardEntry,
+  RewardsDashboard as RewardsDashboardData,
+  StickerWithProgram,
 } from './types/gamification.types';
 
 export { gamificationService } from './services/gamification.service';
@@ -40,6 +46,10 @@ export { useRevisionHomework } from './hooks/useRevisionHomework';
 export type { HomeworkItem } from './hooks/useRevisionHomework';
 export { useDormancySync } from './hooks/useDormancySync';
 export { useRevisionHealth } from './hooks/useRevisionHealth';
+export { useProgramLeaderboard } from './hooks/useProgramLeaderboard';
+export { useStudentBadges } from './hooks/useStudentBadges';
+export { useMilestoneBadges } from './hooks/useMilestoneBadges';
+export { useRewardsDashboard } from './hooks/useRewardsDashboard';
 
 export { RubProgressMap } from './components/RubProgressMap';
 export { RubBlock } from './components/RubBlock';
@@ -50,3 +60,7 @@ export { GroupRevisionSheet } from './components/GroupRevisionSheet';
 export type { CertGroup } from './components/GroupRevisionSheet';
 export { LevelBadge } from './components/LevelBadge';
 export { RevisionWarning } from './components/RevisionWarning';
+export { ProgramLeaderboard } from './components/ProgramLeaderboard';
+export { BadgeCard } from './components/BadgeCard';
+export { BadgeGrid } from './components/BadgeGrid';
+export { RewardsDashboard } from './components/RewardsDashboard';

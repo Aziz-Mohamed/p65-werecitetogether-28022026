@@ -63,6 +63,8 @@
 - Supabase PostgreSQL (remote) — 1 new table (certifications), 1 new Edge Function (verify-certificate), ~6 new RPC functions, send-notification extension (008-certifications)
 - TypeScript 5.9 (strict mode) + Deno (Edge Functions) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Supabase JS 2, react-hook-form 7 + zod 4, i18next + react-i18next, FlashList 2, @gorhom/bottom-sheet 5 (009-himam)
 - Supabase PostgreSQL (remote) — 3 new tables, 1 altered Edge Function, ~6 RPC functions, 3 pg_cron jobs, 2 new Edge Functions (009-himam)
+- TypeScript 5.9 (strict mode) + Deno (Edge Functions) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Supabase JS 2, react-hook-form 7 + zod 4, i18next + react-i18next, FlashList 2, Ionicons, react-native-reanimated 4 (010-gamification-ext)
+- Supabase PostgreSQL (remote) — 1 altered table (stickers), 2 new tables (milestone_badges, student_badges), ~5 new RPC functions, 2 triggers, 1 pg_cron job (010-gamification-ext)
 
 ## Recent Changes
 - 001-mvp-phase1: Added TypeScript 5.9 (strict mode) / React Native 0.83 / React 19 + Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next + react-i18next, FlashList 2, expo-image 3, react-native-calendars, victory-native, @gorhom/bottom-sheet 5
