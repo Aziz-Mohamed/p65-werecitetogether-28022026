@@ -59,6 +59,8 @@
 - Supabase PostgreSQL (remote) — 5 new tables, 1 altered table, ~8 new RPC functions, 3 triggers, 1 new Edge Function (006-ratings-queue)
 - TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Supabase JS 2, react-hook-form 7 + zod 4, i18next + react-i18next, FlashList 2, Ionicons, victory-native, @gorhom/bottom-sheet 5 (007-admin-roles)
 - Supabase PostgreSQL (remote) — 1 altered table (program_roles), 1 new table (platform_config), 8 new RPC functions (007-admin-roles)
+- TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Supabase JS 2, react-hook-form 7 + zod 4, i18next + react-i18next, FlashList 2, Ionicons, @gorhom/bottom-sheet 5, react-native-qrcode-svg (NEW), react-native-view-shot (NEW), expo-sharing (NEW) (008-certifications)
+- Supabase PostgreSQL (remote) — 1 new table (certifications), 1 new Edge Function (verify-certificate), ~6 new RPC functions, send-notification extension (008-certifications)
 
 ## Recent Changes
 - 001-mvp-phase1: Added TypeScript 5.9 (strict mode) / React Native 0.83 / React 19 + Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next + react-i18next, FlashList 2, expo-image 3, react-native-calendars, victory-native, @gorhom/bottom-sheet 5
