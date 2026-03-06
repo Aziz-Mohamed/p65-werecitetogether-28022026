@@ -1,5 +1,13 @@
 import { supabase } from '@/lib/supabase';
-import type { CreateSessionInput, SessionFilters } from '../types/sessions.types';
+import type { CreateSessionInput, SessionFilters, UpdateDraftInput } from '../types/sessions.types';
+
+const SESSION_SELECT = `
+  *,
+  teacher:profiles!sessions_teacher_id_fkey(full_name, name_localized, avatar_url),
+  student:students!sessions_student_id_fkey(profiles!students_id_fkey(full_name, name_localized, avatar_url)),
+  programs(id, name, name_ar),
+  session_voice_memos(id, duration_seconds, is_expired, created_at, expires_at)
+`;
 
 class SessionsService {
   /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
@@ -29,6 +37,7 @@ class SessionsService {
         student_id: input.student_id,
         teacher_id: input.teacher_id,
         class_id: input.class_id ?? null,
+        program_id: input.program_id ?? null,
         session_date: input.session_date ?? new Date().toISOString().split('T')[0],
         memorization_score: input.memorization_score ?? null,
         tajweed_score: input.tajweed_score ?? null,
@@ -36,7 +45,8 @@ class SessionsService {
         notes: input.notes ?? null,
         scheduled_session_id: input.scheduled_session_id ?? null,
         school_id: schoolId,
-      })
+        status: input.status ?? 'completed',
+      } as any)
       .select()
       .single();
 
@@ -47,17 +57,47 @@ class SessionsService {
     return { data: session, error: null };
   }
 
+  /**
+   * SE-002: Update a draft session.
+   */
+  async updateDraft(sessionId: string, input: UpdateDraftInput) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { data: null, error: new Error('Not authenticated') };
+
+    return supabase
+      .from('sessions')
+      .update(input as any)
+      .eq('id', sessionId)
+      .eq('status', 'draft')
+      .eq('teacher_id', user.id)
+      .select()
+      .single();
+  }
+
+  /**
+   * SE-004: Delete a draft session.
+   */
+  async deleteDraft(sessionId: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { data: null, error: new Error('Not authenticated') };
+
+    return supabase
+      .from('sessions')
+      .delete()
+      .eq('id', sessionId)
+      .eq('status', 'draft')
+      .eq('teacher_id', user.id);
+  }
+
   /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * SS-002: Retrieve a paginated, filtered list of sessions.
-   * Joins teacher profile and student profile.
+   * Joins teacher profile, student profile, program name, and voice memo metadata.
    */
   async getSessions(filters: SessionFilters) {
     let query = supabase
       .from('sessions')
-      .select(
-        '*, teacher:profiles!sessions_teacher_id_fkey(full_name, name_localized, avatar_url), student:students!sessions_student_id_fkey(profiles!students_id_fkey(full_name, name_localized, avatar_url))',
-      );
+      .select(SESSION_SELECT);
 
     if (filters.studentId) {
       query = query.eq('student_id', filters.studentId);
@@ -67,6 +107,12 @@ class SessionsService {
     }
     if (filters.classId) {
       query = query.eq('class_id', filters.classId);
+    }
+    if (filters.programId) {
+      query = query.eq('program_id', filters.programId);
+    }
+    if (filters.status) {
+      query = query.eq('status', filters.status);
     }
     if (filters.dateFrom) {
       query = query.gte('session_date', filters.dateFrom);
@@ -91,11 +137,23 @@ class SessionsService {
   async getSessionById(id: string) {
     return supabase
       .from('sessions')
-      .select(
-        '*, teacher:profiles!sessions_teacher_id_fkey(full_name, name_localized, avatar_url), student:students!sessions_student_id_fkey(profiles!students_id_fkey(full_name, name_localized, avatar_url))',
-      )
+      .select(SESSION_SELECT)
       .eq('id', id)
       .single();
+  }
+
+  /**
+   * SE-008: Get teacher's assigned programs for session creation.
+   */
+  async getTeacherPrograms() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { data: null, error: new Error('Not authenticated') };
+
+    return (supabase as any)
+      .from('program_roles')
+      .select('program_id, programs(id, name, name_ar)')
+      .eq('profile_id', user.id)
+      .eq('role', 'teacher');
   }
 }
 
