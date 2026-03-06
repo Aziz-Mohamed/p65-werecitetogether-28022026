@@ -9,6 +9,9 @@ export default function SupervisorLayout() {
       <Stack.Screen name="teachers/[id]/students" />
       <Stack.Screen name="certifications/index" />
       <Stack.Screen name="certifications/[id]" />
+      <Stack.Screen name="himam/index" />
+      <Stack.Screen name="himam/[eventId]/registrations" />
+      <Stack.Screen name="himam/[eventId]/pairings" />
     </Stack>
   );
 }
