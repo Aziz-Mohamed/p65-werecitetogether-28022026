@@ -52,7 +52,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS certifications_certificate_number_idx
 -- ─── Updated_at Trigger ──────────────────────────────────────────────────────
 CREATE TRIGGER certifications_updated_at
   BEFORE UPDATE ON certifications
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
 
 -- ─── RLS ─────────────────────────────────────────────────────────────────────
 ALTER TABLE certifications ENABLE ROW LEVEL SECURITY;
