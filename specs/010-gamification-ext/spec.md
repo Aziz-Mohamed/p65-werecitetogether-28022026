@@ -27,7 +27,7 @@ An admin or program admin creates stickers that belong to a specific program. Te
 
 ### User Story 2 - Program Leaderboard (Priority: P1)
 
-Students enrolled in a program can see a leaderboard scoped to that program, showing top students ranked by their level (rubʿ certifications) or by total stickers earned within the program context. The existing class-based leaderboard continues to work for backwards compatibility.
+Students enrolled in a program can see a leaderboard scoped to that program, showing top students ranked by their rubʿ level. The existing class-based leaderboard continues to work for backwards compatibility.
 
 **Why this priority**: Leaderboards are a key motivational driver. With multiple programs, students need program-scoped competition to stay engaged.
 
@@ -87,31 +87,45 @@ Supervisors and program admins can view aggregated gamification stats for their 
 - What happens when a program is deactivated? All program-scoped stickers become inactive for new awards. Existing awards are preserved. Leaderboard becomes read-only showing final state.
 - What happens if two programs have stickers with the same name? Each sticker has a unique ID regardless of name. The program label disambiguates them in the UI.
 - What happens when a milestone check runs but the student was recently un-enrolled? Milestones are checked at the moment of the triggering action (e.g., session completion). If the student is enrolled at that moment, the badge is awarded. Un-enrollment after does not revoke badges.
+- What happens when a sticker is re-assigned from one program to another (not global-to-program)? Same as global-to-program: previously awarded instances remain; the sticker now appears only for the new program's teachers.
+- What happens when a student re-enrolls in a program they previously dropped? Previously earned badges from the old enrollment remain. New enrollment duration starts fresh from the new `enrolled_at` date. Session/streak badges already earned are not re-awarded (uniqueness constraint per student+badge+program).
+- What happens if the daily pg_cron job fails or runs late? Badges are simply awarded on the next successful run. The check is idempotent — it only inserts badges not yet awarded, so delayed runs cause no duplicates or data corruption.
+- What happens when two leaderboard students have identical current_level AND longest_streak? Final tiebreaker is full_name ascending (alphabetical). This ensures deterministic ordering.
+
+## Clarifications
+
+### Session 2026-03-06
+
+- Q: Should the leaderboard ranking metric be configurable per program or always rubʿ level? → A: Rubʿ level is always the ranking metric for all program leaderboards (all programs center on Quran memorization).
+- Q: Can program admins create global stickers, or only program-scoped ones? → A: Program admins can only create stickers scoped to their assigned program(s). Only admins/master admins can create global stickers.
+- Q: How are time-based enrollment duration milestones checked if no user action triggers them? → A: Hybrid approach — daily pg_cron job checks duration milestones (30d, 90d, 1yr); session count and streak milestones are checked inline at the triggering action.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: System MUST allow stickers to optionally be associated with a specific program (nullable program association on stickers).
-- **FR-002**: System MUST show teachers only global stickers plus stickers for programs they are assigned to when awarding.
+- **FR-001**: System MUST allow stickers to optionally be associated with a specific program (nullable program association on stickers). Program admins can only create stickers scoped to their assigned program(s); only admins/master admins can create global (unscoped) stickers. Students, teachers, and supervisors MUST NOT create or delete stickers. Sticker management UI is provided in the existing admin screens (master-admin for global, program-admin for program-scoped).
+- **FR-002**: System MUST show teachers only global stickers plus stickers for programs they are assigned to when awarding. Stickers MUST be grouped in the picker with section headers: "Global" for unscoped stickers, then one section per program name. Teachers assigned to multiple programs see stickers from all their programs.
 - **FR-003**: System MUST display the program name on program-scoped stickers in the student's collection view.
-- **FR-004**: System MUST provide a program-scoped leaderboard ranking enrolled students by rubʿ level.
-- **FR-005**: System MUST show the current student's rank on the leaderboard even if they are outside the top 20.
+- **FR-004**: System MUST provide a program-scoped leaderboard ranking enrolled students by rubʿ level (`students.current_level`) descending, with ties broken by `longest_streak` descending, then `full_name` ascending as final tiebreaker. This metric is fixed for all programs and is not configurable. When a program has zero enrolled students, the leaderboard MUST show an empty state message.
+- **FR-005**: System MUST show the current student's rank on the leaderboard even if they are outside the top 20. The student's own row MUST be visually distinguished (e.g., highlighted background, "You" label) and separated from the top-20 list by a divider when outside it.
 - **FR-006**: System MUST preserve the existing class-based leaderboard without modification.
-- **FR-007**: System MUST define milestone badge types for enrollment duration (30d, 90d, 1yr), session count (10, 50, 100), and streak length (7d, 30d, 100d).
-- **FR-008**: System MUST automatically award milestone badges when conditions are met and send a notification.
+- **FR-007**: System MUST define milestone badge types for enrollment duration (30, 90, 365 days), session count (10, 50, 100 completed sessions), and streak length (7, 30, 100 consecutive days). Session count milestones count only completed sessions (status = 'completed' or NULL for legacy) filtered by student and program_id.
+- **FR-008**: System MUST automatically award milestone badges when conditions are met and send a push notification with category `milestone_badge_earned`, deep-linking to the badges screen `/(student)/profile/badges`. Session/streak milestones are checked inline at the triggering action; enrollment duration milestones are checked by a daily scheduled job (pg_cron at 04:00 UTC). If the notification infrastructure is unavailable (missing push token or Edge Function error), the badge MUST still be awarded — notification failure MUST NOT block badge insertion. When the daily cron job awards multiple badges to the same student, each badge generates a separate notification.
 - **FR-009**: System MUST prevent duplicate milestone badge awards (each badge earned once per program).
-- **FR-010**: System MUST show earned badges on the student profile with program name and date.
-- **FR-011**: System MUST show unearned badges as locked silhouettes with descriptions.
-- **FR-012**: System MUST provide a supervisor rewards dashboard with sticker counts, top teachers, popular stickers, and milestone distribution.
-- **FR-013**: System MUST scope the rewards dashboard to the supervisor's assigned program(s).
+- **FR-010**: System MUST show earned badges on the student profile with program name and date, grouped by category in fixed order: enrollment, sessions, streak.
+- **FR-011**: System MUST show unearned badges as locked state (reduced opacity, monochrome icon) with the badge description explaining how to earn it. Screen readers MUST announce locked/earned state.
+- **FR-012**: System MUST provide a supervisor rewards dashboard with sticker counts (this week/this month), top 5 teachers, top 5 popular stickers, and milestone badge distribution. When no stickers have been awarded yet, sections MUST show zero counts with an empty state message (not an error). Both supervisors and program admins can access this dashboard.
+- **FR-013**: System MUST scope the rewards dashboard to the viewer's assigned program(s). Supervisors and program admins see only data for programs they are assigned to via `program_roles`.
 - **FR-014**: System MUST preserve all previously awarded stickers when a sticker's program scope changes.
 
 ### Non-Functional Requirements
 
 - **NFR-001**: Leaderboard queries MUST return results within 2 seconds for programs with up to 500 enrolled students.
-- **NFR-002**: Milestone badge checks MUST not add noticeable delay to session recording or streak updates.
+- **NFR-002**: Inline milestone badge checks (session count, streak) MUST add less than 200ms to the session recording or streak update operation.
 - **NFR-003**: All new UI text MUST be bilingual (English and Arabic).
+- **NFR-004**: Rewards dashboard queries MUST return results within 3 seconds for programs with up to 500 enrolled students and 10,000 sticker awards.
+- **NFR-005**: Badge grid MUST be accessible: earned/locked states announced by screen readers, all icons have accessible labels.
 
 ### Key Entities
 
@@ -124,10 +138,10 @@ Supervisors and program admins can view aggregated gamification stats for their 
 
 ### Measurable Outcomes
 
-- **SC-001**: Teachers can award program-scoped stickers to students within 3 taps (same flow as global stickers, just filtered).
+- **SC-001**: Teachers can award program-scoped stickers to students within 3 taps from the student's profile screen (open award picker → select sticker → confirm).
 - **SC-002**: Program leaderboard loads and displays rankings for up to 500 students within 2 seconds.
 - **SC-003**: 100% of defined milestone types (9 total) are automatically checked and awarded without manual intervention.
-- **SC-004**: Students can view all earned badges and stickers (both global and program-scoped) in a single unified collection screen.
+- **SC-004**: Students can view all earned badges in a dedicated badges tab/screen on their profile, and all stickers (both global and program-scoped) in the existing sticker collection screen.
 - **SC-005**: Supervisors can view program gamification stats within one screen without navigating to multiple places.
 - **SC-006**: Existing sticker award flow continues to work identically for teachers not assigned to any program.
 
@@ -135,10 +149,13 @@ Supervisors and program admins can view aggregated gamification stats for their 
 
 - The existing `stickers` and `student_stickers` tables are preserved and extended — not replaced.
 - The `programs`, `enrollments`, and `program_roles` tables from 003-programs-enrollment are available.
-- The existing `students.current_level`, `students.current_streak`, and `students.longest_streak` columns are the source of truth for rubʿ levels and streaks.
-- Session counts for milestones are derived from the existing `sessions` table filtered by student and program.
-- Milestone badge checks are triggered inline (during session save / streak update) rather than via scheduled jobs, to provide immediate feedback.
+- The existing `students.current_level`, `students.current_streak`, and `students.longest_streak` columns are the source of truth for rubʿ levels and streaks. Note: `current_level` is program-independent (global to the student) — the leaderboard ranks students by this global level within the context of program enrollment.
+- Session counts for milestones are derived from the existing `sessions` table filtered by student and `sessions.program_id` (added in 005-session-evolution, migration 00007). Only completed sessions are counted (status IS NULL or status = 'completed').
+- Milestone badge checks use a hybrid approach: session count and streak milestones are triggered inline (during session save / streak update) for immediate feedback; enrollment duration milestones (30d, 90d, 1yr) are checked by a daily pg_cron job since no user action occurs on the exact anniversary.
 - The notification infrastructure from 004-push-notifications is available for milestone award notifications.
+- **Prerequisites**: 003-programs-enrollment (programs, enrollments, program_roles tables), 004-push-notifications (send-notification Edge Function, push_tokens table), 005-session-evolution (sessions.program_id column).
+- Enrollment duration milestones use `enrollments.enrolled_at` as the start date (not `created_at`).
+- When a program is deactivated, student_badges records are retained permanently (badges are never revoked). The daily cron job skips inactive programs.
 
 ## Scope Boundaries
 
