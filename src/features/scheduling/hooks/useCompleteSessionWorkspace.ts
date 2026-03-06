@@ -9,13 +9,7 @@ import { calculateSM2, calculateQualityGrade } from '@/features/memorization/uti
 import { scheduledSessionService } from '../services/scheduled-session.service';
 import type { BulkAttendanceInput } from '@/features/attendance/types/attendance.types';
 import type { RecitationFormData } from '@/features/memorization/components/RecitationForm';
-
-interface EvalData {
-  memorization_score: number | null;
-  tajweed_score: number | null;
-  recitation_quality: number | null;
-  notes: string;
-}
+import type { EvalData } from '@/stores/workspaceDraftStore';
 
 interface CompleteSessionInput {
   scheduledSessionId: string;
