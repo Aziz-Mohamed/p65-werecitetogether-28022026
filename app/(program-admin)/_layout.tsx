@@ -4,7 +4,10 @@ import { Stack } from 'expo-router';
 export default function ProgramAdminLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
+      <Stack.Screen name="select" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="team/add" />
+      {/* Existing program management screens */}
       <Stack.Screen name="programs/index" />
       <Stack.Screen name="programs/[id]/index" />
       <Stack.Screen name="programs/[id]/tracks" />
