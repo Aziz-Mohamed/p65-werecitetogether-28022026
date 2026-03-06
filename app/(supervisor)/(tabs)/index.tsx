@@ -1,0 +1,141 @@
+import React from 'react';
+import { View, Text, StyleSheet, RefreshControl } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+
+import { Screen } from '@/components/layout';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { useAuth } from '@/hooks/useAuth';
+import { colors } from '@/theme/colors';
+import { lightTheme } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+import { typography } from '@/theme/typography';
+import { normalize } from '@/theme/normalize';
+
+import { StatCard } from '@/features/admin/components/StatCard';
+import { TeacherCard } from '@/features/admin/components/TeacherCard';
+import { useSupervisorDashboard } from '@/features/admin/hooks/useSupervisorDashboard';
+import { useSupervisedTeachers } from '@/features/admin/hooks/useSupervisedTeachers';
+
+export default function SupervisorHome() {
+  const { t } = useTranslation();
+  const { session } = useAuth();
+  const router = useRouter();
+  const userId = session?.user?.id;
+
+  const dashboard = useSupervisorDashboard(userId);
+  const teachers = useSupervisedTeachers(userId);
+
+  const isLoading = dashboard.isLoading || teachers.isLoading;
+  const isRefreshing = dashboard.isRefetching || teachers.isRefetching;
+
+  const handleRefresh = () => {
+    dashboard.refetch();
+    teachers.refetch();
+  };
+
+  return (
+    <Screen>
+      <View style={styles.container}>
+        <Text style={styles.title}>{t('admin.supervisor.title')}</Text>
+
+        <View style={styles.statsRow}>
+          <StatCard
+            label={t('admin.supervisor.teacherCount')}
+            value={dashboard.data?.teacher_count ?? 0}
+            icon="people-outline"
+            iconColor={colors.primary[500]}
+            isLoading={isLoading}
+          />
+          <StatCard
+            label={t('admin.supervisor.studentCount')}
+            value={dashboard.data?.student_count ?? 0}
+            icon="school-outline"
+            iconColor={colors.accent.indigo}
+            isLoading={isLoading}
+          />
+        </View>
+
+        <View style={styles.statsRow}>
+          <StatCard
+            label={t('admin.supervisor.sessionsThisWeek')}
+            value={dashboard.data?.sessions_this_week ?? 0}
+            icon="calendar-outline"
+            iconColor={colors.accent.violet}
+            isLoading={isLoading}
+          />
+        </View>
+
+        <FlashList
+          data={teachers.data ?? []}
+          estimatedItemSize={120}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+          }
+          renderItem={({ item }) => (
+            <TeacherCard
+              teacher={item}
+              onPress={() =>
+                router.push({
+                  pathname: '/(supervisor)/teachers/[id]',
+                  params: { id: item.teacher_id, programId: item.program_id },
+                })
+              }
+            />
+          )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ListEmptyComponent={
+            !isLoading ? (
+              dashboard.isError || teachers.isError ? (
+                <ErrorState onRetry={handleRefresh} />
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>
+                    {t('admin.supervisor.teacherList.empty')}
+                  </Text>
+                </View>
+              )
+            ) : null
+          }
+        />
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: spacing.xl,
+  },
+  title: {
+    ...typography.textStyles.heading,
+    color: lightTheme.text,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.base,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.sm,
+  },
+  listContent: {
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.base,
+  },
+  separator: {
+    height: spacing.sm,
+  },
+  emptyContainer: {
+    padding: spacing['2xl'],
+    alignItems: 'center',
+  },
+  emptyText: {
+    ...typography.textStyles.body,
+    color: lightTheme.textSecondary,
+    textAlign: 'center',
+  },
+});
