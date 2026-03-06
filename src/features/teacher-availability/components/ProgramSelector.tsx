@@ -92,7 +92,7 @@ export const ProgramSelector = forwardRef<BottomSheetModal, ProgramSelectorProps
                 <Switch
                   value={program.is_available}
                   onValueChange={(val) => handleToggle(program.program_id, val)}
-                  trackColor={{ false: colors.neutral[200], true: '#22C55E' }}
+                  trackColor={{ false: colors.neutral[200], true: colors.primary[500] }}
                   thumbColor={colors.white}
                 />
               </View>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { normalize } from '@/theme/normalize';
+import { colors } from '@/theme/colors';
 
 interface GreenDotIndicatorProps {
   isAvailable: boolean;
@@ -9,7 +10,7 @@ interface GreenDotIndicatorProps {
 }
 
 const DOT_SIZE = normalize(8);
-const GREEN = '#22C55E';
+const GREEN = colors.primary[500];
 
 export function GreenDotIndicator({ isAvailable, overlay = false }: GreenDotIndicatorProps) {
   if (!isAvailable) return null;
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
     borderRadius: DOT_SIZE / 2,
     backgroundColor: GREEN,
     borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderColor: colors.white,
   },
   label: {
     fontSize: normalize(8),

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import type { TrendDirection } from '../types/reports.types';
-import { semantic } from '@/theme/colors';
+import { semantic, neutral } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { normalize } from '@/theme/normalize';
 import { spacing } from '@/theme/spacing';
@@ -11,7 +11,7 @@ import { spacing } from '@/theme/spacing';
 const TREND_CONFIG: Record<TrendDirection, { icon: string; color: string }> = {
   up: { icon: 'arrow-up', color: semantic.success },
   down: { icon: 'arrow-down', color: semantic.error },
-  steady: { icon: 'remove', color: '#9CA3AF' }, // neutral[400]
+  steady: { icon: 'remove', color: neutral[400] },
 };
 
 interface TrendArrowProps {
