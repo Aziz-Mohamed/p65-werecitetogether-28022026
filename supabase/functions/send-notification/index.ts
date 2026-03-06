@@ -4,11 +4,11 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 interface WebhookPayload {
-  type: "INSERT";
+  type: "INSERT" | "UPDATE" | "DELETE";
   table: string;
   schema: "public";
   record: Record<string, unknown>;
-  old_record: null;
+  old_record: Record<string, unknown> | null;
 }
 
 interface ExpoPushMessage {
@@ -45,18 +45,44 @@ type NotificationCategory =
   | "achievement_unlocked"
   | "attendance_marked"
   | "session_completed"
-  | "voice_memo_attached";
+  | "voice_memo_attached"
+  | "rating_prompt"
+  | "flagged_review_alert"
+  | "low_rating_alert"
+  | "recovered_alert"
+  | "queue_available"
+  | "teacher_demand";
 
-// ─── Table → Category Mapping ───────────────────────────────────────────────
+// Direct notification categories (invoked via pg_net or Edge Functions, not standard webhooks)
+const DIRECT_CATEGORIES = new Set<string>([
+  "low_rating_alert",
+  "recovered_alert",
+  "queue_available",
+  "teacher_demand",
+]);
 
-const TABLE_TO_CATEGORY: Record<string, NotificationCategory> = {
-  student_stickers: "sticker_awarded",
-  student_trophies: "trophy_earned",
-  student_achievements: "achievement_unlocked",
-  attendance: "attendance_marked",
-  sessions: "session_completed",
-  session_voice_memos: "voice_memo_attached",
+// ─── Table → Categories Mapping ─────────────────────────────────────────────
+
+const TABLE_TO_CATEGORIES: Record<string, NotificationCategory[]> = {
+  student_stickers: ["sticker_awarded"],
+  student_trophies: ["trophy_earned"],
+  student_achievements: ["achievement_unlocked"],
+  attendance: ["attendance_marked"],
+  sessions: ["session_completed", "rating_prompt"],
+  session_voice_memos: ["voice_memo_attached"],
+  teacher_ratings: ["flagged_review_alert"],
 };
+
+function getActiveCategories(
+  categories: NotificationCategory[],
+  record: Record<string, unknown>,
+): NotificationCategory[] {
+  return categories.filter((cat) => {
+    if (cat === "rating_prompt" && record.status !== "completed") return false;
+    if (cat === "flagged_review_alert" && !record.is_flagged) return false;
+    return true;
+  });
+}
 
 // ─── Supabase Client ────────────────────────────────────────────────────────
 
@@ -96,6 +122,97 @@ async function getRecipients(
       .single();
     if (student?.parent_id) {
       recipients.push(student.parent_id);
+    }
+
+    return recipients;
+  }
+
+  // Teacher demand: notify offline teachers assigned to the program
+  if (category === "teacher_demand") {
+    const programId = record.program_id as string | undefined;
+    if (!programId) return recipients;
+
+    // Find teachers assigned to this program who are NOT currently available
+    const { data: offlineTeachers } = await supabase
+      .from("teacher_availability")
+      .select("teacher_id")
+      .eq("program_id", programId)
+      .eq("is_available", false);
+
+    if (offlineTeachers) {
+      for (const t of offlineTeachers) {
+        if (!recipients.includes(t.teacher_id)) {
+          recipients.push(t.teacher_id);
+        }
+      }
+    }
+
+    return recipients;
+  }
+
+  // Queue available: student only
+  if (category === "queue_available") {
+    const studentId = record.student_id as string | undefined;
+    if (studentId) recipients.push(studentId);
+    return recipients;
+  }
+
+  // Rating prompt: student only (no parent) for completed sessions
+  if (category === "rating_prompt") {
+    const studentId = record.student_id as string | undefined;
+    if (studentId) recipients.push(studentId);
+    return recipients;
+  }
+
+  // Flagged review alert: send to the teacher's supervisor(s)
+  if (category === "flagged_review_alert") {
+    const teacherId = record.teacher_id as string | undefined;
+    if (!teacherId) return recipients;
+
+    const { data: teacherProfile } = await supabase
+      .from("profiles")
+      .select("supervisor_id")
+      .eq("id", teacherId)
+      .single();
+
+    if (teacherProfile?.supervisor_id) {
+      recipients.push(teacherProfile.supervisor_id);
+    }
+
+    return recipients;
+  }
+
+  // Low rating / recovered alerts: send to program admins and the teacher's supervisor
+  if (category === "low_rating_alert" || category === "recovered_alert") {
+    const teacherId = record.teacher_id as string | undefined;
+    const programId = record.program_id as string | undefined;
+
+    if (teacherId) {
+      const { data: teacherProfile } = await supabase
+        .from("profiles")
+        .select("supervisor_id")
+        .eq("id", teacherId)
+        .single();
+
+      if (teacherProfile?.supervisor_id) {
+        recipients.push(teacherProfile.supervisor_id);
+      }
+    }
+
+    // Also notify program admins
+    if (programId) {
+      const { data: admins } = await supabase
+        .from("profiles")
+        .select("id")
+        .in("role", ["program_admin", "master_admin"]);
+
+      if (admins) {
+        for (const admin of admins) {
+          if (!recipients.includes(admin.id)) {
+            recipients.push(admin.id);
+          }
+        }
+      }
     }
 
     return recipients;
@@ -363,6 +480,125 @@ async function buildNotificationContent(
       };
     }
 
+    case "teacher_demand": {
+      const demandProgramId = record.program_id as string;
+      const waitingCount = record.waiting_count as number;
+      const { data: demandProgram } = await supabase
+        .from("programs")
+        .select("name, name_ar")
+        .eq("id", demandProgramId)
+        .single();
+      const programName = lang === "ar"
+        ? (demandProgram?.name_ar ?? demandProgram?.name ?? "")
+        : (demandProgram?.name ?? "");
+
+      return {
+        title: lang === "ar" ? "طلاب بانتظارك" : "Students Are Waiting",
+        body: lang === "ar"
+          ? `${waitingCount} طالب بانتظار معلم في ${programName}`
+          : `${waitingCount} students are waiting for a teacher in ${programName}`,
+        data: {
+          screen: "/(teacher)/availability",
+        },
+      };
+    }
+
+    case "queue_available": {
+      const entryId = record.entry_id as string;
+      const queueTeacherId = record.teacher_id as string;
+      const { data: queueTeacher } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", queueTeacherId)
+        .single();
+      const queueTeacherName = queueTeacher?.full_name ?? "";
+
+      return {
+        title: lang === "ar" ? "معلم متاح الآن!" : "Teacher Available Now!",
+        body: lang === "ar"
+          ? `${queueTeacherName} متاح الآن — لديك ٣ دقائق للانضمام`
+          : `${queueTeacherName} is available — you have 3 minutes to claim`,
+        data: {
+          screen: `/(student)/queue/claim/${entryId}`,
+          deepLink: `werecitetogether://queue/claim/${entryId}`,
+        },
+      };
+    }
+
+    case "rating_prompt": {
+      const ratingSessionId = record.id as string;
+      return {
+        title: lang === "ar" ? "كيف كانت جلستك؟" : "How was your session?",
+        body: lang === "ar"
+          ? "شاركنا رأيك عن جلستك الأخيرة"
+          : "Share your feedback about your recent session",
+        data: { screen: `/(student)/sessions/${ratingSessionId}` },
+      };
+    }
+
+    case "flagged_review_alert": {
+      const ratedTeacherId = record.teacher_id as string;
+      const starRating = record.star_rating as number;
+      const { data: ratedTeacher } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", ratedTeacherId)
+        .single();
+      const ratedTeacherName = ratedTeacher?.full_name ?? "";
+
+      return {
+        title: lang === "ar" ? "تقييم منخفض مُبلَّغ" : "Low Rating Flagged",
+        body: lang === "ar"
+          ? `${ratedTeacherName} حصل على تقييم ${starRating} نجوم — يحتاج مراجعة`
+          : `${ratedTeacherName} received a ${starRating}-star rating — needs review`,
+        data: {
+          screen: `/(supervisor)/teachers/${ratedTeacherId}/reviews`,
+        },
+      };
+    }
+
+    case "low_rating_alert": {
+      const alertTeacherId = record.teacher_id as string;
+      const avgRating = record.average_rating as number;
+      const { data: alertTeacher } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", alertTeacherId)
+        .single();
+      const alertTeacherName = alertTeacher?.full_name ?? "";
+
+      return {
+        title: lang === "ar" ? "تنبيه تقييم منخفض" : "Low Rating Alert",
+        body: lang === "ar"
+          ? `متوسط تقييم ${alertTeacherName} انخفض إلى ${avgRating.toFixed(1)} — أقل من 3.5`
+          : `${alertTeacherName}'s average rating dropped to ${avgRating.toFixed(1)} — below 3.5 threshold`,
+        data: {
+          screen: `/(supervisor)/teachers/${alertTeacherId}/reviews`,
+        },
+      };
+    }
+
+    case "recovered_alert": {
+      const recTeacherId = record.teacher_id as string;
+      const recAvgRating = record.average_rating as number;
+      const { data: recTeacher } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", recTeacherId)
+        .single();
+      const recTeacherName = recTeacher?.full_name ?? "";
+
+      return {
+        title: lang === "ar" ? "تحسّن التقييم" : "Rating Recovered",
+        body: lang === "ar"
+          ? `متوسط تقييم ${recTeacherName} تحسّن إلى ${recAvgRating.toFixed(1)} — فوق 3.5`
+          : `${recTeacherName}'s average rating recovered to ${recAvgRating.toFixed(1)} — above 3.5 threshold`,
+        data: {
+          screen: `/(supervisor)/teachers/${recTeacherId}/reviews`,
+        },
+      };
+    }
+
     default:
       return null;
   }
@@ -512,27 +748,40 @@ function isDuplicate(recipientId: string, category: string): boolean {
 
 Deno.serve(async (req: Request) => {
   try {
-    const payload = (await req.json()) as WebhookPayload;
-    const { table, record } = payload;
+    const payload = await req.json();
 
-    const category = TABLE_TO_CATEGORY[table];
-    if (!category) {
-      return new Response(
-        JSON.stringify({ success: false, error: `Unknown table: ${table}` }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
-      );
+    // Determine if this is a direct notification (pg_net) or a standard webhook
+    let activeCategories: NotificationCategory[];
+    let record: Record<string, unknown>;
+
+    if (DIRECT_CATEGORIES.has(payload.type)) {
+      // Direct notification from pg_net (e.g., low_rating_alert, recovered_alert)
+      activeCategories = [payload.type as NotificationCategory];
+      record = payload;
+    } else {
+      // Standard webhook payload
+      const webhookPayload = payload as WebhookPayload;
+      const { table } = webhookPayload;
+      record = webhookPayload.record;
+
+      const allCategories = TABLE_TO_CATEGORIES[table];
+      if (!allCategories || allCategories.length === 0) {
+        return new Response(
+          JSON.stringify({ success: false, error: `Unknown table: ${table}` }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      activeCategories = getActiveCategories(allCategories, record);
     }
-
-    const supabase = getSupabaseAdmin();
-
-    // Get recipients
-    const recipientIds = await getRecipients(supabase, category, record);
-    if (recipientIds.length === 0) {
+    if (activeCategories.length === 0) {
       return new Response(
         JSON.stringify({ success: true, sent: 0, skipped: 0, errors: 0 }),
         { headers: { "Content-Type": "application/json" } },
       );
     }
+
+    const supabase = getSupabaseAdmin();
 
     // Get school timezone for quiet hours check
     let resolvedStudentId = record.student_id as string | undefined;
@@ -561,59 +810,63 @@ Deno.serve(async (req: Request) => {
       .single();
     const schoolTimezone = school?.timezone ?? "UTC";
 
-    // Build and send notifications
+    // Build and send notifications for all active categories
     const messages: ExpoPushMessage[] = [];
     const tokensList: string[] = [];
     let skipped = 0;
 
-    for (const recipientId of recipientIds) {
-      // Dedup: skip if same recipient+category sent within 30 seconds
-      if (isDuplicate(recipientId, category)) {
-        skipped++;
-        continue;
-      }
+    for (const category of activeCategories) {
+      const recipientIds = await getRecipients(supabase, category, record);
 
-      // Check preferences
-      const shouldSend = await shouldSendToRecipient(supabase, recipientId, category, schoolTimezone);
-      if (!shouldSend) {
-        skipped++;
-        continue;
-      }
+      for (const recipientId of recipientIds) {
+        // Dedup: skip if same recipient+category sent within 30 seconds
+        if (isDuplicate(recipientId, category)) {
+          skipped++;
+          continue;
+        }
 
-      // Get push tokens
-      const { data: tokens } = await supabase
-        .from("push_tokens")
-        .select("token")
-        .eq("user_id", recipientId)
-        .eq("is_active", true);
+        // Check preferences
+        const shouldSend = await shouldSendToRecipient(supabase, recipientId, category, schoolTimezone);
+        if (!shouldSend) {
+          skipped++;
+          continue;
+        }
 
-      if (!tokens || tokens.length === 0) {
-        skipped++;
-        continue;
-      }
+        // Get push tokens
+        const { data: tokens } = await supabase
+          .from("push_tokens")
+          .select("token")
+          .eq("user_id", recipientId)
+          .eq("is_active", true);
 
-      // Build content
-      const isParent = recipientId !== (resolvedStudentId ?? record.student_id);
-      const content = await buildNotificationContent(
-        supabase, category, record, recipientId, isParent,
-      );
-      if (!content) {
-        skipped++;
-        continue;
-      }
+        if (!tokens || tokens.length === 0) {
+          skipped++;
+          continue;
+        }
 
-      // Create messages for each device
-      for (const { token } of tokens) {
-        messages.push({
-          to: token,
-          title: content.title,
-          body: content.body,
-          data: content.data,
-          sound: "default",
-          priority: "high",
-          channelId: "default",
-        });
-        tokensList.push(token);
+        // Build content
+        const isParent = recipientId !== (resolvedStudentId ?? record.student_id);
+        const content = await buildNotificationContent(
+          supabase, category, record, recipientId, isParent,
+        );
+        if (!content) {
+          skipped++;
+          continue;
+        }
+
+        // Create messages for each device
+        for (const { token } of tokens) {
+          messages.push({
+            to: token,
+            title: content.title,
+            body: content.body,
+            data: content.data,
+            sound: "default",
+            priority: "high",
+            channelId: "default",
+          });
+          tokensList.push(token);
+        }
       }
     }
 

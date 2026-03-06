@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Avatar, Badge, Button } from '@/components/ui';
 import { GreenDotIndicator } from '@/components/ui/GreenDotIndicator';
+import { TeacherRatingBadge } from '@/features/ratings/components/TeacherRatingBadge';
+import { useTeacherRatingStats } from '@/features/ratings/hooks/useTeacherRatingStats';
 import type { AvailableTeacher } from '../types/availability.types';
 import { typography } from '@/theme/typography';
 import { colors } from '@/theme/colors';
@@ -31,6 +33,7 @@ interface AvailableTeacherCardProps {
 
 export function AvailableTeacherCard({ teacher, onJoin, isJoining }: AvailableTeacherCardProps) {
   const { t, i18n } = useTranslation();
+  const { data: ratingStats } = useTeacherRatingStats(teacher.teacher_id, teacher.program_id);
   const isFull = teacher.active_student_count >= teacher.max_students;
   const hasNoLink = !teacher.profiles?.meeting_link;
 
@@ -53,7 +56,10 @@ export function AvailableTeacherCard({ teacher, onJoin, isJoining }: AvailableTe
             <Text style={styles.name} numberOfLines={1}>
               {teacher.profiles?.full_name ?? '—'}
             </Text>
-            <Badge label={t('availability.newTeacher')} variant="sky" size="sm" />
+            <TeacherRatingBadge
+              averageRating={ratingStats?.average_rating ?? null}
+              totalReviews={ratingStats?.total_reviews ?? 0}
+            />
           </View>
 
           {languageNames ? (

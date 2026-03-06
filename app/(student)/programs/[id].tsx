@@ -17,6 +17,8 @@ import { useEnroll, useJoinFreeProgram } from '@/features/programs/hooks/useEnro
 import { useEnrollments } from '@/features/programs/hooks/useEnrollments';
 import { useLeaveProgram } from '@/features/programs/hooks/useLeaveProgram';
 import { useAvailableTeachers } from '@/features/teacher-availability/hooks/useAvailableTeachers';
+import { JoinQueueButton } from '@/features/queue/components/JoinQueueButton';
+import { FairUsageNotice } from '@/features/queue/components/FairUsageNotice';
 import { useLocalizedField, getEnrollErrorKey } from '@/features/programs/utils/enrollment-helpers';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui';
@@ -165,6 +167,20 @@ export default function ProgramDetailScreen() {
               variant="default"
               icon={<Ionicons name="radio-button-on" size={16} color="#22C55E" />}
             />
+          </View>
+        )}
+
+        {/* Queue — free programs with no teachers available */}
+        {program.category === 'free' && availableTeachers?.length === 0 && (
+          <View style={styles.section}>
+            <JoinQueueButton programId={id!} />
+          </View>
+        )}
+
+        {/* Fair usage notice — free programs */}
+        {program.category === 'free' && (
+          <View style={styles.section}>
+            <FairUsageNotice programId={id!} />
           </View>
         )}
 
