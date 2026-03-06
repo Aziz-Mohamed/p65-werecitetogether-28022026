@@ -1358,6 +1358,46 @@
       "askTeacherDesc": "اطلب من معلّمك إضافة هذا إلى مراجعتك",
       "needsRecertNote": "هذا الربع يحتاج إعادة إجازة من معلّمك",
       "mushafPage": "صفحة المصحف"
+    },
+    "badges": {
+      "title": "الشارات",
+      "earned": "مُحصّلة",
+      "locked": "مقفلة",
+      "earnedOn": "حُصلت في {{date}}",
+      "categories": {
+        "enrollment": "الاشتراك",
+        "sessions": "الجلسات",
+        "streak": "السلاسل"
+      },
+      "empty": "لم تحصل على شارات بعد. استمر!"
+    },
+    "programLeaderboard": {
+      "title": "لوحة متصدري البرنامج",
+      "rank": "#{{rank}}",
+      "you": "أنت",
+      "level": "المستوى {{level}}",
+      "streak": "سلسلة {{count}} يوم",
+      "empty": "لا يوجد طلاب مسجلون بعد.",
+      "notEnrolled": "أنت غير مسجل في هذا البرنامج."
+    },
+    "rewardsDashboard": {
+      "title": "لوحة المكافآت",
+      "stickersThisWeek": "ملصقات هذا الأسبوع",
+      "stickersThisMonth": "ملصقات هذا الشهر",
+      "topTeachers": "أفضل المعلمين",
+      "popularStickers": "الملصقات الأكثر شعبية",
+      "milestones": "شارات الإنجاز",
+      "awards": "{{count}} مكافأة",
+      "earned": "{{count}} محصّلة",
+      "noData": "لا توجد مكافآت ملصقات بعد."
+    },
+    "stickerSections": {
+      "global": "عامة",
+      "program": "{{programName}}"
+    },
+    "notifications": {
+      "badgeEarnedTitle": "حصلت على شارة!",
+      "badgeEarnedBody": "حصلت على شارة \"{{badgeName}}\" في {{programName}}!"
     }
   },
   "programs": {

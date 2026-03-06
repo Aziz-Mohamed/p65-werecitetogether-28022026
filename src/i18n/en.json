@@ -1358,6 +1358,46 @@
       "askTeacherDesc": "Ask your teacher to add this to your revision",
       "needsRecertNote": "This rubʿ needs re-certification by your teacher",
       "mushafPage": "Mushaf Page"
+    },
+    "badges": {
+      "title": "Badges",
+      "earned": "Earned",
+      "locked": "Locked",
+      "earnedOn": "Earned on {{date}}",
+      "categories": {
+        "enrollment": "Enrollment",
+        "sessions": "Sessions",
+        "streak": "Streaks"
+      },
+      "empty": "No badges earned yet. Keep going!"
+    },
+    "programLeaderboard": {
+      "title": "Program Leaderboard",
+      "rank": "#{{rank}}",
+      "you": "You",
+      "level": "Level {{level}}",
+      "streak": "{{count}}-day streak",
+      "empty": "No students enrolled yet.",
+      "notEnrolled": "You are not enrolled in this program."
+    },
+    "rewardsDashboard": {
+      "title": "Rewards Dashboard",
+      "stickersThisWeek": "Stickers This Week",
+      "stickersThisMonth": "Stickers This Month",
+      "topTeachers": "Top Teachers",
+      "popularStickers": "Popular Stickers",
+      "milestones": "Milestone Badges",
+      "awards": "{{count}} awards",
+      "earned": "{{count}} earned",
+      "noData": "No sticker awards yet."
+    },
+    "stickerSections": {
+      "global": "Global",
+      "program": "{{programName}}"
+    },
+    "notifications": {
+      "badgeEarnedTitle": "Badge Earned!",
+      "badgeEarnedBody": "You earned the \"{{badgeName}}\" badge in {{programName}}!"
     }
   },
   "programs": {
