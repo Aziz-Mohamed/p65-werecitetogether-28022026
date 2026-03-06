@@ -1999,5 +1999,125 @@
       "orgNameAr": "نتلو معاً",
       "issuedByOrg": "WeReciteTogether (نتلو معاً)"
     }
+  },
+  "himam": {
+    "title": "Himam Marathon",
+    "subtitle": "Weekly Quran Recitation Marathon",
+    "noUpcomingEvent": "No upcoming marathon event. Check back later!",
+    "registerButton": "Register",
+    "cancelRegistration": "Cancel Registration",
+    "cancelRegistrationConfirm": "Are you sure you want to cancel your registration?",
+    "registered": "Registered",
+    "registrationSuccess": "Successfully registered for the marathon!",
+    "registrationCancelled": "Registration cancelled.",
+    "eventDate": "Event Date",
+    "deadline": "Registration Deadline",
+    "makkahTime": "Makkah Time",
+    "countdown": "Starts in",
+    "tracks": {
+      "label": "Track",
+      "3_juz": "3 Juz",
+      "5_juz": "5 Juz",
+      "10_juz": "10 Juz",
+      "15_juz": "15 Juz",
+      "30_juz": "30 Juz"
+    },
+    "prayerTimes": {
+      "label": "Available Times",
+      "fajr": "Fajr",
+      "dhuhr": "Dhuhr",
+      "asr": "Asr",
+      "maghrib": "Maghrib",
+      "isha": "Isha",
+      "night": "Night"
+    },
+    "juzPicker": {
+      "label": "Select Juz",
+      "selected": "{{count}} selected",
+      "selectAll": "Select All (30 Juz)",
+      "juzNumber": "Juz {{number}}"
+    },
+    "partner": {
+      "label": "Your Partner",
+      "noPartner": "Awaiting partner assignment",
+      "meetingLink": "Meeting Link",
+      "joinMeeting": "Join",
+      "partnerMeetingLink": "Partner's Link",
+      "yourMeetingLink": "Your Link"
+    },
+    "progress": {
+      "title": "Progress",
+      "markComplete": "Mark Complete",
+      "completed": "Completed",
+      "pending": "Pending",
+      "juzProgress": "{{completed}}/{{total}} Juz",
+      "allComplete": "All Juz Completed!",
+      "eventNotActive": "Event has not started yet",
+      "completionCelebration": "Congratulations! You completed all your juz!"
+    },
+    "status": {
+      "upcoming": "Upcoming",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "registered": "Registered",
+      "paired": "Paired",
+      "in_progress": "In Progress",
+      "incomplete": "Incomplete"
+    },
+    "supervisor": {
+      "title": "Himam Management",
+      "createEvent": "Create Event",
+      "cancelEvent": "Cancel Event",
+      "cancelEventConfirm": "Cancel this event? All registrations will be cancelled.",
+      "runPairing": "Run Pairing",
+      "pairingSuccess": "Pairing completed: {{pairs}} pairs created, {{unpaired}} unpaired.",
+      "registrations": "Registrations",
+      "pairings": "Pairings",
+      "stats": "Statistics",
+      "unpaired": "Unpaired Students",
+      "swapPartners": "Swap Partners",
+      "completionRate": "Completion Rate",
+      "eventCancelled": "Event cancelled."
+    },
+    "history": {
+      "title": "Event History",
+      "noHistory": "No past events yet.",
+      "pastEvents": "Past Events"
+    },
+    "dashboard": {
+      "nextEvent": "Next Himam Event",
+      "viewDetails": "View Details"
+    },
+    "errors": {
+      "HIMAM_EVENT_NOT_FOUND": "Event not found.",
+      "HIMAM_REGISTRATION_CLOSED": "Registration is closed.",
+      "HIMAM_ALREADY_REGISTERED": "You are already registered for this event.",
+      "HIMAM_INVALID_TRACK": "Invalid track selected.",
+      "HIMAM_INVALID_JUZ_COUNT": "Number of juz does not match the selected track.",
+      "HIMAM_INVALID_JUZ_RANGE": "Juz values must be between 1 and 30 with no duplicates.",
+      "HIMAM_NOT_ENROLLED": "You are not enrolled in the Himam program.",
+      "HIMAM_REG_NOT_FOUND": "Registration not found.",
+      "HIMAM_ALREADY_PAIRED": "Cannot cancel after pairing.",
+      "HIMAM_DEADLINE_PASSED": "Registration deadline has passed.",
+      "HIMAM_NOT_PARTICIPANT": "You are not a participant in this event.",
+      "HIMAM_EVENT_NOT_ACTIVE": "Event is not active.",
+      "HIMAM_JUZ_NOT_IN_SELECTION": "This juz is not in your selection.",
+      "HIMAM_JUZ_ALREADY_COMPLETE": "This juz is already completed.",
+      "HIMAM_UNAUTHORIZED": "You do not have permission for this action.",
+      "HIMAM_DIFFERENT_EVENTS": "Both registrations must be for the same event.",
+      "HIMAM_EVENT_NOT_UPCOMING": "Event is not in upcoming status.",
+      "HIMAM_INVALID_DATE": "Event date must be a Saturday.",
+      "HIMAM_EVENT_EXISTS": "An event already exists for this date.",
+      "unknown": "An unexpected error occurred."
+    },
+    "notifications": {
+      "partnerAssignedTitle": "Partner Assigned!",
+      "partnerAssignedBody": "You've been paired with {{partnerName}} for this week's Himam marathon.",
+      "eventReminderTitle": "Himam Marathon Tomorrow!",
+      "eventReminderBody": "The weekly Himam marathon starts tomorrow at Fajr. Get ready!",
+      "eventCancelledTitle": "Event Cancelled",
+      "eventCancelledBody": "This week's Himam marathon has been cancelled."
+    }
   }
 }
