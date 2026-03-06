@@ -12,6 +12,7 @@ export default function SupervisorLayout() {
       <Stack.Screen name="himam/index" />
       <Stack.Screen name="himam/[eventId]/registrations" />
       <Stack.Screen name="himam/[eventId]/pairings" />
+      <Stack.Screen name="rewards/index" />
     </Stack>
   );
 }
