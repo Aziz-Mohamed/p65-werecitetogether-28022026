@@ -90,13 +90,22 @@ export function StickerDetailSheet({ item, onClose }: StickerDetailSheetProps) {
             {/* Name */}
             <Text style={styles.stickerName}>{name}</Text>
 
-            {/* Tier badge */}
+            {/* Tier badge + program label */}
             <View style={styles.badgeRow}>
               <View style={styles.tierBadge}>
                 <Text style={[styles.tierLabel, { color: tierColor }]}>
                   {t(`student.stickers.tier.${tier}`)}
                 </Text>
               </View>
+              {(item.sticker as Record<string, unknown>).program_id && (
+                <View style={styles.programBadge}>
+                  <Text style={styles.programLabel}>
+                    {isRTL
+                      ? ((item.sticker as Record<string, unknown>).programs as { name_ar?: string })?.name_ar
+                      : ((item.sticker as Record<string, unknown>).programs as { name?: string })?.name}
+                  </Text>
+                </View>
+              )}
             </View>
 
             {/* Stats summary */}
@@ -264,6 +273,17 @@ const styles = StyleSheet.create({
     fontSize: normalize(12),
     fontFamily: typography.fontFamily.semiBold,
     letterSpacing: 0.5,
+  },
+  programBadge: {
+    paddingHorizontal: normalize(12),
+    paddingVertical: normalize(5),
+    borderRadius: normalize(12),
+    backgroundColor: colors.accent.teal[50],
+  },
+  programLabel: {
+    fontSize: normalize(12),
+    fontFamily: typography.fontFamily.semiBold,
+    color: colors.accent.teal[700],
   },
   // ─── Stats ─────────────────────────────────────────
   statsContainer: {

@@ -30,6 +30,16 @@ interface StickerGridProps {
   onStickerPress?: (item: StickerCollectionItem) => void;
 }
 
+interface StickerGridGroupedProps {
+  sections: Array<{
+    programId: string | null;
+    programName: string | null;
+    programNameAr: string | null;
+    stickers: StickerCollectionItem[];
+  }>;
+  onStickerPress?: (item: StickerCollectionItem) => void;
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function StickerGrid({ collection, onStickerPress }: StickerGridProps) {
@@ -48,6 +58,42 @@ export function StickerGrid({ collection, onStickerPress }: StickerGridProps) {
   );
 
   return <View style={styles.grid}>{collection.map(renderItem)}</View>;
+}
+
+/** StickerGrid with program section headers for the award picker */
+export function StickerGridGrouped({ sections, onStickerPress }: StickerGridGroupedProps) {
+  const { t } = useTranslation();
+  const { isRTL } = useRTL();
+
+  return (
+    <View style={styles.groupedContainer}>
+      {sections.map((section) => {
+        const sectionLabel = section.programId === null
+          ? t('gamification.stickerSections.global')
+          : isRTL
+            ? section.programNameAr ?? section.programName ?? ''
+            : section.programName ?? '';
+
+        return (
+          <View key={section.programId ?? 'global'}>
+            {sections.length > 1 && (
+              <Text style={styles.sectionHeader}>{sectionLabel}</Text>
+            )}
+            <View style={styles.grid}>
+              {section.stickers.map((item) => (
+                <StickerCell
+                  key={item.sticker.id}
+                  item={item}
+                  isRTL={isRTL}
+                  onPress={onStickerPress ? () => onStickerPress(item) : undefined}
+                />
+              ))}
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
 }
 
 // ─── Cell ─────────────────────────────────────────────────────────────────────
@@ -109,6 +155,16 @@ function StickerCell({ item, isRTL, onPress }: StickerCellProps) {
 const CELL_SIZE = '47%' as const;
 
 const styles = StyleSheet.create({
+  groupedContainer: {
+    gap: spacing.lg,
+  },
+  sectionHeader: {
+    ...typography.textStyles.bodyMedium,
+    fontFamily: typography.fontFamily.bold,
+    color: colors.neutral[600],
+    marginBottom: spacing.sm,
+    paddingStart: spacing.xs,
+  },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

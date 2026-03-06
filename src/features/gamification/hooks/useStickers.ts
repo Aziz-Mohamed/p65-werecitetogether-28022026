@@ -3,22 +3,58 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { gamificationService } from '../services/gamification.service';
 import { mutationTracker } from '@/features/realtime';
 import { aggregateStickerCollection } from '../utils/sticker-aggregation';
-import type { AwardedSticker } from '../types/gamification.types';
+import type { AwardedSticker, StickerWithProgram } from '../types/gamification.types';
 
 /**
- * Fetch the global heritage sticker catalog (no school scope needed).
+ * Fetch sticker catalog, optionally filtered by program IDs.
+ * When programIds provided: returns global + program-scoped stickers, grouped.
+ * When omitted: returns only global stickers (backward-compatible).
  * Stale for 30 min since the catalog rarely changes.
  */
-export const useStickers = () => {
+export const useStickers = (programIds?: string[]) => {
   return useQuery({
-    queryKey: ['stickers'],
+    queryKey: ['stickers', ...(programIds ?? [])],
     queryFn: async () => {
-      const { data, error } = await gamificationService.getStickers();
+      const { data, error } = await gamificationService.getStickers(programIds);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as Array<StickerWithProgram & { programs: { name: string; name_ar: string } | null }>;
     },
     staleTime: 1000 * 60 * 30,
   });
+};
+
+/** Group stickers by program (null = global) for section rendering */
+export const useGroupedStickers = (programIds?: string[]) => {
+  const query = useStickers(programIds);
+
+  const grouped = useMemo(() => {
+    if (!query.data) return [];
+    const groups = new Map<string | null, { programId: string | null; programName: string | null; programNameAr: string | null; stickers: typeof query.data }>();
+
+    for (const sticker of query.data) {
+      const key = sticker.program_id ?? null;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          programId: key,
+          programName: key ? sticker.programs?.name ?? null : null,
+          programNameAr: key ? sticker.programs?.name_ar ?? null : null,
+          stickers: [],
+        });
+      }
+      groups.get(key)!.stickers.push(sticker);
+    }
+
+    // Global first, then programs alphabetically
+    const entries = [...groups.values()];
+    entries.sort((a, b) => {
+      if (a.programId === null) return -1;
+      if (b.programId === null) return 1;
+      return (a.programName ?? '').localeCompare(b.programName ?? '');
+    });
+    return entries;
+  }, [query.data]);
+
+  return { ...query, grouped };
 };
 
 /**
