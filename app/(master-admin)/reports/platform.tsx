@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { CartesianChart, Line, Bar } from 'victory-native';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -28,11 +28,7 @@ export default function MasterAdminReports() {
           />
         }
       >
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backText}>{t('common.back')}</Text>
-        </Pressable>
-
-        <Text style={styles.title}>{t('admin.masterAdmin.reports.title')}</Text>
+        <PageHeader title={t('admin.masterAdmin.reports.title')} />
 
         {/* Enrollment Trend */}
         <Text style={styles.sectionTitle}>{t('admin.masterAdmin.reports.enrollmentTrend')}</Text>
@@ -119,20 +115,6 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: spacing.xl,
     paddingBottom: spacing['3xl'],
-  },
-  backButton: {
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.sm,
-  },
-  backText: {
-    ...typography.textStyles.bodyMedium,
-    color: colors.primary[500],
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.base,
   },
   sectionTitle: {
     ...typography.textStyles.subheading,

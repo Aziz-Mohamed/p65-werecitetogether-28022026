@@ -6,7 +6,7 @@ import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button } from '@/components/ui/Button';
+import { PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { LoadingState, ErrorState } from '@/components/feedback';
@@ -168,16 +168,7 @@ export default function MemorizationReportScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <Button
-          title={t('common.back')}
-          onPress={() => router.back()}
-          variant="ghost"
-          size="sm"
-        />
-
-        <Text style={styles.title}>
-          {t('reports.memorization.title')}
-        </Text>
+        <PageHeader title={t('reports.memorization.title')} />
 
         {/* Insight Header */}
         {!isLoading && kpis && (
@@ -363,11 +354,6 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing['3xl'],
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    marginBottom: spacing.sm,
   },
   kpiRow: {
     flexDirection: 'row',

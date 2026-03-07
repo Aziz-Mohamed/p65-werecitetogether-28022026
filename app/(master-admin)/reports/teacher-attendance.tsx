@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button } from '@/components/ui/Button';
+import { PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui';
 import { LoadingState, ErrorState } from '@/components/feedback';
@@ -60,16 +60,7 @@ export default function TeacherAttendanceReportScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <Button
-          title={t('common.back')}
-          onPress={() => router.back()}
-          variant="ghost"
-          size="sm"
-        />
-
-        <Text style={styles.title}>
-          {t('reports.teacherAttendanceReport.title')}
-        </Text>
+        <PageHeader title={t('reports.teacherAttendanceReport.title')} />
 
         <TimePeriodFilter value={timePeriod} onChange={setTimePeriod} />
 
@@ -195,11 +186,6 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing['3xl'],
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    marginBottom: spacing.sm,
   },
   kpiRow: {
     flexDirection: 'row',

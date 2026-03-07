@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { FilterChips } from '@/components/lists/FilterChips';
-import { colors, lightTheme } from '@/theme/colors';
+import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { CertificationCard } from '@/features/certifications/components/CertificationCard';
@@ -53,11 +53,7 @@ export default function MasterAdminCertificationsScreen() {
   return (
     <Screen>
       <View style={styles.container}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backText}>{t('common.back')}</Text>
-        </Pressable>
-
-        <Text style={styles.title}>{t('certifications.masterAdmin.title')}</Text>
+        <PageHeader title={t('certifications.masterAdmin.title')} />
 
         <View style={styles.filterSection}>
           <FilterChips
@@ -129,20 +125,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: spacing.xl,
-  },
-  backButton: {
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.sm,
-  },
-  backText: {
-    ...typography.textStyles.bodyMedium,
-    color: colors.primary[500],
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.sm,
   },
   filterSection: {
     marginBottom: spacing.sm,

@@ -1,15 +1,14 @@
 import React, { useState, useCallback } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button } from '@/components/ui/Button';
+import { PageHeader } from '@/components/layout';
 import { useAuth } from '@/hooks/useAuth';
 import { spacing } from '@/theme/spacing';
 import { lightTheme } from '@/theme/colors';
-import { typography } from '@/theme/typography';
 
 import { useTimePeriod } from '@/features/reports/hooks/useTimePeriod';
 import { useTeacherActivity } from '@/features/reports/hooks/useAdminReports';
@@ -43,16 +42,7 @@ export default function TeacherActivityScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <Button
-          title={t('common.back')}
-          onPress={() => router.back()}
-          variant="ghost"
-          size="sm"
-        />
-
-        <Text style={styles.title}>
-          {t('reports.teacherActivity')}
-        </Text>
+        <PageHeader title={t('reports.teacherActivity')} />
 
         <TimePeriodFilter value={timePeriod} onChange={setTimePeriod} />
 
@@ -102,10 +92,5 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing['3xl'],
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    marginBottom: spacing.sm,
   },
 });

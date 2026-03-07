@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, Alert, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/forms/Select';
@@ -32,7 +31,6 @@ const STATUS_COLORS: Record<AttendanceStatus, string> = {
 
 export default function BulkAttendanceScreen() {
   const { t } = useTranslation();
-  const router = useRouter();
   const { profile } = useAuth();
 
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
@@ -135,14 +133,7 @@ export default function BulkAttendanceScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <Button
-          title={t('common.back')}
-          onPress={() => router.back()}
-          variant="ghost"
-          size="sm"
-        />
-
-        <Text style={styles.title}>{t('admin.attendance.title')}</Text>
+        <PageHeader title={t('admin.attendance.title')} />
         <Text style={styles.description}>{t('admin.attendance.subtitle')}</Text>
 
         {/* Class Selector */}
@@ -239,10 +230,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.md,
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
   },
   description: {
     ...typography.textStyles.body,

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Alert, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,7 +17,6 @@ import { normalize } from '@/theme/normalize';
 
 export default function PermissionsSettings() {
   const { t } = useTranslation();
-  const router = useRouter();
   const { schoolId } = useAuth();
 
   const { data: settings, isLoading, error, refetch } = useSchoolSettings(schoolId ?? undefined);
@@ -54,14 +52,7 @@ export default function PermissionsSettings() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <Button
-          title={t('common.back')}
-          onPress={() => router.back()}
-          variant="ghost"
-          size="sm"
-        />
-
-        <Text style={styles.title}>{t('admin.permissions.title')}</Text>
+        <PageHeader title={t('admin.permissions.title')} />
         <Text style={styles.description}>{t('admin.permissions.description')}</Text>
 
         {/* Teacher Session Creation Toggle */}
@@ -118,10 +109,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.md,
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
   },
   description: {
     ...typography.textStyles.body,
