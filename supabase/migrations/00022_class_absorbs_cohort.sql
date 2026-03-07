@@ -139,14 +139,14 @@ SET search_path TO 'public'
 AS $$
 BEGIN
   -- On approval: assign student to the enrollment's class
-  IF NEW.status = 'active' AND (OLD IS NULL OR OLD.status != 'active') THEN
+  IF NEW.status = 'active' AND (TG_OP = 'INSERT' OR OLD.status != 'active') THEN
     IF NEW.class_id IS NOT NULL THEN
       UPDATE students SET class_id = NEW.class_id WHERE id = NEW.student_id;
     END IF;
   END IF;
 
   -- On drop: clear class assignment if it matches
-  IF NEW.status = 'dropped' AND OLD IS NOT NULL AND OLD.status = 'active' THEN
+  IF NEW.status = 'dropped' AND TG_OP = 'UPDATE' AND OLD.status = 'active' THEN
     IF NEW.class_id IS NOT NULL THEN
       UPDATE students SET class_id = NULL
       WHERE id = NEW.student_id AND class_id = NEW.class_id;
