@@ -268,7 +268,7 @@ export default function MemorizationReportScreen() {
           summaries.map((student) => (
             <Pressable
               key={student.student_id}
-              onPress={() => router.push(`/(admin)/students/${student.student_id}` as any)}
+              onPress={() => router.push(`/(master-admin)/students/${student.student_id}` as any)}
             >
               <StudentMemCard student={student} />
             </Pressable>

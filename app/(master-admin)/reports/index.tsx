@@ -123,7 +123,7 @@ export default function AdminReportsScreen() {
                   value: `${pulse.teacherEngagement.sessionCompletionRate}%`,
                 },
               ]}
-              onPress={() => router.push('/(admin)/reports/teacher-activity')}
+              onPress={() => router.push('/(master-admin)/reports/teacher-activity')}
             />
 
             {/* Pillar 3: Academic Progress */}
@@ -183,13 +183,13 @@ export default function AdminReportsScreen() {
                     })
                   : '--'
               }
-              onPress={() => router.push('/(admin)/reports/teacher-activity')}
+              onPress={() => router.push('/(master-admin)/reports/teacher-activity')}
             />
             <QuickReportLink
               title={t('reports.teacherAttendanceReport.title')}
               icon="time-outline"
               metricLabel={t('insights.viewDetails')}
-              onPress={() => router.push('/(admin)/reports/teacher-attendance')}
+              onPress={() => router.push('/(master-admin)/reports/teacher-attendance')}
             />
             <QuickReportLink
               title={t('reports.sessionCompletion.title')}
@@ -199,13 +199,13 @@ export default function AdminReportsScreen() {
                   ? `${pulse.teacherEngagement.sessionCompletionRate}% ${t('insights.completionRate')}`
                   : '--'
               }
-              onPress={() => router.push('/(admin)/reports/session-completion')}
+              onPress={() => router.push('/(master-admin)/reports/session-completion')}
             />
             <QuickReportLink
               title={t('reports.memorization.title')}
               icon="book-outline"
               metricLabel={t('insights.viewDetails')}
-              onPress={() => router.push('/(admin)/reports/memorization')}
+              onPress={() => router.push('/(master-admin)/reports/memorization')}
             />
           </View>
         </View>

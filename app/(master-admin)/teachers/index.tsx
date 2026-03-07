@@ -7,26 +7,25 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui';
 import { Button } from '@/components/ui/Button';
 import { SearchBar } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { useClasses } from '@/features/classes/hooks/useClasses';
+import { useTeachers } from '@/features/teachers/hooks/useTeachers';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
 
-// ─── Admin Classes List ───────────────────────────────────────────────────────
+// ─── Admin Teachers List ──────────────────────────────────────────────────────
 
-export default function AdminClassesScreen() {
+export default function AdminTeachersScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
 
   const { resolveName } = useLocalizedName();
-  const { data: classes = [], isLoading, error, refetch } = useClasses({
+  const { data: teachers = [], isLoading, error, refetch } = useTeachers({
     searchQuery: searchQuery || undefined,
   });
 
@@ -43,10 +42,10 @@ export default function AdminClassesScreen() {
             variant="ghost"
             size="sm"
           />
-          <Text style={styles.title}>{t('admin.classes.title')}</Text>
+          <Text style={styles.title}>{t('admin.teachers.title')}</Text>
           <Button
-            title={t('admin.addClass')}
-            onPress={() => router.push('/(admin)/classes/create')}
+            title={t('admin.addTeacher')}
+            onPress={() => router.push('/(master-admin)/teachers/create')}
             variant="primary"
             size="sm"
             icon={<Ionicons name="add" size={18} color={colors.white} />}
@@ -57,42 +56,37 @@ export default function AdminClassesScreen() {
           value={searchQuery}
           onChangeText={setSearchQuery}
           onClear={() => setSearchQuery('')}
-          placeholder={t('admin.classes.searchPlaceholder')}
+          placeholder={t('admin.teachers.searchPlaceholder')}
           style={styles.searchBar}
         />
 
-        {classes.length === 0 ? (
+        {teachers.length === 0 ? (
           <EmptyState
-            icon="albums-outline"
-            title={t('admin.classes.emptyTitle')}
-            description={t('admin.classes.emptyDescription')}
+            icon="school-outline"
+            title={t('admin.teachers.emptyTitle')}
+            description={t('admin.teachers.emptyDescription')}
           />
         ) : (
           <FlashList
-            data={classes}
+            data={teachers}
             keyExtractor={(item: any) => item.id}
 
             renderItem={({ item }: { item: any }) => (
               <Card
                 variant="outlined"
-                style={styles.classCard}
-                onPress={() => router.push(`/(admin)/classes/${item.id}`)}
+                style={styles.teacherCard}
+                onPress={() => router.push(`/(master-admin)/teachers/${item.id}`)}
               >
-                <View style={styles.classRow}>
-                  <View style={styles.classInfo}>
-                    <Text style={styles.className}>{resolveName(item.name_localized, item.name)}</Text>
-                    <Text style={styles.classMeta}>
-                      {item.profiles?.full_name
-                        ? `${t('admin.classes.teacher')}: ${resolveName(item.profiles?.name_localized, item.profiles?.full_name)}`
-                        : t('admin.classes.noTeacher')}
-                      {` · ${item.students?.length ?? 0} ${t('admin.classes.students')}`}
+                <View style={styles.teacherRow}>
+                  <View style={styles.teacherInfo}>
+                    <Text style={styles.teacherName}>{resolveName(item.name_localized, item.full_name)}</Text>
+                    <Text style={styles.teacherMeta}>
+                      @{item.username ?? '—'}
+                      {(item.classes?.length ?? 0) > 0
+                        ? ` · ${item.classes.length} ${t('admin.teachers.classes')}`
+                        : ''}
                     </Text>
                   </View>
-                  <Badge
-                    label={item.is_active ? t('common.active') : t('common.inactive')}
-                    variant={item.is_active ? 'success' : 'warning'}
-                    size="sm"
-                  />
                 </View>
               </Card>
             )}
@@ -125,23 +119,23 @@ const styles = StyleSheet.create({
   searchBar: {
     marginBottom: spacing.xs,
   },
-  classCard: {
+  teacherCard: {
     marginBottom: spacing.sm,
   },
-  classRow: {
+  teacherRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  classInfo: {
+  teacherInfo: {
     flex: 1,
   },
-  className: {
+  teacherName: {
     ...typography.textStyles.body,
     color: lightTheme.text,
     fontFamily: typography.fontFamily.semiBold,
   },
-  classMeta: {
+  teacherMeta: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
     marginTop: normalize(2),

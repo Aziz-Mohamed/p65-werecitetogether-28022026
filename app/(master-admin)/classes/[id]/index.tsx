@@ -118,7 +118,7 @@ export default function ClassDetailScreen() {
         <View style={styles.actions}>
           <Button
             title={t('common.edit')}
-            onPress={() => router.push(`/(admin)/classes/${id}/edit`)}
+            onPress={() => router.push(`/(master-admin)/classes/${id}/edit`)}
             variant="secondary"
             size="md"
             icon={<Ionicons name="create-outline" size={18} color={colors.primary[500]} />}

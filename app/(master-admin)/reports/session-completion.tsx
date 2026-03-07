@@ -120,7 +120,7 @@ export default function SessionCompletionReportScreen() {
           stats.map((stat) => (
             <Pressable
               key={stat.teacherId}
-              onPress={() => router.push(`/(admin)/teachers/${stat.teacherId}` as any)}
+              onPress={() => router.push(`/(master-admin)/teachers/${stat.teacherId}` as any)}
             >
               <SessionCompletionCard stat={stat} />
             </Pressable>

@@ -121,7 +121,7 @@ export default function TeacherAttendanceReportScreen() {
           teachers.map((teacher) => (
             <Pressable
               key={teacher.teacherId}
-              onPress={() => router.push(`/(admin)/teachers/${teacher.teacherId}` as any)}
+              onPress={() => router.push(`/(master-admin)/teachers/${teacher.teacherId}` as any)}
             >
               <TeacherAttendanceCard teacher={teacher} />
             </Pressable>

@@ -84,7 +84,6 @@ export default function RootLayout() {
               <Stack.Screen name="(student)" />
               <Stack.Screen name="(teacher)" />
               <Stack.Screen name="(parent)" />
-              <Stack.Screen name="(admin)" />
               <Stack.Screen name="(supervisor)" />
               <Stack.Screen name="(program-admin)" />
               <Stack.Screen name="(master-admin)" />
@@ -101,8 +100,8 @@ export default function RootLayout() {
 
 /** Map extended roles to notification-compatible 4-role subset */
 function toNotifRole(role: string | null): NotifUserRole {
-  if (role === 'student' || role === 'teacher' || role === 'parent' || role === 'admin') return role;
-  return 'admin';
+  if (role === 'student' || role === 'teacher' || role === 'parent') return role;
+  return 'admin'; // all admin-tier roles map to 'admin' for notifications
 }
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -252,9 +251,6 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
             break;
           case 'parent':
             router.replace('/(parent)/');
-            break;
-          case 'admin':
-            router.replace('/(admin)/');
             break;
           case 'supervisor':
             router.replace('/(supervisor)/');
