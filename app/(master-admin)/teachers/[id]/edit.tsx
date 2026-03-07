@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { LocalizedNameInput } from '@/components/forms/LocalizedNameInput';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { useTeacherById, useUpdateTeacher } from '@/features/teachers/hooks/useTeachers';
 import { buildNameLocalized, getCanonicalName } from '@/lib/localized-name';
-import { typography } from '@/theme/typography';
-import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 // ─── Edit Teacher Screen ─────────────────────────────────────────────────────
@@ -57,14 +55,7 @@ export default function EditTeacherScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <Button
-          title={t('common.back')}
-          onPress={() => router.back()}
-          variant="ghost"
-          size="sm"
-        />
-
-        <Text style={styles.title}>{t('admin.teachers.editTitle')}</Text>
+        <PageHeader title={t('admin.teachers.editTitle')} />
 
         <LocalizedNameInput
           label={t('admin.teachers.fullName')}
@@ -100,10 +91,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.md,
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
   },
   submitButton: {
     marginTop: spacing.md,

@@ -5,9 +5,8 @@ import { useRouter } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { SearchBar } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
@@ -34,16 +33,7 @@ export default function AdminSupervisorsScreen() {
   return (
     <Screen scroll={false}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Button
-            title={t('common.back')}
-            onPress={() => router.back()}
-            variant="ghost"
-            size="sm"
-          />
-          <Text style={styles.title}>{t('admin.supervisors.title')}</Text>
-          <View style={styles.headerSpacer} />
-        </View>
+        <PageHeader title={t('admin.supervisors.title')} />
 
         <SearchBar
           value={searchQuery}
@@ -104,20 +94,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerSpacer: {
-    width: normalize(80),
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
   },
   searchBar: {
     marginBottom: spacing.xs,

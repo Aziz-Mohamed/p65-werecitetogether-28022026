@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { Select } from '@/components/forms/Select';
@@ -20,7 +19,6 @@ import { spacing } from '@/theme/spacing';
 
 export default function ResetPasswordScreen() {
   const { t } = useTranslation();
-  const router = useRouter();
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
@@ -74,14 +72,7 @@ export default function ResetPasswordScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <Button
-          title={t('common.back')}
-          onPress={() => router.back()}
-          variant="ghost"
-          size="sm"
-        />
-
-        <Text style={styles.title}>{t('admin.resetPassword.title')}</Text>
+        <PageHeader title={t('admin.resetPassword.title')} />
         <Text style={styles.description}>{t('admin.resetPassword.description')}</Text>
 
         <Select
@@ -120,10 +111,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.md,
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
   },
   description: {
     ...typography.textStyles.body,
