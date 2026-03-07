@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.4"
   }
   public: {
     Tables: {
@@ -82,6 +82,131 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      certifications: {
+        Row: {
+          certificate_number: string | null
+          chain_of_narration: string | null
+          created_at: string
+          id: string
+          issue_date: string | null
+          issued_by: string | null
+          metadata: Json
+          notes: string | null
+          program_id: string
+          review_notes: string | null
+          reviewed_by: string | null
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          title: string
+          title_ar: string | null
+          track_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          certificate_number?: string | null
+          chain_of_narration?: string | null
+          created_at?: string
+          id?: string
+          issue_date?: string | null
+          issued_by?: string | null
+          metadata?: Json
+          notes?: string | null
+          program_id: string
+          review_notes?: string | null
+          reviewed_by?: string | null
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          student_id: string
+          teacher_id: string
+          title: string
+          title_ar?: string | null
+          track_id?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          certificate_number?: string | null
+          chain_of_narration?: string | null
+          created_at?: string
+          id?: string
+          issue_date?: string | null
+          issued_by?: string | null
+          metadata?: Json
+          notes?: string | null
+          program_id?: string
+          review_notes?: string | null
+          reviewed_by?: string | null
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          title?: string
+          title_ar?: string | null
+          track_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certifications_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certifications_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "program_tracks"
             referencedColumns: ["id"]
           },
         ]
@@ -185,6 +310,369 @@ export type Database = {
           {
             foreignKeyName: "classes_teacher_id_fkey"
             columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cohorts: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          max_students: number
+          meeting_link: string | null
+          name: string
+          program_id: string
+          schedule: Json | null
+          start_date: string | null
+          status: string
+          supervisor_id: string | null
+          teacher_id: string
+          track_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          max_students?: number
+          meeting_link?: string | null
+          name: string
+          program_id: string
+          schedule?: Json | null
+          start_date?: string | null
+          status?: string
+          supervisor_id?: string | null
+          teacher_id: string
+          track_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          max_students?: number
+          meeting_link?: string | null
+          name?: string
+          program_id?: string
+          schedule?: Json | null
+          start_date?: string | null
+          status?: string
+          supervisor_id?: string | null
+          teacher_id?: string
+          track_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cohorts_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cohorts_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cohorts_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cohorts_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "program_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_session_counts: {
+        Row: {
+          created_at: string
+          id: string
+          program_id: string
+          session_count: number
+          session_date: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          program_id: string
+          session_count?: number
+          session_date: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          program_id?: string
+          session_count?: number
+          session_date?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_session_counts_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_session_counts_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enrollments: {
+        Row: {
+          cohort_id: string | null
+          completed_at: string | null
+          created_at: string
+          enrolled_at: string
+          id: string
+          program_id: string
+          status: string
+          student_id: string
+          teacher_id: string | null
+          track_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          cohort_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          program_id: string
+          status?: string
+          student_id: string
+          teacher_id?: string | null
+          track_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cohort_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          program_id?: string
+          status?: string
+          student_id?: string
+          teacher_id?: string | null
+          track_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "program_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      himam_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_time: string
+          event_date: string
+          id: string
+          program_id: string
+          registration_deadline: string
+          start_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_time?: string
+          event_date: string
+          id?: string
+          program_id: string
+          registration_deadline: string
+          start_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_time?: string
+          event_date?: string
+          id?: string
+          program_id?: string
+          registration_deadline?: string
+          start_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "himam_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "himam_events_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      himam_progress: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          juz_number: number
+          notes: string | null
+          registration_id: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          juz_number: number
+          notes?: string | null
+          registration_id: string
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          juz_number?: number
+          notes?: string | null
+          registration_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "himam_progress_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "himam_progress_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "himam_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      himam_registrations: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          partner_id: string | null
+          selected_juz: number[]
+          status: string
+          student_id: string
+          time_slots: Json
+          track: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          partner_id?: string | null
+          selected_juz: number[]
+          status?: string
+          student_id: string
+          time_slots?: Json
+          track: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          partner_id?: string | null
+          selected_juz?: number[]
+          status?: string
+          student_id?: string
+          time_slots?: Json
+          track?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "himam_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "himam_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "himam_registrations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "himam_registrations_student_id_fkey"
+            columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -352,51 +840,194 @@ export type Database = {
           },
         ]
       }
+      milestone_badges: {
+        Row: {
+          category: string
+          created_at: string
+          description_ar: string
+          description_en: string
+          icon: string
+          id: string
+          name_ar: string
+          name_en: string
+          sort_order: number
+          threshold: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description_ar: string
+          description_en: string
+          icon: string
+          id: string
+          name_ar: string
+          name_en: string
+          sort_order?: number
+          threshold: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description_ar?: string
+          description_en?: string
+          icon?: string
+          id?: string
+          name_ar?: string
+          name_en?: string
+          sort_order?: number
+          threshold?: number
+        }
+        Relationships: []
+      }
+      mutoon_progress: {
+        Row: {
+          certified_at: string | null
+          certified_by: string | null
+          created_at: string
+          current_line: number
+          id: string
+          last_reviewed_at: string | null
+          notes: string | null
+          program_id: string
+          review_count: number
+          status: string
+          student_id: string
+          total_lines: number
+          track_id: string
+          updated_at: string
+        }
+        Insert: {
+          certified_at?: string | null
+          certified_by?: string | null
+          created_at?: string
+          current_line?: number
+          id?: string
+          last_reviewed_at?: string | null
+          notes?: string | null
+          program_id: string
+          review_count?: number
+          status?: string
+          student_id: string
+          total_lines?: number
+          track_id: string
+          updated_at?: string
+        }
+        Update: {
+          certified_at?: string | null
+          certified_by?: string | null
+          created_at?: string
+          current_line?: number
+          id?: string
+          last_reviewed_at?: string | null
+          notes?: string | null
+          program_id?: string
+          review_count?: number
+          status?: string
+          student_id?: string
+          total_lines?: number
+          track_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mutoon_progress_certified_by_fkey"
+            columns: ["certified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mutoon_progress_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mutoon_progress_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mutoon_progress_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "program_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           achievement_unlocked: boolean
           attendance_marked: boolean
           created_at: string
           daily_summary: boolean
+          draft_expired: boolean | null
+          flagged_review_alert: boolean
+          low_rating_alert: boolean
+          queue_available: boolean
           quiet_hours_enabled: boolean
           quiet_hours_end: string | null
           quiet_hours_start: string | null
+          rating_prompt: boolean
+          recovered_alert: boolean
           session_completed: boolean
           sticker_awarded: boolean
           student_alert: boolean
+          teacher_demand: boolean
           trophy_earned: boolean
           updated_at: string
           user_id: string
+          voice_memo_received: boolean | null
         }
         Insert: {
           achievement_unlocked?: boolean
           attendance_marked?: boolean
           created_at?: string
           daily_summary?: boolean
+          draft_expired?: boolean | null
+          flagged_review_alert?: boolean
+          low_rating_alert?: boolean
+          queue_available?: boolean
           quiet_hours_enabled?: boolean
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
+          rating_prompt?: boolean
+          recovered_alert?: boolean
           session_completed?: boolean
           sticker_awarded?: boolean
           student_alert?: boolean
+          teacher_demand?: boolean
           trophy_earned?: boolean
           updated_at?: string
           user_id: string
+          voice_memo_received?: boolean | null
         }
         Update: {
           achievement_unlocked?: boolean
           attendance_marked?: boolean
           created_at?: string
           daily_summary?: boolean
+          draft_expired?: boolean | null
+          flagged_review_alert?: boolean
+          low_rating_alert?: boolean
+          queue_available?: boolean
           quiet_hours_enabled?: boolean
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
+          rating_prompt?: boolean
+          recovered_alert?: boolean
           session_completed?: boolean
           sticker_awarded?: boolean
           student_alert?: boolean
+          teacher_demand?: boolean
           trophy_earned?: boolean
           updated_at?: string
           user_id?: string
+          voice_memo_received?: boolean | null
         }
         Relationships: [
           {
@@ -408,43 +1039,91 @@ export type Database = {
           },
         ]
       }
+      platform_config: {
+        Row: {
+          default_meeting_platform: string | null
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          name_ar: string
+          settings: Json
+          updated_at: string
+        }
+        Insert: {
+          default_meeting_platform?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          name_ar?: string
+          settings?: Json
+          updated_at?: string
+        }
+        Update: {
+          default_meeting_platform?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          name_ar?: string
+          settings?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           full_name: string
           id: string
+          languages: string[] | null
+          meeting_link: string | null
+          meeting_platform: string | null
           name_localized: Json
+          onboarding_completed: boolean
           phone: string | null
           preferred_language: string
           role: string
-          school_id: string
+          school_id: string | null
           updated_at: string
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           full_name: string
           id: string
+          languages?: string[] | null
+          meeting_link?: string | null
+          meeting_platform?: string | null
           name_localized?: Json
+          onboarding_completed?: boolean
           phone?: string | null
           preferred_language?: string
           role: string
-          school_id: string
+          school_id?: string | null
           updated_at?: string
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           full_name?: string
           id?: string
+          languages?: string[] | null
+          meeting_link?: string | null
+          meeting_platform?: string | null
           name_localized?: Json
+          onboarding_completed?: boolean
           phone?: string | null
           preferred_language?: string
           role?: string
-          school_id?: string
+          school_id?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -457,6 +1136,288 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      program_queue_entries: {
+        Row: {
+          claim_expires_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          notified_at: string | null
+          position: number
+          program_id: string
+          status: string
+          student_id: string
+        }
+        Insert: {
+          claim_expires_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          notified_at?: string | null
+          position: number
+          program_id: string
+          status?: string
+          student_id: string
+        }
+        Update: {
+          claim_expires_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          notified_at?: string | null
+          position?: number
+          program_id?: string
+          status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_queue_entries_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_queue_entries_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_roles: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          id: string
+          profile_id: string
+          program_id: string
+          role: string
+          supervisor_id: string | null
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          profile_id: string
+          program_id: string
+          role: string
+          supervisor_id?: string | null
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          profile_id?: string
+          program_id?: string
+          role?: string
+          supervisor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_roles_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_roles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_roles_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_roles_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_tracks: {
+        Row: {
+          created_at: string
+          curriculum: Json | null
+          description: string | null
+          description_ar: string | null
+          id: string
+          is_active: boolean
+          name: string
+          name_ar: string
+          program_id: string
+          sort_order: number
+          track_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          curriculum?: Json | null
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_ar: string
+          program_id: string
+          sort_order?: number
+          track_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          curriculum?: Json | null
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_ar?: string
+          program_id?: string
+          sort_order?: number
+          track_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_tracks_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_waitlist: {
+        Row: {
+          cohort_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          notified_at: string | null
+          position: number
+          program_id: string
+          status: string
+          student_id: string
+          track_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          cohort_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          notified_at?: string | null
+          position?: number
+          program_id: string
+          status?: string
+          student_id: string
+          track_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cohort_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          notified_at?: string | null
+          position?: number
+          program_id?: string
+          status?: string
+          student_id?: string
+          track_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_waitlist_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_waitlist_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_waitlist_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_waitlist_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "program_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      programs: {
+        Row: {
+          category: string
+          created_at: string
+          daily_session_limit: number | null
+          description: string | null
+          description_ar: string | null
+          id: string
+          is_active: boolean
+          name: string
+          name_ar: string
+          queue_notification_threshold: number | null
+          settings: Json
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          daily_session_limit?: number | null
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_ar: string
+          queue_notification_threshold?: number | null
+          settings?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          daily_session_limit?: number | null
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_ar?: string
+          queue_notification_threshold?: number | null
+          settings?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       push_tokens: {
         Row: {
@@ -528,6 +1489,48 @@ export type Database = {
           start_surah?: number
         }
         Relationships: []
+      }
+      rating_exclusion_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          performed_by: string
+          rating_id: string
+          reason: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          performed_by: string
+          rating_id: string
+          reason: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          performed_by?: string
+          rating_id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rating_exclusion_log_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rating_exclusion_log_rating_id_fkey"
+            columns: ["rating_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_ratings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       recitations: {
         Row: {
@@ -896,6 +1899,57 @@ export type Database = {
           },
         ]
       }
+      session_voice_memos: {
+        Row: {
+          created_at: string
+          duration_seconds: number
+          expires_at: string
+          file_size_bytes: number
+          id: string
+          is_expired: boolean
+          session_id: string
+          storage_path: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds: number
+          expires_at: string
+          file_size_bytes: number
+          id?: string
+          is_expired?: boolean
+          session_id: string
+          storage_path: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number
+          expires_at?: string
+          file_size_bytes?: number
+          id?: string
+          is_expired?: boolean
+          session_id?: string
+          storage_path?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_voice_memos_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_voice_memos_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
           class_id: string | null
@@ -903,10 +1957,12 @@ export type Database = {
           id: string
           memorization_score: number | null
           notes: string | null
+          program_id: string | null
           recitation_quality: number | null
           scheduled_session_id: string | null
           school_id: string
           session_date: string
+          status: string | null
           student_id: string
           tajweed_score: number | null
           teacher_id: string
@@ -917,10 +1973,12 @@ export type Database = {
           id?: string
           memorization_score?: number | null
           notes?: string | null
+          program_id?: string | null
           recitation_quality?: number | null
           scheduled_session_id?: string | null
           school_id: string
           session_date?: string
+          status?: string | null
           student_id: string
           tajweed_score?: number | null
           teacher_id: string
@@ -931,10 +1989,12 @@ export type Database = {
           id?: string
           memorization_score?: number | null
           notes?: string | null
+          program_id?: string | null
           recitation_quality?: number | null
           scheduled_session_id?: string | null
           school_id?: string
           session_date?: string
+          status?: string | null
           student_id?: string
           tajweed_score?: number | null
           teacher_id?: string
@@ -945,6 +2005,13 @@ export type Database = {
             columns: ["class_id"]
             isOneToOne: false
             referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
             referencedColumns: ["id"]
           },
           {
@@ -985,6 +2052,7 @@ export type Database = {
           is_active: boolean
           name_ar: string
           name_en: string
+          program_id: string | null
           tier: string
         }
         Insert: {
@@ -994,6 +2062,7 @@ export type Database = {
           is_active?: boolean
           name_ar: string
           name_en: string
+          program_id?: string | null
           tier?: string
         }
         Update: {
@@ -1003,9 +2072,111 @@ export type Database = {
           is_active?: boolean
           name_ar?: string
           name_en?: string
+          program_id?: string | null
           tier?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "stickers_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          program_id: string
+          student_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          program_id: string
+          student_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          program_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "milestone_badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_badges_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_badges_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_guardians: {
+        Row: {
+          created_at: string
+          guardian_email: string | null
+          guardian_name: string
+          guardian_phone: string | null
+          id: string
+          is_primary: boolean
+          notes: string | null
+          relationship: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          guardian_email?: string | null
+          guardian_name: string
+          guardian_phone?: string | null
+          id?: string
+          is_primary?: boolean
+          notes?: string | null
+          relationship?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          guardian_email?: string | null
+          guardian_name?: string
+          guardian_phone?: string | null
+          id?: string
+          is_primary?: boolean
+          notes?: string | null
+          relationship?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_guardians_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       student_rub_certifications: {
         Row: {
@@ -1194,6 +2365,57 @@ export type Database = {
           },
         ]
       }
+      teacher_availability: {
+        Row: {
+          active_student_count: number
+          available_since: string | null
+          created_at: string
+          id: string
+          is_available: boolean
+          max_students: number
+          program_id: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          active_student_count?: number
+          available_since?: string | null
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          max_students?: number
+          program_id: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          active_student_count?: number
+          available_since?: string | null
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          max_students?: number
+          program_id?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_availability_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_availability_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teacher_checkins: {
         Row: {
           checked_in_at: string
@@ -1292,6 +2514,134 @@ export type Database = {
           },
         ]
       }
+      teacher_rating_stats: {
+        Row: {
+          average_rating: number
+          common_constructive_tags: string[] | null
+          common_positive_tags: string[] | null
+          last_30_days_avg: number | null
+          prior_30_days_avg: number | null
+          program_id: string
+          star_distribution: Json
+          teacher_id: string
+          total_reviews: number
+          trend_direction: string | null
+          updated_at: string
+        }
+        Insert: {
+          average_rating?: number
+          common_constructive_tags?: string[] | null
+          common_positive_tags?: string[] | null
+          last_30_days_avg?: number | null
+          prior_30_days_avg?: number | null
+          program_id: string
+          star_distribution?: Json
+          teacher_id: string
+          total_reviews?: number
+          trend_direction?: string | null
+          updated_at?: string
+        }
+        Update: {
+          average_rating?: number
+          common_constructive_tags?: string[] | null
+          common_positive_tags?: string[] | null
+          last_30_days_avg?: number | null
+          prior_30_days_avg?: number | null
+          program_id?: string
+          star_distribution?: Json
+          teacher_id?: string
+          total_reviews?: number
+          trend_direction?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_rating_stats_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_rating_stats_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          is_excluded: boolean
+          is_flagged: boolean
+          program_id: string
+          session_id: string | null
+          star_rating: number
+          student_id: string
+          tags: string[] | null
+          teacher_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_excluded?: boolean
+          is_flagged?: boolean
+          program_id: string
+          session_id?: string | null
+          star_rating: number
+          student_id: string
+          tags?: string[] | null
+          teacher_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_excluded?: boolean
+          is_flagged?: boolean
+          program_id?: string
+          session_id?: string | null
+          star_rating?: number
+          student_id?: string
+          tags?: string[] | null
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_ratings_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_ratings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_ratings_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_ratings_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teacher_work_schedules: {
         Row: {
           created_at: string
@@ -1348,6 +2698,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_master_admin_role: {
+        Args: { p_assigned_by: string; p_user_id: string }
+        Returns: undefined
+      }
+      cancel_himam_event: { Args: { p_event_id: string }; Returns: undefined }
+      cancel_himam_registration: {
+        Args: { p_registration_id: string }
+        Returns: undefined
+      }
+      check_enrollment_duration_milestones: { Args: never; Returns: undefined }
+      check_session_milestones: {
+        Args: { p_program_id: string; p_student_id: string }
+        Returns: undefined
+      }
+      check_streak_milestones: {
+        Args: { p_student_id: string }
+        Returns: undefined
+      }
+      claim_queue_slot: { Args: { p_entry_id: string }; Returns: Json }
+      create_himam_event: { Args: { p_event_date: string }; Returns: Json }
+      enroll_student: {
+        Args: {
+          p_cohort_id?: string
+          p_program_id: string
+          p_track_id?: string
+        }
+        Returns: string
+      }
+      exclude_rating: {
+        Args: { p_rating_id: string; p_reason: string }
+        Returns: Json
+      }
+      generate_himam_pairings: { Args: { p_event_id: string }; Returns: Json }
       get_attendance_trend: {
         Args: {
           p_class_id?: string
@@ -1363,6 +2746,25 @@ export type Database = {
           excused_count: number
           late_count: number
           present_count: number
+        }[]
+      }
+      get_certification_pipeline: {
+        Args: { p_program_id: string }
+        Returns: Json
+      }
+      get_certification_queue: {
+        Args: { p_program_id: string; p_role: string }
+        Returns: {
+          created_at: string
+          id: string
+          program_name: string
+          status: string
+          student_avatar: string
+          student_name: string
+          teacher_name: string
+          title: string
+          track_name: string
+          type: string
         }[]
       }
       get_child_score_trend: {
@@ -1383,6 +2785,9 @@ export type Database = {
           class_avg_tajweed: number
         }[]
       }
+      get_daily_session_count: { Args: { p_program_id: string }; Returns: Json }
+      get_himam_event_stats: { Args: { p_event_id: string }; Returns: Json }
+      get_master_admin_dashboard_stats: { Args: never; Returns: Json }
       get_period_comparison: {
         Args: {
           p_class_id?: string
@@ -1405,6 +2810,24 @@ export type Database = {
           previous_stickers: number
         }[]
       }
+      get_program_admin_dashboard_stats: {
+        Args: { p_program_id: string }
+        Returns: Json
+      }
+      get_program_demand: { Args: { p_program_id: string }; Returns: Json }
+      get_program_leaderboard: {
+        Args: { p_limit?: number; p_program_id: string; p_student_id?: string }
+        Returns: {
+          avatar_url: string
+          current_level: number
+          full_name: string
+          longest_streak: number
+          rank: number
+          student_id: string
+        }[]
+      }
+      get_queue_status: { Args: { p_program_id: string }; Returns: Json }
+      get_rewards_dashboard: { Args: { p_program_id: string }; Returns: Json }
       get_score_trend: {
         Args: {
           p_class_id?: string
@@ -1476,6 +2899,24 @@ export type Database = {
           student_id: string
         }[]
       }
+      get_supervised_teachers: {
+        Args: { p_supervisor_id: string }
+        Returns: {
+          avatar_url: string
+          average_rating: number
+          full_name: string
+          is_active: boolean
+          program_id: string
+          program_name: string
+          sessions_this_week: number
+          student_count: number
+          teacher_id: string
+        }[]
+      }
+      get_supervisor_dashboard_stats: {
+        Args: { p_supervisor_id: string }
+        Returns: Json
+      }
       get_teacher_activity: {
         Args: { p_end_date: string; p_school_id: string; p_start_date: string }
         Returns: {
@@ -1502,12 +2943,304 @@ export type Database = {
           total_hours_worked: number
         }[]
       }
+      get_teacher_rating_stats: {
+        Args: { p_program_id: string; p_teacher_id: string }
+        Returns: Json
+      }
+      get_teacher_reviews: {
+        Args: {
+          p_page?: number
+          p_page_size?: number
+          p_program_id: string
+          p_teacher_id: string
+        }
+        Returns: Json
+      }
+      get_user_programs: { Args: never; Returns: string[] }
       get_user_role: { Args: never; Returns: string }
       get_user_school_id: { Args: never; Returns: string }
+      get_voice_memo_url: { Args: { p_session_id: string }; Returns: Json }
       increment_review_count: { Args: { cert_id: string }; Returns: undefined }
+      issue_certification: {
+        Args: {
+          p_action: string
+          p_certification_id: string
+          p_chain_of_narration?: string
+          p_review_notes?: string
+        }
+        Returns: {
+          certificate_number: string | null
+          chain_of_narration: string | null
+          created_at: string
+          id: string
+          issue_date: string | null
+          issued_by: string | null
+          metadata: Json
+          notes: string | null
+          program_id: string
+          review_notes: string | null
+          reviewed_by: string | null
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          title: string
+          title_ar: string | null
+          track_id: string | null
+          type: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "certifications"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      join_queue: { Args: { p_program_id: string }; Returns: Json }
+      join_teacher_session: {
+        Args: { p_availability_id: string }
+        Returns: boolean
+      }
+      leave_queue: { Args: { p_program_id: string }; Returns: Json }
+      mark_juz_complete: {
+        Args: { p_juz_number: number; p_registration_id: string }
+        Returns: Json
+      }
+      promote_from_waitlist: { Args: { p_cohort_id: string }; Returns: number }
+      reassign_student: {
+        Args: {
+          p_enrollment_id: string
+          p_new_teacher_id: string
+          p_supervisor_id: string
+        }
+        Returns: undefined
+      }
+      recalculate_teacher_stats: {
+        Args: { p_program_id: string; p_teacher_id: string }
+        Returns: undefined
+      }
+      recommend_certification: {
+        Args: {
+          p_metadata?: Json
+          p_notes?: string
+          p_program_id: string
+          p_student_id: string
+          p_title?: string
+          p_title_ar?: string
+          p_track_id?: string
+          p_type?: string
+        }
+        Returns: {
+          certificate_number: string | null
+          chain_of_narration: string | null
+          created_at: string
+          id: string
+          issue_date: string | null
+          issued_by: string | null
+          metadata: Json
+          notes: string | null
+          program_id: string
+          review_notes: string | null
+          reviewed_by: string | null
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          title: string
+          title_ar: string | null
+          track_id: string | null
+          type: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "certifications"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      register_for_himam_event: {
+        Args: {
+          p_event_id: string
+          p_selected_juz: number[]
+          p_time_slots: Json
+          p_track: string
+        }
+        Returns: Json
+      }
       resolve_localized_name: {
         Args: { fallback: string; lang: string; localized: Json }
         Returns: string
+      }
+      restore_rating: {
+        Args: { p_rating_id: string; p_reason: string }
+        Returns: Json
+      }
+      resubmit_certification: {
+        Args: {
+          p_certification_id: string
+          p_notes?: string
+          p_title?: string
+          p_title_ar?: string
+        }
+        Returns: {
+          certificate_number: string | null
+          chain_of_narration: string | null
+          created_at: string
+          id: string
+          issue_date: string | null
+          issued_by: string | null
+          metadata: Json
+          notes: string | null
+          program_id: string
+          review_notes: string | null
+          reviewed_by: string | null
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          title: string
+          title_ar: string | null
+          track_id: string | null
+          type: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "certifications"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      review_certification: {
+        Args: {
+          p_action: string
+          p_certification_id: string
+          p_review_notes?: string
+        }
+        Returns: {
+          certificate_number: string | null
+          chain_of_narration: string | null
+          created_at: string
+          id: string
+          issue_date: string | null
+          issued_by: string | null
+          metadata: Json
+          notes: string | null
+          program_id: string
+          review_notes: string | null
+          reviewed_by: string | null
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          title: string
+          title_ar: string | null
+          track_id: string | null
+          type: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "certifications"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      revoke_certification: {
+        Args: { p_certification_id: string; p_revocation_reason: string }
+        Returns: {
+          certificate_number: string | null
+          chain_of_narration: string | null
+          created_at: string
+          id: string
+          issue_date: string | null
+          issued_by: string | null
+          metadata: Json
+          notes: string | null
+          program_id: string
+          review_notes: string | null
+          reviewed_by: string | null
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          title: string
+          title_ar: string | null
+          track_id: string | null
+          type: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "certifications"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      revoke_master_admin_role: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      search_users_for_role_assignment: {
+        Args: { p_limit?: number; p_search_query: string }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          program_roles_data: Json
+          role: string
+        }[]
+      }
+      submit_rating: {
+        Args: {
+          p_comment?: string
+          p_session_id: string
+          p_star_rating: number
+          p_tags?: string[]
+        }
+        Returns: Json
+      }
+      swap_himam_partners: {
+        Args: { p_registration_id_a: string; p_registration_id_b: string }
+        Returns: undefined
+      }
+      toggle_availability: {
+        Args: {
+          p_is_available: boolean
+          p_max_students?: number
+          p_program_id: string
+        }
+        Returns: {
+          active_student_count: number
+          available_since: string | null
+          created_at: string
+          id: string
+          is_available: boolean
+          max_students: number
+          program_id: string
+          teacher_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "teacher_availability"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
     }
     Enums: {
@@ -1641,4 +3374,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

@@ -12,7 +12,7 @@ export const useMilestoneBadges = () => {
     queryFn: async () => {
       const { data, error } = await gamificationService.getMilestoneBadges();
       if (error) throw error;
-      return (data ?? []) as unknown as MilestoneBadge[];
+      return (data ?? []) as MilestoneBadge[];
     },
     staleTime: 1000 * 60 * 60,
   });

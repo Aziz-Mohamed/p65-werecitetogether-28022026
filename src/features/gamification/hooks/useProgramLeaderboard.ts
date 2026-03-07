@@ -16,15 +16,15 @@ export const useProgramLeaderboard = (
     queryFn: async () => {
       if (!programId) throw new Error('Program ID is required');
       const { data, error } = await supabase.rpc(
-        'get_program_leaderboard' as never,
+        'get_program_leaderboard',
         {
           p_program_id: programId,
           p_limit: limit,
           p_student_id: studentId ?? null,
-        } as never,
+        },
       );
       if (error) throw error;
-      return (data ?? []) as unknown as ProgramLeaderboardEntry[];
+      return (data ?? []) as ProgramLeaderboardEntry[];
     },
     enabled: !!programId,
     staleTime: 1000 * 60 * 5,

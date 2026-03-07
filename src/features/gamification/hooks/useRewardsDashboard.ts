@@ -13,7 +13,7 @@ export const useRewardsDashboard = (programId: string | undefined) => {
       if (!programId) throw new Error('Program ID is required');
       const { data, error } = await gamificationService.getRewardsDashboard(programId);
       if (error) throw error;
-      return data as unknown as RewardsDashboard;
+      return data as RewardsDashboard;
     },
     enabled: !!programId,
     staleTime: 1000 * 60 * 5,
