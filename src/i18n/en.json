@@ -594,6 +594,7 @@
       "notFound": "Teacher not found",
       "classes": "classes",
       "assignedClasses": "Assigned Classes",
+      "noClasses": "No classes",
       "deactivate": "Deactivate",
       "activate": "Activate",
       "deactivateTitle": "Deactivate Teacher?",

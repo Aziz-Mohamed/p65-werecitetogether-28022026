@@ -594,6 +594,7 @@
       "notFound": "المعلّم غير موجود",
       "classes": "فصول",
       "assignedClasses": "الفصول المُعيَّنة",
+      "noClasses": "لا فصول",
       "deactivate": "تعطيل",
       "activate": "تفعيل",
       "deactivateTitle": "تعطيل المعلّم؟",

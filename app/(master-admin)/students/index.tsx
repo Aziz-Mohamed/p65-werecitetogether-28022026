@@ -83,32 +83,28 @@ export default function AdminStudentsScreen() {
                   <Avatar
                     source={item.profiles?.avatar_url ?? undefined}
                     name={resolveName(item.profiles?.name_localized, item.profiles?.full_name)}
-                    size="md"
+                    size="sm"
                   />
                   <View style={styles.info}>
-                    <Text style={styles.name} numberOfLines={1}>
-                      {resolveName(item.profiles?.name_localized, item.profiles?.full_name)}
-                    </Text>
-                    <Text style={styles.meta} numberOfLines={1}>
-                      {item.profiles?.username ? `@${item.profiles.username}` : ''}
-                      {item.classes?.name ? ` · ${resolveName(item.classes?.name_localized, item.classes.name)}` : ''}
-                    </Text>
-                    <View style={styles.badges}>
-                      <Badge
-                        label={`Lvl ${item.current_level ?? 0}`}
-                        variant="info"
-                        size="sm"
-                      />
+                    <View style={styles.nameRow}>
+                      <Text style={styles.name} numberOfLines={1}>
+                        {resolveName(item.profiles?.name_localized, item.profiles?.full_name)}
+                      </Text>
                       <Badge
                         label={item.is_active ? t('common.active') : t('common.inactive')}
                         variant={item.is_active ? 'success' : 'warning'}
                         size="sm"
                       />
                     </View>
+                    <Text style={styles.meta} numberOfLines={1}>
+                      {item.classes?.name ? resolveName(item.classes?.name_localized, item.classes.name) : t('admin.students.noClass')}
+                      {` · ${t('common.level')} ${item.current_level ?? 0}`}
+                      {item.profiles?.username ? ` · @${item.profiles.username}` : ''}
+                    </Text>
                   </View>
                   <Ionicons
                     name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
-                    size={18}
+                    size={16}
                     color={colors.neutral[300]}
                   />
                 </View>
@@ -144,28 +140,32 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   card: {
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.base,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   info: {
     flex: 1,
     gap: normalize(2),
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
   name: {
     ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
+    flex: 1,
   },
   meta: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
-  },
-  badges: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    marginTop: normalize(4),
   },
 });

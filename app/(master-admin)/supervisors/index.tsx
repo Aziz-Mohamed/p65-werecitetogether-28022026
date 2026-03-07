@@ -74,7 +74,7 @@ export default function AdminSupervisorsScreen() {
                   <Avatar
                     source={item.avatar_url ?? undefined}
                     name={resolveName(item.name_localized, item.full_name)}
-                    size="md"
+                    size="sm"
                   />
                   <View style={styles.info}>
                     <Text style={styles.name} numberOfLines={1}>
@@ -86,7 +86,7 @@ export default function AdminSupervisorsScreen() {
                   </View>
                   <Ionicons
                     name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
-                    size={18}
+                    size={16}
                     color={colors.neutral[300]}
                   />
                 </View>
@@ -123,12 +123,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   card: {
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.base,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   info: {
     flex: 1,

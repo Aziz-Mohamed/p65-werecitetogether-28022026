@@ -71,37 +71,40 @@ export default function AdminParentsScreen() {
           <FlashList
             data={parents}
             keyExtractor={(item: any) => item.id}
-            renderItem={({ item }: { item: any }) => (
-              <Card
-                variant="default"
-                style={styles.card}
-                onPress={() => router.push(`/(master-admin)/parents/${item.id}`)}
-              >
-                <View style={styles.row}>
-                  <Avatar
-                    source={item.avatar_url ?? undefined}
-                    name={resolveName(item.name_localized, item.full_name)}
-                    size="md"
-                  />
-                  <View style={styles.info}>
-                    <Text style={styles.name} numberOfLines={1}>
-                      {resolveName(item.name_localized, item.full_name)}
-                    </Text>
-                    <Text style={styles.meta} numberOfLines={1}>
-                      {item.username ? `@${item.username}` : ''}
-                      {(item.students?.length ?? 0) > 0
-                        ? ` · ${item.students.length} ${t('admin.parents.children')}`
-                        : ''}
-                    </Text>
+            renderItem={({ item }: { item: any }) => {
+              const childCount = item.students?.length ?? 0;
+              return (
+                <Card
+                  variant="default"
+                  style={styles.card}
+                  onPress={() => router.push(`/(master-admin)/parents/${item.id}`)}
+                >
+                  <View style={styles.row}>
+                    <Avatar
+                      source={item.avatar_url ?? undefined}
+                      name={resolveName(item.name_localized, item.full_name)}
+                      size="sm"
+                    />
+                    <View style={styles.info}>
+                      <Text style={styles.name} numberOfLines={1}>
+                        {resolveName(item.name_localized, item.full_name)}
+                      </Text>
+                      <Text style={styles.meta} numberOfLines={1}>
+                        {childCount > 0
+                          ? `${childCount} ${t('admin.parents.children')}`
+                          : t('admin.parents.noChildren')}
+                        {item.username ? ` · @${item.username}` : ''}
+                      </Text>
+                    </View>
+                    <Ionicons
+                      name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
+                      size={16}
+                      color={colors.neutral[300]}
+                    />
                   </View>
-                  <Ionicons
-                    name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
-                    size={18}
-                    color={colors.neutral[300]}
-                  />
-                </View>
-              </Card>
-            )}
+                </Card>
+              );
+            }}
           />
         )}
       </View>
@@ -132,12 +135,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   card: {
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.base,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   info: {
     flex: 1,
