@@ -53,6 +53,23 @@ export default function StudentProfile() {
           <Badge label={t('roles.student')} variant={theme.tag} size="md" />
         </Card>
 
+        {/* Badges */}
+        <Card
+          variant="default"
+          style={styles.settingCard}
+          onPress={() => router.push('/(student)/profile/badges')}
+        >
+          <View style={styles.settingRow}>
+            <View style={styles.settingLabelContainer}>
+              <View style={[styles.settingIcon, { backgroundColor: colors.secondary[50] }]}>
+                <Ionicons name="ribbon" size={20} color={colors.secondary[500]} />
+              </View>
+              <Text style={styles.settingLabel}>{t('gamification.badges.title')}</Text>
+            </View>
+            <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={20} color={colors.neutral[300]} />
+          </View>
+        </Card>
+
         {/* Settings Group */}
         <Text style={styles.sectionTitle}>{t('common.settings')}</Text>
         

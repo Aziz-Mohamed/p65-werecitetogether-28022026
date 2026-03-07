@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { Screen } from '@/components/layout';
+import { Card } from '@/components/ui/Card';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useAuth } from '@/hooks/useAuth';
 import { colors } from '@/theme/colors';
@@ -66,6 +68,19 @@ export default function SupervisorHome() {
             isLoading={isLoading}
           />
         </View>
+
+        {/* Quick Actions */}
+        <Card
+          variant="default"
+          style={styles.quickAction}
+          onPress={() => router.push('/(supervisor)/rewards')}
+        >
+          <View style={styles.quickActionRow}>
+            <Ionicons name="gift-outline" size={20} color={colors.secondary[500]} />
+            <Text style={styles.quickActionText}>{t('gamification.rewardsDashboard.title')}</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+          </View>
+        </Card>
 
         <FlashList
           data={teachers.data ?? []}
@@ -137,5 +152,20 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: lightTheme.textSecondary,
     textAlign: 'center',
+  },
+  quickAction: {
+    marginHorizontal: spacing.base,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+  },
+  quickActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  quickActionText: {
+    ...typography.textStyles.bodyMedium,
+    color: lightTheme.text,
+    flex: 1,
   },
 });

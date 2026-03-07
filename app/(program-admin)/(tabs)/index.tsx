@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { Screen } from '@/components/layout';
+import { Card } from '@/components/ui/Card';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -13,6 +15,7 @@ import { useProgramAdminDashboard } from '@/features/admin/hooks/useProgramAdmin
 
 export default function ProgramAdminDashboard() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { programId } = useLocalSearchParams<{ programId: string }>();
   const dashboard = useProgramAdminDashboard(programId);
 
@@ -80,6 +83,19 @@ export default function ProgramAdminDashboard() {
             </Text>
           </View>
         )}
+
+        {/* Quick Actions */}
+        <Card
+          variant="default"
+          style={styles.quickAction}
+          onPress={() => router.push('/(program-admin)/rewards')}
+        >
+          <View style={styles.quickActionRow}>
+            <Ionicons name="gift-outline" size={20} color={colors.secondary[500]} />
+            <Text style={styles.quickActionText}>{t('gamification.rewardsDashboard.title')}</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+          </View>
+        </Card>
       </ScrollView>
     </Screen>
   );
@@ -118,5 +134,20 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: colors.secondary[700],
     textAlign: 'center',
+  },
+  quickAction: {
+    marginHorizontal: spacing.base,
+    marginTop: spacing.base,
+    padding: spacing.md,
+  },
+  quickActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  quickActionText: {
+    ...typography.textStyles.bodyMedium,
+    color: lightTheme.text,
+    flex: 1,
   },
 });

@@ -1436,11 +1436,14 @@
       "assignRole": "Add Member",
       "removeRole": "Remove",
       "deactivate": "Deactivate",
-      "reactivate": "Reactivate"
+      "reactivate": "Reactivate",
+      "joinWaitlist": "Join Waitlist",
+      "cancelWaitlist": "Cancel Waitlist"
     },
     "labels": {
       "tracks": "Tracks",
       "cohorts": "Cohorts",
+      "waitlist": "Waitlist",
       "enrollments": "Enrollments",
       "team": "Team",
       "students": "Students",
@@ -1535,6 +1538,17 @@
       "manageTeam": "Manage Team",
       "pendingApprovals": "Pending Approvals",
       "allPrograms": "All Programs"
+    },
+    "waitlist": {
+      "promoteTitle": "Promote from Waitlist",
+      "promoteBody": "The next student(s) on the waitlist will be offered a spot. They have 48 hours to accept.",
+      "promoteNext": "Promote Next",
+      "empty": "No one is on the waitlist",
+      "expiresAt": "Offer expires: {{date}}",
+      "status": {
+        "waiting": "Waiting",
+        "offered": "Offer Sent"
+      }
     }
   },
   "availability": {
