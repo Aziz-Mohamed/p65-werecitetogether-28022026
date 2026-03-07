@@ -100,8 +100,8 @@ DECLARE
   _prog1_id      UUID;  -- Alternating Recitation
   _prog2_id      UUID;  -- Children's Program
   _track1_id     UUID;  -- first track of prog1
-  _cohort_a_id   UUID := gen_random_uuid();
-  _cohort_b_id   UUID := gen_random_uuid();
+  _class_a_id    UUID := gen_random_uuid();
+  _class_b_id    UUID := gen_random_uuid();
   _school_id     UUID := gen_random_uuid();
   _teacher_role_id UUID;
 BEGIN
@@ -171,17 +171,17 @@ BEGIN
     AND program_id = _prog1_id
     AND role = 'teacher';
 
-  -- ── 6. Cohorts ────────────────────────────────────────────────────────────
-  INSERT INTO cohorts (id, program_id, track_id, name, status, max_students, teacher_id, supervisor_id, start_date)
+  -- ── 6. Program classes (unified — formerly cohorts) ───────────────────────
+  INSERT INTO classes (id, school_id, name, teacher_id, max_students, is_active, program_id, track_id, status, supervisor_id, start_date)
   VALUES
-    (_cohort_a_id, _prog1_id, _track1_id, 'Morning Cohort A', 'enrollment_open', 15, _teacher_id, _supervisor_id, CURRENT_DATE),
-    (_cohort_b_id, _prog1_id, _track1_id, 'Evening Cohort B', 'in_progress', 10, _teacher_id, _supervisor_id, CURRENT_DATE - INTERVAL '14 days')
+    (_class_a_id, _school_id, 'Morning Cohort A', _teacher_id, 15, true, _prog1_id, _track1_id, 'enrollment_open', _supervisor_id, CURRENT_DATE),
+    (_class_b_id, _school_id, 'Evening Cohort B', _teacher_id, 10, true, _prog1_id, _track1_id, 'in_progress', _supervisor_id, CURRENT_DATE - INTERVAL '14 days')
   ON CONFLICT (id) DO NOTHING;
 
   -- ── 7. Enrollments ────────────────────────────────────────────────────────
-  INSERT INTO enrollments (student_id, program_id, track_id, cohort_id, teacher_id, status, enrolled_at)
+  INSERT INTO enrollments (student_id, program_id, track_id, class_id, teacher_id, status, enrolled_at)
   VALUES
-    (_student_id, _prog1_id, _track1_id, _cohort_b_id, _teacher_id, 'active', now() - INTERVAL '10 days')
+    (_student_id, _prog1_id, _track1_id, _class_b_id, _teacher_id, 'active', now() - INTERVAL '10 days')
   ON CONFLICT DO NOTHING;
 
   -- ── 8. Sessions (recent, with program_id for dashboard stats) ─────────────
