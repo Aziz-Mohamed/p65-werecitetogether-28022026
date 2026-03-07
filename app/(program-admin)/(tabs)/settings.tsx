@@ -6,6 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 
 import { Screen } from '@/components/layout';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { programsService } from '@/features/programs/services/programs.service';
 import { useProgramSettings } from '@/features/admin/hooks/useProgramSettings';
@@ -43,6 +44,18 @@ export default function ProgramAdminSettings() {
       rating_concern: settings.rating_concern ?? 3.0,
     },
   });
+
+  if (!programId) {
+    return (
+      <Screen>
+        <EmptyState
+          icon="settings-outline"
+          title={t('admin.programAdmin.selectProgram')}
+          description={t('admin.programAdmin.selectProgramDescription')}
+        />
+      </Screen>
+    );
+  }
 
   const onSubmit = (data: ProgramSettingsInput) => {
     updateSettings.mutate(data, {

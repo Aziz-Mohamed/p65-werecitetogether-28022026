@@ -907,8 +907,11 @@
         "cohorts": "Cohorts",
         "team": "Team",
         "reports": "Reports",
-        "settings": "Settings"
-      }
+        "settings": "Settings",
+        "profile": "Profile"
+      },
+      "selectProgram": "Select a program",
+      "selectProgramDescription": "Go to the Home tab to select a program"
     },
     "masterAdmin": {
       "dashboard": {

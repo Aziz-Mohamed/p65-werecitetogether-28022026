@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -40,6 +41,18 @@ export default function ProgramAdminCohorts() {
     },
     enabled: !!programId,
   });
+
+  if (!programId) {
+    return (
+      <Screen>
+        <EmptyState
+          icon="school-outline"
+          title={t('admin.programAdmin.selectProgram')}
+          description={t('admin.programAdmin.selectProgramDescription')}
+        />
+      </Screen>
+    );
+  }
 
   return (
     <Screen>

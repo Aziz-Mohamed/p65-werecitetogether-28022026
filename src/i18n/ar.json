@@ -907,8 +907,11 @@
         "cohorts": "المجموعات",
         "team": "الفريق",
         "reports": "التقارير",
-        "settings": "الإعدادات"
-      }
+        "settings": "الإعدادات",
+        "profile": "الملف الشخصي"
+      },
+      "selectProgram": "اختر برنامجاً",
+      "selectProgramDescription": "انتقل إلى الرئيسية لاختيار برنامج"
     },
     "masterAdmin": {
       "dashboard": {

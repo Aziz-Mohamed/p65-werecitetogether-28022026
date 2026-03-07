@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, useLocalSearchParams } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -55,6 +55,15 @@ export default function ProgramAdminTabsLayout() {
           title: t('admin.programAdmin.tabs.settings'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'settings' : 'settings-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: t('admin.programAdmin.tabs.profile'),
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
           ),
         }}
       />

@@ -6,17 +6,67 @@ import { useTranslation } from 'react-i18next';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
 import { StatCard } from '@/features/admin/components/StatCard';
+import { ProgramSelector } from '@/features/admin/components/ProgramSelector';
 import { useProgramAdminDashboard } from '@/features/admin/hooks/useProgramAdminDashboard';
+import { useProgramAdminPrograms } from '@/features/admin/hooks/useProgramAdminPrograms';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function ProgramAdminDashboard() {
   const { t } = useTranslation();
   const router = useRouter();
   const { programId } = useLocalSearchParams<{ programId: string }>();
+
+  if (!programId) {
+    return <ProgramSelectorView />;
+  }
+
+  return <DashboardView programId={programId} />;
+}
+
+function ProgramSelectorView() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const { session } = useAuth();
+  const userId = session?.user?.id;
+  const { data: programs, isLoading } = useProgramAdminPrograms(userId);
+
+  if (!isLoading && (programs ?? []).length === 0) {
+    return (
+      <Screen>
+        <EmptyState
+          icon="folder-open-outline"
+          title={t('admin.programAdmin.selector.empty')}
+          description={t('admin.programAdmin.selector.emptyDescription')}
+        />
+      </Screen>
+    );
+  }
+
+  return (
+    <Screen scroll={false} padding={false}>
+      <ProgramSelector
+        programs={programs ?? []}
+        isLoading={isLoading}
+        onSelect={(selectedProgramId) => {
+          router.replace({
+            pathname: '/(program-admin)/(tabs)',
+            params: { programId: selectedProgramId },
+          });
+        }}
+      />
+    </Screen>
+  );
+}
+
+function DashboardView({ programId }: { programId: string }) {
+  const { t } = useTranslation();
+  const router = useRouter();
   const dashboard = useProgramAdminDashboard(programId);
 
   return (

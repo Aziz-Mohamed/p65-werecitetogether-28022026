@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -41,6 +42,18 @@ export default function ProgramAdminTeam() {
     () => (team.data ?? []).filter((m) => m.role === 'supervisor'),
     [team.data],
   );
+
+  if (!programId) {
+    return (
+      <Screen>
+        <EmptyState
+          icon="people-outline"
+          title={t('admin.programAdmin.selectProgram')}
+          description={t('admin.programAdmin.selectProgramDescription')}
+        />
+      </Screen>
+    );
+  }
 
   const getSupervisorName = (supervisorId: string | null) => {
     if (!supervisorId) return undefined;
