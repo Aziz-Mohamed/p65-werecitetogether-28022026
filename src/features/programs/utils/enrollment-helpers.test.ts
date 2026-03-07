@@ -2,7 +2,7 @@ import {
   getEnrollmentStatusColor,
   getEnrollmentStatusVariant,
   getCategoryVariant,
-  getNextCohortStatus,
+  getNextClassStatus,
   getWaitlistPosition,
   getEnrollErrorKey,
 } from './enrollment-helpers';
@@ -71,24 +71,24 @@ describe('getCategoryVariant', () => {
   });
 });
 
-// ─── getNextCohortStatus ────────────────────────────────────────────────────
+// ─── getNextClassStatus ─────────────────────────────────────────────────────
 
-describe('getNextCohortStatus', () => {
+describe('getNextClassStatus', () => {
   it.each([
     ['enrollment_open', 'enrollment_closed'],
     ['enrollment_closed', 'in_progress'],
     ['in_progress', 'completed'],
     ['completed', 'archived'],
   ] as const)('transitions "%s" to "%s"', (current, expected) => {
-    expect(getNextCohortStatus(current)).toBe(expected);
+    expect(getNextClassStatus(current)).toBe(expected);
   });
 
   it('returns null for the terminal status "archived"', () => {
-    expect(getNextCohortStatus('archived')).toBeNull();
+    expect(getNextClassStatus('archived')).toBeNull();
   });
 
   it('returns null for an invalid/unknown status', () => {
-    expect(getNextCohortStatus('nonexistent' as any)).toBeNull();
+    expect(getNextClassStatus('nonexistent' as any)).toBeNull();
   });
 });
 
@@ -135,9 +135,9 @@ describe('getEnrollErrorKey', () => {
   it.each([
     ['ENROLL_PROGRAM_NOT_FOUND', 'programs.errors.programNotFound'],
     ['ENROLL_TRACK_NOT_FOUND', 'programs.errors.trackNotFound'],
-    ['ENROLL_COHORT_REQUIRED', 'programs.errors.cohortRequired'],
-    ['ENROLL_COHORT_NOT_FOUND', 'programs.errors.cohortNotFound'],
-    ['ENROLL_COHORT_CLOSED', 'programs.errors.cohortClosed'],
+    ['ENROLL_CLASS_REQUIRED', 'programs.errors.classRequired'],
+    ['ENROLL_CLASS_NOT_FOUND', 'programs.errors.classNotFound'],
+    ['ENROLL_CLASS_CLOSED', 'programs.errors.classClosed'],
     ['Authentication required', 'programs.errors.authRequired'],
     ['Only students can enroll', 'programs.errors.studentsOnly'],
   ])('maps "%s" to "%s"', (errorMessage, expected) => {

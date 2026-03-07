@@ -8,20 +8,20 @@ import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
-import type { CohortWithTeacher } from '../types/programs.types';
+import type { ProgramClassWithTeacher } from '../types/programs.types';
 
-interface CohortCardProps {
-  cohort: CohortWithTeacher;
+interface ProgramClassCardProps {
+  programClass: ProgramClassWithTeacher;
   onEnroll?: () => void;
   disabled?: boolean;
 }
 
-export function CohortCard({ cohort, onEnroll, disabled }: CohortCardProps) {
+export function ProgramClassCard({ programClass, onEnroll, disabled }: ProgramClassCardProps) {
   const { t } = useTranslation();
 
-  const enrolledCount = cohort.enrollments?.[0]?.count ?? 0;
-  const isFull = enrolledCount >= cohort.max_students;
-  const isOpen = cohort.status === 'enrollment_open';
+  const enrolledCount = programClass.enrollments?.[0]?.count ?? 0;
+  const isFull = enrolledCount >= programClass.max_students;
+  const isOpen = programClass.status === 'enrollment_open';
 
   return (
     <Card
@@ -31,32 +31,32 @@ export function CohortCard({ cohort, onEnroll, disabled }: CohortCardProps) {
     >
       <View style={styles.header}>
         <Text style={styles.name} numberOfLines={1}>
-          {cohort.name}
+          {programClass.name}
         </Text>
         {isFull && (
           <Badge label={t('programs.labels.full')} variant="error" size="sm" />
         )}
       </View>
 
-      {cohort.profiles?.full_name && (
+      {programClass.profiles?.full_name && (
         <View style={styles.row}>
           <Ionicons name="person-outline" size={normalize(14)} color={lightTheme.textSecondary} />
-          <Text style={styles.detail}>{cohort.profiles.full_name}</Text>
+          <Text style={styles.detail}>{programClass.profiles.full_name}</Text>
         </View>
       )}
 
       <View style={styles.row}>
         <Ionicons name="people-outline" size={normalize(14)} color={lightTheme.textSecondary} />
         <Text style={styles.detail}>
-          {enrolledCount}/{cohort.max_students} {t('programs.labels.students')}
+          {enrolledCount}/{programClass.max_students} {t('programs.labels.students')}
         </Text>
       </View>
 
-      {cohort.schedule && cohort.schedule.length > 0 && (
+      {programClass.schedule && programClass.schedule.length > 0 && (
         <View style={styles.row}>
           <Ionicons name="calendar-outline" size={normalize(14)} color={lightTheme.textSecondary} />
           <Text style={styles.detail}>
-            {t('programs.labels.schedule')} ({cohort.schedule.length}x)
+            {t('programs.labels.schedule')} ({programClass.schedule.length}x)
           </Text>
         </View>
       )}

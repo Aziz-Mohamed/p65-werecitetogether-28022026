@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { programsService } from '../services/programs.service';
-import type { CohortFilters, CohortWithTeacher } from '../types/programs.types';
+import type { ProgramClassFilters, ProgramClassWithTeacher } from '../types/programs.types';
 
-export function useCohorts(filters: CohortFilters) {
+export function useProgramClasses(filters: ProgramClassFilters) {
   return useQuery({
-    queryKey: ['programs', filters.programId, 'cohorts', filters.trackId],
+    queryKey: ['programs', filters.programId, 'classes', filters.trackId],
     queryFn: async () => {
-      const { data, error } = await programsService.getCohorts(filters);
+      const { data, error } = await programsService.getProgramClasses(filters);
       if (error) throw error;
-      return (data ?? []) as CohortWithTeacher[];
+      return (data ?? []) as ProgramClassWithTeacher[];
     },
     enabled: !!filters.programId,
   });

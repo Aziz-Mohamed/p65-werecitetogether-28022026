@@ -11,7 +11,7 @@ export function useEnroll(programId: string) {
     mutationFn: (input: EnrollInput) => programsService.enrollStructured(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['programs', programId, 'cohorts'] });
+      queryClient.invalidateQueries({ queryKey: ['programs', programId, 'classes'] });
     },
     onError: (error: { code?: string; message?: string }) => {
       // Error code → i18n key mapping is handled by getEnrollErrorKey()

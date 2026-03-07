@@ -3,21 +3,22 @@ export { CategoryBadge } from './components/CategoryBadge';
 export { ProgramCard } from './components/ProgramCard';
 export { ProgramDetailHeader } from './components/ProgramDetailHeader';
 export { TrackList } from './components/TrackList';
-export { CohortCard } from './components/CohortCard';
+export { ProgramClassCard } from './components/ProgramClassCard';
 export { EnrollmentStatusBadge } from './components/EnrollmentStatusBadge';
 export { EmptyProgramState } from './components/EmptyProgramState';
 
 // ─── Hooks ──────────────────────────────────────────────────────────────────
 export { usePrograms } from './hooks/usePrograms';
 export { useProgram } from './hooks/useProgram';
-export { useCohorts } from './hooks/useCohorts';
+export { useProgramClasses } from './hooks/useCohorts';
 export { useEnroll, useJoinFreeProgram } from './hooks/useEnroll';
 export { useEnrollments } from './hooks/useEnrollments';
 export { useLeaveProgram } from './hooks/useLeaveProgram';
 export { useProgramRoles, useAssignProgramRole, useRemoveProgramRole } from './hooks/useProgramRoles';
 export { useAllPrograms, useUpdateProgram, useCreateProgram, useCreateTrack } from './hooks/useAdminPrograms';
-export { useCreateCohort, useUpdateCohortStatus, useBulkApproveEnrollments } from './hooks/useAdminCohorts';
-export { useCohortEnrollments, useUpdateEnrollmentStatus } from './hooks/useAdminEnrollments';
+export { useCreateProgramClass, useUpdateClassStatus, useBulkApproveEnrollments } from './hooks/useAdminCohorts';
+export { useClassEnrollments, useUpdateEnrollmentStatus } from './hooks/useAdminEnrollments';
+export { useClassWaitlist, useMyWaitlistEntry, useCancelWaitlist, usePromoteFromWaitlist } from './hooks/useWaitlist';
 
 // ─── Services ───────────────────────────────────────────────────────────────
 export { programsService } from './services/programs.service';
@@ -28,7 +29,7 @@ export {
   getEnrollmentStatusColor,
   getEnrollmentStatusVariant,
   getCategoryVariant,
-  getNextCohortStatus,
+  getNextClassStatus,
   getWaitlistPosition,
   getEnrollErrorKey,
 } from './utils/enrollment-helpers';
@@ -37,25 +38,27 @@ export {
 export type {
   Program,
   ProgramTrack,
-  Cohort,
   Enrollment,
   ProgramRole,
   ProgramWithTracks,
-  CohortWithTeacher,
+  ProgramClassWithTeacher,
   EnrollmentWithDetails,
   ProgramRoleWithProfile,
   ProgramCategory,
   TrackType,
   EnrollmentStatus,
-  CohortStatus,
+  ClassStatus,
   ProgramRoleType,
   ProgramSettings,
-  CohortScheduleEntry,
+  ClassScheduleEntry,
   TrackCurriculum,
-  CohortFilters,
+  ProgramClassFilters,
   EnrollInput,
-  CreateCohortInput,
+  CreateProgramClassInput,
   UpdateProgramInput,
   CreateTrackInput,
   AssignRoleInput,
+  WaitlistStatus,
+  WaitlistEntry,
+  WaitlistEntryWithStudent,
 } from './types/programs.types';

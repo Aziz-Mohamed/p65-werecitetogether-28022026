@@ -1,8 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import type {
-  CohortFilters,
+  ProgramClassFilters,
   EnrollInput,
-  CreateCohortInput,
+  CreateProgramClassInput,
   UpdateProgramInput,
   CreateTrackInput,
   AssignRoleInput,
@@ -37,13 +37,13 @@ class ProgramsService {
       .single();
   }
 
-  /** PR-003: List cohorts for a track/program */
-  async getCohorts(filters: CohortFilters) {
+  /** PR-003: List program classes (formerly cohorts) for a track/program */
+  async getProgramClasses(filters: ProgramClassFilters) {
     let query = supabase
-      .from('cohorts')
+      .from('classes')
       .select(`
         *,
-        profiles!cohorts_teacher_id_fkey ( id, full_name, meeting_link ),
+        profiles!classes_teacher_id_fkey ( id, full_name, meeting_link ),
         enrollments ( count )
       `)
       .eq('program_id', filters.programId)
@@ -57,7 +57,7 @@ class ProgramsService {
     return query;
   }
 
-  /** PR-004: Get student's enrollments with program/track/cohort details */
+  /** PR-004: Get student's enrollments with program/track/class details */
   async getMyEnrollments(userId: string) {
     return supabase
       .from('enrollments')
@@ -65,8 +65,8 @@ class ProgramsService {
         *,
         programs ( id, name, name_ar, category ),
         program_tracks ( id, name, name_ar ),
-        cohorts ( id, name, status, teacher_id,
-          profiles!cohorts_teacher_id_fkey ( full_name )
+        classes ( id, name, status, teacher_id,
+          profiles!classes_teacher_id_fkey ( full_name )
         )
       `)
       .eq('student_id', userId)
@@ -92,7 +92,7 @@ class ProgramsService {
     return supabase.rpc('enroll_student', {
       p_program_id: input.programId,
       p_track_id: input.trackId ?? null,
-      p_cohort_id: input.cohortId ?? null,
+      p_class_id: input.classId ?? null,
     });
   }
 
@@ -131,11 +131,12 @@ class ProgramsService {
       .single();
   }
 
-  /** PR-010: Create cohort */
-  async createCohort(input: CreateCohortInput) {
+  /** PR-010: Create program class (formerly createCohort) */
+  async createProgramClass(input: CreateProgramClassInput) {
     return supabase
-      .from('cohorts')
+      .from('classes')
       .insert({
+        school_id: input.schoolId,
         program_id: input.programId,
         track_id: input.trackId ?? null,
         name: input.name,
@@ -147,17 +148,19 @@ class ProgramsService {
         start_date: input.startDate ?? null,
         end_date: input.endDate ?? null,
         status: 'enrollment_open',
+        is_active: true,
       })
       .select()
       .single();
   }
 
-  /** PR-011: Update cohort status */
-  async updateCohortStatus(cohortId: string, status: string) {
+  /** PR-011: Update class status */
+  async updateClassStatus(classId: string, status: string) {
+    const is_active = !['completed', 'archived'].includes(status);
     return supabase
-      .from('cohorts')
-      .update({ status })
-      .eq('id', cohortId)
+      .from('classes')
+      .update({ status, is_active })
+      .eq('id', classId)
       .select()
       .single();
   }
@@ -240,24 +243,24 @@ class ProgramsService {
       .eq('id', roleId);
   }
 
-  /** Bulk update enrollments for cohort status transition (in_progress → approve all pending) */
-  async bulkApproveEnrollments(cohortId: string) {
+  /** Bulk update enrollments for class status transition (in_progress → approve all pending) */
+  async bulkApproveEnrollments(classId: string) {
     return supabase
       .from('enrollments')
       .update({ status: 'active' })
-      .eq('cohort_id', cohortId)
+      .eq('class_id', classId)
       .eq('status', 'pending');
   }
 
-  /** Get enrollments for a specific cohort (admin view) */
-  async getCohortEnrollments(cohortId: string) {
+  /** Get enrollments for a specific class (admin view) */
+  async getClassEnrollments(classId: string) {
     return supabase
       .from('enrollments')
       .select(`
         *,
         profiles:student_id ( id, full_name )
       `)
-      .eq('cohort_id', cohortId)
+      .eq('class_id', classId)
       .order('enrolled_at', { ascending: true });
   }
 
@@ -271,25 +274,25 @@ class ProgramsService {
 
   // ─── Waitlist Operations ───────────────────────────────────────────────────
 
-  /** WL-001: Get waitlist entries for a cohort (admin view) */
-  async getCohortWaitlist(cohortId: string) {
+  /** WL-001: Get waitlist entries for a class (admin view) */
+  async getClassWaitlist(classId: string) {
     return (supabase
       .from('program_waitlist' as any)
       .select(`
         *,
         profiles!program_waitlist_student_id_fkey ( id, full_name )
       `)
-      .eq('cohort_id', cohortId)
+      .eq('class_id', classId)
       .in('status', ['waiting', 'offered'])
       .order('position', { ascending: true })) as any;
   }
 
-  /** WL-002: Get student's own waitlist entry for a cohort */
-  async getMyWaitlistEntry(cohortId: string, userId: string) {
+  /** WL-002: Get student's own waitlist entry for a class */
+  async getMyWaitlistEntry(classId: string, userId: string) {
     return (supabase
       .from('program_waitlist' as any)
       .select('*')
-      .eq('cohort_id', cohortId)
+      .eq('class_id', classId)
       .eq('student_id', userId)
       .in('status', ['waiting', 'offered'])
       .maybeSingle()) as any;
@@ -306,9 +309,9 @@ class ProgramsService {
   }
 
   /** WL-004: Promote from waitlist (admin — calls RPC) */
-  async promoteFromWaitlist(cohortId: string) {
+  async promoteFromWaitlist(classId: string) {
     return supabase.rpc('promote_from_waitlist' as any, {
-      p_cohort_id: cohortId,
+      p_class_id: classId,
     });
   }
 }

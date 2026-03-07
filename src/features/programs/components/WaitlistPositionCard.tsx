@@ -11,7 +11,7 @@ import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
 
 interface WaitlistPositionCardProps {
-  cohortId: string;
+  classId: string;
   userId: string | undefined;
   enrollmentId: string;
   onLeave: () => void;
@@ -19,14 +19,14 @@ interface WaitlistPositionCardProps {
 }
 
 export function WaitlistPositionCard({
-  cohortId,
+  classId,
   userId,
   enrollmentId,
   onLeave,
   leavePending,
 }: WaitlistPositionCardProps) {
   const { t } = useTranslation();
-  const { data: entry } = useMyWaitlistEntry(cohortId, userId);
+  const { data: entry } = useMyWaitlistEntry(classId, userId);
   const cancelWaitlist = useCancelWaitlist();
 
   const handleCancel = () => {

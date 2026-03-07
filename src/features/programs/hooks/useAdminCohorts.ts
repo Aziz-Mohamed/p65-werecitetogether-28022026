@@ -1,28 +1,28 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { programsService } from '../services/programs.service';
-import type { CreateCohortInput } from '../types/programs.types';
+import type { CreateProgramClassInput } from '../types/programs.types';
 
-export function useCreateCohort(programId: string) {
+export function useCreateProgramClass(programId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ['createCohort', programId],
-    mutationFn: (input: CreateCohortInput) => programsService.createCohort(input),
+    mutationKey: ['createProgramClass', programId],
+    mutationFn: (input: CreateProgramClassInput) => programsService.createProgramClass(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['programs', programId, 'cohorts'] });
+      queryClient.invalidateQueries({ queryKey: ['programs', programId, 'classes'] });
     },
   });
 }
 
-export function useUpdateCohortStatus(programId: string) {
+export function useUpdateClassStatus(programId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ['updateCohortStatus', programId],
-    mutationFn: ({ cohortId, status }: { cohortId: string; status: string }) =>
-      programsService.updateCohortStatus(cohortId, status),
+    mutationKey: ['updateClassStatus', programId],
+    mutationFn: ({ classId, status }: { classId: string; status: string }) =>
+      programsService.updateClassStatus(classId, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['programs', programId, 'cohorts'] });
+      queryClient.invalidateQueries({ queryKey: ['programs', programId, 'classes'] });
     },
   });
 }
@@ -32,10 +32,10 @@ export function useBulkApproveEnrollments(programId: string) {
 
   return useMutation({
     mutationKey: ['bulkApprove', programId],
-    mutationFn: (cohortId: string) => programsService.bulkApproveEnrollments(cohortId),
+    mutationFn: (classId: string) => programsService.bulkApproveEnrollments(classId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['programs', programId, 'cohorts'] });
+      queryClient.invalidateQueries({ queryKey: ['programs', programId, 'classes'] });
     },
   });
 }

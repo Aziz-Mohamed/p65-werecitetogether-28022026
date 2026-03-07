@@ -2,31 +2,31 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { programsService } from '../services/programs.service';
 import type { WaitlistEntry, WaitlistEntryWithStudent } from '../types/programs.types';
 
-/** Fetch waitlist entries for a cohort (admin view) */
-export function useCohortWaitlist(cohortId: string | undefined) {
+/** Fetch waitlist entries for a class (admin view) */
+export function useClassWaitlist(classId: string | undefined) {
   return useQuery({
-    queryKey: ['waitlist', 'cohort', cohortId],
+    queryKey: ['waitlist', 'class', classId],
     queryFn: async () => {
-      if (!cohortId) throw new Error('Cohort ID required');
-      const { data, error } = await programsService.getCohortWaitlist(cohortId);
+      if (!classId) throw new Error('Class ID required');
+      const { data, error } = await programsService.getClassWaitlist(classId);
       if (error) throw error;
       return (data ?? []) as unknown as WaitlistEntryWithStudent[];
     },
-    enabled: !!cohortId,
+    enabled: !!classId,
   });
 }
 
-/** Fetch student's own waitlist entry for a cohort */
-export function useMyWaitlistEntry(cohortId: string | undefined, userId: string | undefined) {
+/** Fetch student's own waitlist entry for a class */
+export function useMyWaitlistEntry(classId: string | undefined, userId: string | undefined) {
   return useQuery({
-    queryKey: ['waitlist', 'my', cohortId, userId],
+    queryKey: ['waitlist', 'my', classId, userId],
     queryFn: async () => {
-      if (!cohortId || !userId) throw new Error('Cohort ID and User ID required');
-      const { data, error } = await programsService.getMyWaitlistEntry(cohortId, userId);
+      if (!classId || !userId) throw new Error('Class ID and User ID required');
+      const { data, error } = await programsService.getMyWaitlistEntry(classId, userId);
       if (error) throw error;
       return data as WaitlistEntry | null;
     },
-    enabled: !!cohortId && !!userId,
+    enabled: !!classId && !!userId,
   });
 }
 
@@ -44,11 +44,11 @@ export function useCancelWaitlist() {
 }
 
 /** Promote next student(s) from waitlist (admin) */
-export function usePromoteFromWaitlist(cohortId: string) {
+export function usePromoteFromWaitlist(classId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => programsService.promoteFromWaitlist(cohortId),
+    mutationFn: () => programsService.promoteFromWaitlist(classId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['waitlist'] });
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });

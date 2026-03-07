@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
 import { colors } from '@/theme/colors';
-import type { EnrollmentStatus, CohortStatus, ProgramCategory } from '../types/programs.types';
+import type { EnrollmentStatus, ClassStatus, ProgramCategory } from '../types/programs.types';
 
 // ─── Localized Field Hook ────────────────────────────────────────────────────
 
@@ -66,9 +66,9 @@ export function getCategoryVariant(category: ProgramCategory): CategoryVariant {
   return categoryVariants[category] ?? 'info';
 }
 
-// ─── Cohort Status Label ─────────────────────────────────────────────────────
+// ─── Class Status Label ──────────────────────────────────────────────────────
 
-const cohortStatusOrder: CohortStatus[] = [
+const classStatusOrder: ClassStatus[] = [
   'enrollment_open',
   'enrollment_closed',
   'in_progress',
@@ -76,10 +76,10 @@ const cohortStatusOrder: CohortStatus[] = [
   'archived',
 ];
 
-export function getNextCohortStatus(current: CohortStatus): CohortStatus | null {
-  const idx = cohortStatusOrder.indexOf(current);
-  if (idx < 0 || idx >= cohortStatusOrder.length - 1) return null;
-  return cohortStatusOrder[idx + 1];
+export function getNextClassStatus(current: ClassStatus): ClassStatus | null {
+  const idx = classStatusOrder.indexOf(current);
+  if (idx < 0 || idx >= classStatusOrder.length - 1) return null;
+  return classStatusOrder[idx + 1];
 }
 
 // ─── Waitlist Position ───────────────────────────────────────────────────────
@@ -100,9 +100,9 @@ export function getWaitlistPosition(
 const ENROLL_ERROR_KEYS: Record<string, string> = {
   ENROLL_PROGRAM_NOT_FOUND: 'programs.errors.programNotFound',
   ENROLL_TRACK_NOT_FOUND: 'programs.errors.trackNotFound',
-  ENROLL_COHORT_REQUIRED: 'programs.errors.cohortRequired',
-  ENROLL_COHORT_NOT_FOUND: 'programs.errors.cohortNotFound',
-  ENROLL_COHORT_CLOSED: 'programs.errors.cohortClosed',
+  ENROLL_CLASS_REQUIRED: 'programs.errors.classRequired',
+  ENROLL_CLASS_NOT_FOUND: 'programs.errors.classNotFound',
+  ENROLL_CLASS_CLOSED: 'programs.errors.classClosed',
   'Authentication required': 'programs.errors.authRequired',
   'Only students can enroll': 'programs.errors.studentsOnly',
 };
