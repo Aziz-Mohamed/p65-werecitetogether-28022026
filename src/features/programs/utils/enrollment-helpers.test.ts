@@ -6,62 +6,93 @@ import {
   getWaitlistPosition,
   getEnrollErrorKey,
 } from './enrollment-helpers';
+import { colors } from '@/theme/colors';
 
-describe('getEnrollmentStatusColor', () => {
-  it('returns a color for each enrollment status', () => {
-    expect(getEnrollmentStatusColor('pending')).toBeDefined();
-    expect(getEnrollmentStatusColor('active')).toBeDefined();
-    expect(getEnrollmentStatusColor('completed')).toBeDefined();
-    expect(getEnrollmentStatusColor('dropped')).toBeDefined();
-    expect(getEnrollmentStatusColor('waitlisted')).toBeDefined();
+// ─── getEnrollmentStatusVariant ─────────────────────────────────────────────
+
+describe('getEnrollmentStatusVariant', () => {
+  it.each([
+    ['pending', 'warning'],
+    ['active', 'success'],
+    ['completed', 'info'],
+    ['dropped', 'default'],
+    ['waitlisted', 'error'],
+  ] as const)('maps "%s" to "%s"', (status, expected) => {
+    expect(getEnrollmentStatusVariant(status)).toBe(expected);
   });
 
-  it('returns different colors for different statuses', () => {
-    const colors = [
+  it('falls back to "default" for an unknown status', () => {
+    expect(getEnrollmentStatusVariant('unknown' as any)).toBe('default');
+  });
+});
+
+// ─── getEnrollmentStatusColor ───────────────────────────────────────────────
+
+describe('getEnrollmentStatusColor', () => {
+  it.each([
+    ['pending', colors.secondary[500]],
+    ['active', colors.primary[500]],
+    ['completed', colors.accent.blue[500]],
+    ['dropped', colors.neutral[400]],
+    ['waitlisted', colors.accent.orange[500]],
+  ] as const)('returns the correct color for "%s"', (status, expected) => {
+    expect(getEnrollmentStatusColor(status)).toBe(expected);
+  });
+
+  it('returns different colors for distinct statuses', () => {
+    const values = [
       getEnrollmentStatusColor('pending'),
       getEnrollmentStatusColor('active'),
       getEnrollmentStatusColor('completed'),
       getEnrollmentStatusColor('waitlisted'),
     ];
-    const unique = new Set(colors);
-    expect(unique.size).toBe(colors.length);
+    const unique = new Set(values);
+    expect(unique.size).toBe(values.length);
+  });
+
+  it('falls back to neutral[400] for an unknown status', () => {
+    expect(getEnrollmentStatusColor('bogus' as any)).toBe(colors.neutral[400]);
   });
 });
 
-describe('getEnrollmentStatusVariant', () => {
-  it('maps each status to correct variant', () => {
-    expect(getEnrollmentStatusVariant('pending')).toBe('warning');
-    expect(getEnrollmentStatusVariant('active')).toBe('success');
-    expect(getEnrollmentStatusVariant('completed')).toBe('info');
-    expect(getEnrollmentStatusVariant('dropped')).toBe('default');
-    expect(getEnrollmentStatusVariant('waitlisted')).toBe('error');
-  });
-});
+// ─── getCategoryVariant ─────────────────────────────────────────────────────
 
 describe('getCategoryVariant', () => {
-  it('maps each category to correct variant', () => {
-    expect(getCategoryVariant('free')).toBe('success');
-    expect(getCategoryVariant('structured')).toBe('info');
-    expect(getCategoryVariant('mixed')).toBe('violet');
+  it.each([
+    ['free', 'success'],
+    ['structured', 'info'],
+    ['mixed', 'violet'],
+  ] as const)('maps "%s" to "%s"', (category, expected) => {
+    expect(getCategoryVariant(category)).toBe(expected);
+  });
+
+  it('falls back to "info" for an unknown category', () => {
+    expect(getCategoryVariant('other' as any)).toBe('info');
   });
 });
 
+// ─── getNextCohortStatus ────────────────────────────────────────────────────
+
 describe('getNextCohortStatus', () => {
-  it('returns the next status in the lifecycle', () => {
-    expect(getNextCohortStatus('enrollment_open')).toBe('enrollment_closed');
-    expect(getNextCohortStatus('enrollment_closed')).toBe('in_progress');
-    expect(getNextCohortStatus('in_progress')).toBe('completed');
-    expect(getNextCohortStatus('completed')).toBe('archived');
+  it.each([
+    ['enrollment_open', 'enrollment_closed'],
+    ['enrollment_closed', 'in_progress'],
+    ['in_progress', 'completed'],
+    ['completed', 'archived'],
+  ] as const)('transitions "%s" to "%s"', (current, expected) => {
+    expect(getNextCohortStatus(current)).toBe(expected);
   });
 
-  it('returns null for the last status', () => {
+  it('returns null for the terminal status "archived"', () => {
     expect(getNextCohortStatus('archived')).toBeNull();
   });
 
-  it('returns null for an invalid status', () => {
+  it('returns null for an invalid/unknown status', () => {
     expect(getNextCohortStatus('nonexistent' as any)).toBeNull();
   });
 });
+
+// ─── getWaitlistPosition ────────────────────────────────────────────────────
 
 describe('getWaitlistPosition', () => {
   const waitlisted = [
@@ -71,43 +102,68 @@ describe('getWaitlistPosition', () => {
     { enrolled_at: '2026-01-01T13:00:00Z' },
   ];
 
-  it('returns 1-indexed position', () => {
+  it('returns position 1 for the earliest entry (first in queue)', () => {
     expect(getWaitlistPosition('2026-01-01T10:00:00Z', waitlisted)).toBe(1);
+  });
+
+  it('returns the correct middle position', () => {
     expect(getWaitlistPosition('2026-01-01T11:00:00Z', waitlisted)).toBe(2);
+    expect(getWaitlistPosition('2026-01-01T12:00:00Z', waitlisted)).toBe(3);
+  });
+
+  it('returns position equal to length for the last entry', () => {
     expect(getWaitlistPosition('2026-01-01T13:00:00Z', waitlisted)).toBe(4);
   });
 
-  it('handles empty array', () => {
+  it('returns 1 for a single-item waitlist when matching', () => {
+    const single = [{ enrolled_at: '2026-06-01T00:00:00Z' }];
+    expect(getWaitlistPosition('2026-06-01T00:00:00Z', single)).toBe(1);
+  });
+
+  it('returns 1 for an empty waitlist (no one ahead)', () => {
     expect(getWaitlistPosition('2026-01-01T10:00:00Z', [])).toBe(1);
   });
 
-  it('places a new entry after all existing ones', () => {
+  it('places a later entry after all existing ones', () => {
     expect(getWaitlistPosition('2026-01-02T00:00:00Z', waitlisted)).toBe(5);
   });
 });
 
+// ─── getEnrollErrorKey ──────────────────────────────────────────────────────
+
 describe('getEnrollErrorKey', () => {
-  it('maps known error codes', () => {
-    expect(getEnrollErrorKey('ENROLL_PROGRAM_NOT_FOUND')).toBe('programs.errors.programNotFound');
-    expect(getEnrollErrorKey('ENROLL_TRACK_NOT_FOUND')).toBe('programs.errors.trackNotFound');
-    expect(getEnrollErrorKey('ENROLL_COHORT_REQUIRED')).toBe('programs.errors.cohortRequired');
-    expect(getEnrollErrorKey('ENROLL_COHORT_NOT_FOUND')).toBe('programs.errors.cohortNotFound');
-    expect(getEnrollErrorKey('ENROLL_COHORT_CLOSED')).toBe('programs.errors.cohortClosed');
-    expect(getEnrollErrorKey('Authentication required')).toBe('programs.errors.authRequired');
-    expect(getEnrollErrorKey('Only students can enroll')).toBe('programs.errors.studentsOnly');
+  it.each([
+    ['ENROLL_PROGRAM_NOT_FOUND', 'programs.errors.programNotFound'],
+    ['ENROLL_TRACK_NOT_FOUND', 'programs.errors.trackNotFound'],
+    ['ENROLL_COHORT_REQUIRED', 'programs.errors.cohortRequired'],
+    ['ENROLL_COHORT_NOT_FOUND', 'programs.errors.cohortNotFound'],
+    ['ENROLL_COHORT_CLOSED', 'programs.errors.cohortClosed'],
+    ['Authentication required', 'programs.errors.authRequired'],
+    ['Only students can enroll', 'programs.errors.studentsOnly'],
+  ])('maps "%s" to "%s"', (errorMessage, expected) => {
+    expect(getEnrollErrorKey(errorMessage)).toBe(expected);
   });
 
-  it('detects PostgreSQL 23505 duplicate key violation', () => {
-    expect(getEnrollErrorKey('duplicate key value violates unique constraint (23505)')).toBe(
+  it('detects PostgreSQL 23505 error code', () => {
+    expect(getEnrollErrorKey('violates unique constraint 23505')).toBe(
       'programs.errors.alreadyEnrolled',
     );
   });
 
   it('detects "duplicate key" substring', () => {
-    expect(getEnrollErrorKey('some duplicate key error')).toBe('programs.errors.alreadyEnrolled');
+    expect(getEnrollErrorKey('duplicate key value violates unique constraint')).toBe(
+      'programs.errors.alreadyEnrolled',
+    );
   });
 
-  it('falls back to common.error for unknown errors', () => {
+  it('detects "duplicate key" combined with 23505', () => {
+    expect(getEnrollErrorKey('duplicate key value violates unique constraint (23505)')).toBe(
+      'programs.errors.alreadyEnrolled',
+    );
+  });
+
+  it('falls back to "common.error" for unknown error messages', () => {
     expect(getEnrollErrorKey('something went wrong')).toBe('common.error');
+    expect(getEnrollErrorKey('')).toBe('common.error');
   });
 });
