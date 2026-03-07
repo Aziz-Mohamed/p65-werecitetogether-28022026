@@ -1,6 +1,6 @@
 // ─── User & Role Types ──────────────────────────────────────────────────────
 
-export type UserRole = 'student' | 'teacher' | 'parent' | 'admin' | 'supervisor' | 'program_admin' | 'master_admin';
+export type UserRole = 'student' | 'teacher' | 'parent' | 'supervisor' | 'program_admin' | 'master_admin';
 
 // ─── Attendance ─────────────────────────────────────────────────────────────
 

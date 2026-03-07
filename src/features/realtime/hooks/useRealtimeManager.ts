@@ -57,7 +57,7 @@ export function useRealtimeManager(): RealtimeStatus {
             .eq('is_active', true);
           return { childIds: (data ?? []).map((s) => s.id) };
         }
-        case 'admin':
+        case 'master_admin':
           return {};
         default:
           return null;
@@ -84,7 +84,7 @@ export function useRealtimeManager(): RealtimeStatus {
         const ctx = roleContext as { childIds: string[] };
         return buildParentProfile(userId, ctx.childIds);
       }
-      case 'admin':
+      case 'master_admin':
         return buildAdminProfile(schoolId);
       default:
         return null;

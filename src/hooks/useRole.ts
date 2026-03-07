@@ -6,7 +6,7 @@ interface UseRoleReturn {
   isStudent: boolean;
   isTeacher: boolean;
   isParent: boolean;
-  isAdmin: boolean;
+  isMasterAdmin: boolean;
 }
 
 /**
@@ -21,6 +21,6 @@ export const useRole = (): UseRoleReturn => {
     isStudent: role === 'student',
     isTeacher: role === 'teacher',
     isParent: role === 'parent',
-    isAdmin: role === 'admin',
+    isMasterAdmin: role === 'master_admin',
   };
 };

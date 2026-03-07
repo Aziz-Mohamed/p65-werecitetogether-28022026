@@ -16,7 +16,6 @@ export const ROLES: readonly UserRole[] = [
   'student',
   'teacher',
   'parent',
-  'admin',
   'supervisor',
   'program_admin',
   'master_admin',

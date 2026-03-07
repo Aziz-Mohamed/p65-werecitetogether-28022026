@@ -51,7 +51,7 @@ describe('getCategoriesForRole', () => {
   });
 
   it('returns empty for roles with no categories', () => {
-    const cats = getCategoriesForRole('admin' as any);
+    const cats = getCategoriesForRole('unknown_role' as any);
     expect(cats).toHaveLength(0);
   });
 });

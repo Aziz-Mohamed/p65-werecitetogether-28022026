@@ -366,7 +366,7 @@ export function generateAdminInsights(
         .slice(0, 2)
         .map((ta) => ta.fullName)
         .join(', '),
-      actionRoute: '/(admin)/reports/teacher-activity',
+      actionRoute: '/(master-admin)/reports/teacher-activity',
     });
   }
 
@@ -391,7 +391,7 @@ export function generateAdminInsights(
       severity: 'warning',
       icon: 'close-circle-outline',
       title: t('insights.lowSessionCompletion', { count: lowCompletionTeachers.length }),
-      actionRoute: '/(admin)/reports/session-completion',
+      actionRoute: '/(master-admin)/reports/session-completion',
     });
   }
 
