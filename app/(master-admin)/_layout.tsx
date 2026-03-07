@@ -42,11 +42,6 @@ export default function MasterAdminLayout() {
         <Stack.Screen name="teachers/create" />
         <Stack.Screen name="teachers/[id]/index" />
         <Stack.Screen name="teachers/[id]/edit" />
-        {/* Parents */}
-        <Stack.Screen name="parents/index" />
-        <Stack.Screen name="parents/create" />
-        <Stack.Screen name="parents/[id]/index" />
-        <Stack.Screen name="parents/[id]/edit" />
         {/* Classes */}
         <Stack.Screen name="classes/index" />
         <Stack.Screen name="classes/create" />

@@ -17,7 +17,6 @@ class ProfileService {
    * PS-002: Get a profile with role-specific nested data.
    * Students: includes student record + class.
    * Teachers: includes classes.
-   * Parents: includes children.
    */
   async getProfileWithDetails(userId: string) {
     return supabase
@@ -124,6 +123,41 @@ class ProfileService {
       })
       .select()
       .single();
+  }
+
+  /**
+   * PS-008: Update a guardian record.
+   */
+  async updateGuardian(id: string, input: {
+    guardianName?: string;
+    guardianPhone?: string | null;
+    guardianEmail?: string | null;
+    relationship?: string;
+    isPrimary?: boolean;
+  }) {
+    const updates: Record<string, unknown> = {};
+    if (input.guardianName !== undefined) updates.guardian_name = input.guardianName;
+    if (input.guardianPhone !== undefined) updates.guardian_phone = input.guardianPhone;
+    if (input.guardianEmail !== undefined) updates.guardian_email = input.guardianEmail;
+    if (input.relationship !== undefined) updates.relationship = input.relationship;
+    if (input.isPrimary !== undefined) updates.is_primary = input.isPrimary;
+
+    return supabase
+      .from('student_guardians')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+  }
+
+  /**
+   * PS-009: Delete a guardian record.
+   */
+  async deleteGuardian(id: string) {
+    return supabase
+      .from('student_guardians')
+      .delete()
+      .eq('id', id);
   }
 }
 

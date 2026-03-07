@@ -3,12 +3,21 @@ import type { Tables } from '@/types/database.types';
 /** Base student row from the database */
 type Student = Tables<'students'>;
 
+/** Guardian metadata stored in student_guardians table */
+export interface StudentGuardian {
+  id: string;
+  guardian_name: string;
+  guardian_phone: string | null;
+  guardian_email: string | null;
+  relationship: string;
+  is_primary: boolean;
+}
+
 /** Student record with the associated profile data */
 export interface StudentWithProfile extends Student {
   profile: Tables<'profiles'>;
   currentLevel: number;
   class: Tables<'classes'> | null;
-  parent: Tables<'profiles'> | null;
 }
 
 /**
@@ -18,7 +27,6 @@ export interface StudentWithProfile extends Student {
  */
 export interface StudentFilters {
   classId?: string;
-  parentId?: string;
   isActive?: boolean;
   searchQuery?: string;
   levelNumber?: number;
@@ -37,7 +45,6 @@ export interface CreateStudentInput {
   password: string;
   date_of_birth?: string | null;
   class_id?: string | null;
-  parent_id?: string | null;
   phone?: string | null;
   preferred_language?: string;
 }
@@ -49,7 +56,6 @@ export interface CreateStudentInput {
  */
 export interface UpdateStudentInput {
   classId?: string | null;
-  parentId?: string | null;
   isActive?: boolean;
   dateOfBirth?: string;
 }

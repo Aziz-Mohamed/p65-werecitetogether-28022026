@@ -22,9 +22,6 @@ class StudentsService {
     if (filters?.isActive !== undefined) {
       query = query.eq('is_active', filters.isActive);
     }
-    if (filters?.parentId) {
-      query = query.eq('parent_id', filters.parentId);
-    }
     if (filters?.levelNumber !== undefined) {
       query = query.eq('current_level', filters.levelNumber);
     }
@@ -48,36 +45,16 @@ class StudentsService {
 
   /**
    * SM-002: Get a single student by ID with full details.
-   * Includes profile, class, level, and parent information.
+   * Includes profile, class, level, and guardian information.
    */
   async getStudentById(id: string) {
     return supabase
       .from('students')
       .select(
-        '*, profiles!students_id_fkey!inner(full_name, name_localized, username, avatar_url, phone, created_at), classes(name, name_localized, id), parent:profiles!students_parent_id_fkey(full_name, name_localized)',
+        '*, profiles!students_id_fkey!inner(full_name, name_localized, username, avatar_url, phone, created_at), classes(name, name_localized, id)',
       )
       .eq('id', id)
       .single();
-  }
-
-  /**
-   * Fetch students available for parent linking.
-   * Create flow (no parentId): returns students with no parent assigned.
-   * Edit flow (with parentId): returns unlinked students + students already linked to this parent.
-   */
-  async getAvailableStudentsForParent(parentId?: string) {
-    let query = supabase
-      .from('students')
-      .select('id, parent_id, profiles!students_id_fkey!inner(full_name, name_localized)')
-      .eq('is_active', true);
-
-    if (parentId) {
-      query = query.or(`parent_id.is.null,parent_id.eq.${parentId}`);
-    } else {
-      query = query.is('parent_id', null);
-    }
-
-    return query.order('full_name', { referencedTable: 'profiles', ascending: true });
   }
 
   /**
@@ -91,7 +68,6 @@ class StudentsService {
     const updates: Record<string, unknown> = {};
 
     if (input.classId !== undefined) updates.class_id = input.classId;
-    if (input.parentId !== undefined) updates.parent_id = input.parentId;
     if (input.isActive !== undefined) updates.is_active = input.isActive;
     if (input.dateOfBirth !== undefined) updates.date_of_birth = input.dateOfBirth;
 

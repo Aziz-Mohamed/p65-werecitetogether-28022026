@@ -14,7 +14,7 @@ import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import type { UserRole } from '@/types/common.types';
 
-const ALL_ROLES: UserRole[] = ['student', 'teacher', 'parent', 'supervisor', 'program_admin', 'master_admin'];
+const ALL_ROLES: UserRole[] = ['student', 'teacher', 'supervisor', 'program_admin', 'master_admin'];
 
 export default function EditRoleScreen() {
   const { t } = useTranslation();
