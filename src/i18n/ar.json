@@ -923,7 +923,13 @@
         "programsCount": "البرامج",
         "programsOverview": "نظرة عامة على البرامج",
         "enrolled": "{{count}} مسجلين",
-        "sessions": "{{count}} جلسات"
+        "sessions": "{{count}} جلسات",
+        "sections": {
+          "peopleAndClasses": "الأشخاص والفصول",
+          "programsAndContent": "البرامج والمحتوى",
+          "reportsAndInsights": "التقارير والرؤى",
+          "systemAndPreferences": "النظام والتفضيلات"
+        }
       },
       "users": {
         "title": "إدارة المستخدمين",

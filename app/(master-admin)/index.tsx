@@ -107,93 +107,116 @@ export default function MasterAdminDashboard() {
           />
         </View>
 
-        {/* Management Navigation */}
-        <Text style={styles.sectionTitle}>{t('admin.dashboard.manage')}</Text>
-        <View style={styles.navGrid}>
-          <NavCard
-            title={t('admin.students.title')}
-            icon="people"
-            onPress={() => router.push('/(master-admin)/students')}
-            color={theme.primary}
-          />
-          <NavCard
-            title={t('admin.teachers.title')}
-            icon="person-circle"
-            onPress={() => router.push('/(master-admin)/teachers')}
-            color={colors.accent.indigo[500]}
-          />
-          <NavCard
-            title={t('admin.parents.title')}
-            icon="people"
-            onPress={() => router.push('/(master-admin)/parents')}
-            color={colors.accent.rose[500]}
-          />
-          <NavCard
-            title={t('admin.classes.title')}
-            icon="albums"
-            onPress={() => router.push('/(master-admin)/classes')}
-            color={colors.accent.violet[500]}
-          />
-          <NavCard
-            title={t('admin.masterAdmin.nav.users')}
-            icon="person-outline"
-            onPress={() => router.push('/(master-admin)/users')}
-            color={colors.primary[600]}
-          />
-          <NavCard
-            title={t('admin.masterAdmin.nav.programs')}
-            icon="library"
-            onPress={() => router.push('/(master-admin)/programs')}
-            color={colors.primary[500]}
-          />
-          <NavCard
-            title={t('admin.stickers.title')}
-            icon="star"
-            onPress={() => router.push('/(master-admin)/stickers')}
-            color={colors.gamification.gold}
-          />
-          <NavCard
-            title={t('reports.title')}
-            icon="bar-chart"
-            onPress={() => router.push('/(master-admin)/reports')}
-            color={colors.accent.rose[500]}
-          />
-          <NavCard
-            title={t('admin.masterAdmin.nav.certifications')}
-            icon="ribbon"
-            onPress={() => router.push('/(master-admin)/certifications')}
-            color={colors.accent.indigo[600]}
-          />
-          <NavCard
-            title={t('admin.masterAdmin.nav.settings')}
-            icon="settings"
-            onPress={() => router.push('/(master-admin)/settings')}
-            color={colors.neutral[600]}
-          />
-          <NavCard
-            title={t('admin.permissions.title')}
-            icon="toggle"
-            onPress={() => router.push('/(master-admin)/settings/permissions')}
-            color={colors.accent.sky[500]}
-          />
-          <NavCard
-            title={t('admin.dashboard.resetPassword')}
-            icon="key"
-            onPress={() => router.push('/(master-admin)/members/reset-password')}
-            color={colors.neutral[500]}
-          />
-          <Card variant="default" style={styles.navCard} onPress={toggleLanguage}>
-            <View style={styles.navContent}>
-              <View style={[styles.navIcon, { backgroundColor: colors.accent.indigo[500] + '10' }]}>
-                <Ionicons name="language" size={20} color={colors.accent.indigo[500]} />
+        {/* People & Classes */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.sections.peopleAndClasses')}</Text>
+          <View style={styles.navGrid}>
+            <NavCard
+              title={t('admin.students.title')}
+              icon="people"
+              onPress={() => router.push('/(master-admin)/students')}
+              color={theme.primary}
+            />
+            <NavCard
+              title={t('admin.teachers.title')}
+              icon="person-circle"
+              onPress={() => router.push('/(master-admin)/teachers')}
+              color={colors.accent.indigo[500]}
+            />
+            <NavCard
+              title={t('admin.parents.title')}
+              icon="people"
+              onPress={() => router.push('/(master-admin)/parents')}
+              color={colors.accent.rose[500]}
+            />
+            <NavCard
+              title={t('admin.classes.title')}
+              icon="albums"
+              onPress={() => router.push('/(master-admin)/classes')}
+              color={colors.accent.violet[500]}
+            />
+            <NavCard
+              title={t('admin.masterAdmin.nav.users')}
+              icon="person-outline"
+              onPress={() => router.push('/(master-admin)/users')}
+              color={colors.primary[600]}
+            />
+          </View>
+        </View>
+
+        {/* Programs & Content */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.sections.programsAndContent')}</Text>
+          <View style={styles.navGrid}>
+            <NavCard
+              title={t('admin.masterAdmin.nav.programs')}
+              icon="library"
+              onPress={() => router.push('/(master-admin)/programs')}
+              color={colors.primary[500]}
+            />
+            <NavCard
+              title={t('admin.stickers.title')}
+              icon="star"
+              onPress={() => router.push('/(master-admin)/stickers')}
+              color={colors.gamification.gold}
+            />
+          </View>
+        </View>
+
+        {/* Reports & Insights */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.sections.reportsAndInsights')}</Text>
+          <View style={styles.navGrid}>
+            <NavCard
+              title={t('reports.title')}
+              icon="bar-chart"
+              onPress={() => router.push('/(master-admin)/reports')}
+              color={colors.accent.rose[500]}
+            />
+            <NavCard
+              title={t('admin.masterAdmin.nav.certifications')}
+              icon="ribbon"
+              onPress={() => router.push('/(master-admin)/certifications')}
+              color={colors.accent.indigo[600]}
+            />
+          </View>
+        </View>
+
+        {/* System & Preferences */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.sections.systemAndPreferences')}</Text>
+          <View style={styles.navGrid}>
+            <NavCard
+              title={t('admin.masterAdmin.nav.settings')}
+              icon="settings"
+              onPress={() => router.push('/(master-admin)/settings')}
+              color={colors.neutral[600]}
+            />
+            <NavCard
+              title={t('admin.permissions.title')}
+              icon="toggle"
+              onPress={() => router.push('/(master-admin)/settings/permissions')}
+              color={colors.accent.sky[500]}
+            />
+            <NavCard
+              title={t('admin.dashboard.resetPassword')}
+              icon="key"
+              onPress={() => router.push('/(master-admin)/members/reset-password')}
+              color={colors.neutral[500]}
+            />
+            <Card variant="default" style={styles.navCard} onPress={toggleLanguage}>
+              <View style={styles.navContent}>
+                <View style={[styles.navIcon, { backgroundColor: colors.accent.indigo[500] + '10' }]}>
+                  <Ionicons name="language" size={20} color={colors.accent.indigo[500]} />
+                </View>
+                <Text style={styles.navText}>{t('common.language')}</Text>
+                <Text style={styles.langValue}>
+                  {locale === 'en' ? t('common.english') : t('common.arabic')}
+                </Text>
+                <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={16} color={colors.neutral[300]} />
               </View>
-              <Text style={styles.navText}>{t('common.language')}</Text>
-              <Text style={styles.langValue}>
-                {locale === 'en' ? t('common.english') : t('common.arabic')}
-              </Text>
-              <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={16} color={colors.neutral[300]} />
-            </View>
-          </Card>
+            </Card>
+          </View>
         </View>
 
         {/* Sign Out */}
@@ -328,6 +351,9 @@ const styles = StyleSheet.create({
     ...typography.textStyles.label,
     color: colors.neutral[700],
     fontFamily: typography.fontFamily.medium,
+  },
+  section: {
+    gap: spacing.sm,
   },
   navGrid: {
     gap: spacing.md,

@@ -923,7 +923,13 @@
         "programsCount": "Programs",
         "programsOverview": "Programs Overview",
         "enrolled": "{{count}} enrolled",
-        "sessions": "{{count}} sessions"
+        "sessions": "{{count}} sessions",
+        "sections": {
+          "peopleAndClasses": "People & Classes",
+          "programsAndContent": "Programs & Content",
+          "reportsAndInsights": "Reports & Insights",
+          "systemAndPreferences": "System & Preferences"
+        }
       },
       "users": {
         "title": "User Management",
