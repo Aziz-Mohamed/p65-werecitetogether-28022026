@@ -50,6 +50,21 @@ export function useCreateTrack() {
     mutationFn: (input: CreateTrackInput) => programsService.createTrack(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['program'] });
+    },
+  });
+}
+
+export function useUpdateTrack() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['updateTrack'],
+    mutationFn: (args: { trackId: string; input: Parameters<typeof programsService.updateTrack>[1] }) =>
+      programsService.updateTrack(args.trackId, args.input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['program'] });
     },
   });
 }
