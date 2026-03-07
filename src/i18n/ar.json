@@ -1551,6 +1551,19 @@
       }
     }
   },
+  "mutoon": {
+    "title": "تقدّم المتون",
+    "empty": "لا يوجد تقدّم بعد",
+    "emptyDesc": "سيقوم معلّمك بإعداد مسارات النصوص. سيظهر التقدّم هنا بمجرد البدء.",
+    "linesCompleted": "{{count}} سطر",
+    "reviews": "{{count}} مراجعات",
+    "certifiedOn": "أُجيز بتاريخ {{date}}",
+    "status": {
+      "in_progress": "قيد التقدّم",
+      "completed": "مكتمل",
+      "certified": "مُجاز"
+    }
+  },
   "availability": {
     "title": "التوفر",
     "goAvailable": "أصبح متاحاً",

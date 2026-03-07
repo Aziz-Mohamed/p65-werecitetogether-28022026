@@ -176,6 +176,24 @@ export default function ProgramDetailScreen() {
           </View>
         )}
 
+        {/* Mutoon Progress — structured programs with active enrollment */}
+        {program.category === 'structured' &&
+          myEnrollments.some((e) => e.status === 'active') && (
+          <View style={styles.section}>
+            <Button
+              title={t('mutoon.title')}
+              onPress={() =>
+                router.push({
+                  pathname: '/(student)/mutoon/[programId]',
+                  params: { programId: id! },
+                })
+              }
+              variant="secondary"
+              icon={<Ionicons name="book-outline" size={16} color={lightTheme.text} />}
+            />
+          </View>
+        )}
+
         {/* Available Teachers — free/mixed programs */}
         {showAvailableTeachers && (
           <View style={styles.section}>

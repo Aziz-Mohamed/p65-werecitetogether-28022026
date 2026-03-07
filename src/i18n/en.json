@@ -1551,6 +1551,19 @@
       }
     }
   },
+  "mutoon": {
+    "title": "Mutoon Progress",
+    "empty": "No progress yet",
+    "emptyDesc": "Your teacher will set up your text tracks. Progress will appear here once started.",
+    "linesCompleted": "{{count}} lines",
+    "reviews": "{{count}} reviews",
+    "certifiedOn": "Certified on {{date}}",
+    "status": {
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "certified": "Certified"
+    }
+  },
   "availability": {
     "title": "Availability",
     "goAvailable": "Go Available",
