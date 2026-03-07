@@ -6,8 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const VALID_ROLES = ['student', 'teacher', 'parent', 'admin', 'supervisor', 'program_admin', 'master_admin'];
-const ADMIN_ASSIGNABLE_ROLES = ['student', 'teacher', 'parent'];
+const VALID_ROLES = ['student', 'teacher', 'parent', 'supervisor', 'program_admin', 'master_admin'];
 
 function jsonResponse(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -80,9 +79,9 @@ Deno.serve(async (req: Request) => {
     if (action === 'update-role') {
       const { userId, role } = body;
 
-      // Validate caller has admin or master_admin role
-      if (callerProfile.role !== 'admin' && callerProfile.role !== 'master_admin') {
-        return errorResponse("Only admins can change roles", "UNAUTHORIZED", 403);
+      // Validate caller has master_admin role
+      if (callerProfile.role !== 'master_admin') {
+        return errorResponse("Only master admins can change roles", "UNAUTHORIZED", 403);
       }
 
       // Validate target role
@@ -101,15 +100,6 @@ Deno.serve(async (req: Request) => {
       // Prevent self-role-change
       if (userId === caller.id) {
         return errorResponse("Cannot change your own role", "SELF_ROLE_CHANGE", 403);
-      }
-
-      // Enforce role-gating: admin can only assign student/teacher/parent
-      if (callerProfile.role === 'admin' && !ADMIN_ASSIGNABLE_ROLES.includes(role)) {
-        return errorResponse(
-          `Admin can only assign: ${ADMIN_ASSIGNABLE_ROLES.join(', ')}. Contact a master admin for higher roles.`,
-          "INSUFFICIENT_PERMISSIONS",
-          403
-        );
       }
 
       // Verify target user exists
