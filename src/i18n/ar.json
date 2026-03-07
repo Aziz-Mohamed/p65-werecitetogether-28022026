@@ -532,6 +532,14 @@
     "addClass": "إضافة فصل",
     "bulkAttendance": "حضور جماعي",
     "schoolHealth": "صحّة المدرسة",
+    "detail": {
+      "personalInfo": "المعلومات الشخصية",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "joined": "تاريخ الانضمام",
+      "programRoles": "البرامج والأدوار",
+      "noPrograms": "غير مسجل في أي برنامج"
+    },
     "students": {
       "title": "الطلاب",
       "subtitle": "إدارة طلاب مدرستك",
@@ -550,6 +558,8 @@
       "class": "الفصل",
       "classPlaceholder": "اختر فصلاً (اختياري)",
       "dateOfBirth": "تاريخ الميلاد",
+      "enrollmentDate": "تاريخ التسجيل",
+      "longestStreak": "أطول سلسلة",
       "level": "المستوى",
       "noClass": "بدون فصل",
       "createButton": "إنشاء الطالب",

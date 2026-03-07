@@ -532,6 +532,14 @@
     "addClass": "Add Class",
     "bulkAttendance": "Bulk Attendance",
     "schoolHealth": "School Health",
+    "detail": {
+      "personalInfo": "Personal Information",
+      "email": "Email",
+      "phone": "Phone",
+      "joined": "Joined",
+      "programRoles": "Programs & Roles",
+      "noPrograms": "Not assigned to any programs"
+    },
     "students": {
       "title": "Students",
       "subtitle": "Manage students in your school",
@@ -550,6 +558,8 @@
       "class": "Class",
       "classPlaceholder": "Select a class (optional)",
       "dateOfBirth": "Date of Birth",
+      "enrollmentDate": "Enrollment Date",
+      "longestStreak": "Longest Streak",
       "level": "Level",
       "noClass": "No Class",
       "createButton": "Create Student",

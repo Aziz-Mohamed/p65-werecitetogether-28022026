@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
+import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { useTeacherById } from '@/features/teachers/hooks/useTeachers';
@@ -13,7 +14,6 @@ import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import { normalize } from '@/theme/normalize';
 
 // ─── Teacher Detail Screen ───────────────────────────────────────────────────
 
@@ -47,15 +47,36 @@ export default function TeacherDetailScreen() {
 
         {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <View style={styles.avatar}>
-            <Ionicons name="school" size={40} color={colors.primary[500]} />
-          </View>
+          <Avatar
+            source={teacher.avatar_url ?? undefined}
+            name={resolveName(teacher.name_localized, teacher.full_name)}
+            size="lg"
+          />
           <Text style={styles.name}>{resolveName(teacher.name_localized, teacher.full_name)}</Text>
           <Text style={styles.username}>@{teacher.username ?? '—'}</Text>
         </View>
 
-        {/* Info */}
-        <Card variant="outlined" style={styles.infoCard}>
+        {/* Personal Info */}
+        <Text style={styles.sectionLabel}>{t('admin.detail.personalInfo')}</Text>
+        <Card variant="default" style={styles.infoCard}>
+          {teacher.phone && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>{t('admin.detail.phone')}</Text>
+              <Text style={styles.infoValue}>{teacher.phone}</Text>
+            </View>
+          )}
+          {(teacher as any).created_at && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>{t('admin.detail.joined')}</Text>
+              <Text style={styles.infoValue}>
+                {new Date((teacher as any).created_at).toLocaleDateString()}
+              </Text>
+            </View>
+          )}
+        </Card>
+
+        {/* Stats */}
+        <Card variant="default" style={styles.infoCard}>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>{t('admin.teachers.assignedClasses')}</Text>
             <Text style={styles.infoValue}>{classes.length}</Text>
@@ -69,10 +90,10 @@ export default function TeacherDetailScreen() {
         {/* Classes */}
         {classes.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>{t('admin.teachers.classes')}</Text>
+            <Text style={styles.sectionLabel}>{t('admin.teachers.classes')}</Text>
             {classes.map((c: any) => (
-              <Card key={c.id} variant="outlined" style={styles.classCard}>
-                <Text style={styles.className}>{resolveName(c.name_localized, c.name)}</Text>
+              <Card key={c.id} variant="default" style={styles.listCard}>
+                <Text style={styles.listItemText}>{resolveName(c.name_localized, c.name)}</Text>
               </Card>
             ))}
           </>
@@ -107,22 +128,20 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingVertical: spacing.md,
   },
-  avatar: {
-    width: normalize(72),
-    height: normalize(72),
-    borderRadius: normalize(36),
-    backgroundColor: colors.primary[50],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
   name: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
+    marginTop: spacing.sm,
   },
   username: {
-    ...typography.textStyles.body,
+    ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
+  },
+  sectionLabel: {
+    ...typography.textStyles.label,
+    color: lightTheme.textSecondary,
+    marginTop: spacing.sm,
+    textTransform: 'uppercase',
   },
   infoCard: {
     gap: spacing.sm,
@@ -140,16 +159,13 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: lightTheme.text,
     fontFamily: typography.fontFamily.medium,
+    flexShrink: 1,
+    textAlign: 'right',
   },
-  sectionTitle: {
-    ...typography.textStyles.subheading,
-    color: lightTheme.text,
-    marginTop: spacing.sm,
-  },
-  classCard: {
+  listCard: {
     marginBottom: spacing.xs,
   },
-  className: {
+  listItemText: {
     ...typography.textStyles.body,
     color: lightTheme.text,
   },

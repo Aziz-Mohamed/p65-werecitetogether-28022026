@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui';
+import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { useStudentById, useUpdateStudent } from '@/features/students/hooks/useStudents';
@@ -14,7 +15,6 @@ import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import { normalize } from '@/theme/normalize';
 
 // ─── Student Detail Screen ───────────────────────────────────────────────────
 
@@ -30,6 +30,8 @@ export default function StudentDetailScreen() {
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState description={(error as Error).message} onRetry={refetch} />;
   if (!student) return <ErrorState description={t('admin.students.notFound')} />;
+
+  const profile = (student as any).profiles;
 
   const handleToggleActive = () => {
     Alert.alert(
@@ -62,15 +64,15 @@ export default function StudentDetailScreen() {
 
         {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <View style={styles.avatar}>
-            <Ionicons name="person" size={40} color={colors.primary[500]} />
-          </View>
+          <Avatar
+            source={profile?.avatar_url ?? undefined}
+            name={resolveName(profile?.name_localized, profile?.full_name)}
+            size="lg"
+          />
           <Text style={styles.name}>
-            {resolveName((student as any).profiles?.name_localized, (student as any).profiles?.full_name)}
+            {resolveName(profile?.name_localized, profile?.full_name)}
           </Text>
-          <Text style={styles.username}>
-            @{(student as any).profiles?.username ?? '—'}
-          </Text>
+          <Text style={styles.username}>@{profile?.username ?? '—'}</Text>
           <Badge
             label={student.is_active ? t('common.active') : t('common.inactive')}
             variant={student.is_active ? 'success' : 'warning'}
@@ -78,8 +80,33 @@ export default function StudentDetailScreen() {
           />
         </View>
 
-        {/* Info Cards */}
-        <Card variant="outlined" style={styles.infoCard}>
+        {/* Personal Info */}
+        <Text style={styles.sectionLabel}>{t('admin.detail.personalInfo')}</Text>
+        <Card variant="default" style={styles.infoCard}>
+          {profile?.phone && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>{t('admin.detail.phone')}</Text>
+              <Text style={styles.infoValue}>{profile.phone}</Text>
+            </View>
+          )}
+          {student.date_of_birth && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>{t('admin.students.dateOfBirth')}</Text>
+              <Text style={styles.infoValue}>{student.date_of_birth}</Text>
+            </View>
+          )}
+          {profile?.created_at && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>{t('admin.detail.joined')}</Text>
+              <Text style={styles.infoValue}>
+                {new Date(profile.created_at).toLocaleDateString()}
+              </Text>
+            </View>
+          )}
+        </Card>
+
+        {/* Academic Info */}
+        <Card variant="default" style={styles.infoCard}>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>{t('admin.students.class')}</Text>
             <Text style={styles.infoValue}>
@@ -97,17 +124,24 @@ export default function StudentDetailScreen() {
             <Text style={styles.infoValue}>{student.current_streak}</Text>
           </View>
           <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>{t('admin.students.longestStreak')}</Text>
+
+            <Text style={styles.infoValue}>{student.longest_streak ?? 0}</Text>
+          </View>
+          <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>{t('admin.students.parent')}</Text>
             <Text style={styles.infoValue}>
               {resolveName((student as any).parent?.name_localized, (student as any).parent?.full_name) ?? t('admin.students.noParent')}
             </Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>{t('admin.students.dateOfBirth')}</Text>
-            <Text style={styles.infoValue}>
-              {student.date_of_birth ?? '—'}
-            </Text>
-          </View>
+          {student.enrollment_date && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>{t('admin.students.enrollmentDate')}</Text>
+              <Text style={styles.infoValue}>
+                {new Date(student.enrollment_date).toLocaleDateString()}
+              </Text>
+            </View>
+          )}
         </Card>
 
         {/* Actions */}
@@ -147,22 +181,20 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingVertical: spacing.md,
   },
-  avatar: {
-    width: normalize(72),
-    height: normalize(72),
-    borderRadius: normalize(36),
-    backgroundColor: colors.primary[50],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
   name: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
+    marginTop: spacing.sm,
   },
   username: {
-    ...typography.textStyles.body,
+    ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
+  },
+  sectionLabel: {
+    ...typography.textStyles.label,
+    color: lightTheme.textSecondary,
+    marginTop: spacing.sm,
+    textTransform: 'uppercase',
   },
   infoCard: {
     gap: spacing.sm,
@@ -180,10 +212,13 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: lightTheme.text,
     fontFamily: typography.fontFamily.medium,
+    flexShrink: 1,
+    textAlign: 'right',
   },
   actions: {
     flexDirection: 'row',
     gap: spacing.sm,
+    marginTop: spacing.sm,
   },
   actionButton: {
     flex: 1,

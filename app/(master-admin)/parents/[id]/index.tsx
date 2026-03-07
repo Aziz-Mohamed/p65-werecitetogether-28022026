@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui';
+import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { useParentById } from '@/features/parents/hooks/useParents';
@@ -14,7 +15,6 @@ import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import { normalize } from '@/theme/normalize';
 
 // ─── Parent Detail Screen ───────────────────────────────────────────────────
 
@@ -44,40 +44,51 @@ export default function ParentDetailScreen() {
 
         {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <View style={styles.avatar}>
-            <Ionicons name="people" size={40} color={colors.accent.rose[500]} />
-          </View>
+          <Avatar
+            source={parent.avatar_url ?? undefined}
+            name={resolveName(parent.name_localized, parent.full_name)}
+            size="lg"
+          />
           <Text style={styles.name}>{resolveName(parent.name_localized, parent.full_name)}</Text>
           <Text style={styles.username}>@{parent.username ?? '—'}</Text>
         </View>
 
-        {/* Info */}
-        <Card variant="outlined" style={styles.infoCard}>
+        {/* Personal Info */}
+        <Text style={styles.sectionLabel}>{t('admin.detail.personalInfo')}</Text>
+        <Card variant="default" style={styles.infoCard}>
+          {parent.phone && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>{t('admin.detail.phone')}</Text>
+              <Text style={styles.infoValue}>{parent.phone}</Text>
+            </View>
+          )}
+          {(parent as any).created_at && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>{t('admin.detail.joined')}</Text>
+              <Text style={styles.infoValue}>
+                {new Date((parent as any).created_at).toLocaleDateString()}
+              </Text>
+            </View>
+          )}
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>{t('admin.parents.linkedChildren')}</Text>
             <Text style={styles.infoValue}>{children.length}</Text>
           </View>
-          {parent.phone && (
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>{t('common.phone')}</Text>
-              <Text style={styles.infoValue}>{parent.phone}</Text>
-            </View>
-          )}
         </Card>
 
         {/* Linked Children */}
         {children.length > 0 ? (
           <>
-            <Text style={styles.sectionTitle}>{t('admin.parents.linkedChildren')}</Text>
+            <Text style={styles.sectionLabel}>{t('admin.parents.linkedChildren')}</Text>
             {children.map((child: any) => (
               <Card
                 key={child.id}
-                variant="outlined"
-                style={styles.childCard}
+                variant="default"
+                style={styles.listCard}
                 onPress={() => router.push(`/(master-admin)/students/${child.id}`)}
               >
-                <View style={styles.childRow}>
-                  <Text style={styles.childName}>
+                <View style={styles.listRow}>
+                  <Text style={styles.listItemText}>
                     {resolveName(child.profiles?.name_localized, child.profiles?.full_name) ?? '—'}
                   </Text>
                   <Badge
@@ -90,9 +101,12 @@ export default function ParentDetailScreen() {
             ))}
           </>
         ) : (
-          <Card variant="outlined" style={styles.emptyCard}>
-            <Text style={styles.emptyText}>{t('admin.parents.noChildren')}</Text>
-          </Card>
+          <>
+            <Text style={styles.sectionLabel}>{t('admin.parents.linkedChildren')}</Text>
+            <Card variant="default" style={styles.emptyCard}>
+              <Text style={styles.emptyText}>{t('admin.parents.noChildren')}</Text>
+            </Card>
+          </>
         )}
 
         {/* Actions */}
@@ -124,22 +138,20 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingVertical: spacing.md,
   },
-  avatar: {
-    width: normalize(72),
-    height: normalize(72),
-    borderRadius: normalize(36),
-    backgroundColor: colors.accent.rose[50],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
   name: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
+    marginTop: spacing.sm,
   },
   username: {
-    ...typography.textStyles.body,
+    ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
+  },
+  sectionLabel: {
+    ...typography.textStyles.label,
+    color: lightTheme.textSecondary,
+    marginTop: spacing.sm,
+    textTransform: 'uppercase',
   },
   infoCard: {
     gap: spacing.sm,
@@ -157,23 +169,21 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: lightTheme.text,
     fontFamily: typography.fontFamily.medium,
+    flexShrink: 1,
+    textAlign: 'right',
   },
-  sectionTitle: {
-    ...typography.textStyles.subheading,
-    color: lightTheme.text,
-    marginTop: spacing.sm,
-  },
-  childCard: {
+  listCard: {
     marginBottom: spacing.xs,
   },
-  childRow: {
+  listRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  childName: {
+  listItemText: {
     ...typography.textStyles.body,
     color: lightTheme.text,
+    flex: 1,
   },
   emptyCard: {
     alignItems: 'center',
