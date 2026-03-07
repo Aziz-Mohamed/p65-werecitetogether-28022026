@@ -295,8 +295,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral[50],
     padding: spacing.sm,
     borderRadius: normalize(8),
-    borderLeftWidth: 3,
-    borderLeftColor: colors.neutral[200],
+    borderStartWidth: 3,
+    borderStartColor: colors.neutral[200],
   },
   sessionNotes: {
     ...typography.textStyles.caption,
