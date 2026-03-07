@@ -48,6 +48,25 @@ export interface MasterAdminProgramSummary {
   session_count: number;
 }
 
+export interface MasterAdminProgramEnriched {
+  id: string;
+  name: string;
+  name_ar: string;
+  description: string | null;
+  description_ar: string | null;
+  category: 'free' | 'structured' | 'mixed';
+  is_active: boolean;
+  settings: Record<string, unknown>;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  enrolled_count: number;
+  team_count: number;
+  active_cohort_count: number;
+  track_count: number;
+  session_count_7d: number;
+}
+
 // ─── Team & User Types ──────────────────────────────────────────────────────
 
 export interface ProgramTeamMember {

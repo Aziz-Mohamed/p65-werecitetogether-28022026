@@ -992,7 +992,19 @@
       },
       "programs": {
         "team": "Program Team",
-        "noTeam": "No team members assigned"
+        "noTeam": "No team members assigned",
+        "overview": "Program Overview",
+        "settings": "Program Settings",
+        "editSettings": "Edit program details & configuration",
+        "enrolledStudents": "Enrolled",
+        "teamMembers": "Team",
+        "activeCohorts": "{{count}} cohorts",
+        "activeTracks": "{{count}} tracks",
+        "sessionsThisWeek": "Sessions (7d)",
+        "viewTeam": "Team",
+        "viewTracks": "Tracks",
+        "viewCohorts": "Cohorts",
+        "teamSummary": "{{admins}} admins, {{teachers}} teachers, {{supervisors}} supervisors"
       }
     }
   },

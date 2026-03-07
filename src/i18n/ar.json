@@ -992,7 +992,19 @@
       },
       "programs": {
         "team": "فريق البرنامج",
-        "noTeam": "لم يتم تعيين أعضاء للفريق"
+        "noTeam": "لم يتم تعيين أعضاء للفريق",
+        "overview": "نظرة عامة على البرنامج",
+        "settings": "إعدادات البرنامج",
+        "editSettings": "تعديل تفاصيل وإعدادات البرنامج",
+        "enrolledStudents": "المسجلين",
+        "teamMembers": "الفريق",
+        "activeCohorts": "{{count}} مجموعات",
+        "activeTracks": "{{count}} مسارات",
+        "sessionsThisWeek": "الجلسات (٧ أيام)",
+        "viewTeam": "الفريق",
+        "viewTracks": "المسارات",
+        "viewCohorts": "المجموعات",
+        "teamSummary": "{{admins}} مشرفين, {{teachers}} معلمين, {{supervisors}} موجهين"
       }
     }
   },

@@ -65,6 +65,10 @@ class AdminService {
       .eq('role', 'program_admin');
   }
 
+  async getMasterAdminProgramsEnriched() {
+    return supabase.rpc('get_master_admin_programs_enriched');
+  }
+
   async getProgramAdminDashboardStats(programId: string) {
     return supabase.rpc('get_program_admin_dashboard_stats', {
       p_program_id: programId,

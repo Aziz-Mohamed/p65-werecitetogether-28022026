@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { StyleSheet, View, Text, Pressable, ScrollView, I18nManager } from 'react-native';
+import { StyleSheet, View, Text, Pressable, I18nManager } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,8 +19,6 @@ import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
 
 import { useMasterAdminDashboard } from '@/features/admin/hooks/useMasterAdminDashboard';
-import { radius } from '@/theme/radius';
-import type { MasterAdminProgramSummary } from '@/features/admin/types/admin.types';
 
 // ─── Master Admin Dashboard ──────────────────────────────────────────────────
 
@@ -198,32 +196,6 @@ export default function MasterAdminDashboard() {
           </Card>
         </View>
 
-        {/* Programs Overview */}
-        {(dashboard.data?.programs ?? []).length > 0 && (
-          <>
-            <View style={styles.sectionRow}>
-              <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.programsOverview')}</Text>
-              <Pressable onPress={() => router.push('/(master-admin)/programs')}>
-                <Text style={styles.viewAllText}>{t('common.viewAll')}</Text>
-              </Pressable>
-            </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.programsScroll}
-            >
-              {(dashboard.data?.programs ?? []).map((program, index) => (
-                <ProgramPill
-                  key={program.program_id}
-                  program={program}
-                  index={index}
-                  onPress={() => router.push('/(master-admin)/programs')}
-                />
-              ))}
-            </ScrollView>
-          </>
-        )}
-
         {/* Sign Out */}
         <View style={styles.footer}>
           <Button
@@ -275,38 +247,6 @@ function NavCard({ title, icon, color, onPress }: { title: string; icon: string;
         <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={16} color={colors.neutral[300]} />
       </View>
     </Card>
-  );
-}
-
-const PROGRAM_COLORS = [
-  colors.primary[500],
-  colors.accent.indigo[500],
-  colors.accent.violet[500],
-  colors.accent.sky[500],
-  colors.secondary[500],
-  colors.accent.rose[500],
-];
-
-function ProgramPill({ program, index, onPress }: { program: MasterAdminProgramSummary; index: number; onPress: () => void }) {
-  const { i18n } = useTranslation();
-  const color = PROGRAM_COLORS[index % PROGRAM_COLORS.length];
-  const name = i18n.language === 'ar' ? program.name_ar : program.name;
-
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.programPill,
-        { borderColor: color + '40', backgroundColor: color + '08' },
-        pressed && styles.actionBtnPressed,
-      ]}
-    >
-      <Text style={styles.programPillName} numberOfLines={1}>{name}</Text>
-      <View style={[styles.programPillBadge, { backgroundColor: color + '15' }]}>
-        <Ionicons name="people" size={12} color={color} />
-        <Text style={[styles.programPillCount, { color }]}>{program.enrolled_count}</Text>
-      </View>
-    </Pressable>
   );
 }
 
@@ -416,46 +356,6 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: colors.neutral[500],
     marginEnd: spacing.xs,
-  },
-  sectionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  viewAllText: {
-    ...typography.textStyles.label,
-    color: colors.primary[500],
-  },
-  programsScroll: {
-    gap: spacing.md,
-    paddingEnd: spacing.sm,
-  },
-  programPill: {
-    borderWidth: 1.5,
-    borderRadius: radius.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.base,
-    gap: spacing.xs,
-    alignItems: 'center',
-    minWidth: normalize(120),
-    maxWidth: normalize(180),
-  },
-  programPillName: {
-    ...typography.textStyles.bodyMedium,
-    color: colors.neutral[800],
-    fontSize: normalize(13),
-  },
-  programPillBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: normalize(4),
-    paddingHorizontal: spacing.sm,
-    paddingVertical: normalize(2),
-    borderRadius: radius.full,
-  },
-  programPillCount: {
-    ...typography.textStyles.label,
-    fontSize: normalize(11),
   },
   footer: {
     marginTop: spacing.xl,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { I18nManager, Pressable, StyleSheet, View, Text, Alert } from 'react-native';
+import { I18nManager, Pressable, StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,9 +7,11 @@ import { FlashList } from '@shopify/flash-list';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { CategoryBadge } from '@/features/programs/components/CategoryBadge';
-import { useAllPrograms, useUpdateProgram } from '@/features/programs/hooks/useAdminPrograms';
+import { useAllPrograms } from '@/features/programs/hooks/useAdminPrograms';
+import { useMasterAdminDashboard } from '@/features/admin/hooks/useMasterAdminDashboard';
 import { useLocalizedField } from '@/features/programs/utils/enrollment-helpers';
 import { colors, lightTheme } from '@/theme/colors';
 import { typography } from '@/theme/typography';
@@ -35,27 +37,12 @@ export default function MasterAdminProgramsList() {
   const router = useRouter();
   const localize = useLocalizedField();
   const { data: programs = [], isLoading, error, refetch } = useAllPrograms();
-  const updateProgram = useUpdateProgram();
+  const dashboard = useMasterAdminDashboard();
 
-  const handleToggleActive = (program: Program) => {
-    const action = program.is_active ? t('programs.actions.deactivate') : t('programs.actions.reactivate');
-    Alert.alert(
-      action,
-      program.is_active ? t('programs.confirm.deactivateBody') : '',
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: action,
-          style: program.is_active ? 'destructive' : 'default',
-          onPress: () =>
-            updateProgram.mutate({
-              programId: program.id,
-              input: { is_active: !program.is_active },
-            }),
-        },
-      ],
-    );
-  };
+  // Build a lookup of enriched stats from the dashboard RPC (already deployed)
+  const statsMap = new Map(
+    (dashboard.data?.programs ?? []).map((p) => [p.program_id, p]),
+  );
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState onRetry={refetch} />;
@@ -89,11 +76,12 @@ export default function MasterAdminProgramsList() {
           <FlashList
             data={programs}
             keyExtractor={(item) => item.id}
-            estimatedItemSize={80}
+            estimatedItemSize={100}
             contentContainerStyle={styles.listContent}
             renderItem={({ item }: { item: Program }) => {
               const iconName = CATEGORY_ICON[item.category] ?? 'library-outline';
               const iconColor = CATEGORY_COLOR[item.category] ?? colors.primary[500];
+              const stats = statsMap.get(item.id);
 
               return (
                 <Card
@@ -111,23 +99,25 @@ export default function MasterAdminProgramsList() {
                       </Text>
                       <View style={styles.badgeRow}>
                         <CategoryBadge category={item.category} />
-                        <View style={[styles.statusDot, { backgroundColor: item.is_active ? colors.primary[500] : colors.neutral[300] }]} />
-                        <Text style={[styles.statusText, { color: item.is_active ? colors.primary[600] : colors.neutral[400] }]}>
-                          {item.is_active ? t('common.active') : t('common.inactive')}
-                        </Text>
+                        <Badge
+                          label={item.is_active ? t('common.active') : t('common.inactive')}
+                          variant={item.is_active ? 'success' : 'warning'}
+                          size="sm"
+                        />
                       </View>
+                      {stats && (
+                        <View style={styles.statsRow}>
+                          <View style={styles.miniStat}>
+                            <Ionicons name="people" size={12} color={colors.neutral[400]} />
+                            <Text style={styles.miniStatText}>{stats.enrolled_count}</Text>
+                          </View>
+                          <View style={styles.miniStat}>
+                            <Ionicons name="calendar" size={12} color={colors.neutral[400]} />
+                            <Text style={styles.miniStatText}>{stats.session_count}</Text>
+                          </View>
+                        </View>
+                      )}
                     </View>
-                    <Pressable
-                      style={styles.toggleButton}
-                      onPress={() => handleToggleActive(item)}
-                      hitSlop={8}
-                    >
-                      <Ionicons
-                        name={item.is_active ? 'pause-circle-outline' : 'play-circle-outline'}
-                        size={22}
-                        color={item.is_active ? colors.accent.rose[500] : colors.primary[500]}
-                      />
-                    </Pressable>
                     <Ionicons
                       name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
                       size={18}
@@ -210,17 +200,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-  statusDot: {
-    width: normalize(6),
-    height: normalize(6),
-    borderRadius: normalize(3),
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.base,
+    marginTop: normalize(2),
   },
-  statusText: {
+  miniStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: normalize(3),
+  },
+  miniStatText: {
     fontFamily: typography.fontFamily.medium,
     fontSize: normalize(12),
-  },
-  toggleButton: {
-    padding: spacing.xs,
+    color: colors.neutral[500],
   },
   separator: {
     height: spacing.sm,
