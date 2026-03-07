@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     fontSize: normalize(11),
     color: colors.neutral[500],
     width: normalize(32),
-    textAlign: 'right',
+    textAlign: 'auto',
   },
 
   // FAB

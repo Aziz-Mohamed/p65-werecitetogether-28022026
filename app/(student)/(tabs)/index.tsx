@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
     fontSize: normalize(12),
     color: colors.accent.rose[500],
     flexShrink: 1,
-    textAlign: 'right' as const,
+    textAlign: 'auto' as const,
   },
   heroDivider: {
     height: StyleSheet.hairlineWidth,

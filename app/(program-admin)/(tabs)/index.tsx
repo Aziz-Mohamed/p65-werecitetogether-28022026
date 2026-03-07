@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, I18nManager } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -93,7 +93,7 @@ export default function ProgramAdminDashboard() {
           <View style={styles.quickActionRow}>
             <Ionicons name="gift-outline" size={20} color={colors.secondary[500]} />
             <Text style={styles.quickActionText}>{t('gamification.rewardsDashboard.title')}</Text>
-            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+            <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />
           </View>
         </Card>
       </ScrollView>

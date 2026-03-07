@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   overlay: {
     position: 'absolute',
     bottom: 0,
-    right: 0,
+    end: 0,
   },
   dot: {
     width: DOT_SIZE,

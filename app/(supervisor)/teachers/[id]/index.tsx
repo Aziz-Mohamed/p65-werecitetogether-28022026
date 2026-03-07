@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   flagCharCount: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
-    textAlign: 'right',
+    textAlign: 'auto',
     marginTop: spacing.xs,
   },
   flagSubmitButton: {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, I18nManager } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '@/components/ui/Card';
@@ -67,7 +67,7 @@ export function CohortCard({ cohort, onEnroll, disabled }: CohortCardProps) {
             {isFull ? t('programs.actions.joinWaitlist') : t('programs.actions.enroll')}
           </Text>
           <Ionicons
-            name={isFull ? 'time-outline' : 'arrow-forward'}
+            name={isFull ? 'time-outline' : I18nManager.isRTL ? 'arrow-back' : 'arrow-forward'}
             size={normalize(16)}
             color={isFull ? colors.accent.orange[500] : colors.primary[600]}
           />

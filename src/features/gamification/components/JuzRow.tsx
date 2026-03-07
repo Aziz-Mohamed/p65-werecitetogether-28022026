@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, I18nManager, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -114,7 +114,7 @@ export function JuzRow({ juzNumber, items, onRubPress, onJuzAction }: JuzRowProp
             </Pressable>
           )}
           <Animated.View style={chevronStyle}>
-            <Ionicons name="chevron-forward" size={18} color={colors.neutral[400]} />
+            <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[400]} />
           </Animated.View>
         </View>
       </Pressable>

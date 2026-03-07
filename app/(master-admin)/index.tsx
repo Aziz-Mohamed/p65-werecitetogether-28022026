@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, I18nManager } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,7 @@ function NavButton({ label, icon, onPress }: { label: string; icon: string; onPr
     <Pressable style={navStyles.button} onPress={onPress} accessibilityRole="button">
       <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={normalize(20)} color={colors.primary[500]} />
       <Text style={navStyles.label}>{label}</Text>
-      <Ionicons name="chevron-forward" size={normalize(16)} color={lightTheme.textSecondary} />
+      <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={normalize(16)} color={lightTheme.textSecondary} />
     </Pressable>
   );
 }

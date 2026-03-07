@@ -221,6 +221,6 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.regular,
     fontSize: typography.fontSize.xs,
     color: lightTheme.textTertiary,
-    marginLeft: 'auto',
+    marginStart: 'auto',
   },
 });

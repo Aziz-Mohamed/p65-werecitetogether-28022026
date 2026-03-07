@@ -149,7 +149,7 @@ const fieldStyles = StyleSheet.create({
   input: {
     ...typography.textStyles.body,
     color: lightTheme.text,
-    textAlign: 'right',
+    textAlign: 'auto',
     width: normalize(80),
     borderWidth: 1,
     borderColor: lightTheme.border,

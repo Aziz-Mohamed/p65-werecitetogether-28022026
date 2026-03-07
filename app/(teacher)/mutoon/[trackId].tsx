@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
     minWidth: normalize(50),
-    textAlign: 'right',
+    textAlign: 'auto',
   },
   actions: {
     flexDirection: 'row',

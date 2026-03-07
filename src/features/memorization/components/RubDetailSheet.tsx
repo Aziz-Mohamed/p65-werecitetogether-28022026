@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     fontSize: normalize(12),
     color: colors.neutral[600],
     minWidth: normalize(32),
-    textAlign: 'right',
+    textAlign: 'auto',
   },
 
   // Cancel
