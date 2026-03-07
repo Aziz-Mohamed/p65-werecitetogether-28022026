@@ -23,7 +23,7 @@ class ParentsService {
     return supabase
       .from('profiles')
       .select(
-        'id, full_name, name_localized, username, avatar_url, phone, students!students_parent_id_fkey(id, profiles!students_id_fkey(full_name, name_localized), is_active)',
+        'id, full_name, name_localized, username, avatar_url, phone, created_at, students!students_parent_id_fkey(id, profiles!students_id_fkey(full_name, name_localized), is_active)',
       )
       .eq('id', id)
       .eq('role', 'parent')

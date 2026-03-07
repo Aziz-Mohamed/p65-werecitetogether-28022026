@@ -98,8 +98,8 @@ class AdminService {
   async searchUsersForAssignment(query: string, limit = 20) {
     return supabase
       .from('profiles')
-      .select('id, full_name, avatar_url, email, role')
-      .or(`full_name.ilike.%${query}%,email.ilike.%${query}%`)
+      .select('id, full_name, avatar_url, role')
+      .or(`full_name.ilike.%${query}%,username.ilike.%${query}%`)
       .limit(limit);
   }
 
@@ -160,6 +160,14 @@ class AdminService {
     }
 
     return query.order('full_name');
+  }
+
+  async getUserDetail(id: string) {
+    return supabase
+      .from('profiles')
+      .select('id, full_name, name_localized, username, avatar_url, phone, role, created_at')
+      .eq('id', id)
+      .single();
   }
 
   // ─── Master Admin ──────────────────────────────────────────────────────────

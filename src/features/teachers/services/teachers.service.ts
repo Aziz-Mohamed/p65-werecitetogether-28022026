@@ -28,7 +28,7 @@ class TeachersService {
   async getTeacherById(id: string) {
     return supabase
       .from('profiles')
-      .select('id, full_name, name_localized, username, avatar_url, phone, classes(id, name, name_localized, students(id))')
+      .select('id, full_name, name_localized, username, avatar_url, phone, created_at, classes(id, name, name_localized, students(id))')
       .eq('id', id)
       .eq('role', 'teacher')
       .single();
