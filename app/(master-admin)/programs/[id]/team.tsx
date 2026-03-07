@@ -3,7 +3,8 @@ import { StyleSheet, View, Text, Alert, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
+import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,6 +14,7 @@ import { UserSearchSheet } from '@/features/admin/components/UserSearchSheet';
 import { typography } from '@/theme/typography';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { normalize } from '@/theme/normalize';
 import { radius } from '@/theme/radius';
 import type { ProgramRoleType } from '@/features/programs/types/programs.types';
 
@@ -71,16 +73,18 @@ export default function ProgramTeamScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title}>{t('admin.masterAdmin.programs.team')}</Text>
-          <Button
-            title={t('common.add')}
-            onPress={() => setShowUserSearch(true)}
-            variant="ghost"
-            size="sm"
-          />
-        </View>
+        <PageHeader
+          title={t('admin.masterAdmin.programs.team')}
+          rightAction={
+            <Pressable
+              onPress={() => setShowUserSearch(true)}
+              hitSlop={8}
+              style={styles.addButton}
+            >
+              <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
+            </Pressable>
+          }
+        />
 
         {selectedUser && (
           <View style={styles.assignSection}>
@@ -146,16 +150,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
+  addButton: {
+    width: normalize(38),
+    height: normalize(38),
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
+    justifyContent: 'center',
   },
   assignSection: {
     gap: spacing.sm,

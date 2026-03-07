@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useAllPrograms } from '@/features/programs/hooks/useAdminPrograms';
@@ -46,23 +46,18 @@ export default function MasterAdminProgramsList() {
   return (
     <Screen scroll={false}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.headerButton} hitSlop={8}>
-            <Ionicons
-              name={I18nManager.isRTL ? 'chevron-forward' : 'chevron-back'}
-              size={24}
-              color={lightTheme.text}
-            />
-          </Pressable>
-          <Text style={styles.title}>{t('programs.admin.programs')}</Text>
-          <Pressable
-            style={styles.headerButton}
-            onPress={() => router.push('/(master-admin)/programs/create')}
-            hitSlop={8}
-          >
-            <Ionicons name="add" size={24} color={lightTheme.text} />
-          </Pressable>
-        </View>
+        <PageHeader
+          title={t('programs.admin.programs')}
+          rightAction={
+            <Pressable
+              style={styles.addButton}
+              onPress={() => router.push('/(master-admin)/programs/create')}
+              hitSlop={8}
+            >
+              <Ionicons name="add" size={24} color={lightTheme.text} />
+            </Pressable>
+          }
+        />
 
         {programs.length === 0 ? (
           <EmptyState
@@ -129,23 +124,11 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     gap: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
-  },
-  headerButton: {
+  addButton: {
     width: normalize(38),
     height: normalize(38),
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    fontSize: normalize(22),
   },
   listContent: {
     paddingHorizontal: spacing.lg,

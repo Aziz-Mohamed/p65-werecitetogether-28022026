@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { TextField, Button } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
@@ -94,16 +94,18 @@ export default function ProgramTracksScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title}>{t('programs.labels.tracks')}</Text>
-          <Button
-            title={t('common.add')}
-            onPress={() => { setShowCreate(!showCreate); setEditingId(null); }}
-            variant="ghost"
-            size="sm"
-          />
-        </View>
+        <PageHeader
+          title={t('programs.labels.tracks')}
+          rightAction={
+            <Pressable
+              onPress={() => { setShowCreate(!showCreate); setEditingId(null); }}
+              hitSlop={8}
+              style={styles.addButton}
+            >
+              <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
+            </Pressable>
+          }
+        />
 
         {showCreate && (
           <Card variant="outlined" style={styles.form}>
@@ -228,16 +230,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
+  addButton: {
+    width: normalize(38),
+    height: normalize(38),
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
+    justifyContent: 'center',
   },
   form: {
     gap: spacing.md,

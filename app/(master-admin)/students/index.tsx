@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui';
 import { Avatar } from '@/components/ui/Avatar';
@@ -36,23 +36,18 @@ export default function AdminStudentsScreen() {
   return (
     <Screen scroll={false}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.headerButton} hitSlop={8}>
-            <Ionicons
-              name={I18nManager.isRTL ? 'chevron-forward' : 'chevron-back'}
-              size={24}
-              color={lightTheme.text}
-            />
-          </Pressable>
-          <Text style={styles.title}>{t('admin.students.title')}</Text>
-          <Pressable
-            style={styles.headerButton}
-            onPress={() => router.push('/(master-admin)/students/create')}
-            hitSlop={8}
-          >
-            <Ionicons name="add" size={24} color={lightTheme.text} />
-          </Pressable>
-        </View>
+        <PageHeader
+          title={t('admin.students.title')}
+          rightAction={
+            <Pressable
+              style={styles.addButton}
+              onPress={() => router.push('/(master-admin)/students/create')}
+              hitSlop={8}
+            >
+              <Ionicons name="add" size={24} color={lightTheme.text} />
+            </Pressable>
+          }
+        />
 
         <SearchBar
           value={searchQuery}
@@ -125,22 +120,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  headerButton: {
+  addButton: {
     width: normalize(38),
     height: normalize(38),
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
   },
   searchBar: {
     marginBottom: spacing.xs,
