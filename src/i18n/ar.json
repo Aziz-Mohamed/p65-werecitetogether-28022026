@@ -127,7 +127,6 @@
     "role": {
       "student": "طالب",
       "teacher": "معلّم",
-      "parent": "ولي أمر",
       "supervisor": "مشرف",
       "program_admin": "مدير البرنامج",
       "master_admin": "المدير العام"
@@ -153,7 +152,6 @@
   "roles": {
     "student": "طالب",
     "teacher": "معلّم",
-    "parent": "وليّ أمر",
     "supervisor": "مشرف",
     "program_admin": "مدير البرنامج",
     "master_admin": "المدير العام"
@@ -462,57 +460,6 @@
       "awardAnother": "منح ملصق آخر"
     }
   },
-  "parent": {
-    "tabs": {
-      "dashboard": "لوحة التحكّم",
-      "children": "الأبناء",
-      "settings": "الإعدادات"
-    },
-    "dashboard": {
-      "title": "لوحة وليّ الأمر",
-      "subtitle": "تابع تقدّم أبنائك",
-      "lastSession": "آخر حصة",
-      "todayAtAGlance": "حضور اليوم",
-      "present": "حاضر",
-      "absent": "غائب",
-      "notMarked": "غير مسجّل",
-      "absentAlert": "{{name}} كان غائباً اليوم",
-      "allPresent": "جميع الأبناء حاضرون اليوم!",
-      "averageAttendance": "متوسط الحضور",
-      "totalStickers": "إجمالي الملصقات",
-      "activeStreaks": "سلسلة النشاط",
-      "childrenStatus": "أبنائي",
-      "noRecentSessions": "لا توجد حصص أخيرة بعد"
-    },
-    "myChildren": "أبنائي",
-    "childProgress": "تقدّم الطفل",
-    "classStanding": "الترتيب في الفصل",
-    "settings": {
-      "title": "الإعدادات",
-      "subtitle": "إدارة تفضيلاتك"
-    },
-    "classStandingDesc": "ترتيب مجهول — يُبرز طفلك فقط",
-    "viewAttendance": "عرض الحضور",
-    "attendanceCalendar": "تقويم الحضور",
-    "recentSessions": "الحصص الأخيرة",
-    "yourChild": "طفلك",
-    "sessionDetail": {
-      "title": "تفاصيل الحصّة",
-      "teacher": "المعلّم",
-      "scores": "الدرجات",
-      "memorization": "الحفظ",
-      "tajweed": "التجويد",
-      "recitation": "القراءة",
-      "recitations": "التسميعات",
-      "notes": "ملاحظات المعلّم",
-      "due": "التسليم",
-      "pending": "قيد الانتظار"
-    },
-    "children": {
-      "emptyTitle": "لا يوجد أبناء مرتبطون",
-      "emptyDescription": "اطلب من إدارة المدرسة ربط أبنائك بحسابك"
-    }
-  },
   "admin": {
     "dashboard": {
       "title": "لوحة المدير",
@@ -528,7 +475,6 @@
     "updateRoleFailed": "فشل تحديث الدور",
     "addStudent": "إضافة طالب",
     "addTeacher": "إضافة معلّم",
-    "addParent": "إضافة وليّ أمر",
     "addClass": "إضافة فصل",
     "bulkAttendance": "حضور جماعي",
     "schoolHealth": "صحّة المدرسة",
@@ -571,9 +517,8 @@
       "deactivateMessage": "لن يتمكن هذا الطالب من تسجيل الدخول.",
       "activateTitle": "تفعيل الطالب؟",
       "activateMessage": "سيتمكن هذا الطالب من تسجيل الدخول مرة أخرى.",
-      "parent": "وليّ الأمر",
-      "parentPlaceholder": "اختر وليّ أمر (اختياري)",
-      "noParent": "لا يوجد وليّ أمر مرتبط"
+      "guardian": "وليّ الأمر",
+      "noGuardian": "لا يوجد وليّ أمر مرتبط"
     },
     "teachers": {
       "title": "المعلّمون",
@@ -602,30 +547,14 @@
       "activateTitle": "تفعيل المعلّم؟",
       "activateMessage": "سيتمكن هذا المعلّم من تسجيل الدخول مرة أخرى."
     },
-    "parents": {
+    "guardians": {
       "title": "أولياء الأمور",
-      "subtitle": "إدارة أولياء أمور مدرستك",
-      "searchPlaceholder": "البحث عن أولياء أمور...",
-      "emptyTitle": "لا يوجد أولياء أمور بعد",
-      "emptyDescription": "أضف أول وليّ أمر للبدء",
-      "createTitle": "إنشاء وليّ أمر",
-      "editTitle": "تعديل وليّ أمر",
-      "fullName": "الاسم الكامل",
-      "fullNamePlaceholder": "أدخل اسم وليّ الأمر الكامل",
-      "username": "اسم المستخدم",
-      "usernamePlaceholder": "أدخل اسم المستخدم",
-      "password": "كلمة المرور",
-      "passwordPlaceholder": "أدخل كلمة المرور (6+ أحرف)",
-      "createButton": "إنشاء وليّ الأمر",
-      "requiredFields": "الاسم الكامل واسم المستخدم وكلمة المرور مطلوبة",
-      "notFound": "وليّ الأمر غير موجود",
-      "children": "أبناء",
-      "linkedChildren": "الأبناء المرتبطون",
-      "noChildren": "لا يوجد أبناء مرتبطون",
-      "selectChildren": "ربط الأبناء",
-      "selectChildrenPlaceholder": "اختر طالبًا واحدًا على الأقل...",
-      "selectChildrenRequired": "يجب ربط طفل واحد على الأقل",
-      "manageChildren": "إدارة الأبناء المرتبطين"
+      "name": "اسم وليّ الأمر",
+      "namePlaceholder": "أدخل اسم وليّ الأمر",
+      "phone": "رقم الهاتف",
+      "phonePlaceholder": "أدخل رقم الهاتف",
+      "add": "إضافة وليّ أمر",
+      "removeConfirm": "هل أنت متأكد من إزالة وليّ الأمر هذا؟"
     },
     "supervisors": {
       "title": "المشرفون",
@@ -1039,7 +968,6 @@
       "body": {
         "student": "احصل على إشعارات عند كسب ملصقات وجوائز وإنجازات.",
         "teacher": "احصل على ملخّصات صباحية وتنبيهات عندما يحتاج الطلاب اهتمامًا.",
-        "parent": "احصل على تحديثات حول حضور طفلك وإنجازاته.",
         "admin": "احصل على إشعارات حول نشاط المدرسة المهم."
       },
       "enable": "تفعيل الإشعارات",
