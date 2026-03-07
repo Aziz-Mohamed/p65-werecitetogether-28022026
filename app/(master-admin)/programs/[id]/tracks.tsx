@@ -83,7 +83,7 @@ export default function ProgramTracksScreen() {
           <Button
             title={t('common.add')}
             onPress={() => setShowForm(!showForm)}
-            variant="primary"
+            variant="ghost"
             size="sm"
           />
         </View>

@@ -77,7 +77,7 @@ export default function ProgramTeamScreen() {
           <Button
             title={t('common.add')}
             onPress={() => setShowUserSearch(true)}
-            variant="primary"
+            variant="ghost"
             size="sm"
           />
         </View>

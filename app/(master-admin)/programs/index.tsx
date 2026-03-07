@@ -63,7 +63,7 @@ export default function MasterAdminProgramsList() {
             style={styles.createButton}
             onPress={() => router.push('/(master-admin)/programs/create')}
           >
-            <Ionicons name="add" size={22} color={colors.primary[600]} />
+            <Ionicons name="add" size={24} color={lightTheme.text} />
           </Pressable>
         </View>
 
@@ -109,11 +109,16 @@ export default function MasterAdminProgramsList() {
                         <View style={styles.statsRow}>
                           <View style={styles.miniStat}>
                             <Ionicons name="people" size={12} color={colors.neutral[400]} />
-                            <Text style={styles.miniStatText}>{stats.enrolled_count}</Text>
+                            <Text style={styles.miniStatText}>
+                              {stats.enrolled_count} {t('programs.labels.enrolled')}
+                            </Text>
                           </View>
+                          <View style={styles.miniStatDot} />
                           <View style={styles.miniStat}>
                             <Ionicons name="calendar" size={12} color={colors.neutral[400]} />
-                            <Text style={styles.miniStatText}>{stats.session_count}</Text>
+                            <Text style={styles.miniStatText}>
+                              {stats.session_count} {t('programs.labels.sessions')}
+                            </Text>
                           </View>
                         </View>
                       )}
@@ -164,7 +169,6 @@ const styles = StyleSheet.create({
     width: normalize(38),
     height: normalize(38),
     borderRadius: radius.sm,
-    backgroundColor: colors.primary[50],
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -210,6 +214,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: normalize(3),
+  },
+  miniStatDot: {
+    width: normalize(3),
+    height: normalize(3),
+    borderRadius: normalize(1.5),
+    backgroundColor: colors.neutral[300],
   },
   miniStatText: {
     fontFamily: typography.fontFamily.medium,

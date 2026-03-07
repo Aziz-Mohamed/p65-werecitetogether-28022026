@@ -1703,7 +1703,9 @@
       "cohortName": "Cohort Name",
       "selectTrack": "Select Track",
       "selectTeacher": "Select Teacher",
-      "selectCategory": "Select Category"
+      "selectCategory": "Select Category",
+      "enrolled": "enrolled",
+      "sessions": "sessions"
     },
     "empty": {
       "programs": "No programs available",
