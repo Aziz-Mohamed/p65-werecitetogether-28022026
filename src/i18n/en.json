@@ -844,6 +844,7 @@
       "selector": {
         "title": "Select Program",
         "empty": "Not assigned to any programs",
+        "emptyDescription": "Contact your administrator to get assigned to a program",
         "enrolled": "{{count}} enrolled"
       },
       "dashboard": {

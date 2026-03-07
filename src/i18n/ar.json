@@ -844,6 +844,7 @@
       "selector": {
         "title": "اختر البرنامج",
         "empty": "لم يتم تعيينك لأي برنامج",
+        "emptyDescription": "تواصل مع المسؤول لتعيينك في برنامج",
         "enrolled": "{{count}} مسجلين"
       },
       "dashboard": {
