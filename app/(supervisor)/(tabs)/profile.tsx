@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, Pressable, Alert } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import React, { useCallback } from 'react';
+import { I18nManager, StyleSheet, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
 
 import { Screen } from '@/components/layout';
-import { Avatar } from '@/components/ui/Avatar';
-import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge, Avatar } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useLogout } from '@/features/auth/hooks/useLogout';
-import { profileService } from '@/features/profile/services/profile.service';
-import { useAuthStore } from '@/stores/authStore';
-import { colors, lightTheme } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { useChangeLanguage } from '@/hooks/useChangeLanguage';
+import { useRoleTheme } from '@/hooks/useRoleTheme';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
+import { supabase } from '@/lib/supabase';
 import { typography } from '@/theme/typography';
+import { lightTheme, colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
-import { radius } from '@/theme/radius';
 
 interface ProgramInfo {
   program_id: string;
@@ -26,18 +28,18 @@ interface ProgramInfo {
 
 export default function SupervisorProfile() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { session, profile } = useAuth();
-  const { logout, isPending: logoutPending } = useLogout();
+  const theme = useRoleTheme();
+  const { logout, isPending: isLoggingOut } = useLogout();
+  const { locale, toggleLanguage } = useChangeLanguage();
+  const { resolveName } = useLocalizedName();
   const userId = session?.user?.id;
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [saving, setSaving] = useState(false);
 
   const programs = useQuery({
     queryKey: ['supervisor-programs', userId],
     queryFn: async () => {
-      const { data: roles, error: roleError } = await (await import('@/lib/supabase')).supabase
+      const { data: roles, error: roleError } = await supabase
         .from('program_roles')
         .select(`
           program_id,
@@ -50,7 +52,7 @@ export default function SupervisorProfile() {
       if (!roles) return [];
 
       const programIds = roles.map((r: { program_id: string }) => r.program_id);
-      const { data: teamData } = await (await import('@/lib/supabase')).supabase
+      const { data: teamData } = await supabase
         .from('program_roles')
         .select('program_id, profile_id')
         .in('program_id', programIds)
@@ -59,114 +61,100 @@ export default function SupervisorProfile() {
       return roles.map((r: { program_id: string; programs: { name: string; name_ar: string } | null }) => ({
         program_id: r.program_id,
         program_name: r.programs?.name ?? '',
-        teacher_count: (teamData ?? []).filter((t: { program_id: string }) => t.program_id === r.program_id).length,
+        teacher_count: (teamData ?? []).filter((tc: { program_id: string }) => tc.program_id === r.program_id).length,
       })) as ProgramInfo[];
     },
     enabled: !!userId,
   });
 
-  const handleStartEdit = () => {
-    setEditName(profile?.full_name ?? '');
-    setIsEditing(true);
-  };
+  const handleSignOut = useCallback(() => {
+    logout();
+  }, [logout]);
 
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditName('');
-  };
-
-  const handleSaveProfile = async () => {
-    if (!userId || !editName.trim()) return;
-    setSaving(true);
-    try {
-      const { error } = await profileService.updateProfile(userId, {
-        full_name: editName.trim(),
-      });
-      if (error) throw error;
-      useAuthStore.getState().setProfile(
-        profile ? { ...profile, full_name: editName.trim() } : null,
-      );
-      setIsEditing(false);
-    } catch {
-      Alert.alert(t('common.error'), t('admin.supervisor.profile.saveError'));
-    } finally {
-      setSaving(false);
-    }
-  };
+  const displayName = resolveName(profile?.name_localized, profile?.full_name);
 
   return (
-    <Screen>
+    <Screen scroll hasTabBar>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Avatar
-            source={profile?.avatar_url ?? undefined}
-            name={profile?.full_name ?? ''}
-            size="xl"
-          />
-          {isEditing ? (
-            <>
-              <TextInput
-                style={styles.nameInput}
-                value={editName}
-                onChangeText={setEditName}
-                autoFocus
-                maxLength={100}
-              />
-              <View style={styles.editActions}>
-                <Button
-                  title={t('admin.supervisor.profile.saveProfile')}
-                  onPress={handleSaveProfile}
-                  loading={saving}
-                  disabled={saving || !editName.trim()}
-                  size="sm"
-                  style={styles.editButton}
-                />
-                <Button
-                  title={t('admin.supervisor.profile.cancelEdit')}
-                  onPress={handleCancelEdit}
-                  variant="ghost"
-                  size="sm"
-                  disabled={saving}
-                  style={styles.editButton}
-                />
-              </View>
-            </>
-          ) : (
-            <View style={styles.nameRow}>
-              <Text style={styles.name}>{profile?.full_name ?? ''}</Text>
-              <Pressable onPress={handleStartEdit} hitSlop={8}>
-                <Ionicons name="pencil-outline" size={18} color={colors.primary[500]} />
-              </Pressable>
-            </View>
-          )}
-          <Text style={styles.email}>{profile?.email ?? ''}</Text>
-        </View>
+        <Text style={styles.title}>{t('admin.supervisor.profile.title')}</Text>
 
+        {/* Profile Info */}
+        <Card variant="primary-glow" style={styles.profileCard}>
+          <Avatar
+            name={displayName}
+            size="xl"
+            ring
+            variant={theme.tag}
+          />
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{displayName ?? '—'}</Text>
+            <Text style={styles.profileUsername}>@{profile?.username ?? '—'}</Text>
+          </View>
+          <Badge label={t('roles.supervisor')} variant={theme.tag} size="md" />
+        </Card>
+
+        {/* Settings Group */}
+        <Text style={styles.sectionTitle}>{t('common.settings')}</Text>
+
+        {/* Notification Preferences */}
+        <Card
+          variant="default"
+          style={styles.settingCard}
+          onPress={() => router.push('/notification-preferences')}
+        >
+          <View style={styles.settingRow}>
+            <View style={styles.settingLabelContainer}>
+              <View style={[styles.settingIcon, { backgroundColor: colors.accent.sky[50] }]}>
+                <Ionicons name="notifications" size={20} color={colors.accent.sky[500]} />
+              </View>
+              <Text style={styles.settingLabel}>{t('notifications.preferences.title')}</Text>
+            </View>
+            <Ionicons name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'} size={20} color={colors.neutral[300]} />
+          </View>
+        </Card>
+
+        {/* Language */}
+        <Card variant="default" style={styles.settingCard} onPress={toggleLanguage}>
+          <View style={styles.settingRow}>
+            <View style={styles.settingLabelContainer}>
+              <View style={[styles.settingIcon, { backgroundColor: colors.accent.indigo[50] }]}>
+                <Ionicons name="language" size={20} color={colors.accent.indigo[500]} />
+              </View>
+              <Text style={styles.settingLabel}>{t('common.language')}</Text>
+            </View>
+            <View style={styles.languageValue}>
+              <Text style={styles.languageText}>
+                {locale === 'en' ? t('common.english') : t('common.arabic')}
+              </Text>
+              <Ionicons name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'} size={20} color={colors.neutral[300]} />
+            </View>
+          </View>
+        </Card>
+
+        {/* Supervised Programs */}
         <Text style={styles.sectionTitle}>{t('admin.supervisor.profile.supervisedPrograms')}</Text>
 
-        <FlatList
-          data={programs.data ?? []}
-          keyExtractor={(item) => item.program_id}
-          contentContainerStyle={styles.listContent}
-          renderItem={({ item }) => (
-            <Card variant="outlined" style={styles.programCard}>
-              <Text style={styles.programName}>{item.program_name}</Text>
-              <Text style={styles.programTeachers}>
-                {t('admin.supervisor.profile.teachersInProgram', { count: item.teacher_count })}
-              </Text>
-            </Card>
-          )}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-        />
+        {(programs.data ?? []).map((item) => (
+          <Card key={item.program_id} variant="default" style={styles.programCard}>
+            <Text style={styles.programName}>{item.program_name}</Text>
+            <Text style={styles.programTeachers}>
+              {t('admin.supervisor.profile.teachersInProgram', { count: item.teacher_count })}
+            </Text>
+          </Card>
+        ))}
 
-        <Button
-          title={t('common.signOut')}
-          onPress={() => logout()}
-          variant="ghost"
-          disabled={logoutPending}
-          loading={logoutPending}
-          style={styles.signOutButton}
-        />
+        {/* Sign Out */}
+        <View style={styles.footer}>
+          <Button
+            title={t('common.signOut')}
+            onPress={handleSignOut}
+            variant="ghost"
+            size="md"
+            icon={<Ionicons name="log-out-outline" size={20} color={colors.accent.rose[500]} />}
+            style={styles.signOutButton}
+            loading={isLoggingOut}
+          />
+        </View>
       </View>
     </Screen>
   );
@@ -175,55 +163,71 @@ export default function SupervisorProfile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: spacing.xl,
+    padding: spacing.lg,
+    gap: spacing.md,
   },
-  header: {
-    alignItems: 'center',
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.xl,
-    gap: spacing.sm,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  name: {
+  title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
-    textAlign: 'center',
+    fontSize: normalize(24),
+    marginBottom: spacing.sm,
   },
-  nameInput: {
+  profileCard: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+    gap: spacing.md,
+  },
+  profileInfo: {
+    alignItems: 'center',
+    gap: normalize(2),
+  },
+  profileName: {
     ...typography.textStyles.heading,
-    color: lightTheme.text,
-    textAlign: 'center',
-    borderWidth: 1,
-    borderColor: colors.primary[300],
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    minWidth: normalize(200),
+    color: colors.neutral[900],
+    fontSize: normalize(22),
   },
-  editActions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  editButton: {
-    minWidth: normalize(80),
-  },
-  email: {
+  profileUsername: {
     ...typography.textStyles.body,
-    color: lightTheme.textSecondary,
-    textAlign: 'center',
+    color: colors.neutral[500],
   },
   sectionTitle: {
     ...typography.textStyles.subheading,
     color: lightTheme.text,
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.sm,
+    marginTop: spacing.md,
+    fontSize: normalize(16),
   },
-  listContent: {
-    paddingHorizontal: spacing.base,
+  settingCard: {
+    padding: spacing.md,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  settingLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  settingIcon: {
+    width: normalize(40),
+    height: normalize(40),
+    borderRadius: normalize(12),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  settingLabel: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.neutral[800],
+  },
+  languageValue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  languageText: {
+    ...typography.textStyles.body,
+    color: colors.neutral[500],
   },
   programCard: {
     padding: spacing.md,
@@ -237,11 +241,10 @@ const styles = StyleSheet.create({
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
   },
-  separator: {
-    height: spacing.sm,
+  footer: {
+    marginTop: spacing.xl,
   },
   signOutButton: {
-    marginHorizontal: spacing.base,
-    marginTop: spacing.xl,
+    backgroundColor: colors.accent.rose[50],
   },
 });
