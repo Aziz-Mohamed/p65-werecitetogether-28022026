@@ -1562,6 +1562,14 @@
       "in_progress": "قيد التقدّم",
       "completed": "مكتمل",
       "certified": "مُجاز"
+    },
+    "teacher": {
+      "trackProgress": "تقدّم الطلاب",
+      "noStudents": "لا يوجد تقدّم للطلاب",
+      "advanceLine": "تقديم سطر",
+      "certify": "إجازة",
+      "certifyTitle": "إجازة الإكمال",
+      "certifyBody": "تأكيد إجازة حفظ {{name}}؟ لا يمكن التراجع عن هذا الإجراء."
     }
   },
   "availability": {

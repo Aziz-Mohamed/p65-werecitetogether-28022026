@@ -1562,6 +1562,14 @@
       "in_progress": "In Progress",
       "completed": "Completed",
       "certified": "Certified"
+    },
+    "teacher": {
+      "trackProgress": "Student Progress",
+      "noStudents": "No student progress to show",
+      "advanceLine": "Advance Line",
+      "certify": "Certify",
+      "certifyTitle": "Certify Completion",
+      "certifyBody": "Mark {{name}}'s memorization as certified? This cannot be undone."
     }
   },
   "availability": {
