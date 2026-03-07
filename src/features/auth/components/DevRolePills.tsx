@@ -13,8 +13,6 @@ import type { UserRole } from '@/types/common.types';
 const ROLE_COLORS: Record<UserRole, string> = {
   student: semantic.success,
   teacher: accent.blue[500],
-  parent: secondary[500],
-  admin: accent.violet[500],
   supervisor: accent.blue[700] ?? accent.blue[500],
   program_admin: accent.violet[700] ?? accent.violet[500],
   master_admin: semantic.error,

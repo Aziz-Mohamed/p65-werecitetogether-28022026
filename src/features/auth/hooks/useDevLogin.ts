@@ -8,8 +8,6 @@ import type { UserRole } from '@/types/common.types';
 const DEV_EMAIL_MAP: Record<UserRole, string> = {
   student: 'dev-student@test.werecitetogether.app',
   teacher: 'dev-teacher@test.werecitetogether.app',
-  parent: 'dev-parent@test.werecitetogether.app',
-  admin: 'dev-admin@test.werecitetogether.app',
   supervisor: 'dev-supervisor@test.werecitetogether.app',
   program_admin: 'dev-program-admin@test.werecitetogether.app',
   master_admin: 'dev-master-admin@test.werecitetogether.app',

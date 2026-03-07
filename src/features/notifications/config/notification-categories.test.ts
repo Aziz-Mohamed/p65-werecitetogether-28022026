@@ -42,14 +42,6 @@ describe('getCategoriesForRole', () => {
     expect(ids).not.toContain('sticker_awarded');
   });
 
-  it('returns parent categories', () => {
-    const cats = getCategoriesForRole('parent');
-    const ids = cats.map((c) => c.id);
-    expect(ids).toContain('sticker_awarded');
-    expect(ids).toContain('attendance_marked');
-    expect(ids).not.toContain('daily_summary');
-  });
-
   it('returns empty for roles with no categories', () => {
     const cats = getCategoriesForRole('unknown_role' as any);
     expect(cats).toHaveLength(0);

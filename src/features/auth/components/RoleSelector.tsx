@@ -21,7 +21,6 @@ interface RoleOption {
 const ALL_ROLE_OPTIONS: RoleOption[] = [
   { role: 'student', icon: 'school-outline', labelKey: 'auth.role.student' },
   { role: 'teacher', icon: 'person-outline', labelKey: 'auth.role.teacher' },
-  { role: 'parent', icon: 'people-outline', labelKey: 'auth.role.parent' },
   { role: 'supervisor', icon: 'eye-outline', labelKey: 'auth.role.supervisor' },
   { role: 'program_admin', icon: 'briefcase-outline', labelKey: 'auth.role.program_admin' },
   { role: 'master_admin', icon: 'shield-outline', labelKey: 'auth.role.master_admin' },

@@ -16,7 +16,7 @@ export type NotificationCategory =
   | 'daily_summary'
   | 'student_alert';
 
-export type UserRole = 'student' | 'teacher' | 'parent' | 'admin';
+export type UserRole = 'student' | 'teacher' | 'admin';
 
 // ─── Deep-Link Data ──────────────────────────────────────────────────────────
 

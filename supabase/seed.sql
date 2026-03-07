@@ -8,9 +8,9 @@
 DO $$
 DECLARE
   _password_hash TEXT := crypt('devtest123', gen_salt('bf'));
-  _roles TEXT[] := ARRAY['student', 'teacher', 'parent', 'supervisor', 'program_admin', 'master_admin'];
-  _names TEXT[] := ARRAY['Test Student', 'Test Teacher', 'Test Parent', 'Test Supervisor', 'Test Program Admin', 'Test Master Admin'];
-  _slugs TEXT[] := ARRAY['student', 'teacher', 'parent', 'supervisor', 'program-admin', 'master-admin'];
+  _roles TEXT[] := ARRAY['student', 'teacher', 'supervisor', 'program_admin', 'master_admin'];
+  _names TEXT[] := ARRAY['Test Student', 'Test Teacher', 'Test Supervisor', 'Test Program Admin', 'Test Master Admin'];
+  _slugs TEXT[] := ARRAY['student', 'teacher', 'supervisor', 'program-admin', 'master-admin'];
   _role TEXT;
   _name TEXT;
   _slug TEXT;

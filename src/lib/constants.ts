@@ -15,7 +15,6 @@ export const MAX_STUDENTS_PER_CLASS = 20;
 export const ROLES: readonly UserRole[] = [
   'student',
   'teacher',
-  'parent',
   'supervisor',
   'program_admin',
   'master_admin',
