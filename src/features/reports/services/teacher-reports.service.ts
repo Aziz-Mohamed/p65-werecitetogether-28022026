@@ -9,7 +9,6 @@ import type {
 } from '../types/reports.types';
 
 class TeacherReportsService {
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   async getClassAnalytics(
     classId: string,
     dateRange: DateRange,
@@ -94,7 +93,6 @@ class TeacherReportsService {
   }
 
   /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   async getClassScoreTrend(
     schoolId: string,
     classId: string,
@@ -119,7 +117,6 @@ class TeacherReportsService {
   }
 
   /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   async getClassAttendanceTrend(
     schoolId: string,
     classId: string,
@@ -145,7 +142,6 @@ class TeacherReportsService {
     }));
   }
 
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   async getStudentsNeedingAttention(
     classId: string,
     dateRange: DateRange,

@@ -12,7 +12,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { programsService } from '@/features/programs/services/programs.service';
-import type { CohortWithTeacher } from '@/features/programs/types/programs.types';
+import type { ProgramClassWithTeacher } from '@/features/programs/types/programs.types';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -27,17 +27,17 @@ const statusVariant: Record<string, 'success' | 'info' | 'warning' | 'default'> 
   archived: 'default',
 };
 
-export default function ProgramAdminCohorts() {
+export default function ProgramAdminClasses() {
   const { t, i18n } = useTranslation();
   const { programId } = useLocalSearchParams<{ programId: string }>();
   const router = useRouter();
 
-  const cohorts = useQuery({
-    queryKey: ['cohorts', programId],
+  const classes = useQuery({
+    queryKey: ['programs', programId, 'classes'],
     queryFn: async () => {
-      const { data, error } = await programsService.getCohorts({ programId: programId! });
+      const { data, error } = await programsService.getProgramClasses({ programId: programId! });
       if (error) throw error;
-      return (data as CohortWithTeacher[]) ?? [];
+      return (data as unknown as ProgramClassWithTeacher[]) ?? [];
     },
     enabled: !!programId,
   });
@@ -57,37 +57,37 @@ export default function ProgramAdminCohorts() {
   return (
     <Screen>
       <View style={styles.container}>
-        <Text style={styles.title}>{t('admin.programAdmin.cohorts.title')}</Text>
+        <Text style={styles.title}>{t('admin.programAdmin.classes.title')}</Text>
 
         <FlashList
-          data={cohorts.data ?? []}
+          data={classes.data ?? []}
           estimatedItemSize={100}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={cohorts.isRefetching} onRefresh={() => cohorts.refetch()} />
+            <RefreshControl refreshing={classes.isRefetching} onRefresh={() => classes.refetch()} />
           }
           renderItem={({ item }) => {
             const enrolled = item.enrollments?.[0]?.count ?? 0;
             return (
               <Card variant="outlined" style={styles.card}>
                 <View style={styles.cardHeader}>
-                  <Text style={styles.cohortName} numberOfLines={1}>{item.name}</Text>
+                  <Text style={styles.className} numberOfLines={1}>{item.name}</Text>
                   <Badge
                     label={item.status.replace('_', ' ')}
                     variant={statusVariant[item.status] ?? 'default'}
                     size="sm"
                   />
                 </View>
-                <Text style={styles.cohortDetail}>
-                  {t('admin.programAdmin.cohorts.enrolled', { current: enrolled, max: item.max_students })}
+                <Text style={styles.classDetail}>
+                  {t('admin.programAdmin.classes.enrolled', { current: enrolled, max: item.max_students })}
                 </Text>
                 {item.profiles && (
-                  <Text style={styles.cohortTeacher}>
+                  <Text style={styles.classTeacher}>
                     {t('common.teacher')}: {item.profiles.full_name}
                   </Text>
                 )}
                 {item.start_date && (
-                  <Text style={styles.cohortDate}>
+                  <Text style={styles.classDate}>
                     {new Date(item.start_date).toLocaleDateString()}
                   </Text>
                 )}
@@ -96,12 +96,12 @@ export default function ProgramAdminCohorts() {
           }}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
-            !cohorts.isLoading ? (
-              cohorts.isError ? (
-                <ErrorState onRetry={() => cohorts.refetch()} />
+            !classes.isLoading ? (
+              classes.isError ? (
+                <ErrorState onRetry={() => classes.refetch()} />
               ) : (
                 <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>{t('admin.programAdmin.cohorts.empty')}</Text>
+                  <Text style={styles.emptyText}>{t('admin.programAdmin.classes.empty')}</Text>
                 </View>
               )
             ) : null
@@ -117,7 +117,7 @@ export default function ProgramAdminCohorts() {
             })
           }
           accessibilityRole="button"
-          accessibilityLabel={t('admin.programAdmin.cohorts.createCohort')}
+          accessibilityLabel={t('admin.programAdmin.classes.createClass')}
         >
           <Ionicons name="add" size={normalize(28)} color="#fff" />
         </Pressable>
@@ -149,20 +149,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  cohortName: {
+  className: {
     ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
     flex: 1,
   },
-  cohortDetail: {
+  classDetail: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
   },
-  cohortTeacher: {
+  classTeacher: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
   },
-  cohortDate: {
+  classDate: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
   },

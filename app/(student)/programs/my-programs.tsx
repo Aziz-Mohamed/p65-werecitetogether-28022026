@@ -98,7 +98,7 @@ export default function MyProgramsScreen() {
                   {localize(item.program_tracks.name, item.program_tracks.name_ar)}
                 </Text>
               )}
-              {item.cohorts?.profiles?.full_name && (
+              {item.classes?.profiles?.full_name && (
                 <View style={styles.row}>
                   <Ionicons
                     name="person-outline"
@@ -106,7 +106,7 @@ export default function MyProgramsScreen() {
                     color={lightTheme.textSecondary}
                   />
                   <Text style={styles.detail}>
-                    {item.cohorts.profiles.full_name}
+                    {item.classes.profiles.full_name}
                   </Text>
                 </View>
               )}

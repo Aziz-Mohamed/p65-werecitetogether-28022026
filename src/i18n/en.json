@@ -804,7 +804,7 @@
       "dashboard": {
         "title": "Program Dashboard",
         "totalEnrolled": "Enrolled Students",
-        "activeCohorts": "Active Cohorts",
+        "activeClasses": "Active Classes",
         "totalTeachers": "Teachers",
         "sessionsThisWeek": "Sessions This Week",
         "pendingEnrollments": "Pending Enrollments",
@@ -833,11 +833,11 @@
           "admins": "Program Admins"
         }
       },
-      "cohorts": {
-        "title": "Cohorts",
-        "createCohort": "Create Cohort",
+      "classes": {
+        "title": "Classes",
+        "createClass": "Create Class",
         "enrolled": "{{current}}/{{max}} students",
-        "empty": "No cohorts in this program"
+        "empty": "No classes in this program"
       },
       "settings": {
         "title": "Program Settings",
@@ -859,7 +859,7 @@
       },
       "tabs": {
         "home": "Home",
-        "cohorts": "Cohorts",
+        "classes": "Classes",
         "team": "Team",
         "reports": "Reports",
         "settings": "Settings",
@@ -952,12 +952,12 @@
         "editSettings": "Edit program details & configuration",
         "enrolledStudents": "Enrolled",
         "teamMembers": "Team",
-        "activeCohorts": "{{count}} cohorts",
+        "activeClasses": "{{count}} classes",
         "activeTracks": "{{count}} tracks",
         "sessionsThisWeek": "Sessions (7d)",
         "viewTeam": "Team",
         "viewTracks": "Tracks",
-        "viewCohorts": "Cohorts",
+        "viewClasses": "Classes",
         "teamSummary": "{{admins}} admins, {{teachers}} teachers, {{supervisors}} supervisors"
       }
     }
@@ -1599,14 +1599,14 @@
       "dropped": "Dropped",
       "waitlisted": "Waitlisted"
     },
-    "cohortStatus": {
+    "classStatus": {
       "enrollment_open": "Enrollment Open",
       "enrollment_closed": "Enrollment Closed",
       "in_progress": "In Progress",
       "completed": "Completed",
       "archived": "Archived"
     },
-    "cohortAction": {
+    "classAction": {
       "enrollment_closed": "Close Enrollment",
       "in_progress": "Start Program",
       "completed": "Mark Complete",
@@ -1618,7 +1618,7 @@
       "leave": "Leave Program",
       "approve": "Approve",
       "reject": "Reject",
-      "createCohort": "Create Cohort",
+      "createClass": "Create Class",
       "createProgram": "Create Program",
       "createTrack": "Add Track",
       "assignRole": "Add Member",
@@ -1630,14 +1630,14 @@
     },
     "labels": {
       "tracks": "Tracks",
-      "cohorts": "Cohorts",
+      "classes": "Classes",
       "waitlist": "Waitlist",
       "enrollments": "Enrollments",
       "team": "Team",
       "students": "Students",
       "capacity": "{{current}}/{{max}} students",
       "noTracks": "No tracks available",
-      "noCohorts": "No cohorts available — check back soon.",
+      "noClasses": "No classes available — check back soon.",
       "joined": "Joined",
       "waitlistPosition": "Waitlist position: #{{position}}",
       "sortOrder": "Sort Order",
@@ -1659,7 +1659,7 @@
       "descriptionAr": "Description (Arabic)",
       "trackName": "Track Name (English)",
       "trackNameAr": "Track Name (Arabic)",
-      "cohortName": "Cohort Name",
+      "className": "Class Name",
       "selectTrack": "Select Track",
       "selectTeacher": "Select Teacher",
       "selectCategory": "Select Category",
@@ -1671,8 +1671,8 @@
       "programsDesc": "Programs will appear here once they are set up.",
       "enrollments": "No enrollments yet",
       "enrollmentsDesc": "Browse programs and enroll to get started.",
-      "cohorts": "No cohorts yet",
-      "cohortsDesc": "Create a cohort to start accepting enrollments.",
+      "classes": "No classes yet",
+      "classesDesc": "Create a class to start accepting enrollments.",
       "team": "No team members assigned",
       "teamDesc": "Add teachers and supervisors to this program."
     },
@@ -1694,9 +1694,9 @@
     "errors": {
       "programNotFound": "Program not found",
       "trackNotFound": "Track not found",
-      "cohortRequired": "A cohort is required for structured enrollment",
-      "cohortNotFound": "Cohort not found",
-      "cohortClosed": "This cohort is no longer accepting enrollments",
+      "classRequired": "A class is required for structured enrollment",
+      "classNotFound": "Class not found",
+      "classClosed": "This class is no longer accepting enrollments",
       "authRequired": "Please sign in to enroll",
       "studentsOnly": "Only students can enroll in programs",
       "alreadyEnrolled": "You are already enrolled in this program",
@@ -1708,7 +1708,7 @@
       "left": "You have left the program.",
       "approved": "Enrollment approved",
       "rejected": "Enrollment rejected",
-      "cohortCreated": "Cohort created successfully",
+      "classCreated": "Class created successfully",
       "programUpdated": "Program updated",
       "trackCreated": "Track added",
       "roleAssigned": "Team member assigned",
@@ -1723,9 +1723,9 @@
       "programs": "Programs",
       "editProgram": "Edit Program",
       "createProgram": "Create Program",
-      "createCohort": "Create Cohort",
+      "createClass": "Create Class",
       "managePrograms": "Manage Programs",
-      "manageCohorts": "Manage Cohorts",
+      "manageClasses": "Manage Classes",
       "manageTeam": "Manage Team",
       "pendingApprovals": "Pending Approvals",
       "allPrograms": "All Programs"

@@ -804,7 +804,7 @@
       "dashboard": {
         "title": "لوحة البرنامج",
         "totalEnrolled": "الطلاب المسجلون",
-        "activeCohorts": "المجموعات النشطة",
+        "activeClasses": "الحلقات النشطة",
         "totalTeachers": "المعلمون",
         "sessionsThisWeek": "جلسات هذا الأسبوع",
         "pendingEnrollments": "طلبات التسجيل المعلقة",
@@ -833,11 +833,11 @@
           "admins": "مديرو البرنامج"
         }
       },
-      "cohorts": {
-        "title": "المجموعات",
-        "createCohort": "إنشاء مجموعة",
+      "classes": {
+        "title": "الحلقات",
+        "createClass": "إنشاء حلقة",
         "enrolled": "{{current}}/{{max}} طلاب",
-        "empty": "لا توجد مجموعات في هذا البرنامج"
+        "empty": "لا توجد حلقات في هذا البرنامج"
       },
       "settings": {
         "title": "إعدادات البرنامج",
@@ -859,7 +859,7 @@
       },
       "tabs": {
         "home": "الرئيسية",
-        "cohorts": "المجموعات",
+        "classes": "الحلقات",
         "team": "الفريق",
         "reports": "التقارير",
         "settings": "الإعدادات",
@@ -952,12 +952,12 @@
         "editSettings": "تعديل تفاصيل وإعدادات البرنامج",
         "enrolledStudents": "المسجلين",
         "teamMembers": "الفريق",
-        "activeCohorts": "{{count}} مجموعات",
+        "activeClasses": "{{count}} حلقات",
         "activeTracks": "{{count}} مسارات",
         "sessionsThisWeek": "الجلسات (٧ أيام)",
         "viewTeam": "الفريق",
         "viewTracks": "المسارات",
-        "viewCohorts": "المجموعات",
+        "viewClasses": "الحلقات",
         "teamSummary": "{{admins}} مشرفين, {{teachers}} معلمين, {{supervisors}} موجهين"
       }
     }
@@ -1599,14 +1599,14 @@
       "dropped": "منسحب",
       "waitlisted": "قائمة الانتظار"
     },
-    "cohortStatus": {
+    "classStatus": {
       "enrollment_open": "التسجيل مفتوح",
       "enrollment_closed": "التسجيل مغلق",
       "in_progress": "قيد التنفيذ",
       "completed": "مكتمل",
       "archived": "مؤرشف"
     },
-    "cohortAction": {
+    "classAction": {
       "enrollment_closed": "إغلاق التسجيل",
       "in_progress": "بدء البرنامج",
       "completed": "تحديد كمكتمل",
@@ -1618,7 +1618,7 @@
       "leave": "مغادرة البرنامج",
       "approve": "موافقة",
       "reject": "رفض",
-      "createCohort": "إنشاء دفعة",
+      "createClass": "إنشاء حلقة",
       "createProgram": "إنشاء برنامج",
       "createTrack": "إضافة مسار",
       "assignRole": "إضافة عضو",
@@ -1630,14 +1630,14 @@
     },
     "labels": {
       "tracks": "المسارات",
-      "cohorts": "الدفعات",
+      "classes": "الحلقات",
       "waitlist": "قائمة الانتظار",
       "enrollments": "التسجيلات",
       "team": "الفريق",
       "students": "الطلاب",
       "capacity": "{{current}}/{{max}} طالب",
       "noTracks": "لا توجد مسارات متاحة",
-      "noCohorts": "لا توجد دفعات متاحة — يُرجى المراجعة لاحقاً.",
+      "noClasses": "لا توجد حلقات متاحة — يُرجى المراجعة لاحقاً.",
       "joined": "منضم",
       "waitlistPosition": "ترتيب الانتظار: #{{position}}",
       "sortOrder": "ترتيب العرض",
@@ -1659,7 +1659,7 @@
       "descriptionAr": "الوصف (عربي)",
       "trackName": "اسم المسار (إنجليزي)",
       "trackNameAr": "اسم المسار (عربي)",
-      "cohortName": "اسم الدفعة",
+      "className": "اسم الحلقة",
       "selectTrack": "اختر المسار",
       "selectTeacher": "اختر المعلّم",
       "selectCategory": "اختر الفئة",
@@ -1671,8 +1671,8 @@
       "programsDesc": "ستظهر البرامج هنا بعد إعدادها.",
       "enrollments": "لا توجد تسجيلات بعد",
       "enrollmentsDesc": "تصفح البرامج وسجّل للبدء.",
-      "cohorts": "لا توجد دفعات بعد",
-      "cohortsDesc": "أنشئ دفعة لبدء قبول التسجيلات.",
+      "classes": "لا توجد حلقات بعد",
+      "classesDesc": "أنشئ حلقة لبدء قبول التسجيلات.",
       "team": "لم يتم تعيين أعضاء الفريق",
       "teamDesc": "أضف معلمين ومشرفين لهذا البرنامج."
     },
@@ -1694,9 +1694,9 @@
     "errors": {
       "programNotFound": "البرنامج غير موجود",
       "trackNotFound": "المسار غير موجود",
-      "cohortRequired": "يجب اختيار دفعة للتسجيل في البرامج المقيّدة",
-      "cohortNotFound": "الدفعة غير موجودة",
-      "cohortClosed": "هذه الدفعة لم تعد تقبل التسجيلات",
+      "classRequired": "يجب اختيار حلقة للتسجيل المنظّم",
+      "classNotFound": "الحلقة غير موجودة",
+      "classClosed": "هذه الحلقة لم تعد تقبل التسجيلات",
       "authRequired": "يُرجى تسجيل الدخول للتسجيل",
       "studentsOnly": "التسجيل متاح للطلاب فقط",
       "alreadyEnrolled": "أنت مسجّل بالفعل في هذا البرنامج",
@@ -1708,7 +1708,7 @@
       "left": "تمت المغادرة من البرنامج.",
       "approved": "تمت الموافقة على التسجيل",
       "rejected": "تم رفض التسجيل",
-      "cohortCreated": "تم إنشاء الدفعة بنجاح",
+      "classCreated": "تم إنشاء الحلقة بنجاح",
       "programUpdated": "تم تحديث البرنامج",
       "trackCreated": "تمت إضافة المسار",
       "roleAssigned": "تم تعيين العضو",
@@ -1723,9 +1723,9 @@
       "programs": "البرامج",
       "editProgram": "تعديل البرنامج",
       "createProgram": "إنشاء برنامج",
-      "createCohort": "إنشاء دفعة",
+      "createClass": "إنشاء حلقة",
       "managePrograms": "إدارة البرامج",
-      "manageCohorts": "إدارة الدفعات",
+      "manageClasses": "إدارة الحلقات",
       "manageTeam": "إدارة الفريق",
       "pendingApprovals": "الموافقات المعلّقة",
       "allPrograms": "جميع البرامج"

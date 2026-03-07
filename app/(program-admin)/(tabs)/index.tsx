@@ -107,8 +107,8 @@ function DashboardView({ programId, programName }: { programId: string; programN
             isLoading={dashboard.isLoading}
           />
           <StatCard
-            label={t('admin.programAdmin.dashboard.activeCohorts')}
-            value={dashboard.data?.active_cohorts ?? 0}
+            label={t('admin.programAdmin.dashboard.activeClasses')}
+            value={dashboard.data?.active_classes ?? 0}
             icon="people-circle-outline"
             iconColor={colors.accent.indigo[500]}
             isLoading={dashboard.isLoading}

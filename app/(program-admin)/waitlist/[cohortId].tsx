@@ -9,7 +9,7 @@ import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Button, Badge } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { useCohortWaitlist, usePromoteFromWaitlist } from '@/features/programs/hooks/useWaitlist';
+import { useClassWaitlist, usePromoteFromWaitlist } from '@/features/programs/hooks/useWaitlist';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -17,12 +17,12 @@ import { normalize } from '@/theme/normalize';
 import type { WaitlistEntryWithStudent } from '@/features/programs/types/programs.types';
 
 export default function WaitlistScreen() {
-  const { cohortId } = useLocalSearchParams<{ cohortId: string }>();
+  const { cohortId: classId } = useLocalSearchParams<{ cohortId: string }>();
   const { t } = useTranslation();
   const router = useRouter();
 
-  const { data: waitlist = [], isLoading, error, refetch } = useCohortWaitlist(cohortId);
-  const promote = usePromoteFromWaitlist(cohortId!);
+  const { data: waitlist = [], isLoading, error, refetch } = useClassWaitlist(classId);
+  const promote = usePromoteFromWaitlist(classId!);
 
   const handlePromote = () => {
     Alert.alert(

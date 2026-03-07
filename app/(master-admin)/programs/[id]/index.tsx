@@ -90,8 +90,8 @@ export default function ProgramOverviewScreen() {
           />
           <OverviewStat
             icon="school"
-            label={t('admin.masterAdmin.programs.activeCohorts')}
-            value={stats?.active_cohorts ?? 0}
+            label={t('admin.masterAdmin.programs.activeClasses')}
+            value={stats?.active_classes ?? 0}
             color={colors.accent.violet[500]}
           />
           <OverviewStat
@@ -124,8 +124,8 @@ export default function ProgramOverviewScreen() {
           />
           <NavCard
             icon="school-outline"
-            title={t('admin.masterAdmin.programs.viewCohorts')}
-            subtitle={t('admin.masterAdmin.programs.activeCohorts', { count: stats?.active_cohorts ?? 0 })}
+            title={t('admin.masterAdmin.programs.viewClasses')}
+            subtitle={t('admin.masterAdmin.programs.activeClasses', { count: stats?.active_classes ?? 0 })}
             color={colors.accent.sky[500]}
             onPress={() => router.push(`/(master-admin)/programs/${id}/cohorts`)}
           />

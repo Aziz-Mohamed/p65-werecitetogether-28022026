@@ -8,7 +8,6 @@ import type {
 } from '../types/reports.types';
 
 class ParentReportsService {
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   async getChildProgressReport(
     studentId: string,
     classId: string | null,
@@ -25,7 +24,6 @@ class ParentReportsService {
     return { scoreTrend, attendanceSummary, gamification };
   }
 
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   async getChildScoreTrend(
     studentId: string,
     classId: string,

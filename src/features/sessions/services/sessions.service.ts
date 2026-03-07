@@ -11,7 +11,6 @@ const SESSION_SELECT = `
 
 class SessionsService {
   /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * SS-001: Create a new session record.
    * Looks up the teacher's school_id from their profile and inserts the session.
@@ -89,7 +88,6 @@ class SessionsService {
       .eq('teacher_id', user.id);
   }
 
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * SS-002: Retrieve a paginated, filtered list of sessions.
    * Joins teacher profile, student profile, program name, and voice memo metadata.
