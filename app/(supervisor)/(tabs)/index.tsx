@@ -38,56 +38,58 @@ export default function SupervisorHome() {
   };
 
   return (
-    <Screen>
+    <Screen scroll={false}>
       <View style={styles.container}>
-        <Text style={styles.title}>{t('admin.supervisor.title')}</Text>
-
-        <View style={styles.statsRow}>
-          <StatCard
-            label={t('admin.supervisor.teacherCount')}
-            value={dashboard.data?.teacher_count ?? 0}
-            icon="people-outline"
-            iconColor={colors.primary[500]}
-            isLoading={isLoading}
-          />
-          <StatCard
-            label={t('admin.supervisor.studentCount')}
-            value={dashboard.data?.student_count ?? 0}
-            icon="school-outline"
-            iconColor={colors.accent.indigo}
-            isLoading={isLoading}
-          />
-        </View>
-
-        <View style={styles.statsRow}>
-          <StatCard
-            label={t('admin.supervisor.sessionsThisWeek')}
-            value={dashboard.data?.sessions_this_week ?? 0}
-            icon="calendar-outline"
-            iconColor={colors.accent.violet}
-            isLoading={isLoading}
-          />
-        </View>
-
-        {/* Quick Actions */}
-        <Card
-          variant="default"
-          style={styles.quickAction}
-          onPress={() => router.push('/(supervisor)/rewards')}
-        >
-          <View style={styles.quickActionRow}>
-            <Ionicons name="gift-outline" size={20} color={colors.secondary[500]} />
-            <Text style={styles.quickActionText}>{t('gamification.rewardsDashboard.title')}</Text>
-            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
-          </View>
-        </Card>
-
         <FlashList
           data={teachers.data ?? []}
           estimatedItemSize={120}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+          }
+          ListHeaderComponent={
+            <View style={styles.headerSection}>
+              <Text style={styles.title}>{t('admin.supervisor.title')}</Text>
+
+              <View style={styles.statsRow}>
+                <StatCard
+                  label={t('admin.supervisor.teacherCount')}
+                  value={dashboard.data?.teacher_count ?? 0}
+                  icon="people-outline"
+                  iconColor={colors.primary[500]}
+                  isLoading={isLoading}
+                />
+                <StatCard
+                  label={t('admin.supervisor.studentCount')}
+                  value={dashboard.data?.student_count ?? 0}
+                  icon="school-outline"
+                  iconColor={colors.accent.indigo}
+                  isLoading={isLoading}
+                />
+              </View>
+
+              <View style={styles.statsRow}>
+                <StatCard
+                  label={t('admin.supervisor.sessionsThisWeek')}
+                  value={dashboard.data?.sessions_this_week ?? 0}
+                  icon="calendar-outline"
+                  iconColor={colors.accent.violet}
+                  isLoading={isLoading}
+                />
+              </View>
+
+              <Card
+                variant="default"
+                style={styles.quickAction}
+                onPress={() => router.push('/(supervisor)/rewards')}
+              >
+                <View style={styles.quickActionRow}>
+                  <Ionicons name="gift-outline" size={20} color={colors.secondary[500]} />
+                  <Text style={styles.quickActionText}>{t('gamification.rewardsDashboard.title')}</Text>
+                  <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+                </View>
+              </Card>
+            </View>
           }
           renderItem={({ item }) => (
             <TeacherCard
@@ -123,23 +125,23 @@ export default function SupervisorHome() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  headerSection: {
     paddingTop: spacing.xl,
+    paddingBottom: spacing.base,
   },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
-    paddingHorizontal: spacing.base,
     marginBottom: spacing.base,
   },
   statsRow: {
     flexDirection: 'row',
     gap: spacing.sm,
-    paddingHorizontal: spacing.base,
     marginBottom: spacing.sm,
   },
   listContent: {
     paddingHorizontal: spacing.base,
-    paddingTop: spacing.base,
   },
   separator: {
     height: spacing.sm,
@@ -154,7 +156,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   quickAction: {
-    marginHorizontal: spacing.base,
     marginBottom: spacing.sm,
     padding: spacing.md,
   },
