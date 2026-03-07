@@ -1653,6 +1653,12 @@
       "completed": "مكتمل",
       "archived": "مؤرشف"
     },
+    "cohortAction": {
+      "enrollment_closed": "إغلاق التسجيل",
+      "in_progress": "بدء البرنامج",
+      "completed": "تحديد كمكتمل",
+      "archived": "أرشفة"
+    },
     "actions": {
       "enroll": "تسجيل",
       "join": "انضمام",

@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, Text, Alert } from 'react-native';
+import { StyleSheet, View, Text, Alert, I18nManager } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 
 import { Screen } from '@/components/layout';
@@ -11,14 +12,13 @@ import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useCohortEnrollments, useUpdateEnrollmentStatus } from '@/features/programs/hooks/useAdminEnrollments';
 import { useUpdateCohortStatus, useBulkApproveEnrollments } from '@/features/programs/hooks/useAdminCohorts';
 import { useCohorts } from '@/features/programs/hooks/useCohorts';
-import { useCohortWaitlist } from '@/features/programs/hooks/useWaitlist';
 import { getNextCohortStatus } from '@/features/programs/utils/enrollment-helpers';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import type { CohortStatus } from '@/features/programs/types/programs.types';
+import { normalize } from '@/theme/normalize';
 
-export default function CohortDetailScreen() {
+export default function MasterAdminCohortDetailScreen() {
   const { id, cohortId } = useLocalSearchParams<{ id: string; cohortId: string }>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -27,7 +27,6 @@ export default function CohortDetailScreen() {
   const cohort = cohorts?.find((c) => c.id === cohortId);
 
   const { data: enrollments = [], isLoading, error, refetch } = useCohortEnrollments(cohortId);
-  const { data: waitlist = [] } = useCohortWaitlist(cohortId);
   const updateCohortStatus = useUpdateCohortStatus(id!);
   const updateEnrollment = useUpdateEnrollmentStatus();
   const bulkApprove = useBulkApproveEnrollments(id!);
@@ -37,9 +36,10 @@ export default function CohortDetailScreen() {
     const next = getNextCohortStatus(cohort.status);
     if (!next) return;
 
+    const pendingCount = enrollments.filter((e: any) => e.status === 'pending').length;
     const confirmMsg =
       next === 'in_progress'
-        ? t('programs.confirm.bulkApproveBody', { count: enrollments.filter((e: any) => e.status === 'pending').length })
+        ? t('programs.confirm.bulkApproveBody', { count: pendingCount })
         : '';
 
     Alert.alert(
@@ -70,22 +70,28 @@ export default function CohortDetailScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title}>{cohort?.name ?? '—'}</Text>
-          <View style={{ width: 60 }} />
+          <Text style={styles.title} numberOfLines={1}>{cohort?.name ?? '—'}</Text>
+          <View style={styles.headerSpacer} />
         </View>
 
         {cohort && (
           <View style={styles.statusRow}>
-            <Badge
-              label={t(`programs.cohortStatus.${cohort.status}`)}
-              variant={cohort.status === 'enrollment_open' ? 'success' : 'info'}
-              size="sm"
-            />
+            <Text style={styles.statusText}>
+              {t(`programs.cohortStatus.${cohort.status}`)}
+            </Text>
+            {cohort.profiles?.full_name && (
+              <>
+                <View style={styles.dot} />
+                <Ionicons name="person-outline" size={normalize(13)} color={colors.neutral[400]} />
+                <Text style={styles.metaText}>{cohort.profiles.full_name}</Text>
+              </>
+            )}
+            <View style={{ flex: 1 }} />
             {nextStatus && (
               <Button
                 title={t(`programs.cohortAction.${nextStatus}`)}
                 onPress={handleStatusTransition}
-                variant="primary"
+                variant="ghost"
                 size="sm"
                 loading={updateCohortStatus.isPending || bulkApprove.isPending}
               />
@@ -93,21 +99,9 @@ export default function CohortDetailScreen() {
           </View>
         )}
 
-        {waitlist.length > 0 && (
-          <Button
-            title={`${t('programs.labels.waitlist')} (${waitlist.length})`}
-            onPress={() =>
-              router.push({
-                pathname: '/(program-admin)/waitlist/[cohortId]',
-                params: { cohortId: cohortId! },
-              })
-            }
-            variant="secondary"
-            size="sm"
-          />
-        )}
-
-        <Text style={styles.sectionTitle}>{t('programs.labels.enrollments')}</Text>
+        <Text style={styles.sectionTitle}>
+          {t('programs.labels.enrollments')} ({enrollments.length})
+        </Text>
 
         {enrollments.length === 0 ? (
           <EmptyState
@@ -118,18 +112,16 @@ export default function CohortDetailScreen() {
           <FlashList
             data={enrollments}
             keyExtractor={(item: any) => item.id}
-            estimatedItemSize={70}
+            estimatedItemSize={56}
             renderItem={({ item }: { item: any }) => (
-              <Card variant="outlined" style={styles.card}>
-                <View style={styles.cardRow}>
+              <View style={styles.studentRow}>
+                <View style={styles.studentInfo}>
                   <Text style={styles.studentName} numberOfLines={1}>
                     {item.profiles?.full_name ?? '—'}
                   </Text>
-                  <Badge
-                    label={t(`programs.status.${item.status}`)}
-                    variant={item.status === 'active' ? 'success' : item.status === 'pending' ? 'warning' : 'default'}
-                    size="sm"
-                  />
+                  <Text style={styles.studentStatus}>
+                    {t(`programs.status.${item.status}`)}
+                  </Text>
                 </View>
                 {item.status === 'pending' && (
                   <View style={styles.actions}>
@@ -138,7 +130,7 @@ export default function CohortDetailScreen() {
                       onPress={() =>
                         updateEnrollment.mutate({ enrollmentId: item.id, status: 'active' })
                       }
-                      variant="primary"
+                      variant="ghost"
                       size="sm"
                     />
                     <Button
@@ -159,8 +151,9 @@ export default function CohortDetailScreen() {
                     />
                   </View>
                 )}
-              </Card>
+              </View>
             )}
+            ItemSeparatorComponent={() => <View style={styles.divider} />}
           />
         )}
       </View>
@@ -179,6 +172,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  headerSpacer: {
+    width: 60,
+  },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
@@ -188,31 +184,57 @@ const styles = StyleSheet.create({
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: spacing.sm,
+  },
+  statusText: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: normalize(13),
+    color: colors.neutral[500],
+    textTransform: 'capitalize',
+  },
+  dot: {
+    width: normalize(3),
+    height: normalize(3),
+    borderRadius: normalize(1.5),
+    backgroundColor: colors.neutral[300],
+  },
+  metaText: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: normalize(13),
+    color: colors.neutral[400],
   },
   sectionTitle: {
     ...typography.textStyles.subheading,
     color: lightTheme.text,
   },
-  card: {
-    marginBottom: spacing.sm,
+  studentRow: {
+    paddingVertical: spacing.base,
   },
-  cardRow: {
+  studentInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
   studentName: {
-    ...typography.textStyles.body,
+    ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
     flex: 1,
+  },
+  studentStatus: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: normalize(12),
+    color: colors.neutral[400],
+    textTransform: 'capitalize',
   },
   actions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: spacing.sm,
     marginTop: spacing.sm,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: lightTheme.border,
   },
 });

@@ -1653,6 +1653,12 @@
       "completed": "Completed",
       "archived": "Archived"
     },
+    "cohortAction": {
+      "enrollment_closed": "Close Enrollment",
+      "in_progress": "Start Program",
+      "completed": "Mark Complete",
+      "archived": "Archive"
+    },
     "actions": {
       "enroll": "Enroll",
       "join": "Join",

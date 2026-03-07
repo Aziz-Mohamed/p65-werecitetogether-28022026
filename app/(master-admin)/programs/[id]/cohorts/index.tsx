@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, I18nManager } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,11 +7,11 @@ import { FlashList } from '@shopify/flash-list';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
-import { Button, Badge } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useCohorts } from '@/features/programs/hooks/useCohorts';
 import { typography } from '@/theme/typography';
-import { lightTheme } from '@/theme/colors';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
 import type { CohortWithTeacher } from '@/features/programs/types/programs.types';
@@ -31,7 +31,7 @@ export default function ProgramCohortsScreen() {
         <View style={styles.header}>
           <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
           <Text style={styles.title}>{t('programs.labels.cohorts')}</Text>
-          <View style={{ width: 60 }} />
+          <View style={styles.headerSpacer} />
         </View>
 
         {cohorts.length === 0 ? (
@@ -45,37 +45,42 @@ export default function ProgramCohortsScreen() {
             data={cohorts}
             keyExtractor={(item) => item.id}
             estimatedItemSize={90}
+            contentContainerStyle={styles.listContent}
             renderItem={({ item }: { item: CohortWithTeacher }) => {
               const enrolledCount = item.enrollments?.[0]?.count ?? 0;
+              const metaParts = [
+                t(`programs.cohortStatus.${item.status}`),
+                item.profiles?.full_name,
+                `${enrolledCount}/${item.max_students}`,
+              ].filter(Boolean);
+
               return (
-                <Card variant="outlined" style={styles.card}>
+                <Card
+                  variant="default"
+                  style={styles.card}
+                  onPress={() =>
+                    router.push(`/(master-admin)/programs/${id}/cohorts/${item.id}`)
+                  }
+                >
                   <View style={styles.cardRow}>
-                    <Text style={styles.cohortName} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                    <Badge
-                      label={t(`programs.cohortStatus.${item.status}`)}
-                      variant={item.status === 'enrollment_open' ? 'success' : 'info'}
-                      size="sm"
-                    />
-                  </View>
-                  <View style={styles.meta}>
-                    {item.profiles?.full_name && (
-                      <View style={styles.metaRow}>
-                        <Ionicons name="person-outline" size={normalize(14)} color={lightTheme.textSecondary} />
-                        <Text style={styles.metaText}>{item.profiles.full_name}</Text>
-                      </View>
-                    )}
-                    <View style={styles.metaRow}>
-                      <Ionicons name="people-outline" size={normalize(14)} color={lightTheme.textSecondary} />
-                      <Text style={styles.metaText}>
-                        {enrolledCount}/{item.max_students}
+                    <View style={styles.cardContent}>
+                      <Text style={styles.cohortName} numberOfLines={1}>
+                        {item.name}
+                      </Text>
+                      <Text style={styles.metaText} numberOfLines={1}>
+                        {metaParts.join('  ·  ')}
                       </Text>
                     </View>
+                    <Ionicons
+                      name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
+                      size={18}
+                      color={colors.neutral[300]}
+                    />
                   </View>
                 </Card>
               );
             }}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
           />
         )}
       </View>
@@ -86,13 +91,17 @@ export default function ProgramCohortsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: spacing.lg,
+    paddingTop: spacing.lg,
     gap: spacing.md,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+  },
+  headerSpacer: {
+    width: 60,
   },
   title: {
     ...typography.textStyles.heading,
@@ -100,33 +109,33 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
+  listContent: {
+    paddingHorizontal: spacing.lg,
+  },
   card: {
-    marginBottom: spacing.sm,
+    padding: spacing.md,
   },
   cardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
+    gap: spacing.md,
+  },
+  cardContent: {
+    flex: 1,
+    gap: normalize(3),
   },
   cohortName: {
-    ...typography.textStyles.body,
-    fontFamily: typography.fontFamily.semiBold,
+    ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
-    flex: 1,
-  },
-  meta: {
-    flexDirection: 'row',
-    gap: spacing.base,
-    marginTop: spacing.xs,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
+    fontSize: normalize(15),
   },
   metaText: {
-    ...typography.textStyles.caption,
-    color: lightTheme.textSecondary,
+    fontFamily: typography.fontFamily.regular,
+    fontSize: normalize(12),
+    color: colors.neutral[400],
+    textTransform: 'capitalize',
+  },
+  separator: {
+    height: spacing.sm,
   },
 });
