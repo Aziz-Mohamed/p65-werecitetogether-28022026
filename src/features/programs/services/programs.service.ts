@@ -248,6 +248,49 @@ class ProgramsService {
       .select('*')
       .order('sort_order', { ascending: true });
   }
+
+  // ─── Waitlist Operations ───────────────────────────────────────────────────
+
+  /** WL-001: Get waitlist entries for a cohort (admin view) */
+  async getCohortWaitlist(cohortId: string) {
+    return (supabase
+      .from('program_waitlist' as any)
+      .select(`
+        *,
+        profiles!program_waitlist_student_id_fkey ( id, full_name )
+      `)
+      .eq('cohort_id', cohortId)
+      .in('status', ['waiting', 'offered'])
+      .order('position', { ascending: true })) as any;
+  }
+
+  /** WL-002: Get student's own waitlist entry for a cohort */
+  async getMyWaitlistEntry(cohortId: string, userId: string) {
+    return (supabase
+      .from('program_waitlist' as any)
+      .select('*')
+      .eq('cohort_id', cohortId)
+      .eq('student_id', userId)
+      .in('status', ['waiting', 'offered'])
+      .maybeSingle()) as any;
+  }
+
+  /** WL-003: Cancel own waitlist entry */
+  async cancelWaitlistEntry(waitlistId: string) {
+    return (supabase
+      .from('program_waitlist' as any)
+      .update({ status: 'cancelled' })
+      .eq('id', waitlistId)
+      .select()
+      .single()) as any;
+  }
+
+  /** WL-004: Promote from waitlist (admin — calls RPC) */
+  async promoteFromWaitlist(cohortId: string) {
+    return supabase.rpc('promote_from_waitlist' as any, {
+      p_cohort_id: cohortId,
+    });
+  }
 }
 
 export const programsService = new ProgramsService();

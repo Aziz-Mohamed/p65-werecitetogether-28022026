@@ -27,7 +27,7 @@ export function CohortCard({ cohort, onEnroll, disabled }: CohortCardProps) {
     <Card
       variant="outlined"
       style={styles.card}
-      onPress={isOpen && !isFull && !disabled ? onEnroll : undefined}
+      onPress={isOpen && !disabled ? onEnroll : undefined}
     >
       <View style={styles.header}>
         <Text style={styles.name} numberOfLines={1}>
@@ -61,10 +61,16 @@ export function CohortCard({ cohort, onEnroll, disabled }: CohortCardProps) {
         </View>
       )}
 
-      {isOpen && !isFull && !disabled && (
+      {isOpen && !disabled && (
         <View style={styles.footer}>
-          <Text style={styles.enrollText}>{t('programs.actions.enroll')}</Text>
-          <Ionicons name="arrow-forward" size={normalize(16)} color={colors.primary[600]} />
+          <Text style={[styles.enrollText, isFull && styles.waitlistText]}>
+            {isFull ? t('programs.actions.joinWaitlist') : t('programs.actions.enroll')}
+          </Text>
+          <Ionicons
+            name={isFull ? 'time-outline' : 'arrow-forward'}
+            size={normalize(16)}
+            color={isFull ? colors.accent.orange[500] : colors.primary[600]}
+          />
         </View>
       )}
     </Card>
@@ -109,5 +115,8 @@ const styles = StyleSheet.create({
   enrollText: {
     ...typography.textStyles.bodyMedium,
     color: colors.primary[600],
+  },
+  waitlistText: {
+    color: colors.accent.orange[500],
   },
 });

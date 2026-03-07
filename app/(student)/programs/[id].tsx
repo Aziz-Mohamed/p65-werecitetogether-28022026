@@ -19,6 +19,7 @@ import { useLeaveProgram } from '@/features/programs/hooks/useLeaveProgram';
 import { useAvailableTeachers } from '@/features/teacher-availability/hooks/useAvailableTeachers';
 import { JoinQueueButton } from '@/features/queue/components/JoinQueueButton';
 import { FairUsageNotice } from '@/features/queue/components/FairUsageNotice';
+import { WaitlistPositionCard } from '@/features/programs/components/WaitlistPositionCard';
 import { useLocalizedField, getEnrollErrorKey } from '@/features/programs/utils/enrollment-helpers';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui';
@@ -158,6 +159,23 @@ export default function ProgramDetailScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <ProgramDetailHeader program={program} />
 
+        {/* Leaderboard */}
+        {myEnrollments.some((e) => e.status === 'active') && (
+          <View style={styles.section}>
+            <Button
+              title={t('gamification.programLeaderboard.title')}
+              onPress={() =>
+                router.push({
+                  pathname: '/(student)/program/[programId]/leaderboard',
+                  params: { programId: id! },
+                })
+              }
+              variant="secondary"
+              icon={<Ionicons name="podium-outline" size={16} color={lightTheme.text} />}
+            />
+          </View>
+        )}
+
         {/* Available Teachers — free/mixed programs */}
         {showAvailableTeachers && (
           <View style={styles.section}>
@@ -233,13 +251,23 @@ export default function ProgramDetailScreen() {
               )}
 
               {enrolled && trackEnrollment ? (
-                <Button
-                  title={t('programs.actions.leave')}
-                  onPress={() => handleLeave(trackEnrollment.id)}
-                  variant="danger"
-                  size="sm"
-                  loading={leaveProgram.isPending}
-                />
+                trackEnrollment.status === 'waitlisted' && trackEnrollment.cohort_id ? (
+                  <WaitlistPositionCard
+                    cohortId={trackEnrollment.cohort_id}
+                    userId={userId}
+                    enrollmentId={trackEnrollment.id}
+                    onLeave={() => handleLeave(trackEnrollment.id)}
+                    leavePending={leaveProgram.isPending}
+                  />
+                ) : (
+                  <Button
+                    title={t('programs.actions.leave')}
+                    onPress={() => handleLeave(trackEnrollment.id)}
+                    variant="danger"
+                    size="sm"
+                    loading={leaveProgram.isPending}
+                  />
+                )
               ) : isFree ? (
                 <Button
                   title={t('programs.actions.join')}
