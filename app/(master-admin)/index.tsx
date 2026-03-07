@@ -81,11 +81,16 @@ export default function MasterAdminDashboard() {
 
         <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.programsOverview')}</Text>
 
-        {(dashboard.data?.programs ?? []).map((program) => (
-          <View key={program.program_id} style={styles.programItem}>
-            <ProgramSummaryRow program={program} />
-          </View>
-        ))}
+        <View style={styles.programsList}>
+          {(dashboard.data?.programs ?? []).map((program, index) => (
+            <ProgramSummaryRow
+              key={program.program_id}
+              program={program}
+              index={index}
+              onPress={() => router.push('/(master-admin)/programs')}
+            />
+          ))}
+        </View>
 
         <Button
           title={t('common.signOut')}
@@ -135,9 +140,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
   },
-  programItem: {
+  programsList: {
     paddingHorizontal: spacing.base,
-    marginBottom: spacing.sm,
+    gap: spacing.sm,
   },
   signOutButton: {
     marginHorizontal: spacing.base,
