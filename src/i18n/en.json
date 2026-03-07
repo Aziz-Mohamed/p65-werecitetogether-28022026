@@ -854,7 +854,8 @@
         "totalTeachers": "Teachers",
         "sessionsThisWeek": "Sessions This Week",
         "pendingEnrollments": "Pending Enrollments",
-        "pendingWarning": "{{count}} enrollment requests pending review"
+        "pendingWarning": "{{count}} enrollment requests pending review",
+        "switchProgram": "Switch Program"
       },
       "team": {
         "title": "Team",

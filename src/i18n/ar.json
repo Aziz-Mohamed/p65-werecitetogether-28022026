@@ -854,7 +854,8 @@
         "totalTeachers": "المعلمون",
         "sessionsThisWeek": "جلسات هذا الأسبوع",
         "pendingEnrollments": "طلبات التسجيل المعلقة",
-        "pendingWarning": "{{count}} طلبات تسجيل بانتظار المراجعة"
+        "pendingWarning": "{{count}} طلبات تسجيل بانتظار المراجعة",
+        "switchProgram": "تبديل البرنامج"
       },
       "team": {
         "title": "الفريق",

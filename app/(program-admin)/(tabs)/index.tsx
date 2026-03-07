@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, I18nManager } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, I18nManager, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -16,25 +16,33 @@ import { ProgramSelector } from '@/features/admin/components/ProgramSelector';
 import { useProgramAdminDashboard } from '@/features/admin/hooks/useProgramAdminDashboard';
 import { useProgramAdminPrograms } from '@/features/admin/hooks/useProgramAdminPrograms';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 
 export default function ProgramAdminDashboard() {
   const { t } = useTranslation();
   const router = useRouter();
   const { programId } = useLocalSearchParams<{ programId: string }>();
-
-  if (!programId) {
-    return <ProgramSelectorView />;
-  }
-
-  return <DashboardView programId={programId} />;
-}
-
-function ProgramSelectorView() {
-  const { t } = useTranslation();
-  const router = useRouter();
   const { session } = useAuth();
   const userId = session?.user?.id;
-  const { data: programs, isLoading } = useProgramAdminPrograms(userId);
+  const { data: programs } = useProgramAdminPrograms(userId);
+  const { resolveName } = useLocalizedName();
+
+  const currentProgram = programs?.find((p) => p.program_id === programId);
+  const programName = currentProgram?.programs
+    ? resolveName({ en: currentProgram.programs.name, ar: currentProgram.programs.name_ar }, currentProgram.programs.name)
+    : undefined;
+
+  if (!programId) {
+    return <ProgramSelectorView programs={programs} />;
+  }
+
+  return <DashboardView programId={programId} programName={programName} />;
+}
+
+function ProgramSelectorView({ programs }: { programs: ReturnType<typeof useProgramAdminPrograms>['data'] }) {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const isLoading = programs === undefined;
 
   if (!isLoading && (programs ?? []).length === 0) {
     return (
@@ -64,7 +72,7 @@ function ProgramSelectorView() {
   );
 }
 
-function DashboardView({ programId }: { programId: string }) {
+function DashboardView({ programId, programName }: { programId: string; programName?: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const dashboard = useProgramAdminDashboard(programId);
@@ -78,7 +86,17 @@ function DashboardView({ programId }: { programId: string }) {
           <RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()} />
         }
       >
-        <Text style={styles.title}>{t('admin.programAdmin.dashboard.title')}</Text>
+        <Pressable
+          style={styles.programHeader}
+          onPress={() => router.replace({ pathname: '/(program-admin)/(tabs)' })}
+          accessibilityRole="button"
+          accessibilityLabel={t('admin.programAdmin.dashboard.switchProgram')}
+        >
+          <Text style={styles.title} numberOfLines={1}>
+            {programName ?? t('admin.programAdmin.dashboard.title')}
+          </Text>
+          <Ionicons name="swap-horizontal-outline" size={20} color={colors.primary[500]} />
+        </Pressable>
 
         <View style={styles.statsRow}>
           <StatCard
@@ -159,11 +177,17 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xl,
     paddingBottom: spacing['3xl'],
   },
+  programHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.base,
+  },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.base,
+    flex: 1,
   },
   statsRow: {
     flexDirection: 'row',
