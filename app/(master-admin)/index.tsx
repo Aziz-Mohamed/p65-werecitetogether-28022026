@@ -1,168 +1,387 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, I18nManager } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
-import { useRouter } from 'expo-router';
+import React, { useCallback } from 'react';
+import { StyleSheet, View, Text, Pressable, I18nManager } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
+import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui';
+import { useAuth } from '@/hooks/useAuth';
 import { useLogout } from '@/features/auth/hooks/useLogout';
-import { colors, lightTheme } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { useChangeLanguage } from '@/hooks/useChangeLanguage';
+import { useRoleTheme } from '@/hooks/useRoleTheme';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
+import { lightTheme, colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
 
-import { StatCard } from '@/features/admin/components/StatCard';
 import { ProgramSummaryRow } from '@/features/admin/components/ProgramSummaryRow';
 import { useMasterAdminDashboard } from '@/features/admin/hooks/useMasterAdminDashboard';
 
-function NavButton({ label, icon, onPress }: { label: string; icon: string; onPress: () => void }) {
-  return (
-    <Pressable style={navStyles.button} onPress={onPress} accessibilityRole="button">
-      <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={normalize(20)} color={colors.primary[500]} />
-      <Text style={navStyles.label}>{label}</Text>
-      <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={normalize(16)} color={lightTheme.textSecondary} />
-    </Pressable>
-  );
-}
+// ─── Master Admin Dashboard ──────────────────────────────────────────────────
 
 export default function MasterAdminDashboard() {
   const { t } = useTranslation();
+  const { profile } = useAuth();
   const router = useRouter();
+  const theme = useRoleTheme();
+  const { logout, isPending: isLoggingOut } = useLogout();
+  const { locale, toggleLanguage } = useChangeLanguage();
+  const { resolveFirstName } = useLocalizedName();
+
   const dashboard = useMasterAdminDashboard();
-  const { logout, isPending: logoutPending } = useLogout();
+
+  const handleSignOut = useCallback(() => {
+    logout();
+  }, [logout]);
 
   return (
-    <Screen>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()} />
-        }
-      >
-        <Text style={styles.title}>{t('admin.masterAdmin.dashboard.title')}</Text>
+    <Screen scroll>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>
+              {t('dashboard.welcome', { name: resolveFirstName(profile?.name_localized, profile?.full_name) })} 👋
+            </Text>
+            <Text style={styles.subtitle}>{t('admin.masterAdmin.dashboard.title')}</Text>
+          </View>
+          <Badge label={t('roles.master_admin')} variant={theme.tag} size="md" />
+        </View>
 
-        <View style={styles.statsRow}>
+        {/* Stats Grid */}
+        <View style={styles.statsGrid}>
           <StatCard
             label={t('admin.masterAdmin.dashboard.totalStudents')}
             value={dashboard.data?.total_students ?? 0}
-            icon="school-outline"
-            iconColor={colors.primary[500]}
-            isLoading={dashboard.isLoading}
+            color={theme.primary}
+            icon="people"
           />
           <StatCard
             label={t('admin.masterAdmin.dashboard.totalTeachers')}
             value={dashboard.data?.total_teachers ?? 0}
-            icon="people-outline"
-            iconColor={colors.accent.indigo[500]}
-            isLoading={dashboard.isLoading}
+            color={colors.accent.indigo[500]}
+            icon="school"
           />
-        </View>
-
-        <View style={styles.statsRow}>
           <StatCard
             label={t('admin.masterAdmin.dashboard.activeSessions')}
             value={dashboard.data?.total_active_sessions ?? 0}
-            icon="pulse-outline"
-            iconColor={colors.accent.violet[500]}
-            isLoading={dashboard.isLoading}
+            color={colors.accent.violet[500]}
+            icon="pulse"
+          />
+          <StatCard
+            label={t('admin.masterAdmin.dashboard.programsCount')}
+            value={dashboard.data?.programs?.length ?? 0}
+            color={colors.accent.rose[500]}
+            icon="library"
           />
         </View>
 
-        <View style={styles.navSection}>
-          <NavButton label={t('admin.masterAdmin.nav.users')} icon="people-outline" onPress={() => router.push('/(master-admin)/users')} />
-          <NavButton label={t('admin.masterAdmin.nav.programs')} icon="library-outline" onPress={() => router.push('/(master-admin)/programs')} />
-          <NavButton label={t('admin.masterAdmin.nav.reports')} icon="bar-chart-outline" onPress={() => router.push('/(master-admin)/reports')} />
-          <NavButton label={t('admin.masterAdmin.nav.settings')} icon="settings-outline" onPress={() => router.push('/(master-admin)/settings')} />
-          <NavButton label={t('admin.masterAdmin.nav.certifications')} icon="ribbon-outline" onPress={() => router.push('/(master-admin)/certifications')} />
+        {/* Quick Actions */}
+        <Text style={styles.sectionTitle}>{t('dashboard.quickActions')}</Text>
+        <View style={styles.actionsRow}>
+          <ActionButton
+            title={t('admin.addStudent')}
+            onPress={() => router.push('/(master-admin)/students/create')}
+            icon="person-add"
+            color={theme.primary}
+          />
+          <ActionButton
+            title={t('admin.addTeacher')}
+            onPress={() => router.push('/(master-admin)/teachers/create')}
+            icon="school"
+            color={colors.accent.indigo[500]}
+          />
+          <ActionButton
+            title={t('admin.addClass')}
+            onPress={() => router.push('/(master-admin)/classes/create')}
+            icon="add-circle"
+            color={colors.accent.violet[500]}
+          />
+          <ActionButton
+            title={t('admin.addParent')}
+            onPress={() => router.push('/(master-admin)/parents/create')}
+            icon="people"
+            color={colors.accent.rose[500]}
+          />
         </View>
 
-        <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.programsOverview')}</Text>
-
-        <View style={styles.programsList}>
-          {(dashboard.data?.programs ?? []).map((program, index) => (
-            <ProgramSummaryRow
-              key={program.program_id}
-              program={program}
-              index={index}
-              onPress={() => router.push('/(master-admin)/programs')}
-            />
-          ))}
+        {/* Management Navigation */}
+        <Text style={styles.sectionTitle}>{t('admin.dashboard.manage')}</Text>
+        <View style={styles.navGrid}>
+          <NavCard
+            title={t('admin.students.title')}
+            icon="people"
+            onPress={() => router.push('/(master-admin)/students')}
+            color={theme.primary}
+          />
+          <NavCard
+            title={t('admin.teachers.title')}
+            icon="person-circle"
+            onPress={() => router.push('/(master-admin)/teachers')}
+            color={colors.accent.indigo[500]}
+          />
+          <NavCard
+            title={t('admin.parents.title')}
+            icon="people"
+            onPress={() => router.push('/(master-admin)/parents')}
+            color={colors.accent.rose[500]}
+          />
+          <NavCard
+            title={t('admin.classes.title')}
+            icon="albums"
+            onPress={() => router.push('/(master-admin)/classes')}
+            color={colors.accent.violet[500]}
+          />
+          <NavCard
+            title={t('admin.masterAdmin.nav.users')}
+            icon="person-outline"
+            onPress={() => router.push('/(master-admin)/users')}
+            color={colors.primary[600]}
+          />
+          <NavCard
+            title={t('admin.masterAdmin.nav.programs')}
+            icon="library"
+            onPress={() => router.push('/(master-admin)/programs')}
+            color={colors.primary[500]}
+          />
+          <NavCard
+            title={t('admin.stickers.title')}
+            icon="star"
+            onPress={() => router.push('/(master-admin)/stickers')}
+            color={colors.gamification.gold}
+          />
+          <NavCard
+            title={t('reports.title')}
+            icon="bar-chart"
+            onPress={() => router.push('/(master-admin)/reports')}
+            color={colors.accent.rose[500]}
+          />
+          <NavCard
+            title={t('admin.masterAdmin.nav.certifications')}
+            icon="ribbon"
+            onPress={() => router.push('/(master-admin)/certifications')}
+            color={colors.accent.indigo[600]}
+          />
+          <NavCard
+            title={t('admin.masterAdmin.nav.settings')}
+            icon="settings"
+            onPress={() => router.push('/(master-admin)/settings')}
+            color={colors.neutral[600]}
+          />
+          <NavCard
+            title={t('admin.permissions.title')}
+            icon="toggle"
+            onPress={() => router.push('/(master-admin)/settings/permissions')}
+            color={colors.accent.sky[500]}
+          />
+          <NavCard
+            title={t('admin.dashboard.resetPassword')}
+            icon="key"
+            onPress={() => router.push('/(master-admin)/members/reset-password')}
+            color={colors.neutral[500]}
+          />
+          <Card variant="default" style={styles.navCard} onPress={toggleLanguage}>
+            <View style={styles.navContent}>
+              <View style={[styles.navIcon, { backgroundColor: colors.accent.indigo[500] + '10' }]}>
+                <Ionicons name="language" size={20} color={colors.accent.indigo[500]} />
+              </View>
+              <Text style={styles.navText}>{t('common.language')}</Text>
+              <Text style={styles.langValue}>
+                {locale === 'en' ? t('common.english') : t('common.arabic')}
+              </Text>
+              <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={16} color={colors.neutral[300]} />
+            </View>
+          </Card>
         </View>
 
-        <Button
-          title={t('common.signOut')}
-          onPress={() => logout()}
-          variant="ghost"
-          disabled={logoutPending}
-          loading={logoutPending}
-          style={styles.signOutButton}
-        />
-      </ScrollView>
+        {/* Programs Overview */}
+        {(dashboard.data?.programs ?? []).length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.programsOverview')}</Text>
+            <View style={styles.programsList}>
+              {(dashboard.data?.programs ?? []).map((program, index) => (
+                <ProgramSummaryRow
+                  key={program.program_id}
+                  program={program}
+                  index={index}
+                  onPress={() => router.push('/(master-admin)/programs')}
+                />
+              ))}
+            </View>
+          </>
+        )}
+
+        {/* Sign Out */}
+        <View style={styles.footer}>
+          <Button
+            title={t('common.signOut')}
+            onPress={handleSignOut}
+            variant="ghost"
+            size="md"
+            icon={<Ionicons name="log-out-outline" size={20} color={colors.accent.rose[500]} />}
+            style={styles.signOutButton}
+            loading={isLoggingOut}
+          />
+        </View>
+      </View>
     </Screen>
   );
 }
 
+function StatCard({ label, value, color, icon }: { label: string; value: string | number; color: string; icon: string }) {
+  return (
+    <Card variant="default" style={styles.statCard}>
+      <View style={[styles.statIconContainer, { backgroundColor: color + '10' }]}>
+        <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={16} color={color} />
+      </View>
+      <Text style={[styles.statValue, { color }]}>{value}</Text>
+      <Text style={styles.statLabel} numberOfLines={1}>{label}</Text>
+    </Card>
+  );
+}
+
+function ActionButton({ title, icon, color, onPress }: { title: string; icon: string; color: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}>
+      <View style={[styles.actionIcon, { backgroundColor: color + '15' }]}>
+        <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={22} color={color} />
+      </View>
+      <Text style={styles.actionText} numberOfLines={1}>{title}</Text>
+    </Pressable>
+  );
+}
+
+function NavCard({ title, icon, color, onPress }: { title: string; icon: string; color: string; onPress: () => void }) {
+  return (
+    <Card variant="default" style={styles.navCard} onPress={onPress}>
+      <View style={styles.navContent}>
+        <View style={[styles.navIcon, { backgroundColor: color + '10' }]}>
+          <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={20} color={color} />
+        </View>
+        <Text style={styles.navText} numberOfLines={1}>{title}</Text>
+        <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={16} color={colors.neutral[300]} />
+      </View>
+    </Card>
+  );
+}
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    padding: spacing.lg,
+    gap: spacing.lg,
   },
-  content: {
-    paddingTop: spacing.xl,
-    paddingBottom: spacing['3xl'],
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.base,
-  },
-  statsRow: {
+  header: {
     flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.sm,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
   },
-  navSection: {
-    marginTop: spacing.xl,
-    marginHorizontal: spacing.base,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: lightTheme.border,
-    overflow: 'hidden',
+  greeting: {
+    ...typography.textStyles.heading,
+    color: colors.neutral[900],
+    fontSize: normalize(22),
+  },
+  subtitle: {
+    ...typography.textStyles.caption,
+    color: colors.neutral[500],
+    marginTop: normalize(2),
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+  },
+  statCard: {
+    width: '47%',
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.sm,
+  },
+  statIconContainer: {
+    width: normalize(32),
+    height: normalize(32),
+    borderRadius: normalize(16),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: normalize(8),
+  },
+  statValue: {
+    ...typography.textStyles.display,
+    fontSize: normalize(24),
+  },
+  statLabel: {
+    ...typography.textStyles.label,
+    color: colors.neutral[500],
+    marginTop: normalize(4),
   },
   sectionTitle: {
     ...typography.textStyles.subheading,
-    color: lightTheme.text,
-    paddingHorizontal: spacing.base,
-    marginTop: spacing.xl,
-    marginBottom: spacing.sm,
+    color: colors.neutral[800],
+    fontSize: normalize(18),
   },
-  programsList: {
-    paddingHorizontal: spacing.base,
-    gap: spacing.sm,
-  },
-  signOutButton: {
-    marginHorizontal: spacing.base,
-    marginTop: spacing.xl,
-  },
-});
-
-const navStyles = StyleSheet.create({
-  button: {
+  actionsRow: {
     flexDirection: 'row',
+    gap: spacing.md,
+  },
+  actionBtn: {
+    flex: 1,
     alignItems: 'center',
     gap: spacing.sm,
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: lightTheme.border,
   },
-  label: {
+  actionBtnPressed: {
+    opacity: 0.7,
+  },
+  actionIcon: {
+    width: normalize(56),
+    height: normalize(56),
+    borderRadius: normalize(16),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionText: {
+    ...typography.textStyles.label,
+    color: colors.neutral[700],
+    fontFamily: typography.fontFamily.medium,
+  },
+  navGrid: {
+    gap: spacing.md,
+  },
+  navCard: {
+    padding: spacing.md,
+  },
+  navContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  navIcon: {
+    width: normalize(40),
+    height: normalize(40),
+    borderRadius: normalize(10),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navText: {
     ...typography.textStyles.bodyMedium,
-    color: lightTheme.text,
+    color: colors.neutral[800],
     flex: 1,
+  },
+  langValue: {
+    ...typography.textStyles.body,
+    color: colors.neutral[500],
+    marginEnd: spacing.xs,
+  },
+  programsList: {
+    gap: spacing.sm,
+  },
+  footer: {
+    marginTop: spacing.xl,
+  },
+  signOutButton: {
+    backgroundColor: colors.accent.rose[50],
   },
 });

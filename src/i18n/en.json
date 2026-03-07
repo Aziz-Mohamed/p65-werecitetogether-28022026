@@ -127,7 +127,6 @@
       "student": "Student",
       "teacher": "Teacher",
       "parent": "Parent",
-      "admin": "Admin",
       "supervisor": "Supervisor",
       "program_admin": "Program Admin",
       "master_admin": "Master Admin"
@@ -154,7 +153,6 @@
     "student": "Student",
     "teacher": "Teacher",
     "parent": "Parent",
-    "admin": "Admin",
     "supervisor": "Supervisor",
     "program_admin": "Program Admin",
     "master_admin": "Master Admin"
@@ -921,6 +919,7 @@
         "totalStudents": "Total Students",
         "totalTeachers": "Total Teachers",
         "activeSessions": "Active Sessions",
+        "programsCount": "Programs",
         "programsOverview": "Programs Overview",
         "enrolled": "{{count}} enrolled",
         "sessions": "{{count}} sessions"

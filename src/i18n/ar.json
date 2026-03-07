@@ -127,7 +127,6 @@
       "student": "طالب",
       "teacher": "معلّم",
       "parent": "ولي أمر",
-      "admin": "مدير",
       "supervisor": "مشرف",
       "program_admin": "مدير البرنامج",
       "master_admin": "المدير العام"
@@ -154,7 +153,6 @@
     "student": "طالب",
     "teacher": "معلّم",
     "parent": "وليّ أمر",
-    "admin": "مدير",
     "supervisor": "مشرف",
     "program_admin": "مدير البرنامج",
     "master_admin": "المدير العام"
@@ -921,6 +919,7 @@
         "totalStudents": "إجمالي الطلاب",
         "totalTeachers": "إجمالي المعلمين",
         "activeSessions": "الجلسات النشطة",
+        "programsCount": "البرامج",
         "programsOverview": "نظرة عامة على البرامج",
         "enrolled": "{{count}} مسجلين",
         "sessions": "{{count}} جلسات"
