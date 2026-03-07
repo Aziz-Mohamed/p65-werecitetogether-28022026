@@ -111,10 +111,22 @@ export default function MasterAdminDashboard() {
         <Text style={styles.sectionTitle}>{t('admin.dashboard.manage')}</Text>
         <View style={styles.navGrid}>
           <NavCard
-            title={t('admin.students.title')}
-            icon="people"
-            onPress={() => router.push('/(master-admin)/students')}
-            color={theme.primary}
+            title={t('admin.masterAdmin.nav.users')}
+            icon="person-outline"
+            onPress={() => router.push('/(master-admin)/users')}
+            color={colors.primary[600]}
+          />
+          <NavCard
+            title={t('roles.program_admin')}
+            icon="shield-checkmark"
+            onPress={() => router.push({ pathname: '/(master-admin)/users', params: { role: 'program_admin' } })}
+            color={colors.accent.violet[500]}
+          />
+          <NavCard
+            title={t('roles.supervisor')}
+            icon="eye"
+            onPress={() => router.push({ pathname: '/(master-admin)/users', params: { role: 'supervisor' } })}
+            color={colors.accent.sky[500]}
           />
           <NavCard
             title={t('admin.teachers.title')}
@@ -129,16 +141,16 @@ export default function MasterAdminDashboard() {
             color={colors.accent.rose[500]}
           />
           <NavCard
+            title={t('admin.students.title')}
+            icon="people"
+            onPress={() => router.push('/(master-admin)/students')}
+            color={theme.primary}
+          />
+          <NavCard
             title={t('admin.classes.title')}
             icon="albums"
             onPress={() => router.push('/(master-admin)/classes')}
             color={colors.accent.violet[500]}
-          />
-          <NavCard
-            title={t('admin.masterAdmin.nav.users')}
-            icon="person-outline"
-            onPress={() => router.push('/(master-admin)/users')}
-            color={colors.primary[600]}
           />
           <NavCard
             title={t('admin.masterAdmin.nav.programs')}
