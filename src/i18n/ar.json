@@ -616,6 +616,20 @@
       "selectChildrenRequired": "يجب ربط طفل واحد على الأقل",
       "manageChildren": "إدارة الأبناء المرتبطين"
     },
+    "supervisors": {
+      "title": "المشرفون",
+      "searchPlaceholder": "البحث عن المشرفين...",
+      "emptyTitle": "لا يوجد مشرفون",
+      "emptyDescription": "لم يتم تعيين مشرفين بعد.",
+      "programs": "{{count}} برامج"
+    },
+    "programAdmins": {
+      "title": "مديرو البرامج",
+      "searchPlaceholder": "البحث عن مديري البرامج...",
+      "emptyTitle": "لا يوجد مديرو برامج",
+      "emptyDescription": "لم يتم تعيين مديري برامج بعد.",
+      "programs": "{{count}} برامج"
+    },
     "classes": {
       "title": "الفصول",
       "subtitle": "إدارة فصول مدرستك",

@@ -11,22 +11,20 @@ import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { SearchBar } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { useParents } from '@/features/parents/hooks/useParents';
+import { useSupervisors } from '@/features/admin/hooks/useSupervisors';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
 
-// ─── Admin Parents List ──────────────────────────────────────────────────────
-
-export default function AdminParentsScreen() {
+export default function AdminSupervisorsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-
   const { resolveName } = useLocalizedName();
-  const { data: parents = [], isLoading, error, refetch } = useParents({
+
+  const { data: supervisors = [], isLoading, error, refetch } = useSupervisors({
     searchQuery: searchQuery || undefined,
   });
 
@@ -43,39 +41,34 @@ export default function AdminParentsScreen() {
             variant="ghost"
             size="sm"
           />
-          <Text style={styles.title}>{t('admin.parents.title')}</Text>
-          <Button
-            title={t('admin.addParent')}
-            onPress={() => router.push('/(master-admin)/parents/create')}
-            variant="primary"
-            size="sm"
-            icon={<Ionicons name="add" size={18} color={colors.white} />}
-          />
+          <Text style={styles.title}>{t('admin.supervisors.title')}</Text>
+          <View style={styles.headerSpacer} />
         </View>
 
         <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
           onClear={() => setSearchQuery('')}
-          placeholder={t('admin.parents.searchPlaceholder')}
+          placeholder={t('admin.supervisors.searchPlaceholder')}
           style={styles.searchBar}
         />
 
-        {parents.length === 0 ? (
+        {supervisors.length === 0 ? (
           <EmptyState
-            icon="people-outline"
-            title={t('admin.parents.emptyTitle')}
-            description={t('admin.parents.emptyDescription')}
+            icon="eye-outline"
+            title={t('admin.supervisors.emptyTitle')}
+            description={t('admin.supervisors.emptyDescription')}
           />
         ) : (
           <FlashList
-            data={parents}
+            data={supervisors}
             keyExtractor={(item: any) => item.id}
+
             renderItem={({ item }: { item: any }) => (
               <Card
                 variant="default"
                 style={styles.card}
-                onPress={() => router.push(`/(master-admin)/parents/${item.id}`)}
+                onPress={() => router.push({ pathname: '/(master-admin)/users/[id]', params: { id: item.id } })}
               >
                 <View style={styles.row}>
                   <Avatar
@@ -87,12 +80,9 @@ export default function AdminParentsScreen() {
                     <Text style={styles.name} numberOfLines={1}>
                       {resolveName(item.name_localized, item.full_name)}
                     </Text>
-                    <Text style={styles.meta} numberOfLines={1}>
-                      {item.username ? `@${item.username}` : ''}
-                      {(item.students?.length ?? 0) > 0
-                        ? ` · ${item.students.length} ${t('admin.parents.children')}`
-                        : ''}
-                    </Text>
+                    {item.username ? (
+                      <Text style={styles.meta} numberOfLines={1}>@{item.username}</Text>
+                    ) : null}
                   </View>
                   <Ionicons
                     name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
@@ -109,8 +99,6 @@ export default function AdminParentsScreen() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -121,6 +109,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerSpacer: {
+    width: normalize(80),
   },
   title: {
     ...typography.textStyles.heading,

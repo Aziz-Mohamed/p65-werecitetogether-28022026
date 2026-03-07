@@ -130,6 +130,38 @@ class AdminService {
       .gte('created_at', startDate);
   }
 
+  // ─── Role-Specific Lists ──────────────────────────────────────────────────
+
+  async getSupervisors(filters?: { searchQuery?: string }) {
+    let query = supabase
+      .from('profiles')
+      .select('id, full_name, name_localized, username, avatar_url')
+      .eq('role', 'supervisor');
+
+    if (filters?.searchQuery) {
+      query = query.or(
+        `full_name.ilike.%${filters.searchQuery}%,name_localized::text.ilike.%${filters.searchQuery}%`,
+      );
+    }
+
+    return query.order('full_name');
+  }
+
+  async getProgramAdmins(filters?: { searchQuery?: string }) {
+    let query = supabase
+      .from('profiles')
+      .select('id, full_name, name_localized, username, avatar_url')
+      .eq('role', 'program_admin');
+
+    if (filters?.searchQuery) {
+      query = query.or(
+        `full_name.ilike.%${filters.searchQuery}%,name_localized::text.ilike.%${filters.searchQuery}%`,
+      );
+    }
+
+    return query.order('full_name');
+  }
+
   // ─── Master Admin ──────────────────────────────────────────────────────────
 
   async getMasterAdminDashboardStats() {

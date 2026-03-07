@@ -616,6 +616,20 @@
       "selectChildrenRequired": "At least one child must be linked",
       "manageChildren": "Manage Linked Children"
     },
+    "supervisors": {
+      "title": "Supervisors",
+      "searchPlaceholder": "Search supervisors...",
+      "emptyTitle": "No Supervisors",
+      "emptyDescription": "No supervisors have been assigned yet.",
+      "programs": "{{count}} programs"
+    },
+    "programAdmins": {
+      "title": "Program Admins",
+      "searchPlaceholder": "Search program admins...",
+      "emptyTitle": "No Program Admins",
+      "emptyDescription": "No program admins have been assigned yet.",
+      "programs": "{{count}} programs"
+    },
     "classes": {
       "title": "Classes",
       "subtitle": "Manage classes in your school",

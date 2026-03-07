@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, I18nManager } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Avatar } from '@/components/ui/Avatar';
 import { SearchBar } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useTeachers } from '@/features/teachers/hooks/useTeachers';
@@ -73,20 +74,32 @@ export default function AdminTeachersScreen() {
 
             renderItem={({ item }: { item: any }) => (
               <Card
-                variant="outlined"
-                style={styles.teacherCard}
+                variant="default"
+                style={styles.card}
                 onPress={() => router.push(`/(master-admin)/teachers/${item.id}`)}
               >
-                <View style={styles.teacherRow}>
-                  <View style={styles.teacherInfo}>
-                    <Text style={styles.teacherName}>{resolveName(item.name_localized, item.full_name)}</Text>
-                    <Text style={styles.teacherMeta}>
-                      @{item.username ?? '—'}
+                <View style={styles.row}>
+                  <Avatar
+                    source={item.avatar_url ?? undefined}
+                    name={resolveName(item.name_localized, item.full_name)}
+                    size="md"
+                  />
+                  <View style={styles.info}>
+                    <Text style={styles.name} numberOfLines={1}>
+                      {resolveName(item.name_localized, item.full_name)}
+                    </Text>
+                    <Text style={styles.meta} numberOfLines={1}>
+                      {item.username ? `@${item.username}` : ''}
                       {(item.classes?.length ?? 0) > 0
                         ? ` · ${item.classes.length} ${t('admin.teachers.classes')}`
                         : ''}
                     </Text>
                   </View>
+                  <Ionicons
+                    name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
+                    size={18}
+                    color={colors.neutral[300]}
+                  />
                 </View>
               </Card>
             )}
@@ -119,25 +132,24 @@ const styles = StyleSheet.create({
   searchBar: {
     marginBottom: spacing.xs,
   },
-  teacherCard: {
+  card: {
     marginBottom: spacing.sm,
   },
-  teacherRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: spacing.md,
   },
-  teacherInfo: {
+  info: {
     flex: 1,
+    gap: normalize(2),
   },
-  teacherName: {
-    ...typography.textStyles.body,
+  name: {
+    ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
-    fontFamily: typography.fontFamily.semiBold,
   },
-  teacherMeta: {
+  meta: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
-    marginTop: normalize(2),
   },
 });

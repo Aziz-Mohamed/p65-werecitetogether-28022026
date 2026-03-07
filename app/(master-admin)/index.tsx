@@ -119,13 +119,13 @@ export default function MasterAdminDashboard() {
           <NavCard
             title={t('roles.program_admin')}
             icon="shield-checkmark"
-            onPress={() => router.push({ pathname: '/(master-admin)/users', params: { role: 'program_admin' } })}
+            onPress={() => router.push('/(master-admin)/program-admins')}
             color={colors.accent.violet[500]}
           />
           <NavCard
             title={t('roles.supervisor')}
             icon="eye"
-            onPress={() => router.push({ pathname: '/(master-admin)/users', params: { role: 'supervisor' } })}
+            onPress={() => router.push('/(master-admin)/supervisors')}
             color={colors.accent.sky[500]}
           />
           <NavCard

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable, RefreshControl, ActionSheetIOS, Platform } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -21,12 +21,9 @@ const ROLE_OPTIONS = ['all', 'student', 'teacher', 'supervisor', 'program_admin'
 export default function UserListScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { role: initialRole } = useLocalSearchParams<{ role?: string }>();
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState(
-    initialRole && ROLE_OPTIONS.includes(initialRole as typeof ROLE_OPTIONS[number]) ? initialRole : 'all',
-  );
+  const [roleFilter, setRoleFilter] = useState('all');
   const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const users = useAdminUsers(debouncedQuery);

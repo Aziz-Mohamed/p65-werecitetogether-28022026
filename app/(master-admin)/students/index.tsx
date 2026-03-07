@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, I18nManager } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
@@ -9,6 +9,7 @@ import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui';
 import { Button } from '@/components/ui/Button';
+import { Avatar } from '@/components/ui/Avatar';
 import { SearchBar } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useStudents } from '@/features/students/hooks/useStudents';
@@ -74,32 +75,42 @@ export default function AdminStudentsScreen() {
 
             renderItem={({ item }: { item: any }) => (
               <Card
-                variant="outlined"
-                style={styles.studentCard}
+                variant="default"
+                style={styles.card}
                 onPress={() => router.push(`/(master-admin)/students/${item.id}`)}
               >
-                <View style={styles.studentRow}>
-                  <View style={styles.studentInfo}>
-                    <Text style={styles.studentName}>
+                <View style={styles.row}>
+                  <Avatar
+                    source={item.profiles?.avatar_url ?? undefined}
+                    name={resolveName(item.profiles?.name_localized, item.profiles?.full_name)}
+                    size="md"
+                  />
+                  <View style={styles.info}>
+                    <Text style={styles.name} numberOfLines={1}>
                       {resolveName(item.profiles?.name_localized, item.profiles?.full_name)}
                     </Text>
-                    <Text style={styles.studentMeta}>
-                      @{item.profiles?.username ?? '—'}
+                    <Text style={styles.meta} numberOfLines={1}>
+                      {item.profiles?.username ? `@${item.profiles.username}` : ''}
                       {item.classes?.name ? ` · ${resolveName(item.classes?.name_localized, item.classes.name)}` : ''}
                     </Text>
+                    <View style={styles.badges}>
+                      <Badge
+                        label={`Lvl ${item.current_level ?? 0}`}
+                        variant="info"
+                        size="sm"
+                      />
+                      <Badge
+                        label={item.is_active ? t('common.active') : t('common.inactive')}
+                        variant={item.is_active ? 'success' : 'warning'}
+                        size="sm"
+                      />
+                    </View>
                   </View>
-                  <View style={styles.studentBadges}>
-                    <Badge
-                      label={`Lvl ${item.current_level ?? 0}`}
-                      variant="info"
-                      size="sm"
-                    />
-                    <Badge
-                      label={item.is_active ? t('common.active') : t('common.inactive')}
-                      variant={item.is_active ? 'success' : 'warning'}
-                      size="sm"
-                    />
-                  </View>
+                  <Ionicons
+                    name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
+                    size={18}
+                    color={colors.neutral[300]}
+                  />
                 </View>
               </Card>
             )}
@@ -132,29 +143,29 @@ const styles = StyleSheet.create({
   searchBar: {
     marginBottom: spacing.xs,
   },
-  studentCard: {
+  card: {
     marginBottom: spacing.sm,
   },
-  studentRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: spacing.md,
   },
-  studentInfo: {
+  info: {
     flex: 1,
+    gap: normalize(2),
   },
-  studentName: {
-    ...typography.textStyles.body,
+  name: {
+    ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
-    fontFamily: typography.fontFamily.semiBold,
   },
-  studentMeta: {
+  meta: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
-    marginTop: normalize(2),
   },
-  studentBadges: {
+  badges: {
     flexDirection: 'row',
     gap: spacing.xs,
+    marginTop: normalize(4),
   },
 });
