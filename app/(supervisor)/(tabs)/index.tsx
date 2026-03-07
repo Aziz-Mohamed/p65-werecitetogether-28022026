@@ -78,6 +78,43 @@ export default function SupervisorHome() {
                 />
               </View>
 
+              {(dashboard.data?.inactive_teachers?.length ?? 0) > 0 && (
+                <Card variant="outlined" style={styles.inactiveAlert}>
+                  <View style={styles.quickActionRow}>
+                    <Ionicons name="warning-outline" size={20} color={colors.secondary[500]} />
+                    <Text style={styles.inactiveAlertText}>
+                      {t('admin.supervisor.inactiveTeachersWarning', {
+                        count: dashboard.data!.inactive_teachers.length,
+                      })}
+                    </Text>
+                  </View>
+                </Card>
+              )}
+
+              <Card
+                variant="default"
+                style={styles.quickAction}
+                onPress={() => router.push('/(supervisor)/certifications')}
+              >
+                <View style={styles.quickActionRow}>
+                  <Ionicons name="ribbon-outline" size={20} color={colors.accent.indigo[500]} />
+                  <Text style={styles.quickActionText}>{t('certifications.queue.supervisorTitle')}</Text>
+                  <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+                </View>
+              </Card>
+
+              <Card
+                variant="default"
+                style={styles.quickAction}
+                onPress={() => router.push('/(supervisor)/himam')}
+              >
+                <View style={styles.quickActionRow}>
+                  <Ionicons name="book-outline" size={20} color={colors.accent.violet[500]} />
+                  <Text style={styles.quickActionText}>{t('himam.supervisor.title')}</Text>
+                  <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+                </View>
+              </Card>
+
               <Card
                 variant="default"
                 style={styles.quickAction}
@@ -154,6 +191,17 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: lightTheme.textSecondary,
     textAlign: 'center',
+  },
+  inactiveAlert: {
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+    borderColor: colors.secondary[300],
+    backgroundColor: colors.secondary[50],
+  },
+  inactiveAlertText: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.secondary[700],
+    flex: 1,
   },
   quickAction: {
     marginBottom: spacing.sm,

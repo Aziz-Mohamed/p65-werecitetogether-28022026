@@ -1757,6 +1757,7 @@
       "studentCount": "Students",
       "sessionsThisWeek": "Sessions This Week",
       "inactiveFlag": "Inactive",
+      "inactiveTeachersWarning": "{{count}} teacher(s) inactive this week",
       "teacherCard": {
         "students": "{{count}} students",
         "sessions": "{{count}} sessions",
@@ -1798,12 +1799,18 @@
         "title": "Reports",
         "sessionsPerTeacher": "Sessions Per Teacher",
         "studentDistribution": "Student Distribution",
-        "averageRating": "Average Rating Per Teacher"
+        "averageRating": "Average Rating Per Teacher",
+        "inactiveTeachers": "Inactive Teacher Alerts",
+        "noInactiveTeachers": "All teachers are active"
       },
       "profile": {
         "title": "My Profile",
         "supervisedPrograms": "Supervised Programs",
-        "teachersInProgram": "{{count}} teachers"
+        "teachersInProgram": "{{count}} teachers",
+        "editProfile": "Edit",
+        "saveProfile": "Save",
+        "cancelEdit": "Cancel",
+        "saveError": "Failed to save profile"
       }
     },
     "programAdmin": {

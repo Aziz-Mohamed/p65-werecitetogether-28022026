@@ -1757,6 +1757,7 @@
       "studentCount": "الطلاب",
       "sessionsThisWeek": "جلسات هذا الأسبوع",
       "inactiveFlag": "غير نشط",
+      "inactiveTeachersWarning": "{{count}} معلم(ين) غير نشطين هذا الأسبوع",
       "teacherCard": {
         "students": "{{count}} طلاب",
         "sessions": "{{count}} جلسات",
@@ -1798,12 +1799,18 @@
         "title": "التقارير",
         "sessionsPerTeacher": "الجلسات لكل معلم",
         "studentDistribution": "توزيع الطلاب",
-        "averageRating": "متوسط التقييم لكل معلم"
+        "averageRating": "متوسط التقييم لكل معلم",
+        "inactiveTeachers": "تنبيهات المعلمين غير النشطين",
+        "noInactiveTeachers": "جميع المعلمين نشطون"
       },
       "profile": {
         "title": "ملفي الشخصي",
         "supervisedPrograms": "البرامج المُشرف عليها",
-        "teachersInProgram": "{{count}} معلمين"
+        "teachersInProgram": "{{count}} معلمين",
+        "editProfile": "تعديل",
+        "saveProfile": "حفظ",
+        "cancelEdit": "إلغاء",
+        "saveError": "فشل حفظ الملف الشخصي"
       }
     },
     "programAdmin": {

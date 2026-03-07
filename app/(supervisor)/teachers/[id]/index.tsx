@@ -142,6 +142,19 @@ export default function TeacherDetailScreen() {
                 style={styles.actionButton}
               />
               <Button
+                title={t('ratings.supervisor.reviews')}
+                onPress={() =>
+                  router.push({
+                    pathname: '/(supervisor)/teachers/[id]/reviews',
+                    params: { id: teacherId!, programId: programId ?? teacher.program_id },
+                  })
+                }
+                variant="secondary"
+                style={styles.actionButton}
+              />
+            </View>
+            <View style={styles.buttonRow}>
+              <Button
                 title={t('admin.supervisor.teacherDetail.flagIssue')}
                 onPress={openFlagSheet}
                 variant="ghost"
