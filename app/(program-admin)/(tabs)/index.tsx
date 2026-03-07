@@ -42,7 +42,7 @@ export default function ProgramAdminDashboard() {
             label={t('admin.programAdmin.dashboard.activeCohorts')}
             value={dashboard.data?.active_cohorts ?? 0}
             icon="people-circle-outline"
-            iconColor={colors.accent.indigo}
+            iconColor={colors.accent.indigo[500]}
             isLoading={dashboard.isLoading}
           />
         </View>
@@ -52,14 +52,14 @@ export default function ProgramAdminDashboard() {
             label={t('admin.programAdmin.dashboard.totalTeachers')}
             value={dashboard.data?.total_teachers ?? 0}
             icon="people-outline"
-            iconColor={colors.accent.violet}
+            iconColor={colors.accent.violet[500]}
             isLoading={dashboard.isLoading}
           />
           <StatCard
             label={t('admin.programAdmin.dashboard.sessionsThisWeek')}
             value={dashboard.data?.sessions_this_week ?? 0}
             icon="calendar-outline"
-            iconColor={colors.accent.sky}
+            iconColor={colors.accent.sky[500]}
             isLoading={dashboard.isLoading}
           />
         </View>

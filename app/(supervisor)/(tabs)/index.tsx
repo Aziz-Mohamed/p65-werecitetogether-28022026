@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, RefreshControl, I18nManager } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -63,7 +63,7 @@ export default function SupervisorHome() {
                   label={t('admin.supervisor.studentCount')}
                   value={dashboard.data?.student_count ?? 0}
                   icon="school-outline"
-                  iconColor={colors.accent.indigo}
+                  iconColor={colors.accent.indigo[500]}
                   isLoading={isLoading}
                 />
               </View>
@@ -73,7 +73,7 @@ export default function SupervisorHome() {
                   label={t('admin.supervisor.sessionsThisWeek')}
                   value={dashboard.data?.sessions_this_week ?? 0}
                   icon="calendar-outline"
-                  iconColor={colors.accent.violet}
+                  iconColor={colors.accent.violet[500]}
                   isLoading={isLoading}
                 />
               </View>
@@ -99,7 +99,7 @@ export default function SupervisorHome() {
                 <View style={styles.quickActionRow}>
                   <Ionicons name="ribbon-outline" size={20} color={colors.accent.indigo[500]} />
                   <Text style={styles.quickActionText}>{t('certifications.queue.supervisorTitle')}</Text>
-                  <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+                  <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />
                 </View>
               </Card>
 
@@ -111,7 +111,7 @@ export default function SupervisorHome() {
                 <View style={styles.quickActionRow}>
                   <Ionicons name="book-outline" size={20} color={colors.accent.violet[500]} />
                   <Text style={styles.quickActionText}>{t('himam.supervisor.title')}</Text>
-                  <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+                  <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />
                 </View>
               </Card>
 
@@ -123,7 +123,7 @@ export default function SupervisorHome() {
                 <View style={styles.quickActionRow}>
                   <Ionicons name="gift-outline" size={20} color={colors.secondary[500]} />
                   <Text style={styles.quickActionText}>{t('gamification.rewardsDashboard.title')}</Text>
-                  <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+                  <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />
                 </View>
               </Card>
             </View>

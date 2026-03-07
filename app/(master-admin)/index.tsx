@@ -56,7 +56,7 @@ export default function MasterAdminDashboard() {
             label={t('admin.masterAdmin.dashboard.totalTeachers')}
             value={dashboard.data?.total_teachers ?? 0}
             icon="people-outline"
-            iconColor={colors.accent.indigo}
+            iconColor={colors.accent.indigo[500]}
             isLoading={dashboard.isLoading}
           />
         </View>
@@ -66,7 +66,7 @@ export default function MasterAdminDashboard() {
             label={t('admin.masterAdmin.dashboard.activeSessions')}
             value={dashboard.data?.total_active_sessions ?? 0}
             icon="pulse-outline"
-            iconColor={colors.accent.violet}
+            iconColor={colors.accent.violet[500]}
             isLoading={dashboard.isLoading}
           />
         </View>

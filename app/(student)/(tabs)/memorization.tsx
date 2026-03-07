@@ -33,7 +33,7 @@ export default function MemorizationScreen() {
   const isRTL = I18nManager.isRTL;
 
   const { data: stats } = useMemorizationStats(profile?.id);
-  const { data: dashboardData } = useStudentDashboard(profile?.id);
+  const { data: dashboardData, isLoading: dashboardLoading } = useStudentDashboard(profile?.id);
   const { enriched: certifications } = useRubCertifications(profile?.id);
   const { data: progress = [], isLoading: progressLoading } = useMemorizationProgress({
     studentId: profile?.id ?? '',
@@ -89,7 +89,7 @@ export default function MemorizationScreen() {
     });
   }, [progress]);
 
-  const isLoading = coverageLoading || progressLoading;
+  const isLoading = coverageLoading || progressLoading || dashboardLoading;
 
   if (isLoading) return <LoadingState />;
 

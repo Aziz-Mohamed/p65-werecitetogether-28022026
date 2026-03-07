@@ -114,7 +114,7 @@ export default function TeacherDetailScreen() {
                 label={t('admin.supervisor.teacherCard.sessions', { count: teacher.sessions_this_week })}
                 value={teacher.sessions_this_week}
                 icon="calendar-outline"
-                iconColor={colors.accent.indigo}
+                iconColor={colors.accent.indigo[500]}
               />
             </View>
 
