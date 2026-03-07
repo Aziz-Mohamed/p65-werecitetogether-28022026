@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Text, Alert, Switch, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -9,12 +9,17 @@ import { z } from 'zod';
 import { Screen } from '@/components/layout';
 import { TextField, Button } from '@/components/ui';
 import { LoadingState, ErrorState } from '@/components/feedback';
+import { useAuth } from '@/hooks/useAuth';
 import { useProgram } from '@/features/programs/hooks/useProgram';
 import { useUpdateProgram } from '@/features/programs/hooks/useAdminPrograms';
+import { useProgramTeam } from '@/features/admin/hooks/useProgramTeam';
+import { TeamMemberRow } from '@/features/admin/components/TeamMemberRow';
+import { UserSearchSheet } from '@/features/admin/components/UserSearchSheet';
 import { typography } from '@/theme/typography';
-import { lightTheme } from '@/theme/colors';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import type { ProgramCategory } from '@/features/programs/types/programs.types';
+import { radius } from '@/theme/radius';
+import type { ProgramCategory, ProgramRoleType } from '@/features/programs/types/programs.types';
 
 const editSchema = z.object({
   name: z.string().min(1),
@@ -32,12 +37,20 @@ const editSchema = z.object({
 
 type EditFormData = z.infer<typeof editSchema>;
 
+const TEAM_ROLES: ProgramRoleType[] = ['program_admin', 'supervisor', 'teacher'];
+
 export default function MasterAdminEditProgram() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
+  const { session } = useAuth();
   const { data: program, isLoading, error, refetch } = useProgram(id);
   const updateProgram = useUpdateProgram();
+  const teamQuery = useProgramTeam(id);
+
+  const [showUserSearch, setShowUserSearch] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; full_name: string } | null>(null);
+  const [selectedRole, setSelectedRole] = useState<ProgramRoleType>('teacher');
 
   const {
     control,
@@ -89,6 +102,42 @@ export default function MasterAdminEditProgram() {
     }
 
     router.back();
+  };
+
+  const handleAssignTeamMember = () => {
+    if (!selectedUser || !id || !session?.user?.id) return;
+    teamQuery.assign.mutate(
+      { input: { profileId: selectedUser.id, programId: id, role: selectedRole }, assignedBy: session.user.id },
+      {
+        onSuccess: () => {
+          Alert.alert(t('common.success'), t('admin.masterAdmin.users.roles.assignSuccess'));
+          setSelectedUser(null);
+        },
+        onError: () => {
+          Alert.alert(t('common.error'), t('admin.masterAdmin.users.roles.assignError'));
+        },
+      },
+    );
+  };
+
+  const handleRemoveTeamMember = (roleId: string, memberName: string) => {
+    Alert.alert(
+      t('admin.masterAdmin.users.roles.removeConfirm', { role: '', program: memberName }),
+      undefined,
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.remove'),
+          style: 'destructive',
+          onPress: () => {
+            teamQuery.remove.mutate(roleId, {
+              onSuccess: () => Alert.alert(t('common.success'), t('admin.masterAdmin.users.roles.removeSuccess')),
+              onError: () => Alert.alert(t('common.error'), t('admin.masterAdmin.users.roles.removeError')),
+            });
+          },
+        },
+      ],
+    );
   };
 
   if (isLoading) return <LoadingState />;
@@ -258,6 +307,70 @@ export default function MasterAdminEditProgram() {
           variant="primary"
           loading={isSubmitting || updateProgram.isPending}
         />
+
+        {/* Team Section */}
+        <View style={styles.teamDivider} />
+        <View style={styles.teamHeader}>
+          <Text style={styles.teamTitle}>{t('admin.masterAdmin.programs.team')}</Text>
+          <Button
+            title={t('admin.programAdmin.team.addMember')}
+            onPress={() => setShowUserSearch(true)}
+            variant="secondary"
+            size="sm"
+          />
+        </View>
+
+        {selectedUser && (
+          <View style={styles.assignSection}>
+            <View style={styles.selectedUser}>
+              <Text style={styles.selectedName}>{selectedUser.full_name}</Text>
+              <Pressable onPress={() => setSelectedUser(null)}>
+                <Text style={styles.changeText}>{t('common.cancel')}</Text>
+              </Pressable>
+            </View>
+            <View style={styles.roleRow}>
+              {TEAM_ROLES.map((role) => (
+                <Pressable
+                  key={role}
+                  style={[styles.roleChip, selectedRole === role && styles.roleChipActive]}
+                  onPress={() => setSelectedRole(role)}
+                >
+                  <Text style={[styles.roleChipText, selectedRole === role && styles.roleChipTextActive]}>
+                    {role.replace('_', ' ')}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <Button
+              title={t('common.confirm')}
+              onPress={handleAssignTeamMember}
+              loading={teamQuery.assign.isPending}
+              disabled={teamQuery.assign.isPending}
+              size="sm"
+            />
+          </View>
+        )}
+
+        {teamQuery.data && teamQuery.data.length > 0 ? (
+          teamQuery.data.map((member) => (
+            <TeamMemberRow
+              key={member.id}
+              member={member}
+              onRemove={() => handleRemoveTeamMember(member.id, member.full_name)}
+            />
+          ))
+        ) : (
+          <Text style={styles.noTeam}>{t('admin.masterAdmin.programs.noTeam')}</Text>
+        )}
+
+        <UserSearchSheet
+          isOpen={showUserSearch && !selectedUser}
+          onClose={() => setShowUserSearch(false)}
+          onSelect={(user) => {
+            setSelectedUser({ id: user.id, full_name: user.full_name });
+            setShowUserSearch(false);
+          }}
+        />
       </View>
     </Screen>
   );
@@ -308,6 +421,67 @@ const styles = StyleSheet.create({
   segmentTextActive: {
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+  teamDivider: {
+    height: 1,
+    backgroundColor: lightTheme.border,
+    marginVertical: spacing.md,
+  },
+  teamHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  teamTitle: {
+    ...typography.textStyles.subheading,
+    color: lightTheme.text,
+  },
+  assignSection: {
+    gap: spacing.sm,
+    backgroundColor: colors.neutral[50],
+    borderRadius: radius.md,
+    padding: spacing.base,
+  },
+  selectedUser: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  selectedName: {
+    ...typography.textStyles.bodyMedium,
+    color: lightTheme.text,
+  },
+  changeText: {
+    ...typography.textStyles.body,
+    color: colors.primary[500],
+  },
+  roleRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  roleChip: {
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: lightTheme.border,
+  },
+  roleChipActive: {
+    backgroundColor: colors.primary[50],
+    borderColor: colors.primary[500],
+  },
+  roleChipText: {
+    ...typography.textStyles.body,
+    color: lightTheme.textSecondary,
+    textTransform: 'capitalize',
+  },
+  roleChipTextActive: {
+    color: colors.primary[700],
+  },
+  noTeam: {
+    ...typography.textStyles.body,
+    color: lightTheme.textSecondary,
+    paddingVertical: spacing.md,
   },
   switchRow: {
     flexDirection: 'row',

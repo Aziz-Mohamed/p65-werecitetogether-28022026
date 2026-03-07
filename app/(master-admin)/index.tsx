@@ -76,6 +76,7 @@ export default function MasterAdminDashboard() {
           <NavButton label={t('admin.masterAdmin.nav.programs')} icon="library-outline" onPress={() => router.push('/(master-admin)/programs')} />
           <NavButton label={t('admin.masterAdmin.nav.reports')} icon="bar-chart-outline" onPress={() => router.push('/(master-admin)/reports')} />
           <NavButton label={t('admin.masterAdmin.nav.settings')} icon="settings-outline" onPress={() => router.push('/(master-admin)/settings')} />
+          <NavButton label={t('admin.masterAdmin.nav.certifications')} icon="ribbon-outline" onPress={() => router.push('/(master-admin)/certifications')} />
         </View>
 
         <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.programsOverview')}</Text>

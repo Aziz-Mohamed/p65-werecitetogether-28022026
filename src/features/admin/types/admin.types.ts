@@ -76,6 +76,7 @@ export interface AdminUser {
 }
 
 export interface AdminUserProgramRole {
+  role_id: string;
   program_id: string;
   program_name: string;
   role: string;

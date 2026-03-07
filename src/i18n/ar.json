@@ -62,7 +62,8 @@
       "memorization": "الحفظ",
       "tajweed": "التجويد",
       "recitation": "القراءة"
-    }
+    },
+    "all": "الكل"
   },
   "forms": {
     "fullName": "الاسم الكامل",
@@ -948,7 +949,12 @@
           "promoteError": "فشلت ترقية المستخدم",
           "demoteError": "فشل تخفيض رتبة المستخدم",
           "selectProgram": "اختر البرنامج",
-          "selectRole": "اختر الدور"
+          "selectRole": "اختر الدور",
+          "assignSuccess": "تم تعيين دور البرنامج بنجاح",
+          "assignError": "فشل تعيين دور البرنامج",
+          "removeConfirm": "إزالة دور {{role}} من {{program}}؟",
+          "removeSuccess": "تمت إزالة دور البرنامج",
+          "removeError": "فشل إزالة دور البرنامج"
         }
       },
       "reports": {
@@ -981,7 +987,12 @@
         "users": "المستخدمون",
         "programs": "البرامج",
         "reports": "التقارير",
-        "settings": "الإعدادات"
+        "settings": "الإعدادات",
+        "certifications": "الشهادات"
+      },
+      "programs": {
+        "team": "فريق البرنامج",
+        "noTeam": "لم يتم تعيين أعضاء للفريق"
       }
     }
   },

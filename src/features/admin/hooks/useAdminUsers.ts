@@ -8,10 +8,11 @@ export function useAdminUsers(searchQuery: string) {
     queryFn: async () => {
       const { data, error } = await adminService.searchUsersForRoleAssignment({
         p_search_query: searchQuery,
+        p_limit: searchQuery.length === 0 ? 50 : 20,
       });
       if (error) throw error;
       return (data as unknown as AdminUser[]) ?? [];
     },
-    enabled: searchQuery.length >= 2,
+    enabled: searchQuery.length === 0 || searchQuery.length >= 2,
   });
 }

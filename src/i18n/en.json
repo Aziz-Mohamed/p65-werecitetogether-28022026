@@ -62,7 +62,8 @@
       "memorization": "Memorization",
       "tajweed": "Tajweed",
       "recitation": "Recitation"
-    }
+    },
+    "all": "All"
   },
   "forms": {
     "fullName": "Full Name",
@@ -948,7 +949,12 @@
           "promoteError": "Failed to promote user",
           "demoteError": "Failed to demote user",
           "selectProgram": "Select Program",
-          "selectRole": "Select Role"
+          "selectRole": "Select Role",
+          "assignSuccess": "Program role assigned successfully",
+          "assignError": "Failed to assign program role",
+          "removeConfirm": "Remove {{role}} role from {{program}}?",
+          "removeSuccess": "Program role removed",
+          "removeError": "Failed to remove program role"
         }
       },
       "reports": {
@@ -981,7 +987,12 @@
         "users": "Users",
         "programs": "Programs",
         "reports": "Reports",
-        "settings": "Settings"
+        "settings": "Settings",
+        "certifications": "Certifications"
+      },
+      "programs": {
+        "team": "Program Team",
+        "noTeam": "No team members assigned"
       }
     }
   },
