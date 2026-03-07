@@ -7,9 +7,7 @@ import { FlashList } from '@shopify/flash-list';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { CategoryBadge } from '@/features/programs/components/CategoryBadge';
 import { useAllPrograms } from '@/features/programs/hooks/useAdminPrograms';
 import { useMasterAdminDashboard } from '@/features/admin/hooks/useMasterAdminDashboard';
 import { useLocalizedField } from '@/features/programs/utils/enrollment-helpers';
@@ -17,7 +15,6 @@ import { colors, lightTheme } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
-import { radius } from '@/theme/radius';
 import type { Program } from '@/features/programs/types/programs.types';
 
 const CATEGORY_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -39,7 +36,6 @@ export default function MasterAdminProgramsList() {
   const { data: programs = [], isLoading, error, refetch } = useAllPrograms();
   const dashboard = useMasterAdminDashboard();
 
-  // Build a lookup of enriched stats from the dashboard RPC (already deployed)
   const statsMap = new Map(
     (dashboard.data?.programs ?? []).map((p) => [p.program_id, p]),
   );
@@ -51,7 +47,7 @@ export default function MasterAdminProgramsList() {
     <Screen scroll={false}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Pressable onPress={() => router.back()} style={styles.headerButton} hitSlop={8}>
             <Ionicons
               name={I18nManager.isRTL ? 'chevron-forward' : 'chevron-back'}
               size={24}
@@ -60,8 +56,9 @@ export default function MasterAdminProgramsList() {
           </Pressable>
           <Text style={styles.title}>{t('programs.admin.programs')}</Text>
           <Pressable
-            style={styles.createButton}
+            style={styles.headerButton}
             onPress={() => router.push('/(master-admin)/programs/create')}
+            hitSlop={8}
           >
             <Ionicons name="add" size={24} color={lightTheme.text} />
           </Pressable>
@@ -97,30 +94,16 @@ export default function MasterAdminProgramsList() {
                       <Text style={styles.programName} numberOfLines={1}>
                         {localize(item.name, item.name_ar)}
                       </Text>
-                      <View style={styles.badgeRow}>
-                        <CategoryBadge category={item.category} />
-                        <Badge
-                          label={item.is_active ? t('common.active') : t('common.inactive')}
-                          variant={item.is_active ? 'success' : 'warning'}
-                          size="sm"
-                        />
-                      </View>
+                      <Text style={styles.metaText} numberOfLines={1}>
+                        {t(`programs.category.${item.category}`)}
+                        {!item.is_active && (
+                          `  ·  ${t('common.inactive')}`
+                        )}
+                      </Text>
                       {stats && (
-                        <View style={styles.statsRow}>
-                          <View style={styles.miniStat}>
-                            <Ionicons name="people" size={12} color={colors.neutral[400]} />
-                            <Text style={styles.miniStatText}>
-                              {stats.enrolled_count} {t('programs.labels.enrolled')}
-                            </Text>
-                          </View>
-                          <View style={styles.miniStatDot} />
-                          <View style={styles.miniStat}>
-                            <Ionicons name="calendar" size={12} color={colors.neutral[400]} />
-                            <Text style={styles.miniStatText}>
-                              {stats.session_count} {t('programs.labels.sessions')}
-                            </Text>
-                          </View>
-                        </View>
+                        <Text style={styles.statsText} numberOfLines={1}>
+                          {stats.enrolled_count} {t('programs.labels.enrolled')}  ·  {stats.session_count} {t('programs.labels.sessions')}
+                        </Text>
                       )}
                     </View>
                     <Ionicons
@@ -152,10 +135,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,
   },
-  backButton: {
+  headerButton: {
     width: normalize(38),
     height: normalize(38),
-    borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -164,13 +146,6 @@ const styles = StyleSheet.create({
     color: lightTheme.text,
     flex: 1,
     fontSize: normalize(22),
-  },
-  createButton: {
-    width: normalize(38),
-    height: normalize(38),
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   listContent: {
     paddingHorizontal: spacing.lg,
@@ -192,39 +167,23 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
-    gap: normalize(4),
+    gap: normalize(3),
   },
   programName: {
     ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
-    fontSize: normalize(16),
+    fontSize: normalize(15),
   },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.base,
-    marginTop: normalize(2),
-  },
-  miniStat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: normalize(3),
-  },
-  miniStatDot: {
-    width: normalize(3),
-    height: normalize(3),
-    borderRadius: normalize(1.5),
-    backgroundColor: colors.neutral[300],
-  },
-  miniStatText: {
+  metaText: {
     fontFamily: typography.fontFamily.medium,
     fontSize: normalize(12),
-    color: colors.neutral[500],
+    color: colors.neutral[400],
+    textTransform: 'capitalize',
+  },
+  statsText: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: normalize(12),
+    color: colors.neutral[400],
   },
   separator: {
     height: spacing.sm,
