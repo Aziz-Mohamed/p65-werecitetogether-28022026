@@ -1,5 +1,6 @@
--- Add role_id to search_users_for_role_assignment so master admin can remove
--- program roles from the UI (previously returned only program_id/name/role).
+-- Fix search_users_for_role_assignment: profiles table has no email column.
+-- Email lives in auth.users — join it via SECURITY DEFINER access.
+-- Also adds role_id to program_roles_data for removal support.
 
 CREATE OR REPLACE FUNCTION search_users_for_role_assignment(
   p_search_query text,
@@ -28,7 +29,7 @@ BEGIN
   SELECT
     p.id,
     p.full_name,
-    p.email,
+    au.email::text,
     p.role,
     p.avatar_url,
     p.created_at,
@@ -44,8 +45,9 @@ BEGIN
       WHERE pr.profile_id = p.id
     ) AS program_roles_data
   FROM profiles p
+  JOIN auth.users au ON au.id = p.id
   WHERE p.full_name ILIKE '%' || p_search_query || '%'
-     OR p.email ILIKE '%' || p_search_query || '%'
+     OR au.email ILIKE '%' || p_search_query || '%'
   ORDER BY p.full_name
   LIMIT p_limit;
 END;
