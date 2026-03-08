@@ -97,21 +97,21 @@ export function RevisionCard({ item, onPress, style }: RevisionCardProps) {
           {item.avg_accuracy != null && (
             <View style={styles.scoreItem}>
               <Ionicons name="locate-outline" size={normalize(14)} color={colors.primary[500]} />
-              <Text style={styles.scoreLabel}>Acc</Text>
+              <Text style={styles.scoreLabel}>{t('memorization.scoreAbbr.accuracy')}</Text>
               <Text style={styles.scoreValue}>{item.avg_accuracy.toFixed(1)}</Text>
             </View>
           )}
           {item.avg_tajweed != null && (
             <View style={styles.scoreItem}>
               <Ionicons name="book-outline" size={normalize(14)} color={colors.accent.violet[500]} />
-              <Text style={styles.scoreLabel}>Taj</Text>
+              <Text style={styles.scoreLabel}>{t('memorization.scoreAbbr.tajweed')}</Text>
               <Text style={styles.scoreValue}>{item.avg_tajweed.toFixed(1)}</Text>
             </View>
           )}
           {item.avg_fluency != null && (
             <View style={styles.scoreItem}>
               <Ionicons name="mic-outline" size={normalize(14)} color={colors.accent.sky[500]} />
-              <Text style={styles.scoreLabel}>Flu</Text>
+              <Text style={styles.scoreLabel}>{t('memorization.scoreAbbr.fluency')}</Text>
               <Text style={styles.scoreValue}>{item.avg_fluency.toFixed(1)}</Text>
             </View>
           )}

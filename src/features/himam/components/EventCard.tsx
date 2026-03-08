@@ -80,7 +80,7 @@ export function EventCard({ event, registrationCount }: EventCardProps) {
         <View style={styles.countdownRow}>
           <Text style={styles.countdownLabel}>{t('himam.countdown')}</Text>
           <Text style={styles.countdownValue}>
-            {daysUntilEvent} {daysUntilEvent === 1 ? 'day' : 'days'}
+            {t('himam.countdownDays', { count: daysUntilEvent })}
           </Text>
         </View>
       )}
