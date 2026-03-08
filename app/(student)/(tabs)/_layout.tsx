@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CustomTabBar } from '@/components/layout/CustomTabBar';
 
 // ─── Student Tabs Layout ──────────────────────────────────────────────────────
-// Order: Dashboard | Programs | Memorization | Revision (center) | Journey | Profile
+// Order: Dashboard | Memorization | Revision (center) | Journey | Profile
 
 export default function StudentTabsLayout() {
   const { t } = useTranslation();
@@ -34,15 +34,6 @@ export default function StudentTabsLayout() {
           title: t('dashboard.student.home'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="programs"
-        options={{
-          title: t('student.tabs.programs'),
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "library" : "library-outline"} size={24} color={color} />
           ),
         }}
       />

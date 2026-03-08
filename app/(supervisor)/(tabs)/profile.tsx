@@ -27,7 +27,7 @@ interface ProgramInfo {
 }
 
 export default function SupervisorProfile() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { session, profile } = useAuth();
   const theme = useRoleTheme();
@@ -60,7 +60,7 @@ export default function SupervisorProfile() {
 
       return roles.map((r: { program_id: string; programs: { name: string; name_ar: string } | null }) => ({
         program_id: r.program_id,
-        program_name: r.programs?.name ?? '',
+        program_name: (i18n.language === 'ar' ? r.programs?.name_ar : r.programs?.name) ?? '',
         teacher_count: (teamData ?? []).filter((tc: { program_id: string }) => tc.program_id === r.program_id).length,
       })) as ProgramInfo[];
     },

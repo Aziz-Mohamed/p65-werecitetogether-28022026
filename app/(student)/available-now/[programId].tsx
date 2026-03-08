@@ -1,7 +1,8 @@
 import React, { useCallback } from 'react';
-import { StyleSheet, View, Text, Alert, Linking, ScrollView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { StyleSheet, View, Text, Alert, Linking, ScrollView, Pressable } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { ErrorState } from '@/components/feedback';
@@ -20,6 +21,7 @@ import { normalize } from '@/theme/normalize';
 export default function AvailableNowScreen() {
   const { programId } = useLocalSearchParams<{ programId: string }>();
   const { t } = useTranslation();
+  const router = useRouter();
   const { data: teachers, isLoading, error, refetch } = useAvailableTeachers(programId);
   const joinSession = useJoinSession();
 
@@ -56,6 +58,14 @@ export default function AvailableNowScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
+        <Pressable
+          onPress={() => router.back()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+        >
+          <Ionicons name="arrow-back" size={normalize(24)} color={lightTheme.text} />
+        </Pressable>
         <Text style={styles.title}>{t('availability.availableNow')}</Text>
 
         {isLoading ? (
@@ -86,6 +96,10 @@ export default function AvailableNowScreen() {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    alignSelf: 'flex-start',
+    marginBottom: spacing.xs,
+  },
   container: {
     flex: 1,
     padding: spacing.lg,

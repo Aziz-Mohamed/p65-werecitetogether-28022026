@@ -16,9 +16,11 @@ export interface SupervisorDashboardStats {
 export interface SupervisedTeacher {
   teacher_id: string;
   full_name: string;
+  name_localized: Record<string, string> | null;
   avatar_url: string | null;
   program_id: string;
   program_name: string;
+  program_name_ar: string;
   student_count: number;
   sessions_this_week: number;
   average_rating: number | null;
@@ -221,6 +223,7 @@ export interface TeacherStudentRow {
   profiles: {
     id: string;
     full_name: string;
+    name_localized: Record<string, string> | null;
     avatar_url: string | null;
   } | null;
 }
@@ -235,6 +238,7 @@ export interface SessionHistoryRow {
   notes: string | null;
   profiles: {
     full_name: string;
+    name_localized: Record<string, string> | null;
   } | null;
 }
 

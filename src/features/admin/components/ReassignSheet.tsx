@@ -5,6 +5,7 @@ import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -30,6 +31,7 @@ export function ReassignSheet({
   teachers,
 }: ReassignSheetProps) {
   const { t } = useTranslation();
+  const { resolveName } = useLocalizedName();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['50%'], []);
   const reassign = useReassignStudent();
@@ -81,16 +83,16 @@ export function ReassignSheet({
             onPress={() => handleSelect(item.teacher_id)}
             disabled={reassign.isPending}
             accessibilityRole="button"
-            accessibilityLabel={item.full_name}
+            accessibilityLabel={resolveName(item.name_localized, item.full_name)}
           >
             <Avatar
               source={item.avatar_url ?? undefined}
-              name={item.full_name}
+              name={resolveName(item.name_localized, item.full_name)}
               size="sm"
             />
             <View style={styles.rowText}>
               <Text style={styles.rowName} numberOfLines={1}>
-                {item.full_name}
+                {resolveName(item.name_localized, item.full_name)}
               </Text>
               <Text style={styles.rowSub} numberOfLines={1}>
                 {t('admin.supervisor.teacherCard.students', { count: item.student_count })}

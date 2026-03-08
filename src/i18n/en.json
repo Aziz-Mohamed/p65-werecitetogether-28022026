@@ -1106,9 +1106,36 @@
     "platformName": "Platform Name",
     "platformNameAr": "Platform Name (Arabic)"
   },
-  "teacher": {
-    "dashboard": {
-      "noRecentSessions": "No recent sessions"
+  "memorization": {
+    "title": "Memorization",
+    "progress": "Progress",
+    "progressTitle": "Memorization Progress",
+    "recitations": "Recitations",
+    "addRecitation": "Add Recitation",
+    "noRecitations": "No recitations added. Tap \"Add Recitation\" to track verse-level progress.",
+    "needsReview": "Needs Revision",
+    "needsRepeat": "Needs Repeat",
+    "viewDetails": "View Details",
+    "studentMemorization": "{{name}} — Memorization",
+    "surahsStarted": "Surahs ({{count}} started)",
+    "ayahRange": "Ayah {{from}}–{{to}}",
+    "needReviewCount": "{{count}} need revision",
+    "reviewCount": "{{count}} revision(s)",
+    "scoreAbbr": {
+      "accuracy": "Acc",
+      "tajweed": "Taj",
+      "fluency": "Flu"
+    },
+    "quranProgress": "Quran Progress",
+    "quranMemorization": "Quran Memorization",
+    "ayahsMemorized": "{{memorized}} / {{total}} ayahs memorized",
+    "surahsStartedLabel": "Surahs Started",
+    "surahsComplete": "Surahs Complete",
+    "inProgress": "In Progress",
+    "averageAccuracy": "Average Accuracy",
+    "summary": {
+      "ayahs": "{{count}} ayahs",
+      "surahs": "{{count}} surahs"
     },
     "insights": {
       "emptyDescription": "Insights will appear as you conduct more sessions",
@@ -1950,6 +1977,8 @@
     "deadline": "Registration Deadline",
     "makkahTime": "Makkah Time",
     "countdown": "Starts in",
+    "countdownDays": "{{count}} day",
+    "countdownDays_other": "{{count}} days",
     "tracks": {
       "label": "Track",
       "3_juz": "3 Juz",
@@ -2056,14 +2085,11 @@
       "eventCancelledBody": "This week's Himam marathon has been cancelled."
     }
   },
-
   "wiki": {
     "pageTitle": "Help Guide",
     "profileLink": "Help Guide",
-
     "student": {
       "intro": "Welcome to your help guide! Here you'll find everything you need to get the most out of the app — from tracking your memorization to joining Himam marathons.",
-
       "dashboard": {
         "title": "Dashboard",
         "subtitle": "Your daily overview and quick actions",
@@ -2087,7 +2113,6 @@
           "step2": "You'll be taken directly to that section of the app"
         }
       },
-
       "programs": {
         "title": "Programs",
         "subtitle": "Browse and enroll in learning programs",
@@ -2111,7 +2136,6 @@
           "description": "View all programs you're currently enrolled in. Access your class details, schedule, and program-specific features from here."
         }
       },
-
       "memorization": {
         "title": "Memorization",
         "subtitle": "Track your Quran memorization progress",
@@ -2132,7 +2156,6 @@
           "description": "Your memorization progress is tracked automatically through sessions with your teacher. After each session, your teacher evaluates your recitation and updates your certified rub' blocks. You can view your overall progress as a percentage on both your dashboard and the Memorization tab."
         }
       },
-
       "revision": {
         "title": "Revision",
         "subtitle": "Keep your memorization fresh with spaced repetition",
@@ -2149,7 +2172,6 @@
           "step3": "Mark each rub' as 'Good' or 'Needs Work' after reviewing it"
         }
       },
-
       "journey": {
         "title": "Journey",
         "subtitle": "Milestones, badges, and achievements",
@@ -2163,7 +2185,6 @@
           "tip": "Check your profile to see all your earned badges and what you need to earn the next ones."
         }
       },
-
       "sessions": {
         "title": "Sessions & Schedule",
         "subtitle": "View and manage your learning sessions",
@@ -2183,7 +2204,6 @@
           "tip": "Scores are meant to help you improve, not to judge you. Focus on gradual improvement over time."
         }
       },
-
       "himam": {
         "title": "Himam Marathon",
         "subtitle": "Weekly Quran recitation marathon",
@@ -2216,7 +2236,6 @@
           "step3": "Watch your progress bar fill up — aim to complete all your juz before Sunday Fajr!"
         }
       },
-
       "leaderboard": {
         "title": "Leaderboard",
         "subtitle": "See how you rank among peers",
@@ -2225,7 +2244,6 @@
           "description": "The leaderboard shows how you compare with other students in your program. Rankings are based on your activity, session attendance, and memorization progress. You can view program-specific leaderboards from within each program."
         }
       },
-
       "certificates": {
         "title": "Certificates",
         "subtitle": "View and verify your certifications",
@@ -2239,7 +2257,6 @@
           "tip": "Your certificate QR code links to a verification page that confirms its authenticity."
         }
       },
-
       "mutoon": {
         "title": "Mutoon",
         "subtitle": "Islamic texts and study materials",
@@ -2248,7 +2265,6 @@
           "description": "Mutoon (متون) refers to Islamic texts that you study alongside your Quran memorization. Each program may have its own set of texts. Your progress is tracked by lines — your teacher advances you as you demonstrate mastery of each section."
         }
       },
-
       "attendance": {
         "title": "Attendance",
         "subtitle": "How your attendance is tracked",
@@ -2257,7 +2273,6 @@
           "description": "Your attendance is automatically recorded when you join a session. Your teacher marks you as present or absent. Consistent attendance contributes to your streak, helps earn badges, and keeps your memorization fresh."
         }
       },
-
       "profile": {
         "title": "Profile & Settings",
         "subtitle": "Manage your account and preferences",
@@ -2275,10 +2290,8 @@
         }
       }
     },
-
     "teacher": {
       "intro": "Welcome to your teaching guide! Here's how to manage your sessions, track student progress, and use all the tools available to you.",
-
       "dashboard": {
         "title": "Dashboard",
         "subtitle": "Your daily overview and quick actions",
@@ -2292,7 +2305,6 @@
           "tip": "Check insights regularly to identify students who may be struggling before they fall behind."
         }
       },
-
       "students": {
         "title": "Students",
         "subtitle": "Manage and track your students",
@@ -2312,7 +2324,6 @@
           "description": "You can write recommendations for your students based on their progress. Recommendations help supervisors and program admins understand each student's journey."
         }
       },
-
       "sessions": {
         "title": "Sessions",
         "subtitle": "Manage and conduct sessions",
@@ -2330,7 +2341,6 @@
           "tip": "Be consistent in your scoring so students can track meaningful progress over time."
         }
       },
-
       "classProgress": {
         "title": "Class Progress",
         "subtitle": "Analytics and performance charts",
@@ -2343,7 +2353,6 @@
           "description": "Trend charts show how your class performance changes over time. Look for upward trends in scores and consistent attendance patterns. Sudden drops may indicate issues that need attention."
         }
       },
-
       "availability": {
         "title": "Availability",
         "subtitle": "Set your teaching schedule",
@@ -2356,7 +2365,6 @@
           "tip": "Keep your availability up to date so students can book sessions during your free times."
         }
       },
-
       "stickers": {
         "title": "Sticker Awards",
         "subtitle": "Motivate students with rewards",
@@ -2368,7 +2376,6 @@
           "step3": "Choose a sticker and optionally add a reason or note"
         }
       },
-
       "certifications": {
         "title": "Certifications",
         "subtitle": "Review and issue certifications",
@@ -2377,7 +2384,6 @@
           "description": "When a student completes memorization of a portion, they may request certification. You can review their readiness and issue a certification upon successful evaluation."
         }
       },
-
       "meeting": {
         "title": "Meeting Settings",
         "subtitle": "Configure your virtual meeting setup",
@@ -2389,7 +2395,6 @@
           "step3": "Select your meeting platform and teaching languages, then save"
         }
       },
-
       "profile": {
         "title": "Profile & Settings",
         "subtitle": "Manage your account and preferences",
@@ -2403,10 +2408,8 @@
         }
       }
     },
-
     "supervisor": {
       "intro": "Welcome to your supervision guide! Here's how to oversee teachers, manage events, and access reports.",
-
       "dashboard": {
         "title": "Dashboard",
         "subtitle": "Key metrics and quick actions",
@@ -2420,7 +2423,6 @@
           "tip": "Reach out to inactive teachers early — a brief check-in can help resolve scheduling issues before they become bigger problems."
         }
       },
-
       "teachers": {
         "title": "Teachers",
         "subtitle": "Monitor and support your team",
@@ -2436,7 +2438,6 @@
           "step3": "Review their session history, student list, and ratings"
         }
       },
-
       "reports": {
         "title": "Reports",
         "subtitle": "Analytics and performance data",
@@ -2449,7 +2450,6 @@
           "description": "View student ratings for each teacher. Ratings help you understand student satisfaction and identify areas where teachers may need additional support."
         }
       },
-
       "himam": {
         "title": "Himam Events",
         "subtitle": "Manage weekly marathon events",
@@ -2470,7 +2470,6 @@
           "tip": "The pairing algorithm matches students by track and overlapping time slots. You can manually swap partners if a better match exists."
         }
       },
-
       "certifications": {
         "title": "Certifications",
         "subtitle": "Verify student certifications",
@@ -2482,7 +2481,6 @@
           "step3": "Verify or request changes for each certification"
         }
       },
-
       "rewards": {
         "title": "Rewards",
         "subtitle": "Distribute stickers and badges",
@@ -2491,7 +2489,6 @@
           "description": "Manage the distribution of stickers and rewards across your supervised programs. You can view reward statistics and allocate new rewards to teachers."
         }
       },
-
       "profile": {
         "title": "Profile & Settings",
         "subtitle": "Your account and preferences",
@@ -2505,10 +2502,8 @@
         }
       }
     },
-
     "programAdmin": {
       "intro": "Welcome to your program administration guide! Here's how to manage classes, teams, enrollments, and monitor your program's performance.",
-
       "dashboard": {
         "title": "Dashboard",
         "subtitle": "Program overview and key metrics",
@@ -2522,7 +2517,6 @@
           "tip": "A high number of pending enrollments may indicate you need to open more classes or increase class capacity."
         }
       },
-
       "classes": {
         "title": "Classes",
         "subtitle": "Create and manage learning groups",
@@ -2544,7 +2538,6 @@
           "tip": "Monitor waitlists regularly — long waitlists may signal the need for new classes."
         }
       },
-
       "team": {
         "title": "Team",
         "subtitle": "Manage teachers and supervisors",
@@ -2560,7 +2553,6 @@
           "step3": "Search for the user and assign them a role (teacher or supervisor)"
         }
       },
-
       "reports": {
         "title": "Reports",
         "subtitle": "Program analytics and metrics",
@@ -2577,7 +2569,6 @@
           "description": "View enrollment statistics including total enrolled, pending, and capacity utilization across all your classes."
         }
       },
-
       "programs": {
         "title": "Programs",
         "subtitle": "Program details and configuration",
@@ -2590,7 +2581,6 @@
           "description": "Tracks are distinct pathways within your program. Each track may have its own curriculum and learning objectives. You can view track details and see which students are in each track."
         }
       },
-
       "certifications": {
         "title": "Certifications",
         "subtitle": "Certification queue and approvals",
@@ -2599,7 +2589,6 @@
           "description": "Review and approve student certifications submitted by teachers in your program. Each certification shows the student's name, the portion they've certified, and the evaluating teacher."
         }
       },
-
       "rewards": {
         "title": "Rewards",
         "subtitle": "Sticker distribution",
@@ -2608,7 +2597,6 @@
           "description": "Manage reward distribution across your program. View which stickers are available and track distribution statistics."
         }
       },
-
       "profile": {
         "title": "Profile & Settings",
         "subtitle": "Your account and preferences",
@@ -2622,10 +2610,8 @@
         }
       }
     },
-
     "masterAdmin": {
       "intro": "Welcome to the platform administration guide! Here's how to manage users, programs, classes, and system settings across the entire platform.",
-
       "dashboard": {
         "title": "Dashboard",
         "subtitle": "Platform overview and navigation",
@@ -2638,7 +2624,6 @@
           "description": "Use the quick action buttons to rapidly create new students, teachers, or classes without navigating through menus."
         }
       },
-
       "users": {
         "title": "User Management",
         "subtitle": "Search and manage all users",
@@ -2651,7 +2636,6 @@
           "description": "Each user profile shows their role, contact information, enrollment status, and activity history. You can edit user details or change their role from this view."
         }
       },
-
       "teachers": {
         "title": "Teacher Management",
         "subtitle": "Create and manage teachers",
@@ -2667,7 +2651,6 @@
           "description": "View all teachers on the platform. You can edit their profiles, view their session history, see student assignments, and manage their program memberships."
         }
       },
-
       "students": {
         "title": "Student Management",
         "subtitle": "Create and manage students",
@@ -2683,7 +2666,6 @@
           "description": "View all students on the platform. Edit profiles, view memorization progress, manage class assignments, and review session history."
         }
       },
-
       "classes": {
         "title": "Class Management",
         "subtitle": "Create and organize classes",
@@ -2700,7 +2682,6 @@
           "description": "View and manage the session schedule for each class. See upcoming sessions, assigned teachers, and enrolled student counts."
         }
       },
-
       "programs": {
         "title": "Program Management",
         "subtitle": "Create and configure programs",
@@ -2717,7 +2698,6 @@
           "description": "Assign program admins, supervisors, and teachers to each program. Team members get access to program-specific management tools."
         }
       },
-
       "stickers": {
         "title": "Sticker Management",
         "subtitle": "Create and manage rewards",
@@ -2733,7 +2713,6 @@
           "description": "View the full sticker catalog. Edit existing stickers, change their icons, or deactivate ones no longer in use."
         }
       },
-
       "reports": {
         "title": "Reports",
         "subtitle": "Platform-wide analytics",
@@ -2742,7 +2721,6 @@
           "description": "Access five report types:\n\n• Platform Overview — High-level stats across all programs\n• Session Completion — Track session completion rates\n• Teacher Activity — Monitor teacher engagement and session counts\n• Teacher Attendance — Track teacher attendance patterns\n• Memorization — View memorization progress across students"
         }
       },
-
       "certifications": {
         "title": "Certifications",
         "subtitle": "Verification queue",
@@ -2751,7 +2729,6 @@
           "description": "Review the certification verification queue. Each certification shows the student, the certified portion, the issuing teacher, and a QR code for external verification."
         }
       },
-
       "settings": {
         "title": "Settings",
         "subtitle": "Platform configuration",
@@ -2764,7 +2741,6 @@
           "description": "Manage role-based permissions. Control what each role can do — for example, toggle whether teachers can create their own sessions."
         }
       },
-
       "passwordReset": {
         "title": "Password Reset",
         "subtitle": "Reset user passwords",
@@ -2776,6 +2752,11 @@
           "step3": "Set a new temporary password and share it with the user securely"
         }
       }
+    }
+  },
+  "parent": {
+    "dashboard": {
+      "notMarked": "Not Marked"
     }
   }
 }

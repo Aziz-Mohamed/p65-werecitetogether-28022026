@@ -46,7 +46,7 @@ export default function MemorizationScreen() {
 
   const cancelAssignment = useCancelAssignment();
 
-  const canSelfAssign = dashboardData?.student?.can_self_assign ?? false;
+  const canSelfAssign = dashboardData?.student?.can_self_assign ?? true;
   const schoolId = dashboardData?.student?.school_id ?? '';
   const [formVisible, setFormVisible] = useState(false);
   const [selectedRub, setSelectedRub] = useState<RubCoverage | null>(null);
@@ -96,7 +96,7 @@ export default function MemorizationScreen() {
   const hasBlocks = uncertified.length > 0;
 
   return (
-    <>
+    <View style={styles.root}>
       <Screen scroll hasTabBar refreshControl={<RefreshControl refreshing={false} onRefresh={refetch} />}>
         <View style={styles.content}>
           {/* Header */}
@@ -188,29 +188,34 @@ export default function MemorizationScreen() {
       )}
 
       {/* Self-Assignment Form Modal */}
-      {profile?.id && schoolId ? (
+      {formVisible && profile?.id && schoolId && (
         <SelfAssignmentForm
-          visible={formVisible}
+          visible
           onClose={() => setFormVisible(false)}
           studentId={profile.id}
           schoolId={schoolId}
         />
-      ) : null}
+      )}
 
       {/* Rub' Detail Sheet */}
-      <RubDetailSheet
-        visible={!!selectedRub}
-        coverage={selectedRub}
-        onClose={() => setSelectedRub(null)}
-        onCancelAssignments={handleCancelAssignments}
-      />
-    </>
+      {selectedRub && (
+        <RubDetailSheet
+          visible
+          coverage={selectedRub}
+          onClose={() => setSelectedRub(null)}
+          onCancelAssignments={handleCancelAssignments}
+        />
+      )}
+    </View>
   );
 }
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   content: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,

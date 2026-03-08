@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -17,7 +18,8 @@ interface TeacherCardProps {
 }
 
 export function TeacherCard({ teacher, onPress }: TeacherCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { resolveName } = useLocalizedName();
 
   return (
     <Card variant="outlined" onPress={onPress} style={styles.card}>
@@ -29,10 +31,10 @@ export function TeacherCard({ teacher, onPress }: TeacherCardProps) {
         />
         <View style={styles.headerText}>
           <Text style={styles.name} numberOfLines={1}>
-            {teacher.full_name}
+            {resolveName(teacher.name_localized, teacher.full_name)}
           </Text>
           <Text style={styles.program} numberOfLines={1}>
-            {teacher.program_name}
+            {i18n.language === 'ar' ? teacher.program_name_ar : teacher.program_name}
           </Text>
         </View>
         {!teacher.is_active && (

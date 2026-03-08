@@ -27,7 +27,7 @@ class AdminService {
       .from('enrollments')
       .select(`
         id, student_id, program_id, status, enrolled_at,
-        profiles:student_id ( id, full_name, avatar_url )
+        profiles:student_id ( id, full_name, name_localized, avatar_url )
       `)
       .eq('teacher_id', teacherId)
       .eq('program_id', programId)
@@ -41,7 +41,7 @@ class AdminService {
       .select(`
         id, teacher_id, student_id, program_id, created_at,
         duration_minutes, notes,
-        profiles:student_id ( full_name )
+        profiles:student_id ( full_name, name_localized )
       `)
       .eq('teacher_id', teacherId)
       .order('created_at', { ascending: false })

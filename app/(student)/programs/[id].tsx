@@ -1,14 +1,12 @@
 import React, { useMemo } from 'react';
-import { ScrollView, View, Text, Alert, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, Alert, StyleSheet, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
 
 import { Screen } from '@/components/layout/Screen';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { ProgramDetailHeader } from '@/features/programs/components/ProgramDetailHeader';
-import { TrackList } from '@/features/programs/components/TrackList';
 import { ProgramClassCard } from '@/features/programs/components/ProgramClassCard';
 import { EnrollmentStatusBadge } from '@/features/programs/components/EnrollmentStatusBadge';
 import { useProgram } from '@/features/programs/hooks/useProgram';
@@ -23,10 +21,12 @@ import { WaitlistPositionCard } from '@/features/programs/components/WaitlistPos
 import { useLocalizedField, getEnrollErrorKey } from '@/features/programs/utils/enrollment-helpers';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui';
+import { Card } from '@/components/ui/Card';
 import { spacing } from '@/theme/spacing';
-import { lightTheme } from '@/theme/colors';
+import { lightTheme, colors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { normalize } from '@/theme/normalize';
+import { radius } from '@/theme/radius';
 import type { ProgramClassWithTeacher, ProgramTrack } from '@/features/programs/types/programs.types';
 
 export default function ProgramDetailScreen() {
@@ -55,6 +55,8 @@ export default function ProgramDetailScreen() {
     () => enrollments?.filter((e) => e.program_id === id) ?? [],
     [enrollments, id],
   );
+
+  const hasActiveEnrollment = myEnrollments.some((e) => e.status === 'active');
 
   const isEnrolledInTrack = (trackId: string | null) =>
     myEnrollments.some(
@@ -146,6 +148,14 @@ export default function ProgramDetailScreen() {
   const classesForTrack = (trackId: string) =>
     programClasses?.filter((c) => c.track_id === trackId) ?? [];
 
+  // Separate enrolled tracks from available tracks
+  const enrolledTracks = program.program_tracks.filter((t) => isEnrolledInTrack(t.id));
+  const availableTracks = program.program_tracks.filter((t) => !isEnrolledInTrack(t.id));
+
+  // Show quick actions row?
+  const showQuickActions =
+    hasActiveEnrollment || showAvailableTeachers;
+
   return (
     <Screen>
       <Pressable
@@ -159,81 +169,99 @@ export default function ProgramDetailScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <ProgramDetailHeader program={program} />
 
-        {/* Leaderboard */}
-        {myEnrollments.some((e) => e.status === 'active') && (
-          <View style={styles.section}>
-            <Button
-              title={t('gamification.programLeaderboard.title')}
-              onPress={() =>
-                router.push({
-                  pathname: '/(student)/program/[programId]/leaderboard',
-                  params: { programId: id! },
-                })
-              }
-              variant="secondary"
-              icon={<Ionicons name="podium-outline" size={16} color={lightTheme.text} />}
-            />
+        {/* ── Quick Actions Row ── */}
+        {showQuickActions && (
+          <View style={styles.quickActions}>
+            {showAvailableTeachers && (
+              <Pressable
+                style={styles.quickActionItem}
+                onPress={() => router.push(`/(student)/available-now/${id}`)}
+                accessibilityRole="button"
+              >
+                <View style={[styles.quickActionIcon, styles.quickActionIconGreen]}>
+                  <Ionicons name="radio-button-on" size={normalize(18)} color={colors.primary[600]} />
+                </View>
+                <Text style={styles.quickActionLabel} numberOfLines={1}>
+                  {t('availability.availableNow')}
+                </Text>
+                {availableTeachers?.length ? (
+                  <View style={styles.quickActionBadge}>
+                    <Text style={styles.quickActionBadgeText}>{availableTeachers.length}</Text>
+                  </View>
+                ) : null}
+              </Pressable>
+            )}
+
+            {hasActiveEnrollment && (
+              <Pressable
+                style={styles.quickActionItem}
+                onPress={() =>
+                  router.push({
+                    pathname: '/(student)/program/[programId]/leaderboard',
+                    params: { programId: id! },
+                  })
+                }
+                accessibilityRole="button"
+              >
+                <View style={[styles.quickActionIcon, styles.quickActionIconAmber]}>
+                  <Ionicons name="podium-outline" size={normalize(18)} color={colors.secondary[600]} />
+                </View>
+                <Text style={styles.quickActionLabel} numberOfLines={1}>
+                  {t('gamification.programLeaderboard.title')}
+                </Text>
+              </Pressable>
+            )}
+
+            {program.category === 'structured' && hasActiveEnrollment && (
+              <Pressable
+                style={styles.quickActionItem}
+                onPress={() =>
+                  router.push({
+                    pathname: '/(student)/mutoon/[programId]',
+                    params: { programId: id! },
+                  })
+                }
+                accessibilityRole="button"
+              >
+                <View style={[styles.quickActionIcon, styles.quickActionIconIndigo]}>
+                  <Ionicons name="book-outline" size={normalize(18)} color={colors.accent.indigo[600]} />
+                </View>
+                <Text style={styles.quickActionLabel} numberOfLines={1}>
+                  {t('mutoon.title')}
+                </Text>
+              </Pressable>
+            )}
           </View>
         )}
 
-        {/* Mutoon Progress — structured programs with active enrollment */}
-        {program.category === 'structured' &&
-          myEnrollments.some((e) => e.status === 'active') && (
-          <View style={styles.section}>
-            <Button
-              title={t('mutoon.title')}
-              onPress={() =>
-                router.push({
-                  pathname: '/(student)/mutoon/[programId]',
-                  params: { programId: id! },
-                })
-              }
-              variant="secondary"
-              icon={<Ionicons name="book-outline" size={16} color={lightTheme.text} />}
-            />
-          </View>
-        )}
-
-        {/* Available Teachers — free/mixed programs */}
-        {showAvailableTeachers && (
-          <View style={styles.section}>
-            <Button
-              title={`${t('availability.availableNow')}${availableTeachers?.length ? ` (${availableTeachers.length})` : ''}`}
-              onPress={() => router.push(`/(student)/available-now/${id}`)}
-              variant="default"
-              icon={<Ionicons name="radio-button-on" size={16} color="#22C55E" />}
-            />
-          </View>
-        )}
-
-        {/* Queue — free programs with no teachers available */}
+        {/* ── Queue / Fair Usage ── */}
         {program.category === 'free' && availableTeachers?.length === 0 && (
           <View style={styles.section}>
             <JoinQueueButton programId={id!} />
           </View>
         )}
-
-        {/* Fair usage notice — free programs */}
         {program.category === 'free' && (
           <View style={styles.section}>
             <FairUsageNotice programId={id!} />
           </View>
         )}
 
-        {/* Free program with no tracks — direct join */}
+        {/* ── Free program with no tracks — direct enrollment card ── */}
         {program.category === 'free' && program.program_tracks.length === 0 && (
           <View style={styles.section}>
             {isEnrolledInTrack(null) ? (
-              <View style={styles.enrolledRow}>
-                <EnrollmentStatusBadge status={getTrackEnrollment(null)!.status} />
-                <Button
-                  title={t('programs.actions.leave')}
-                  onPress={() => handleLeave(getTrackEnrollment(null)!.id)}
-                  variant="danger"
-                  size="sm"
-                  loading={leaveProgram.isPending}
-                />
-              </View>
+              <Card variant="outlined" style={styles.enrolledCard}>
+                <View style={styles.enrolledCardRow}>
+                  <EnrollmentStatusBadge status={getTrackEnrollment(null)!.status} />
+                  <Pressable
+                    onPress={() => handleLeave(getTrackEnrollment(null)!.id)}
+                    disabled={leaveProgram.isPending}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.leaveText}>{t('programs.actions.leave')}</Text>
+                  </Pressable>
+                </View>
+              </Card>
             ) : (
               <Button
                 title={t('programs.actions.join')}
@@ -244,72 +272,100 @@ export default function ProgramDetailScreen() {
           </View>
         )}
 
-        {/* Tracks with class/join actions */}
-        {program.program_tracks.map((track) => {
-          const enrolled = isEnrolledInTrack(track.id);
-          const trackEnrollment = getTrackEnrollment(track.id);
-          const trackClasses = classesForTrack(track.id);
-          const isFree = isFreeProgramOrTrack(track);
+        {/* ── Enrolled Tracks ── */}
+        {enrolledTracks.length > 0 && (
+          <View style={styles.tracksSection}>
+            <Text style={styles.sectionTitle}>{t('programs.myPrograms')}</Text>
+            {enrolledTracks.map((track) => {
+              const trackEnrollment = getTrackEnrollment(track.id)!;
+              return (
+                <Card key={track.id} variant="outlined" style={styles.trackCard}>
+                  <View style={styles.trackCardHeader}>
+                    <Text style={styles.trackCardName} numberOfLines={2}>
+                      {localize(track.name, track.name_ar)}
+                    </Text>
+                    <EnrollmentStatusBadge status={trackEnrollment.status} />
+                  </View>
 
-          return (
-            <View key={track.id} style={styles.trackSection}>
-              <View style={styles.trackHeader}>
-                <Text style={styles.trackName} numberOfLines={1}>
-                  {localize(track.name, track.name_ar)}
-                </Text>
-                {enrolled && trackEnrollment && (
-                  <EnrollmentStatusBadge status={trackEnrollment.status} />
-                )}
-              </View>
+                  {(track.description || track.description_ar) && (
+                    <Text style={styles.trackDescription}>
+                      {localize(track.description, track.description_ar)}
+                    </Text>
+                  )}
 
-              {(track.description || track.description_ar) && (
-                <Text style={styles.trackDescription}>
-                  {localize(track.description, track.description_ar)}
-                </Text>
-              )}
+                  {trackEnrollment.status === 'waitlisted' && trackEnrollment.class_id ? (
+                    <WaitlistPositionCard
+                      classId={trackEnrollment.class_id}
+                      userId={userId}
+                      enrollmentId={trackEnrollment.id}
+                      onLeave={() => handleLeave(trackEnrollment.id)}
+                      leavePending={leaveProgram.isPending}
+                    />
+                  ) : (
+                    <Pressable
+                      onPress={() => handleLeave(trackEnrollment.id)}
+                      disabled={leaveProgram.isPending}
+                      style={styles.leaveButton}
+                      accessibilityRole="button"
+                    >
+                      <Ionicons name="exit-outline" size={normalize(14)} color={colors.accent.red[500]} />
+                      <Text style={styles.leaveText}>{t('programs.actions.leave')}</Text>
+                    </Pressable>
+                  )}
+                </Card>
+              );
+            })}
+          </View>
+        )}
 
-              {enrolled && trackEnrollment ? (
-                trackEnrollment.status === 'waitlisted' && trackEnrollment.class_id ? (
-                  <WaitlistPositionCard
-                    classId={trackEnrollment.class_id}
-                    userId={userId}
-                    enrollmentId={trackEnrollment.id}
-                    onLeave={() => handleLeave(trackEnrollment.id)}
-                    leavePending={leaveProgram.isPending}
-                  />
-                ) : (
-                  <Button
-                    title={t('programs.actions.leave')}
-                    onPress={() => handleLeave(trackEnrollment.id)}
-                    variant="danger"
-                    size="sm"
-                    loading={leaveProgram.isPending}
-                  />
-                )
-              ) : isFree ? (
-                <Button
-                  title={t('programs.actions.join')}
-                  onPress={() => handleJoinFree(track.id)}
-                  loading={joinFree.isPending}
-                  variant="default"
-                />
-              ) : trackClasses.length > 0 ? (
-                trackClasses.map((pc: ProgramClassWithTeacher) => (
-                  <ProgramClassCard
-                    key={pc.id}
-                    programClass={pc}
-                    onEnroll={() => handleEnroll(pc.id, track.id)}
-                    disabled={enroll.isPending}
-                  />
-                ))
-              ) : (
-                <Text style={styles.noClasses}>
-                  {t('programs.labels.noClasses')}
-                </Text>
-              )}
-            </View>
-          );
-        })}
+        {/* ── Available Tracks ── */}
+        {availableTracks.length > 0 && (
+          <View style={styles.tracksSection}>
+            <Text style={styles.sectionTitle}>{t('programs.labels.tracks')}</Text>
+            {availableTracks.map((track) => {
+              const trackClasses = classesForTrack(track.id);
+              const isFree = isFreeProgramOrTrack(track);
+
+              return (
+                <Card key={track.id} variant="outlined" style={styles.trackCard}>
+                  <Text style={styles.trackCardName} numberOfLines={2}>
+                    {localize(track.name, track.name_ar)}
+                  </Text>
+
+                  {(track.description || track.description_ar) && (
+                    <Text style={styles.trackDescription}>
+                      {localize(track.description, track.description_ar)}
+                    </Text>
+                  )}
+
+                  {isFree ? (
+                    <Button
+                      title={t('programs.actions.join')}
+                      onPress={() => handleJoinFree(track.id)}
+                      loading={joinFree.isPending}
+                      size="sm"
+                    />
+                  ) : trackClasses.length > 0 ? (
+                    <View style={styles.classesContainer}>
+                      {trackClasses.map((pc: ProgramClassWithTeacher) => (
+                        <ProgramClassCard
+                          key={pc.id}
+                          programClass={pc}
+                          onEnroll={() => handleEnroll(pc.id, track.id)}
+                          disabled={enroll.isPending}
+                        />
+                      ))}
+                    </View>
+                  ) : (
+                    <Text style={styles.noClasses}>
+                      {t('programs.labels.noClasses')}
+                    </Text>
+                  )}
+                </Card>
+              );
+            })}
+          </View>
+        )}
       </ScrollView>
     </Screen>
   );
@@ -323,29 +379,94 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: spacing['3xl'],
-    gap: spacing.lg,
   },
   section: {
     paddingHorizontal: spacing.base,
+    marginTop: spacing.base,
   },
-  enrolledRow: {
+
+  /* ── Quick Actions ── */
+  quickActions: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    paddingHorizontal: spacing.base,
     gap: spacing.sm,
+    marginTop: spacing.sm,
   },
-  trackSection: {
+  quickActionItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: lightTheme.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: lightTheme.border,
+  },
+  quickActionIcon: {
+    width: normalize(36),
+    height: normalize(36),
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickActionIconGreen: {
+    backgroundColor: colors.primary[50],
+  },
+  quickActionIconAmber: {
+    backgroundColor: colors.secondary[50],
+  },
+  quickActionIconIndigo: {
+    backgroundColor: colors.accent.indigo[50],
+  },
+  quickActionLabel: {
+    ...typography.textStyles.caption,
+    color: lightTheme.text,
+    textAlign: 'center',
+  },
+  quickActionBadge: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    backgroundColor: colors.primary[500],
+    borderRadius: radius.full,
+    minWidth: normalize(20),
+    height: normalize(20),
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xs,
+  },
+  quickActionBadgeText: {
+    ...typography.textStyles.label,
+    color: colors.white,
+  },
+
+  /* ── Section Headers ── */
+  tracksSection: {
+    marginTop: spacing.xl,
     paddingHorizontal: spacing.base,
     gap: spacing.sm,
   },
-  trackHeader: {
+  sectionTitle: {
+    ...typography.textStyles.bodyMedium,
+    color: lightTheme.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: typography.letterSpacing.wide,
+    marginBottom: spacing.xs,
+  },
+
+  /* ── Track Cards ── */
+  trackCard: {
+    gap: spacing.sm,
+  },
+  trackCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  trackName: {
-    ...typography.textStyles.subheading,
+  trackCardName: {
+    ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
     flex: 1,
   },
@@ -353,9 +474,35 @@ const styles = StyleSheet.create({
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
   },
+  classesContainer: {
+    gap: spacing.sm,
+  },
   noClasses: {
     ...typography.textStyles.caption,
     color: lightTheme.textTertiary,
     fontStyle: 'italic',
+  },
+
+  /* ── Enrolled Card ── */
+  enrolledCard: {
+    gap: spacing.sm,
+  },
+  enrolledCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  /* ── Leave Action ── */
+  leaveButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+  },
+  leaveText: {
+    ...typography.textStyles.caption,
+    color: colors.accent.red[500],
   },
 });

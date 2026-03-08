@@ -4,6 +4,7 @@ import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
+import { normalize } from '@/theme/normalize';
 
 import { Screen } from '@/components/layout';
 import { ErrorState } from '@/components/feedback/ErrorState';
@@ -25,6 +26,14 @@ export default function StudentCertificatesScreen() {
   return (
     <Screen>
       <View style={styles.container}>
+        <Pressable
+          onPress={() => router.back()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+        >
+          <Ionicons name="arrow-back" size={normalize(24)} color={lightTheme.text} />
+        </Pressable>
         <Text style={styles.title}>{t('certifications.student.title')}</Text>
         <FlashList
           data={data ?? []}
@@ -95,9 +104,14 @@ export default function StudentCertificatesScreen() {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.sm,
+  },
   container: {
     flex: 1,
-    paddingTop: spacing.xl,
+    paddingTop: spacing.sm,
   },
   title: {
     ...typography.textStyles.heading,

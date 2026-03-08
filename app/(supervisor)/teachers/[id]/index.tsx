@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -19,10 +19,12 @@ import { normalize } from '@/theme/normalize';
 import { StatCard } from '@/features/admin/components/StatCard';
 import { useSupervisedTeachers } from '@/features/admin/hooks/useSupervisedTeachers';
 import { adminService } from '@/features/admin/services/admin.service';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 import type { SessionHistoryRow } from '@/features/admin/types/admin.types';
 
 export default function TeacherDetailScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { resolveName } = useLocalizedName();
   const { id: teacherId, programId } = useLocalSearchParams<{ id: string; programId: string }>();
   const { session } = useAuth();
   const router = useRouter();
@@ -94,12 +96,12 @@ export default function TeacherDetailScreen() {
             <View style={styles.header}>
               <Avatar
                 source={teacher.avatar_url ?? undefined}
-                name={teacher.full_name}
+                name={resolveName(teacher.name_localized, teacher.full_name)}
                 size="lg"
               />
               <View style={styles.headerText}>
-                <Text style={styles.name}>{teacher.full_name}</Text>
-                <Text style={styles.program}>{teacher.program_name}</Text>
+                <Text style={styles.name}>{resolveName(teacher.name_localized, teacher.full_name)}</Text>
+                <Text style={styles.program}>{i18n.language === 'ar' ? teacher.program_name_ar : teacher.program_name}</Text>
               </View>
             </View>
 
@@ -166,33 +168,29 @@ export default function TeacherDetailScreen() {
 
         <Text style={styles.sectionTitle}>{t('admin.supervisor.teacherDetail.sessionHistory')}</Text>
 
-        <FlatList
-          data={sessionHistory.data ?? []}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          renderItem={({ item }) => (
-            <View style={styles.sessionRow}>
-              <Text style={styles.sessionStudent} numberOfLines={1}>
-                {item.profiles?.full_name ?? '-'}
-              </Text>
-              <Text style={styles.sessionDate}>
-                {new Date(item.created_at).toLocaleDateString()}
-              </Text>
-              {item.duration_minutes != null && (
-                <Text style={styles.sessionDuration}>
-                  {item.duration_minutes}m
+        <View style={styles.listContent}>
+          {(sessionHistory.data ?? []).length > 0
+            ? (sessionHistory.data ?? []).map((item) => (
+                <View key={item.id} style={styles.sessionRow}>
+                  <Text style={styles.sessionStudent} numberOfLines={1}>
+                    {resolveName(item.profiles?.name_localized, item.profiles?.full_name)}
+                  </Text>
+                  <Text style={styles.sessionDate}>
+                    {new Date(item.created_at).toLocaleDateString()}
+                  </Text>
+                  {item.duration_minutes != null && (
+                    <Text style={styles.sessionDuration}>
+                      {item.duration_minutes}m
+                    </Text>
+                  )}
+                </View>
+              ))
+            : !sessionHistory.isLoading && (
+                <Text style={styles.emptyText}>
+                  {t('admin.supervisor.teacherDetail.noSessions')}
                 </Text>
               )}
-            </View>
-          )}
-          ListEmptyComponent={
-            !sessionHistory.isLoading ? (
-              <Text style={styles.emptyText}>
-                {t('admin.supervisor.teacherDetail.noSessions')}
-              </Text>
-            ) : null
-          }
-        />
+        </View>
       </View>
 
       <BottomSheet
