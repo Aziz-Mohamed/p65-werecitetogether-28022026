@@ -12,9 +12,11 @@ import { typography } from '@/theme/typography';
 import { normalize } from '@/theme/normalize';
 
 import { useSupervisedTeachers } from '@/features/admin/hooks/useSupervisedTeachers';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 
 export default function SupervisorReports() {
   const { t } = useTranslation();
+  const { resolveName } = useLocalizedName();
   const { session } = useAuth();
   const userId = session?.user?.id;
   const teachers = useSupervisedTeachers(userId);
@@ -22,7 +24,7 @@ export default function SupervisorReports() {
   const sessionsData = (teachers.data ?? []).map((teacher, i) => ({
     x: i,
     y: teacher.sessions_this_week,
-    label: teacher.full_name,
+    label: resolveName(teacher.name_localized, teacher.full_name),
   }));
 
   const ratingsData = (teachers.data ?? [])
@@ -30,7 +32,7 @@ export default function SupervisorReports() {
     .map((teacher, i) => ({
       x: i,
       y: teacher.average_rating ?? 0,
-      label: teacher.full_name,
+      label: resolveName(teacher.name_localized, teacher.full_name),
     }));
 
   const inactiveTeachers = (teachers.data ?? []).filter((t) => !t.is_active);
@@ -85,7 +87,7 @@ export default function SupervisorReports() {
         <View style={styles.listContainer}>
           {(teachers.data ?? []).map((teacher) => (
             <View key={teacher.teacher_id} style={styles.distRow}>
-              <Text style={styles.distName} numberOfLines={1}>{teacher.full_name}</Text>
+              <Text style={styles.distName} numberOfLines={1}>{resolveName(teacher.name_localized, teacher.full_name)}</Text>
               <Text style={styles.distValue}>{teacher.student_count}</Text>
             </View>
           ))}
@@ -134,7 +136,7 @@ export default function SupervisorReports() {
           {inactiveTeachers.length > 0 ? (
             inactiveTeachers.map((teacher) => (
               <View key={teacher.teacher_id} style={styles.distRow}>
-                <Text style={styles.distName} numberOfLines={1}>{teacher.full_name}</Text>
+                <Text style={styles.distName} numberOfLines={1}>{resolveName(teacher.name_localized, teacher.full_name)}</Text>
                 <Badge label={t('admin.supervisor.inactiveFlag')} variant="warning" size="sm" />
               </View>
             ))

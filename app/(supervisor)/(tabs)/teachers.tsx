@@ -15,9 +15,11 @@ import { normalize } from '@/theme/normalize';
 
 import { TeacherCard } from '@/features/admin/components/TeacherCard';
 import { useSupervisedTeachers } from '@/features/admin/hooks/useSupervisedTeachers';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 
 export default function SupervisorTeachers() {
   const { t } = useTranslation();
+  const { resolveName } = useLocalizedName();
   const { session } = useAuth();
   const router = useRouter();
   const userId = session?.user?.id;
@@ -28,7 +30,10 @@ export default function SupervisorTeachers() {
     const data = teachers.data ?? [];
     if (!query.trim()) return data;
     const q = query.toLowerCase();
-    return data.filter((t) => t.full_name.toLowerCase().includes(q));
+    return data.filter((t) => {
+      const localizedName = resolveName(t.name_localized, t.full_name).toLowerCase();
+      return localizedName.includes(q) || t.full_name.toLowerCase().includes(q);
+    });
   }, [teachers.data, query]);
 
   return (

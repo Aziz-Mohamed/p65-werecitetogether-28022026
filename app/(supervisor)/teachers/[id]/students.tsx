@@ -16,10 +16,12 @@ import { typography } from '@/theme/typography';
 import { ReassignSheet } from '@/features/admin/components/ReassignSheet';
 import { useTeacherStudents } from '@/features/admin/hooks/useTeacherStudents';
 import { useSupervisedTeachers } from '@/features/admin/hooks/useSupervisedTeachers';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 import type { TeacherStudentRow } from '@/features/admin/types/admin.types';
 
 export default function TeacherStudentsScreen() {
   const { t } = useTranslation();
+  const { resolveName } = useLocalizedName();
   const { id: teacherId, programId } = useLocalSearchParams<{ id: string; programId: string }>();
   const { session } = useAuth();
   const router = useRouter();
@@ -46,12 +48,12 @@ export default function TeacherStudentsScreen() {
             <View style={styles.row}>
               <Avatar
                 source={item.profiles?.avatar_url ?? undefined}
-                name={item.profiles?.full_name ?? ''}
+                name={resolveName(item.profiles?.name_localized, item.profiles?.full_name)}
                 size="sm"
               />
               <View style={styles.rowText}>
                 <Text style={styles.rowName} numberOfLines={1}>
-                  {item.profiles?.full_name ?? '-'}
+                  {resolveName(item.profiles?.name_localized, item.profiles?.full_name)}
                 </Text>
                 <Text style={styles.rowDate}>
                   {t('common.active')}: {new Date(item.enrolled_at).toLocaleDateString()}
