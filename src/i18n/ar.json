@@ -1808,6 +1808,7 @@
     "offline": "غير متاح",
     "meetingSettings": "إعدادات الاجتماع",
     "noFreePrograms": "لم يتم تعيينك في أي برنامج حر.",
+    "settingsSaved": "تم حفظ إعدادات الاجتماع بنجاح.",
     "platformLabels": {
       "google_meet": "Google Meet",
       "zoom": "Zoom",

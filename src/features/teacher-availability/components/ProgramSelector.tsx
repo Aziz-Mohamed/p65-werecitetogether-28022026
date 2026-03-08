@@ -74,13 +74,15 @@ export const ProgramSelector = forwardRef<BottomSheetModal, ProgramSelectorProps
             // Revert on failure
             setLocalAvailability((prev) => ({ ...prev, [programId]: !isAvailable }));
             const msg = (err as Error).message ?? '';
-            const needsMeetingLink = msg.includes('meeting_link') || msg.includes('http_request_queue') || msg.includes('url');
-            Alert.alert(
-              t('availability.meetingLink'),
-              needsMeetingLink
-                ? t('availability.configureMeetingLink')
-                : msg,
-            );
+            if (msg.includes('AVAILABILITY_NO_MEETING_LINK') || msg.includes('meeting_link')) {
+              Alert.alert(t('availability.meetingLink'), t('availability.configureMeetingLink'));
+            } else if (msg.includes('http_request_queue') || msg.includes('app.settings')) {
+              // DB webhook config missing — toggle likely succeeded but notification trigger failed
+              // Refetch to check actual state
+              Alert.alert(t('common.error'), t('availability.connectionLost'));
+            } else {
+              Alert.alert(t('common.error'), msg);
+            }
           },
         },
       );

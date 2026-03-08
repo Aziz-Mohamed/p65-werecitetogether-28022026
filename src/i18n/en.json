@@ -1808,6 +1808,7 @@
     "offline": "Offline",
     "meetingSettings": "Meeting Settings",
     "noFreePrograms": "You are not assigned to any open programs.",
+    "settingsSaved": "Meeting settings saved successfully.",
     "platformLabels": {
       "google_meet": "Google Meet",
       "zoom": "Zoom",

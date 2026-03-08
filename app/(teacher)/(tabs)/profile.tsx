@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { I18nManager, StyleSheet, View, Text, TextInput, Pressable, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -58,16 +58,38 @@ export default function TeacherProfile() {
     }
   }, [teacherProfile]);
 
+  const isDirty = useMemo(() => {
+    if (!teacherProfile) return false;
+    const origLink = teacherProfile.meeting_link ?? '';
+    const origPlatform = teacherProfile.meeting_platform ?? 'google_meet';
+    const origLangs = teacherProfile.languages ?? [];
+    if (meetingLink !== origLink) return true;
+    if (meetingPlatform !== origPlatform) return true;
+    if (selectedLanguages.length !== origLangs.length) return true;
+    if (selectedLanguages.some((l) => !origLangs.includes(l))) return true;
+    return false;
+  }, [teacherProfile, meetingLink, meetingPlatform, selectedLanguages]);
+
   const handleSaveMeetingSettings = () => {
     if (meetingLink && !meetingLink.startsWith('https://')) {
       Alert.alert(t('common.error'), 'Meeting link must start with https://');
       return;
     }
-    updateProfile.mutate({
-      meetingLink: meetingLink || undefined,
-      meetingPlatform,
-      languages: selectedLanguages.length > 0 ? selectedLanguages : undefined,
-    });
+    updateProfile.mutate(
+      {
+        meetingLink: meetingLink || undefined,
+        meetingPlatform,
+        languages: selectedLanguages.length > 0 ? selectedLanguages : undefined,
+      },
+      {
+        onSuccess: () => {
+          Alert.alert(t('common.success'), t('availability.settingsSaved'));
+        },
+        onError: (err) => {
+          Alert.alert(t('common.error'), (err as Error).message ?? t('common.genericError'));
+        },
+      },
+    );
   };
 
   const toggleLang = (code: string) => {
@@ -225,6 +247,7 @@ export default function TeacherProfile() {
             onPress={handleSaveMeetingSettings}
             variant="primary"
             size="md"
+            disabled={!isDirty}
             loading={updateProfile.isPending}
           />
         </Card>
