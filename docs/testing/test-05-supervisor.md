@@ -200,7 +200,7 @@
 - [ ] Supervisor CANNOT manage team assignments (program_admin scope only)
 - [ ] Supervisor CANNOT access master admin features (platform config, global user management)
 - [ ] Supervisor CANNOT create or manage programs (program_admin/master_admin scope only)
-- [ ] Supervisor CANNOT create or manage cohorts/tracks
+- [ ] Supervisor CANNOT create or manage classes/tracks
 - [ ] Supervisor CANNOT approve/reject enrollment applications
 
 ### 9.3 Data Scoping

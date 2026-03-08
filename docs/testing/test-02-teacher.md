@@ -439,7 +439,7 @@ These verify that the teacher role is properly restricted from unauthorized acti
 | 4 | Assign teacher to a program (via Supabase) | - |
 | 5 | Refresh or re-login | Dashboard populates with program data | [ ] |
 
-### M4. Single Student in Cohort
+### M4. Single Student in Class
 
 | # | Action | Expected | Pass |
 |---|--------|----------|------|

@@ -83,18 +83,18 @@
 
 ## 3. Class Management
 
-### 3.1 Class List — Tab (`(tabs)/cohorts.tsx`)
+### 3.1 Class List — Tab (`(tabs)/classes.tsx`)
 - [ ] Classes tab loads with list of classes in the selected program
 - [ ] Only classes from the current program are shown
 - [ ] Class cards display name, student count, and status
 - [ ] "Create" button/action is visible and accessible
 - [ ] Empty state shown if no classes exist
 
-### 3.2 Class List — Program Scoped (`programs/[id]/cohorts/index.tsx`)
+### 3.2 Class List — Program Scoped (`programs/[id]/classes/index.tsx`)
 - [ ] Navigating from program details to classes shows classes for that specific program
 - [ ] Class list matches the classes tab for the same program
 
-### 3.3 Create Class (`programs/[id]/cohorts/create.tsx`)
+### 3.3 Create Class (`programs/[id]/classes/create.tsx`)
 - [ ] Create class form loads with required fields (name, capacity, start date, etc.)
 - [ ] Submitting valid data creates a new class
 - [ ] New class appears in the class list after creation
@@ -102,7 +102,7 @@
 - [ ] Validation errors shown for missing/invalid fields
 - [ ] Cancel/back navigation returns to class list without creating
 
-### 3.4 Class Details (`programs/[id]/cohorts/[cohortId].tsx`)
+### 3.4 Class Details (`programs/[id]/classes/[classId].tsx`)
 - [ ] Tapping a class navigates to class details
 - [ ] Class details show: name, capacity, enrolled student roster, assigned teacher(s)
 - [ ] Student list within the class is accurate
@@ -204,7 +204,7 @@
 
 ## 7. Waitlist Management
 
-### 7.1 View Waitlist (`waitlist/[cohortId].tsx`)
+### 7.1 View Waitlist (`waitlist/[classId].tsx`)
 - [ ] Waitlist screen loads for a specific class
 - [ ] Shows students on the waitlist with their position/order
 - [ ] Only waitlist entries for the selected class are shown
