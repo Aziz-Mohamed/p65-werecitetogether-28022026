@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Alert, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 import { Screen } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
@@ -25,9 +26,13 @@ export default function AddTeamMember() {
   const router = useRouter();
   const team = useProgramTeam(programId);
 
+  const searchSheetRef = useRef<BottomSheetModal>(null);
   const [selectedUser, setSelectedUser] = useState<{ id: string; full_name: string } | null>(null);
   const [selectedRole, setSelectedRole] = useState<ProgramRoleType>('teacher');
-  const [showSearch, setShowSearch] = useState(true);
+
+  const handleOpenSearch = useCallback(() => {
+    searchSheetRef.current?.present();
+  }, []);
 
   const handleAssign = () => {
     if (!selectedUser || !programId || !session?.user?.id) return;
@@ -50,64 +55,64 @@ export default function AddTeamMember() {
   };
 
   return (
-    <Screen>
-      <View style={styles.container}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backText}>{t('common.back')}</Text>
-        </Pressable>
+    <BottomSheetModalProvider>
+      <Screen>
+        <View style={styles.container}>
+          <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Text style={styles.backText}>{t('common.back')}</Text>
+          </Pressable>
 
-        <Text style={styles.title}>{t('admin.programAdmin.team.addMember')}</Text>
+          <Text style={styles.title}>{t('admin.programAdmin.team.addMember')}</Text>
 
-        {selectedUser ? (
-          <View style={styles.selectedUser}>
-            <Text style={styles.selectedName}>{selectedUser.full_name}</Text>
-            <Pressable onPress={() => { setSelectedUser(null); setShowSearch(true); }}>
-              <Text style={styles.changeText}>{t('common.edit')}</Text>
-            </Pressable>
+          {selectedUser ? (
+            <View style={styles.selectedUser}>
+              <Text style={styles.selectedName}>{selectedUser.full_name}</Text>
+              <Pressable onPress={() => { setSelectedUser(null); handleOpenSearch(); }}>
+                <Text style={styles.changeText}>{t('common.edit')}</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Button
+              title={t('common.search')}
+              variant="secondary"
+              onPress={handleOpenSearch}
+              style={styles.searchButton}
+            />
+          )}
+
+          <Text style={styles.sectionLabel}>{t('admin.programAdmin.team.rolePicker')}</Text>
+          <View style={styles.roleRow}>
+            {ROLES.map((role) => (
+              <Pressable
+                key={role}
+                style={[styles.roleChip, selectedRole === role && styles.roleChipActive]}
+                onPress={() => setSelectedRole(role)}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.roleChipText, selectedRole === role && styles.roleChipTextActive]}>
+                  {role.replace('_', ' ')}
+                </Text>
+              </Pressable>
+            ))}
           </View>
-        ) : (
+
           <Button
-            title={t('common.search')}
-            variant="secondary"
-            onPress={() => setShowSearch(true)}
-            style={styles.searchButton}
+            title={t('admin.programAdmin.team.addMember')}
+            onPress={handleAssign}
+            disabled={!selectedUser || team.assign.isPending}
+            loading={team.assign.isPending}
+            style={styles.assignButton}
           />
-        )}
-
-        <Text style={styles.sectionLabel}>{t('admin.programAdmin.team.rolePicker')}</Text>
-        <View style={styles.roleRow}>
-          {ROLES.map((role) => (
-            <Pressable
-              key={role}
-              style={[styles.roleChip, selectedRole === role && styles.roleChipActive]}
-              onPress={() => setSelectedRole(role)}
-              accessibilityRole="button"
-            >
-              <Text style={[styles.roleChipText, selectedRole === role && styles.roleChipTextActive]}>
-                {role.replace('_', ' ')}
-              </Text>
-            </Pressable>
-          ))}
         </View>
+      </Screen>
 
-        <Button
-          title={t('admin.programAdmin.team.addMember')}
-          onPress={handleAssign}
-          disabled={!selectedUser || team.assign.isPending}
-          loading={team.assign.isPending}
-          style={styles.assignButton}
-        />
-
-        <UserSearchSheet
-          isOpen={showSearch && !selectedUser}
-          onClose={() => setShowSearch(false)}
-          onSelect={(user) => {
-            setSelectedUser({ id: user.id, full_name: user.full_name });
-            setShowSearch(false);
-          }}
-        />
-      </View>
-    </Screen>
+      <UserSearchSheet
+        ref={searchSheetRef}
+        onSelect={(user) => {
+          setSelectedUser({ id: user.id, full_name: user.full_name });
+        }}
+      />
+    </BottomSheetModalProvider>
   );
 }
 

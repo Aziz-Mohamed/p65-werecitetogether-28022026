@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View, Text, Alert, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 import { Screen, PageHeader } from '@/components/layout';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,9 +28,13 @@ export default function ProgramTeamScreen() {
   const { session } = useAuth();
   const teamQuery = useProgramTeam(id);
 
-  const [showUserSearch, setShowUserSearch] = useState(false);
+  const searchSheetRef = useRef<BottomSheetModal>(null);
   const [selectedUser, setSelectedUser] = useState<{ id: string; full_name: string } | null>(null);
   const [selectedRole, setSelectedRole] = useState<ProgramRoleType>('teacher');
+
+  const handleOpenSearch = useCallback(() => {
+    searchSheetRef.current?.present();
+  }, []);
 
   const handleAssign = () => {
     if (!selectedUser || !id || !session?.user?.id) return;
@@ -71,77 +76,77 @@ export default function ProgramTeamScreen() {
   if (teamQuery.error) return <ErrorState onRetry={teamQuery.refetch} />;
 
   return (
-    <Screen scroll>
-      <View style={styles.container}>
-        <PageHeader
-          title={t('admin.masterAdmin.programs.team')}
-          rightAction={
-            <Pressable
-              onPress={() => setShowUserSearch(true)}
-              hitSlop={8}
-              style={styles.addButton}
-            >
-              <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
-            </Pressable>
-          }
-        />
-
-        {selectedUser && (
-          <View style={styles.assignSection}>
-            <View style={styles.selectedUser}>
-              <Text style={styles.selectedName}>{selectedUser.full_name}</Text>
-              <Pressable onPress={() => setSelectedUser(null)}>
-                <Text style={styles.changeText}>{t('common.cancel')}</Text>
+    <BottomSheetModalProvider>
+      <Screen scroll>
+        <View style={styles.container}>
+          <PageHeader
+            title={t('admin.masterAdmin.programs.team')}
+            rightAction={
+              <Pressable
+                onPress={handleOpenSearch}
+                hitSlop={8}
+                style={styles.addButton}
+              >
+                <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
               </Pressable>
-            </View>
-            <View style={styles.roleRow}>
-              {TEAM_ROLES.map((role) => (
-                <Pressable
-                  key={role}
-                  style={[styles.roleChip, selectedRole === role && styles.roleChipActive]}
-                  onPress={() => setSelectedRole(role)}
-                >
-                  <Text style={[styles.roleChipText, selectedRole === role && styles.roleChipTextActive]}>
-                    {role.replace('_', ' ')}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-            <Button
-              title={t('common.confirm')}
-              onPress={handleAssign}
-              loading={teamQuery.assign.isPending}
-              disabled={teamQuery.assign.isPending}
-              size="sm"
-            />
-          </View>
-        )}
-
-        {teamQuery.data && teamQuery.data.length > 0 ? (
-          teamQuery.data.map((member) => (
-            <TeamMemberRow
-              key={member.id}
-              member={member}
-              onRemove={() => handleRemove(member.id, member.profiles?.full_name ?? '')}
-            />
-          ))
-        ) : (
-          <EmptyState
-            icon="people-outline"
-            title={t('admin.masterAdmin.programs.noTeam')}
+            }
           />
-        )}
 
-        <UserSearchSheet
-          isOpen={showUserSearch && !selectedUser}
-          onClose={() => setShowUserSearch(false)}
-          onSelect={(user) => {
-            setSelectedUser({ id: user.id, full_name: user.full_name });
-            setShowUserSearch(false);
-          }}
-        />
-      </View>
-    </Screen>
+          {selectedUser && (
+            <View style={styles.assignSection}>
+              <View style={styles.selectedUser}>
+                <Text style={styles.selectedName}>{selectedUser.full_name}</Text>
+                <Pressable onPress={() => setSelectedUser(null)}>
+                  <Text style={styles.changeText}>{t('common.cancel')}</Text>
+                </Pressable>
+              </View>
+              <View style={styles.roleRow}>
+                {TEAM_ROLES.map((role) => (
+                  <Pressable
+                    key={role}
+                    style={[styles.roleChip, selectedRole === role && styles.roleChipActive]}
+                    onPress={() => setSelectedRole(role)}
+                  >
+                    <Text style={[styles.roleChipText, selectedRole === role && styles.roleChipTextActive]}>
+                      {role.replace('_', ' ')}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <Button
+                title={t('common.confirm')}
+                onPress={handleAssign}
+                loading={teamQuery.assign.isPending}
+                disabled={teamQuery.assign.isPending}
+                size="sm"
+              />
+            </View>
+          )}
+
+          {teamQuery.data && teamQuery.data.length > 0 ? (
+            teamQuery.data.map((member) => (
+              <TeamMemberRow
+                key={member.id}
+                member={member}
+                onRemove={() => handleRemove(member.id, member.profiles?.full_name ?? '')}
+              />
+            ))
+          ) : (
+            <EmptyState
+              icon="people-outline"
+              title={t('admin.masterAdmin.programs.noTeam')}
+            />
+          )}
+        </View>
+      </Screen>
+
+      <UserSearchSheet
+        ref={searchSheetRef}
+        onSelect={(user) => {
+          setSelectedUser({ id: user.id, full_name: user.full_name });
+        }}
+      />
+    </BottomSheetModalProvider>
   );
 }
 

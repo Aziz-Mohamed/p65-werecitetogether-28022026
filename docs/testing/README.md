@@ -63,6 +63,13 @@ After creating accounts, set up the following data via Supabase Dashboard or SQL
 - **Test order**: Follow the critical paths first (see [critical-paths.md](./critical-paths.md)), then work through individual role scripts
 - **Record results**: Copy [test-results-template.md](./test-results-template.md) for each test run
 
+### Recommended Test Order (Solo Tester)
+
+1. **Critical Paths first** — Run [critical-paths.md](./critical-paths.md) P0 items (CP-01 through CP-04). These cross-role flows catch the most serious issues.
+2. **Quick Smoke Tests** — Each role script has a "Quick Smoke Test" section at the top. Run all 5 role smoke tests (~50 checkboxes total) before going deeper.
+3. **Full role scripts** — Work through role scripts in dependency order: Student → Teacher → Supervisor → Program Admin → Master Admin. This order ensures you can verify cross-role effects (e.g., teacher awards sticker → student sees it).
+4. **P1/P2 Critical Paths** — Run the remaining critical paths (CP-05 through CP-12) last.
+
 ### 4. Supabase Dashboard Shortcuts
 
 - **Table Editor**: Inspect/edit rows directly — useful for verifying writes
@@ -94,5 +101,5 @@ RESET request.jwt.claims;
 | Student | `/(student)/` | 6 tabs | Own data only |
 | Teacher | `/(teacher)/` | 5 tabs | Own students/sessions |
 | Supervisor | `/(supervisor)/` | 4 tabs | Supervised teachers in assigned programs |
-| Program Admin | `/(program-admin)/` | 5 tabs | Assigned programs |
+| Program Admin | `/(program-admin)/` | 6 tabs | Assigned programs |
 | Master Admin | `/(master-admin)/` | No tabs (scroll + nav) | Entire platform |

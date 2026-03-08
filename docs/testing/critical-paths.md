@@ -15,7 +15,7 @@ Verifies each role lands on the correct dashboard after login.
 | 1 | Log in as **student** | Lands on `/(student)/` with 6 tabs: Dashboard, Programs, Memorization, Revision, Journey, Profile |
 | 2 | Log out, log in as **teacher** | Lands on `/(teacher)/` with 5 tabs: Dashboard, Students, Sessions, Class Progress, Profile |
 | 3 | Log out, log in as **supervisor** | Lands on `/(supervisor)/` with 4 tabs: Home, Teachers, Reports, Profile |
-| 4 | Log out, log in as **program_admin** | Lands on `/(program-admin)/` program selector, then 5 tabs: Home, Classes, Team, Reports, Settings |
+| 4 | Log out, log in as **program_admin** | Lands on `/(program-admin)/` program selector, then 6 tabs: Home, Classes, Team, Reports, Settings, Profile |
 | 5 | Log out, log in as **master_admin** | Lands on `/(master-admin)/` scroll dashboard with stat cards + nav buttons |
 | 6 | Verify unauthenticated user → redirected to `/(auth)/login` | Login screen shown |
 | - | **Pass criteria** | All 5 roles route correctly, no cross-role leakage |

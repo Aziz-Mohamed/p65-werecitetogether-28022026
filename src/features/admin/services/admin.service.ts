@@ -95,12 +95,17 @@ class AdminService {
       .single();
   }
 
-  async searchUsersForAssignment(query: string, limit = 20) {
-    return supabase
+  async searchUsersForAssignment(query: string, limit = 50) {
+    let qb = supabase
       .from('profiles')
       .select('id, full_name, avatar_url, role')
-      .or(`full_name.ilike.%${query}%,username.ilike.%${query}%`)
-      .limit(limit);
+      .order('full_name');
+
+    if (query.length > 0) {
+      qb = qb.or(`full_name.ilike.%${query}%,username.ilike.%${query}%`);
+    }
+
+    return qb.limit(limit);
   }
 
   async getProgramSessionTrend(programId: string, startDate: string) {

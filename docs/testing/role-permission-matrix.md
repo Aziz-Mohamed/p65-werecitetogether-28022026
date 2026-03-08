@@ -28,7 +28,9 @@ Sources: RLS policies in `supabase/migrations/00001`, `00005`, `00008`, `00009`,
 | Delete profiles | - | - | - | - | D |
 | Notification preferences | W (own) | W (own) | W (own) | W (own) | W (own) |
 
-**RLS enforcement:** `profiles` table — users can only read/update own profile. Admins can insert/delete within their school via `get_user_school_id()`. Role changes blocked by `prevent_role_self_update()` trigger.
+**RLS enforcement:** `profiles` table — users can only read/update own profile. Admins can insert/delete within their school via `get_user_school_id()`. Role changes blocked by `prevent_role_self_update()` trigger. Master admin can change any user's global role via `change_user_role()` RPC.
+
+> **Note:** The database uses `school_id` scoping via `get_user_school_id()` in RLS policies, but the platform currently operates as single-tenant (one school). This means school-scoped policies effectively grant access to all data within the platform.
 
 ---
 
@@ -210,7 +212,7 @@ Sources: RLS policies in `supabase/migrations/00001`, `00005`, `00008`, `00009`,
 |---------|---------|---------|------------|---------------|--------------|
 | CRUD students | - | - | - | - | W |
 | CRUD teachers | - | - | - | - | W |
-| Manage classes | - | - | - | - | - |
+| Manage classes | - | - | - | W (program) | W |
 | Manage sticker catalog | - | - | - | W (program) | W |
 | Manage team (program roles) | - | - | - | W (program) | W |
 | Reassign students | - | - | W (supervised) | W (program) | W |
@@ -218,6 +220,7 @@ Sources: RLS policies in `supabase/migrations/00001`, `00005`, `00008`, `00009`,
 | Revoke master_admin role | - | - | - | - | W |
 | Update platform config | - | - | - | - | W |
 | View all users | - | - | - | - | R |
+| Change user global role | - | - | - | - | W |
 | Search users for role assign | - | - | - | - | R |
 
 **RLS enforcement:** Admin CRUD via school_id scoping. Program role management via `program_roles` INSERT/DELETE policies. Master admin operations via `assign_master_admin_role()` / `revoke_master_admin_role()` RPCs. Platform config UPDATE restricted to master_admin.
