@@ -410,6 +410,17 @@ export default function StudentDashboard() {
             </Pressable>
           )}
         </View>
+        <View style={styles.exploreRow}>
+          <Pressable
+            style={[styles.explorePill, { backgroundColor: colors.accent.indigo[50] }]}
+            onPress={() => router.push('/(student)/programs')}
+          >
+            <Ionicons name="library-outline" size={14} color={colors.accent.indigo[500]} />
+            <Text style={[styles.explorePillText, { color: colors.accent.indigo[600] }]}>
+              {t('student.tabs.programs')}
+            </Text>
+          </Pressable>
+        </View>
 
       </View>
     </Screen>

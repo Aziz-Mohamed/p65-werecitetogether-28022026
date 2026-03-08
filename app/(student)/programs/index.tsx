@@ -37,7 +37,7 @@ export default function ProgramsTab() {
   }
 
   return (
-    <Screen scroll={false} hasTabBar>
+    <Screen scroll={false}>
       <View style={styles.header}>
         <Text style={styles.title}>{t('student.tabs.programs')}</Text>
         <Button

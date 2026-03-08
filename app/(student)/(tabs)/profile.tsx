@@ -70,6 +70,23 @@ export default function StudentProfile() {
           </View>
         </Card>
 
+        {/* My Programs */}
+        <Card
+          variant="default"
+          style={styles.settingCard}
+          onPress={() => router.push('/(student)/programs')}
+        >
+          <View style={styles.settingRow}>
+            <View style={styles.settingLabelContainer}>
+              <View style={[styles.settingIcon, { backgroundColor: colors.accent.indigo[50] }]}>
+                <Ionicons name="library" size={20} color={colors.accent.indigo[500]} />
+              </View>
+              <Text style={styles.settingLabel}>{t('programs.myPrograms')}</Text>
+            </View>
+            <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={20} color={colors.neutral[300]} />
+          </View>
+        </Card>
+
         {/* Help Guide */}
         <Card
           variant="default"
