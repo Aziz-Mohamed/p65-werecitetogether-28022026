@@ -256,3 +256,9 @@ Each feature above should go through the speckit workflow before coding:
 ```
 
 Specs should be created in `specs/011-{feature-name}/` following the existing convention (001-010 are already used).
+
+---
+
+## Related Plans
+
+- **[Supabase Performance Optimization](./supabase-performance-optimization.md)** — 7-phase plan for scaling to 60K+ users (indexes, RLS helpers, async triggers, Edge Function optimization, text search)
