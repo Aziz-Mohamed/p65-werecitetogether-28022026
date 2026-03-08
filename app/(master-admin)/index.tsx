@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { StyleSheet, View, Text, Pressable, I18nManager } from 'react-native';
+import { StyleSheet, View, Text, Pressable, I18nManager, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui';
+import { LoadingState, ErrorState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
 import { useLogout } from '@/features/auth/hooks/useLogout';
 import { useChangeLanguage } from '@/hooks/useChangeLanguage';
@@ -37,8 +38,16 @@ export default function MasterAdminDashboard() {
     logout();
   }, [logout]);
 
+  if (dashboard.isLoading) return <LoadingState />;
+  if (dashboard.isError) return <ErrorState onRetry={() => dashboard.refetch()} />;
+
   return (
-    <Screen scroll>
+    <Screen
+      scroll
+      refreshControl={
+        <RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()} />
+      }
+    >
       <View style={styles.container}>
         <View style={styles.header}>
           <View>

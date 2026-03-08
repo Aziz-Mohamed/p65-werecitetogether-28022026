@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/feedback/EmptyState';
+import { ErrorState } from '@/components/feedback';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -76,6 +77,14 @@ function DashboardView({ programId, programName }: { programId: string; programN
   const { t } = useTranslation();
   const router = useRouter();
   const dashboard = useProgramAdminDashboard(programId);
+
+  if (dashboard.isError) {
+    return (
+      <Screen>
+        <ErrorState onRetry={() => dashboard.refetch()} />
+      </Screen>
+    );
+  }
 
   return (
     <Screen>

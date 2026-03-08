@@ -1,5 +1,5 @@
 import React from 'react';
-import { I18nManager, StyleSheet, View, Text } from 'react-native';
+import { I18nManager, RefreshControl, StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -61,7 +61,13 @@ export default function TeacherDashboard() {
   if (error) return <ErrorState description={error.message} onRetry={refetch} />;
 
   return (
-    <Screen scroll hasTabBar>
+    <Screen
+      scroll
+      hasTabBar
+      refreshControl={
+        <RefreshControl refreshing={false} onRefresh={refetch} />
+      }
+    >
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>

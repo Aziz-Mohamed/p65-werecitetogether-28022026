@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { I18nManager, Pressable, StyleSheet, View, Text } from 'react-native';
+import { I18nManager, Pressable, RefreshControl, StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -163,7 +163,13 @@ export default function StudentDashboard() {
   const hasCertifications = enriched.length > 0;
 
   return (
-    <Screen scroll hasTabBar>
+    <Screen
+      scroll
+      hasTabBar
+      refreshControl={
+        <RefreshControl refreshing={false} onRefresh={refetch} />
+      }
+    >
       <View style={styles.container}>
         {/* 1. Header + Attendance Badge */}
         <View style={styles.header}>
