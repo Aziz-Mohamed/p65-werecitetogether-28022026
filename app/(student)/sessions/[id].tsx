@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { I18nManager, StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,6 +14,8 @@ import { RecitationTypeChip } from '@/features/memorization/components/Recitatio
 import { useSessionById } from '@/features/sessions/hooks/useSessions';
 import { ProgramChip } from '@/features/sessions/components/ProgramChip';
 import { VoiceMemoPlayer, useVoiceMemo } from '@/features/voice-memos';
+import { useRatingPrompt } from '@/features/ratings/hooks/useRatingPrompt';
+import { RatingPrompt } from '@/features/ratings/components/RatingPrompt';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
 import { formatSessionDate } from '@/lib/helpers';
 import { getSurah, formatVerseRange } from '@/lib/quran-metadata';
@@ -33,6 +35,8 @@ export default function StudentSessionDetailScreen() {
   const { data: session, isLoading, error, refetch } = useSessionById(id);
   const { data: recitations = [] } = useSessionRecitations(id);
   const { data: voiceMemo } = useVoiceMemo(id);
+  const { canRate, alreadyRated } = useRatingPrompt(id, session?.status, session?.session_date);
+  const [ratingOpen, setRatingOpen] = useState(false);
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState description={error.message} onRetry={refetch} />;
@@ -169,7 +173,31 @@ export default function StudentSessionDetailScreen() {
           </Card>
         )}
 
+        {/* Rating */}
+        {canRate && (
+          <Button
+            title={t('ratings.rateSession')}
+            onPress={() => setRatingOpen(true)}
+            icon={<Ionicons name="star-outline" size={18} color={colors.white} />}
+            style={styles.rateButton}
+          />
+        )}
+        {alreadyRated && (
+          <View style={styles.ratedBadge}>
+            <Ionicons name="checkmark-circle" size={16} color={colors.primary[500]} />
+            <Text style={styles.ratedText}>{t('ratings.alreadyRated')}</Text>
+          </View>
+        )}
+
       </View>
+
+      {canRate && (
+        <RatingPrompt
+          sessionId={id!}
+          isOpen={ratingOpen}
+          onClose={() => setRatingOpen(false)}
+        />
+      )}
     </Screen>
   );
 }
@@ -326,5 +354,20 @@ const styles = StyleSheet.create({
   caption: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
+  },
+  rateButton: {
+    marginTop: spacing.sm,
+  },
+  ratedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: normalize(6),
+    paddingVertical: spacing.sm,
+  },
+  ratedText: {
+    ...typography.textStyles.caption,
+    color: colors.primary[500],
+    fontFamily: typography.fontFamily.semiBold,
   },
 });

@@ -1,111 +1,124 @@
-import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { useQueuePosition, useLeaveQueue } from '../hooks/useQueue';
+import { useQueuePosition } from '../hooks/useQueuePosition';
+import { useLeaveQueue } from '../hooks/useLeaveQueue';
+import { colors, lightTheme } from '@/theme/colors';
 import { typography } from '@/theme/typography';
-import { lightTheme, primary, neutral } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
 
 interface QueueStatusProps {
-  studentId: string;
   programId: string;
 }
 
-export function QueueStatus({ studentId, programId }: QueueStatusProps) {
+function useCountdown(expiresAt: string | null) {
+  const [remaining, setRemaining] = useState('');
+
+  useEffect(() => {
+    if (!expiresAt) return;
+
+    const update = () => {
+      const diff = new Date(expiresAt).getTime() - Date.now();
+      if (diff <= 0) {
+        setRemaining('0:00');
+        return;
+      }
+      const hours = Math.floor(diff / 3_600_000);
+      const minutes = Math.floor((diff % 3_600_000) / 60_000);
+      const seconds = Math.floor((diff % 60_000) / 1_000);
+      setRemaining(hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}` : `${minutes}:${String(seconds).padStart(2, '0')}`);
+    };
+
+    update();
+    const id = setInterval(update, 1_000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+
+  return remaining;
+}
+
+export function QueueStatus({ programId }: QueueStatusProps) {
   const { t } = useTranslation();
-  const { data: queueEntry, isLoading } = useQueuePosition(studentId, programId);
+  const { data: status } = useQueuePosition(programId);
   const leaveQueue = useLeaveQueue();
 
-  if (isLoading || !queueEntry) return null;
+  const countdown = useCountdown(status?.expires_at ?? null);
 
   const handleLeave = () => {
-    leaveQueue.mutate({
-      queueEntryId: queueEntry.id,
-      studentId,
-      programId,
-    });
+    Alert.alert(
+      t('queue.leaveConfirm'),
+      t('queue.leaveConfirmBody'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('queue.leaveQueue'),
+          style: 'destructive',
+          onPress: () => leaveQueue.mutate(programId),
+        },
+      ],
+    );
   };
 
-  return (
-    <Card variant="primary-glow" style={styles.card}>
-      <View style={styles.row}>
-        <View style={styles.positionBadge}>
-          <Text style={styles.positionNumber}>#{queueEntry.position}</Text>
-        </View>
-        <View style={styles.info}>
-          <Text style={styles.title}>
-            {t('queue.inLine', { position: queueEntry.position })}
-          </Text>
-          <Text style={styles.subtitle}>
-            {t('queue.waitingForTeacher')}
-          </Text>
-        </View>
-      </View>
+  if (!status || !status.in_queue) return null;
 
-      <View style={styles.indicatorRow}>
-        <Ionicons name="time-outline" size={16} color={neutral[400]} />
-        <Text style={styles.estimateText}>
-          {t('queue.estimatedWait')}
+  return (
+    <Card variant="outlined" style={styles.container}>
+      <View style={styles.header}>
+        <Ionicons name="time-outline" size={normalize(20)} color={colors.primary[500]} />
+        <Text style={styles.positionText}>
+          {t('queue.position', { position: status.position })}
         </Text>
       </View>
+
+      {status.estimated_wait_minutes != null && (
+        <Text style={styles.waitText}>
+          {t('queue.estimatedWait', { minutes: status.estimated_wait_minutes })}
+        </Text>
+      )}
+
+      {countdown && (
+        <Text style={styles.expiryText}>
+          {t('queue.expiresIn', { time: countdown })}
+        </Text>
+      )}
 
       <Button
         title={t('queue.leaveQueue')}
         onPress={handleLeave}
-        variant="ghost"
+        variant="outline"
         size="sm"
         loading={leaveQueue.isPending}
-        fullWidth
       />
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    gap: spacing.md,
+  container: {
+    padding: spacing.md,
+    gap: spacing.sm,
+    borderColor: colors.primary[200],
   },
-  row: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
   },
-  positionBadge: {
-    width: normalize(48),
-    height: normalize(48),
-    borderRadius: normalize(24),
-    backgroundColor: primary[100],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  positionNumber: {
-    ...typography.textStyles.subheading,
-    color: primary[700],
-  },
-  info: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  title: {
+  positionText: {
     ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
   },
-  subtitle: {
+  waitText: {
     ...typography.textStyles.caption,
-    color: neutral[500],
+    color: colors.neutral[500],
   },
-  indicatorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  estimateText: {
+  expiryText: {
     ...typography.textStyles.caption,
-    color: neutral[500],
+    color: colors.neutral[400],
   },
 });

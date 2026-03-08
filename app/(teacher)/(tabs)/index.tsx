@@ -11,6 +11,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTeacherDashboard } from '@/features/dashboard/hooks/useTeacherDashboard';
 import { useTeacherUpcomingSessions } from '@/features/scheduling/hooks/useScheduledSessions';
 import { useMyAvailability } from '@/features/teacher-availability/hooks/useMyAvailability';
+import { useTeacherRatingStats } from '@/features/ratings/hooks/useTeacherRatingStats';
+import { RatingStatsCard } from '@/features/ratings/components/RatingStatsCard';
+import { DemandIndicator } from '@/features/queue/components/DemandIndicator';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
 import {
   useToggleAvailability,
@@ -37,6 +40,8 @@ export default function TeacherDashboard() {
   const { data: myAvailability = [] } = useMyAvailability();
 
   const availableCount = myAvailability.filter((a) => a.is_available).length;
+  const firstProgramId = myAvailability[0]?.program_id;
+  const { data: ratingStats } = useTeacherRatingStats(profile?.id, firstProgramId);
   const nextSession = upcomingSessions[0] ?? null;
 
   // Track whether teacher is currently available
@@ -163,6 +168,20 @@ export default function TeacherDashboard() {
             <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
           </View>
         </Card>
+
+        {/* Demand Indicators — students waiting in queue */}
+        {myAvailability.map((avail) => (
+          <DemandIndicator
+            key={avail.id}
+            programId={avail.program_id}
+            programName={avail.programs?.name ?? ''}
+          />
+        ))}
+
+        {/* Rating Stats */}
+        {ratingStats && ratingStats.total_reviews >= 5 && (
+          <RatingStatsCard stats={ratingStats} />
+        )}
 
         {/* Student Insights */}
         <Text style={styles.sectionTitle}>{t('teacher.todayOverview')}</Text>

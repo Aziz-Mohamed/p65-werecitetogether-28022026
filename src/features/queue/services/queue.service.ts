@@ -1,133 +1,69 @@
 import { supabase } from '@/lib/supabase';
-import type { ServiceResult } from '@/types/common.types';
-import type { QueueEntry, DailySessionCount } from '../types';
+import type {
+  JoinQueueResponse,
+  QueueStatus,
+  DailySessionCount,
+  ProgramDemand,
+  ClaimSlotResponse,
+} from '../types/queue.types';
 
 class QueueService {
-  async joinQueue(
-    studentId: string,
-    programId: string,
-  ): Promise<ServiceResult<QueueEntry>> {
-    // Cancel any existing active queue entries for this student across ALL programs
-    await supabase
-      .from('free_program_queue')
-      .update({ status: 'cancelled' })
-      .eq('student_id', studentId)
-      .in('status', ['waiting', 'notified']);
+  // ─── Read Operations ──────────────────────────────────────────────────────
 
-    // Calculate next position
-    const { count, error: countError } = await supabase
-      .from('free_program_queue')
-      .select('*', { count: 'exact', head: true })
-      .eq('program_id', programId)
-      .eq('status', 'waiting');
-
-    if (countError) {
-      return { error: { message: countError.message, code: countError.code } };
-    }
-
-    const position = (count ?? 0) + 1;
-
-    const { data, error } = await supabase
-      .from('free_program_queue')
-      .insert({
-        student_id: studentId,
-        program_id: programId,
-        position,
-        status: 'waiting',
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data };
+  /** Get student's queue position and wait estimate */
+  async getQueueStatus(programId: string) {
+    const { data, error } = await supabase.rpc('get_queue_status' as any, {
+      p_program_id: programId,
+    });
+    if (error) throw error;
+    return data as QueueStatus;
   }
 
-  async leaveQueue(queueEntryId: string): Promise<ServiceResult<QueueEntry>> {
-    const { data, error } = await supabase
-      .from('free_program_queue')
-      .update({ status: 'cancelled' })
-      .eq('id', queueEntryId)
-      .select()
-      .single();
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data };
+  /** Get demand count for a program (teacher view) */
+  async getProgramDemand(programId: string) {
+    const { data, error } = await supabase.rpc('get_program_demand' as any, {
+      p_program_id: programId,
+    });
+    if (error) throw error;
+    return data as ProgramDemand;
   }
 
-  async getQueuePosition(
-    studentId: string,
-    programId: string,
-  ): Promise<ServiceResult<QueueEntry | null>> {
-    const { data, error } = await supabase
-      .from('free_program_queue')
-      .select('*')
-      .eq('student_id', studentId)
-      .eq('program_id', programId)
-      .eq('status', 'waiting')
-      .maybeSingle();
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data };
+  /** Get student's daily session count for a program */
+  async getDailySessionCount(programId: string) {
+    const { data, error } = await supabase.rpc('get_daily_session_count' as any, {
+      p_program_id: programId,
+    });
+    if (error) throw error;
+    return data as DailySessionCount;
   }
 
-  async getQueueSize(programId: string): Promise<ServiceResult<number>> {
-    const { count, error } = await supabase
-      .from('free_program_queue')
-      .select('*', { count: 'exact', head: true })
-      .eq('program_id', programId)
-      .eq('status', 'waiting');
+  // ─── Write Operations ─────────────────────────────────────────────────────
 
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data: count ?? 0 };
+  /** Join the queue for a free program */
+  async joinQueue(programId: string) {
+    const { data, error } = await supabase.rpc('join_queue' as any, {
+      p_program_id: programId,
+    });
+    if (error) throw error;
+    return data as JoinQueueResponse;
   }
 
-  async claimQueueSlot(queueEntryId: string): Promise<ServiceResult<QueueEntry>> {
-    const { data, error } = await supabase
-      .from('free_program_queue')
-      .update({ status: 'claimed' })
-      .eq('id', queueEntryId)
-      .eq('status', 'notified')
-      .select()
-      .single();
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data };
+  /** Leave the queue */
+  async leaveQueue(programId: string) {
+    const { data, error } = await supabase.rpc('leave_queue' as any, {
+      p_program_id: programId,
+    });
+    if (error) throw error;
+    return data as { success: boolean };
   }
 
-  async getDailySessionCount(
-    studentId: string,
-    programId: string,
-  ): Promise<ServiceResult<number>> {
-    const today = new Date().toISOString().split('T')[0];
-
-    const { data, error } = await supabase
-      .from('daily_session_count')
-      .select('session_count')
-      .eq('student_id', studentId)
-      .eq('program_id', programId)
-      .eq('date', today)
-      .maybeSingle();
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data: data?.session_count ?? 0 };
+  /** Claim a queue slot (after notification tap) */
+  async claimQueueSlot(entryId: string) {
+    const { data, error } = await supabase.rpc('claim_queue_slot' as any, {
+      p_entry_id: entryId,
+    });
+    if (error) throw error;
+    return data as ClaimSlotResponse;
   }
 }
 

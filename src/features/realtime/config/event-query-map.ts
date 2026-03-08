@@ -115,6 +115,27 @@ export function getQueryKeysForEvent(
     case 'teacher_availability':
       return [['available-teachers'], ['my-availability']];
 
+    case 'program_queue_entries': {
+      const programId = newRecord.program_id as string | undefined;
+      return programId
+        ? [['queue-status', programId], ['program-demand', programId]]
+        : [['queue-status'], ['program-demand']];
+    }
+
+    case 'teacher_ratings': {
+      const tId = newRecord.teacher_id as string | undefined;
+      return tId
+        ? [['teacher-reviews', tId], ['teacher-rating-stats', tId]]
+        : [['teacher-reviews'], ['teacher-rating-stats']];
+    }
+
+    case 'teacher_rating_stats': {
+      const statsTeacherId = newRecord.teacher_id as string | undefined;
+      return statsTeacherId
+        ? [['teacher-rating-stats', statsTeacherId], ['available-teachers']]
+        : [['teacher-rating-stats'], ['available-teachers']];
+    }
+
     default:
       return [];
   }

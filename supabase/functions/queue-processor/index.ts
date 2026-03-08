@@ -1,182 +1,114 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// Invoked by pg_net trigger when a teacher goes available.
+// Finds the first waiting student in that program's queue, sets them as notified
+// with a 3-minute claim window, and sends a push notification via send-notification.
 
-const CLAIM_WINDOW_MINUTES = 3;
-const DEFAULT_TEACHER_NOTIFY_THRESHOLD = 5;
+interface QueueProcessorPayload {
+  teacher_id: string;
+  program_id: string;
+}
+
+function getSupabaseAdmin() {
+  return createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+}
 
 Deno.serve(async (req: Request) => {
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const payload = (await req.json()) as QueueProcessorPayload;
+    const { teacher_id, program_id } = payload;
 
-    // Get the program_id and optional teacher info from the request body
-    const { program_id, teacher_id } = await req.json();
-
-    if (!program_id) {
+    if (!teacher_id || !program_id) {
       return new Response(
-        JSON.stringify({ error: "program_id is required" }),
+        JSON.stringify({ success: false, error: "Missing teacher_id or program_id" }),
         { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    // Count waiting queue entries BEFORE advancing (for threshold detection)
-    const { count: queueSizeBefore } = await supabase
-      .from("free_program_queue")
-      .select("*", { count: "exact", head: true })
-      .eq("program_id", program_id)
-      .eq("status", "waiting");
+    const supabase = getSupabaseAdmin();
 
-    // Find first waiting queue entry for this program
-    const { data: entry, error: fetchError } = await supabase
-      .from("free_program_queue")
-      .select("*")
+    // Find first waiting student in queue (ordered by priority: daily_sessions ASC, joined_at ASC)
+    const { data: nextEntry, error: fetchError } = await supabase
+      .from("program_queue_entries")
+      .select("id, student_id, program_id")
       .eq("program_id", program_id)
       .eq("status", "waiting")
-      .order("position", { ascending: true })
+      .order("daily_sessions_at_join", { ascending: true })
+      .order("joined_at", { ascending: true })
       .limit(1)
       .maybeSingle();
 
     if (fetchError) {
+      console.error("[queue-processor] Error fetching queue:", fetchError);
       return new Response(
-        JSON.stringify({ error: fetchError.message }),
+        JSON.stringify({ success: false, error: fetchError.message }),
         { status: 500, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    if (!entry) {
+    if (!nextEntry) {
       return new Response(
-        JSON.stringify({ message: "No students waiting in queue" }),
-        { status: 200, headers: { "Content-Type": "application/json" } },
+        JSON.stringify({ success: true, message: "No waiting students" }),
+        { headers: { "Content-Type": "application/json" } },
       );
     }
 
-    // Update to notified with expiry
-    const expiresAt = new Date(
-      Date.now() + CLAIM_WINDOW_MINUTES * 60 * 1000,
-    ).toISOString();
-
+    // Set student as notified with 3-min claim window
+    const claimDeadline = new Date(Date.now() + 3 * 60 * 1000).toISOString();
     const { error: updateError } = await supabase
-      .from("free_program_queue")
+      .from("program_queue_entries")
       .update({
         status: "notified",
         notified_at: new Date().toISOString(),
-        expires_at: expiresAt,
+        claim_expires_at: claimDeadline,
+        teacher_id,
       })
-      .eq("id", entry.id);
+      .eq("id", nextEntry.id);
 
     if (updateError) {
+      console.error("[queue-processor] Error updating entry:", updateError);
       return new Response(
-        JSON.stringify({ error: updateError.message }),
+        JSON.stringify({ success: false, error: updateError.message }),
         { status: 500, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    // Fetch teacher profile for enriched notification data
-    let teacherName = "";
-    let teacherPlatform = "";
-    if (teacher_id) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("display_name, full_name, meeting_platform")
-        .eq("id", teacher_id)
-        .single();
-      if (profile) {
-        teacherName = profile.display_name ?? profile.full_name ?? "";
-        teacherPlatform = profile.meeting_platform ?? "";
-      }
-    }
+    // Send push notification via send-notification Edge Function
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Get student's push token
-    const { data: tokens } = await supabase
-      .from("push_tokens")
-      .select("token")
-      .eq("profile_id", entry.student_id);
-
-    if (tokens && tokens.length > 0) {
-      // Send push notification via Expo Push API with enriched data
-      const messages = tokens.map((tk: { token: string }) => ({
-        to: tk.token,
-        title: "A teacher is available!",
-        body: `Tap to join your session. You have ${CLAIM_WINDOW_MINUTES} minutes to claim your spot.`,
-        data: {
-          screen: "/(student)/queue-claim",
-          params: { queueEntryId: entry.id, programId: program_id },
-          teacherName,
-          platform: teacherPlatform,
-          expiresAt,
-        },
-        categoryId: "queue_available",
-      }));
-
-      await fetch("https://exp.host/--/api/v2/push/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(messages),
-      });
-    }
-
-    // --- Teacher threshold notification (FR-011) ---
-    // Notify offline teachers when the queue grows past the threshold.
-    // The threshold check uses the BEFORE count: if a new student just joined
-    // and pushed the queue past the threshold, this processor was invoked by
-    // the teacher going available (which pops one student). So we check the
-    // pre-advance count against the threshold.
-    const { data: program } = await supabase
-      .from("programs")
-      .select("settings")
-      .eq("id", program_id)
-      .single();
-
-    const threshold =
-      (program?.settings as Record<string, unknown> | null)
-        ?.notify_teachers_queue_threshold as number | undefined ??
-      DEFAULT_TEACHER_NOTIFY_THRESHOLD;
-
-    const beforeCount = queueSizeBefore ?? 0;
-
-    // Trigger when the queue was at/above threshold before this advance.
-    // This means there are many students waiting — notify offline teachers.
-    if (beforeCount >= threshold) {
-      // Find offline teachers for this program
-      const { data: offlineTeachers } = await supabase
-        .from("teacher_availability")
-        .select("teacher_id")
-        .eq("program_id", program_id)
-        .eq("is_available", false);
-
-      if (offlineTeachers && offlineTeachers.length > 0) {
-        // Send notification to each offline teacher via send-notification
-        for (const teacher of offlineTeachers) {
-          await supabase.functions.invoke("send-notification", {
-            body: {
-              user_id: teacher.teacher_id,
-              title: "Students Waiting",
-              body: `${beforeCount} students are waiting — please come online`,
-              data: {
-                type: "queue_threshold",
-                screen: "/(teacher)/(tabs)/index",
-                params: { programId: program_id },
-              },
-            },
-          });
-        }
-      }
-    }
+    await fetch(`${supabaseUrl}/functions/v1/send-notification`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${serviceRoleKey}`,
+      },
+      body: JSON.stringify({
+        type: "queue_available",
+        student_id: nextEntry.student_id,
+        program_id: nextEntry.program_id,
+        entry_id: nextEntry.id,
+        teacher_id,
+      }),
+    });
 
     return new Response(
       JSON.stringify({
-        message: "Student notified",
-        student_id: entry.student_id,
-        expires_at: expiresAt,
-        teacher_threshold_notified: beforeCount >= threshold,
+        success: true,
+        notified_student: nextEntry.student_id,
+        entry_id: nextEntry.id,
+        claim_expires_at: claimDeadline,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
+      { headers: { "Content-Type": "application/json" } },
     );
-  } catch (err) {
+  } catch (error) {
+    console.error("[queue-processor] Error:", error);
     return new Response(
-      JSON.stringify({ error: (err as Error).message }),
+      JSON.stringify({ success: false, error: String(error) }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }

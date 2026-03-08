@@ -26,6 +26,8 @@ const editSchema = z.object({
   max_students_per_teacher: z.number().min(1).max(100),
   auto_approve: z.boolean(),
   session_duration_minutes: z.number().min(5).max(180),
+  daily_session_limit: z.number().min(1).max(20),
+  queue_notification_threshold: z.number().min(1).max(100),
 });
 
 type EditFormData = z.infer<typeof editSchema>;
@@ -54,6 +56,8 @@ export default function MasterAdminEditProgram() {
           max_students_per_teacher: program.settings?.max_students_per_teacher ?? 10,
           auto_approve: program.settings?.auto_approve ?? false,
           session_duration_minutes: program.settings?.session_duration_minutes ?? 30,
+          daily_session_limit: (program as any).daily_session_limit ?? 2,
+          queue_notification_threshold: (program as any).queue_notification_threshold ?? 5,
         }
       : undefined,
   });
@@ -74,6 +78,8 @@ export default function MasterAdminEditProgram() {
           auto_approve: data.auto_approve,
           session_duration_minutes: data.session_duration_minutes,
         },
+        daily_session_limit: data.daily_session_limit,
+        queue_notification_threshold: data.queue_notification_threshold,
       },
     });
 
@@ -217,6 +223,32 @@ export default function MasterAdminEditProgram() {
               <Text style={styles.switchLabel}>{t('common.active')}</Text>
               <Switch value={value} onValueChange={onChange} />
             </View>
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="daily_session_limit"
+          render={({ field: { onChange, value } }) => (
+            <TextField
+              label={t('queue.fairUsage.dailyLimit')}
+              value={String(value)}
+              onChangeText={(v) => onChange(Number(v) || 0)}
+              keyboardType="numeric"
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="queue_notification_threshold"
+          render={({ field: { onChange, value } }) => (
+            <TextField
+              label={t('queue.fairUsage.threshold')}
+              value={String(value)}
+              onChangeText={(v) => onChange(Number(v) || 0)}
+              keyboardType="numeric"
+            />
           )}
         />
 

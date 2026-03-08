@@ -1117,5 +1117,107 @@
   "notification": {
     "voiceMemoReceived": "ترك لك معلمك رسالة صوتية",
     "draftsExpired": "تم حذف {{count}} جلسة/جلسات مسودة بعد ٧ أيام"
+  },
+  "ratings": {
+    "title": "التقييمات",
+    "rateSession": "قيّم جلستك",
+    "ratePrompt": "كيف كانت جلستك؟",
+    "starLabel": "نجمة {{count}}",
+    "starsLabel": "{{count}} نجوم",
+    "selectRating": "اضغط للتقييم",
+    "positiveTags": "ما الذي كان جيداً؟",
+    "constructiveTags": "ما الذي يمكن تحسينه؟",
+    "commentPlaceholder": "أضف تعليقاً (اختياري)...",
+    "commentCharLimit": "{{count}}/٥٠٠",
+    "submit": "إرسال التقييم",
+    "submitting": "جارٍ الإرسال...",
+    "submitSuccess": "تم إرسال التقييم!",
+    "alreadyRated": "لقد قيّمت هذه الجلسة بالفعل",
+    "windowExpired": "انتهت مدة التقييم (٤٨ ساعة)",
+    "newTeacher": "معلم جديد",
+    "reviews": "{{count}} تقييمات",
+    "noReviewsYet": "لا توجد تقييمات كافية بعد",
+    "averageRating": "متوسط التقييم",
+    "totalReviews": "إجمالي التقييمات",
+    "starDistribution": "توزيع النجوم",
+    "trend": {
+      "improving": "تحسّن",
+      "declining": "تراجع",
+      "stable": "مستقر"
+    },
+    "commonPositive": "نقاط القوة",
+    "commonConstructive": "مجالات التحسين",
+    "tags": {
+      "patient": "صبور",
+      "clearExplanation": "شرح واضح",
+      "encouraging": "مشجّع",
+      "wellPrepared": "مستعد جيداً",
+      "goodListener": "مستمع جيد",
+      "sessionFeltRushed": "الجلسة كانت سريعة",
+      "needsMorePractice": "يحتاج مزيداً من التدريب",
+      "unclearInstructions": "تعليمات غير واضحة",
+      "lateStart": "بداية متأخرة"
+    },
+    "supervisor": {
+      "reviews": "المراجعات",
+      "flagged": "مُبلّغ عنه",
+      "excluded": "مُستبعَد",
+      "exclude": "استبعاد",
+      "restore": "استعادة",
+      "excludeTitle": "استبعاد المراجعة؟",
+      "excludeMessage": "سيتم إزالة هذه المراجعة من التقييم التجميعي للمعلم.",
+      "restoreTitle": "استعادة المراجعة؟",
+      "restoreMessage": "سيتم إعادة هذه المراجعة إلى التقييم التجميعي للمعلم.",
+      "reasonPlaceholder": "سبب الاستبعاد...",
+      "reasonRequired": "السبب مطلوب",
+      "auditTrail": "سجل المراجعة",
+      "excludedBy": "استُبعد بواسطة {{name}}",
+      "restoredBy": "استُعيد بواسطة {{name}}"
+    },
+    "errors": {
+      "sessionNotFound": "الجلسة غير موجودة",
+      "notCompleted": "الجلسة لم تكتمل",
+      "notYourSession": "هذه ليست جلستك",
+      "invalidRating": "التقييم يجب أن يكون بين ١ و ٥",
+      "commentTooLong": "التعليق يجب ألا يتجاوز ٥٠٠ حرف",
+      "submitFailed": "فشل إرسال التقييم"
+    }
+  },
+  "queue": {
+    "title": "قائمة الانتظار",
+    "joinQueue": "أعلمني",
+    "joinQueueDesc": "احصل على إشعار عندما يتوفر معلم",
+    "joining": "جارٍ الانضمام...",
+    "leaveQueue": "مغادرة القائمة",
+    "leaveConfirm": "مغادرة قائمة الانتظار؟",
+    "leaveConfirmBody": "ستفقد ترتيبك في القائمة.",
+    "position": "أنت رقم #{{position}} في القائمة",
+    "estimatedWait": "الوقت المتوقع: {{minutes}} دقيقة",
+    "expiresIn": "تنتهي القائمة خلال {{time}}",
+    "claimSlot": "جارٍ حجز مكانك...",
+    "claimSuccess": "تم الحجز! جارٍ التحويل للجلسة...",
+    "claimExpired": "عذراً، انتهت مهلة الحجز. تمت إعادتك للقائمة.",
+    "noTeachersAvailable": "لا يوجد معلمون متاحون حالياً",
+    "teacherAvailable": "معلم متاح!",
+    "tapToClaim": "اضغط للانضمام لجلستك",
+    "fairUsage": {
+      "title": "الاستخدام العادل",
+      "message": "لقد حضرت {{count}} جلسات اليوم.",
+      "softLimit": "يمكنك الانضمام إذا لم ينتظر أحد.",
+      "dailyLimit": "حد الجلسات اليومي",
+      "threshold": "حد إشعار قائمة الانتظار"
+    },
+    "demand": {
+      "studentsWaiting": "{{count}} طلاب بالانتظار",
+      "noStudentsWaiting": "لا يوجد طلاب بالانتظار"
+    },
+    "errors": {
+      "notFreeProgram": "قائمة الانتظار متاحة فقط للبرامج المجانية",
+      "alreadyInQueue": "أنت بالفعل في قائمة الانتظار",
+      "notEnrolled": "يجب أن تكون مسجلاً للانضمام",
+      "joinFailed": "فشل الانضمام لقائمة الانتظار",
+      "leaveFailed": "فشلت مغادرة قائمة الانتظار",
+      "claimFailed": "فشل حجز المكان"
+    }
   }
 }
