@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Pressable, View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 
 import { Screen } from '@/components/layout/Screen';
@@ -13,9 +14,10 @@ import { usePrograms } from '@/features/programs/hooks/usePrograms';
 import { typography } from '@/theme/typography';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { normalize } from '@/theme/normalize';
 import type { Program } from '@/features/programs/types/programs.types';
 
-export default function ProgramsTab() {
+export default function ProgramsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { data: programs, isLoading, error, refetch } = usePrograms();
@@ -38,6 +40,14 @@ export default function ProgramsTab() {
 
   return (
     <Screen scroll={false}>
+      <Pressable
+        onPress={() => router.back()}
+        style={styles.backButton}
+        accessibilityRole="button"
+        accessibilityLabel={t('common.back')}
+      >
+        <Ionicons name="arrow-back" size={normalize(24)} color={lightTheme.text} />
+      </Pressable>
       <View style={styles.header}>
         <Text style={styles.title}>{t('student.tabs.programs')}</Text>
         <Button
@@ -68,6 +78,11 @@ export default function ProgramsTab() {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    alignSelf: 'flex-start',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
