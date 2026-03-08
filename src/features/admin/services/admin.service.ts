@@ -170,6 +170,13 @@ class AdminService {
       .single();
   }
 
+  async getUserProgramRoles(userId: string) {
+    return supabase
+      .from('program_roles')
+      .select('id, program_id, role, programs!inner(name)')
+      .eq('profile_id', userId);
+  }
+
   // ─── Master Admin ──────────────────────────────────────────────────────────
 
   async getMasterAdminDashboardStats() {
