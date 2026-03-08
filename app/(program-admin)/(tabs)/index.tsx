@@ -1,54 +1,86 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui';
-import { useAuthStore } from '@/stores/authStore';
-import { useRoleTheme } from '@/hooks/useRoleTheme';
-import { typography } from '@/theme/typography';
-import { lightTheme, accent, neutral } from '@/theme/colors';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import { normalize } from '@/theme/normalize';
+import { typography } from '@/theme/typography';
+
+import { StatCard } from '@/features/admin/components/StatCard';
+import { useProgramAdminDashboard } from '@/features/admin/hooks/useProgramAdminDashboard';
 
 export default function ProgramAdminDashboard() {
   const { t } = useTranslation();
-  const profile = useAuthStore((s) => s.profile);
-  const theme = useRoleTheme();
-  const displayName = profile?.display_name ?? profile?.full_name ?? '';
+  const { programId } = useLocalSearchParams<{ programId: string }>();
+  const dashboard = useProgramAdminDashboard(programId);
 
   return (
-    <Screen scroll hasTabBar>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <Text style={styles.greeting}>
-              {t('dashboard.welcome', { name: displayName })}
+    <Screen>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()} />
+        }
+      >
+        <Text style={styles.title}>{t('admin.programAdmin.dashboard.title')}</Text>
+
+        <View style={styles.statsRow}>
+          <StatCard
+            label={t('admin.programAdmin.dashboard.totalEnrolled')}
+            value={dashboard.data?.total_enrolled ?? 0}
+            icon="school-outline"
+            iconColor={colors.primary[500]}
+            isLoading={dashboard.isLoading}
+          />
+          <StatCard
+            label={t('admin.programAdmin.dashboard.activeCohorts')}
+            value={dashboard.data?.active_cohorts ?? 0}
+            icon="people-circle-outline"
+            iconColor={colors.accent.indigo}
+            isLoading={dashboard.isLoading}
+          />
+        </View>
+
+        <View style={styles.statsRow}>
+          <StatCard
+            label={t('admin.programAdmin.dashboard.totalTeachers')}
+            value={dashboard.data?.total_teachers ?? 0}
+            icon="people-outline"
+            iconColor={colors.accent.violet}
+            isLoading={dashboard.isLoading}
+          />
+          <StatCard
+            label={t('admin.programAdmin.dashboard.sessionsThisWeek')}
+            value={dashboard.data?.sessions_this_week ?? 0}
+            icon="calendar-outline"
+            iconColor={colors.accent.sky}
+            isLoading={dashboard.isLoading}
+          />
+        </View>
+
+        <View style={styles.statsRow}>
+          <StatCard
+            label={t('admin.programAdmin.dashboard.pendingEnrollments')}
+            value={dashboard.data?.pending_enrollments ?? 0}
+            icon="time-outline"
+            iconColor={colors.secondary[500]}
+            isLoading={dashboard.isLoading}
+          />
+        </View>
+
+        {(dashboard.data?.pending_enrollments ?? 0) > 0 && (
+          <View style={styles.warningBanner}>
+            <Text style={styles.warningText}>
+              {t('admin.programAdmin.dashboard.pendingWarning', {
+                count: dashboard.data?.pending_enrollments ?? 0,
+              })}
             </Text>
           </View>
-          <Badge label={t('roles.program_admin')} variant="sky" size="md" />
-        </View>
-
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <Card variant="default" style={styles.statCard}>
-            <Text style={[styles.statValue, { color: accent.sky[500] }]}>—</Text>
-            <Text style={styles.statLabel}>{t('dashboard.programAdmin.cohorts')}</Text>
-          </Card>
-          <Card variant="default" style={styles.statCard}>
-            <Text style={[styles.statValue, { color: accent.violet[500] }]}>—</Text>
-            <Text style={styles.statLabel}>{t('dashboard.programAdmin.team')}</Text>
-          </Card>
-        </View>
-
-        {/* Placeholder */}
-        <View style={styles.placeholder}>
-          <Ionicons name="analytics-outline" size={48} color={neutral[300]} />
-          <Text style={styles.placeholderText}>{t('common.comingSoon')}</Text>
-        </View>
-      </View>
+        )}
+      </ScrollView>
     </Screen>
   );
 }
@@ -56,49 +88,35 @@ export default function ProgramAdminDashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: spacing.lg,
-    gap: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+  content: {
+    paddingTop: spacing.xl,
+    paddingBottom: spacing['3xl'],
   },
-  headerContent: {
-    flex: 1,
-  },
-  greeting: {
+  title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
-    fontSize: normalize(22),
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.base,
   },
   statsRow: {
     flexDirection: 'row',
-    gap: spacing.md,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.sm,
   },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    paddingBlock: spacing.lg,
+  warningBanner: {
+    marginHorizontal: spacing.base,
+    marginTop: spacing.base,
+    backgroundColor: colors.secondary[50],
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.secondary[200],
+    padding: spacing.md,
   },
-  statValue: {
-    ...typography.textStyles.display,
-    fontSize: normalize(28),
-  },
-  statLabel: {
-    ...typography.textStyles.label,
-    color: neutral[500],
-    marginBlockStart: spacing.xs,
-    textAlign: 'center',
-  },
-  placeholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.md,
-    paddingBlock: spacing['3xl'],
-  },
-  placeholderText: {
+  warningText: {
     ...typography.textStyles.body,
-    color: lightTheme.textSecondary,
+    color: colors.secondary[700],
+    textAlign: 'center',
   },
 });

@@ -1,40 +1,100 @@
 import React from 'react';
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/Button';
 import { useLogout } from '@/features/auth/hooks/useLogout';
-import { typography } from '@/theme/typography';
-import { lightTheme } from '@/theme/colors';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { typography } from '@/theme/typography';
 import { normalize } from '@/theme/normalize';
 
-export default function MasterAdminPlaceholder() {
+import { StatCard } from '@/features/admin/components/StatCard';
+import { ProgramSummaryRow } from '@/features/admin/components/ProgramSummaryRow';
+import { useMasterAdminDashboard } from '@/features/admin/hooks/useMasterAdminDashboard';
+
+function NavButton({ label, icon, onPress }: { label: string; icon: string; onPress: () => void }) {
+  return (
+    <Pressable style={navStyles.button} onPress={onPress} accessibilityRole="button">
+      <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={normalize(20)} color={colors.primary[500]} />
+      <Text style={navStyles.label}>{label}</Text>
+      <Ionicons name="chevron-forward" size={normalize(16)} color={lightTheme.textSecondary} />
+    </Pressable>
+  );
+}
+
+export default function MasterAdminDashboard() {
   const { t } = useTranslation();
-  const { logout, isPending } = useLogout();
+  const router = useRouter();
+  const dashboard = useMasterAdminDashboard();
+  const { logout, isPending: logoutPending } = useLogout();
 
   return (
     <Screen>
-      <View style={styles.container}>
-        <Image
-          source={require('../../assets/app-icon.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text style={styles.roleTitle}>
-          {t('auth.placeholder.title', { role: t('auth.role.master_admin') })}
-        </Text>
-        <Text style={styles.comingSoon}>{t('auth.placeholder.comingSoon')}</Text>
-        <Text style={styles.description}>{t('auth.placeholder.description')}</Text>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()} />
+        }
+      >
+        <Text style={styles.title}>{t('admin.masterAdmin.dashboard.title')}</Text>
+
+        <View style={styles.statsRow}>
+          <StatCard
+            label={t('admin.masterAdmin.dashboard.totalStudents')}
+            value={dashboard.data?.total_students ?? 0}
+            icon="school-outline"
+            iconColor={colors.primary[500]}
+            isLoading={dashboard.isLoading}
+          />
+          <StatCard
+            label={t('admin.masterAdmin.dashboard.totalTeachers')}
+            value={dashboard.data?.total_teachers ?? 0}
+            icon="people-outline"
+            iconColor={colors.accent.indigo}
+            isLoading={dashboard.isLoading}
+          />
+        </View>
+
+        <View style={styles.statsRow}>
+          <StatCard
+            label={t('admin.masterAdmin.dashboard.activeSessions')}
+            value={dashboard.data?.total_active_sessions ?? 0}
+            icon="pulse-outline"
+            iconColor={colors.accent.violet}
+            isLoading={dashboard.isLoading}
+          />
+        </View>
+
+        <View style={styles.navSection}>
+          <NavButton label={t('admin.masterAdmin.nav.users')} icon="people-outline" onPress={() => router.push('/(master-admin)/users')} />
+          <NavButton label={t('admin.masterAdmin.nav.programs')} icon="library-outline" onPress={() => router.push('/(master-admin)/programs')} />
+          <NavButton label={t('admin.masterAdmin.nav.reports')} icon="bar-chart-outline" onPress={() => router.push('/(master-admin)/reports')} />
+          <NavButton label={t('admin.masterAdmin.nav.settings')} icon="settings-outline" onPress={() => router.push('/(master-admin)/settings')} />
+        </View>
+
+        <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.programsOverview')}</Text>
+
+        {(dashboard.data?.programs ?? []).map((program) => (
+          <View key={program.program_id} style={styles.programItem}>
+            <ProgramSummaryRow program={program} />
+          </View>
+        ))}
+
         <Button
           title={t('common.signOut')}
           onPress={() => logout()}
-          disabled={isPending}
-          loading={isPending}
+          variant="ghost"
+          disabled={logoutPending}
+          loading={logoutPending}
           style={styles.signOutButton}
         />
-      </View>
+      </ScrollView>
     </Screen>
   );
 }
@@ -42,34 +102,61 @@ export default function MasterAdminPlaceholder() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingInline: spacing.xl,
   },
-  logo: {
-    width: normalize(80),
-    height: normalize(80),
-    marginBlockEnd: spacing.xl,
+  content: {
+    paddingTop: spacing.xl,
+    paddingBottom: spacing['3xl'],
   },
-  roleTitle: {
+  title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
-    textAlign: 'center',
-    marginBlockEnd: spacing.sm,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.base,
   },
-  comingSoon: {
+  statsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.sm,
+  },
+  navSection: {
+    marginTop: spacing.xl,
+    marginHorizontal: spacing.base,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: lightTheme.border,
+    overflow: 'hidden',
+  },
+  sectionTitle: {
     ...typography.textStyles.subheading,
-    color: lightTheme.textSecondary,
-    textAlign: 'center',
-    marginBlockEnd: spacing.xs,
+    color: lightTheme.text,
+    paddingHorizontal: spacing.base,
+    marginTop: spacing.xl,
+    marginBottom: spacing.sm,
   },
-  description: {
-    ...typography.textStyles.body,
-    color: lightTheme.textSecondary,
-    textAlign: 'center',
-    marginBlockEnd: spacing.xl,
+  programItem: {
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.sm,
   },
   signOutButton: {
-    minWidth: normalize(200),
+    marginHorizontal: spacing.base,
+    marginTop: spacing.xl,
+  },
+});
+
+const navStyles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: lightTheme.border,
+  },
+  label: {
+    ...typography.textStyles.bodyMedium,
+    color: lightTheme.text,
+    flex: 1,
   },
 });

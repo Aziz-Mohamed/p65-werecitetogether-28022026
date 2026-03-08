@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs } from 'expo-router';
+import { Tabs, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -16,7 +16,7 @@ export default function ProgramAdminTabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: t('dashboard.programAdmin.home'),
+          title: t('admin.programAdmin.tabs.home'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
           ),
@@ -25,16 +25,16 @@ export default function ProgramAdminTabsLayout() {
       <Tabs.Screen
         name="cohorts"
         options={{
-          title: t('dashboard.programAdmin.cohorts'),
+          title: t('admin.programAdmin.tabs.cohorts'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'grid' : 'grid-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'school' : 'school-outline'} size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="team"
         options={{
-          title: t('dashboard.programAdmin.team'),
+          title: t('admin.programAdmin.tabs.team'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'people' : 'people-outline'} size={24} color={color} />
           ),
@@ -43,7 +43,7 @@ export default function ProgramAdminTabsLayout() {
       <Tabs.Screen
         name="reports"
         options={{
-          title: t('dashboard.programAdmin.reports'),
+          title: t('admin.programAdmin.tabs.reports'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={24} color={color} />
           ),
@@ -52,7 +52,7 @@ export default function ProgramAdminTabsLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: t('dashboard.programAdmin.settings'),
+          title: t('admin.programAdmin.tabs.settings'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'settings' : 'settings-outline'} size={24} color={color} />
           ),

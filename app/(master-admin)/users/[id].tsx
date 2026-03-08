@@ -1,117 +1,86 @@
-import React from 'react';
-import { StyleSheet, View, Text, FlatList, Pressable } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { Screen } from '@/components/layout';
-import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { LoadingState, ErrorState } from '@/components/feedback';
-import { useUserPrograms } from '@/features/programs/hooks/useRoleManagement';
-import { profileService } from '@/features/profile/services/profile.service';
-import { useQuery } from '@tanstack/react-query';
-import { typography } from '@/theme/typography';
-import { lightTheme, accent, neutral } from '@/theme/colors';
+import { useAdminUsers } from '@/features/admin/hooks/useAdminUsers';
+import { RoleAssignmentSheet } from '@/features/admin/components/RoleAssignmentSheet';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import { normalize } from '@/theme/normalize';
+import { typography } from '@/theme/typography';
 
 export default function UserDetailScreen() {
   const { t } = useTranslation();
-  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const [showRoleSheet, setShowRoleSheet] = useState(false);
 
-  const {
-    data: profile,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ['profile', id],
-    queryFn: async () => {
-      const result = await profileService.getProfile(id!);
-      if (result.error) throw new Error(result.error.message);
-      return result.data!;
-    },
-    enabled: !!id,
-  });
+  // Re-search to get user data (or could pass via params)
+  const users = useAdminUsers(id ?? '');
+  const user = users.data?.find((u) => u.id === id);
 
-  const { data: programRoles = [] } = useUserPrograms(id);
-
-  if (isLoading) return <LoadingState />;
-  if (error || !profile) {
+  if (!user && !users.isLoading) {
     return (
-      <ErrorState
-        description={error?.message ?? 'Not found'}
-        onRetry={refetch}
-      />
+      <Screen>
+        <View style={styles.container}>
+          <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Text style={styles.backText}>{t('common.back')}</Text>
+          </Pressable>
+          <Text style={styles.emptyText}>{t('common.noResults')}</Text>
+        </View>
+      </Screen>
     );
   }
 
-  const displayName = profile.display_name ?? profile.full_name;
+  if (!user) return null;
 
   return (
-    <Screen scroll>
+    <Screen>
       <View style={styles.container}>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backText}>{t('common.back')}</Text>
+        </Pressable>
+
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={lightTheme.text} />
-          </Pressable>
-          <Text style={styles.title}>{displayName}</Text>
+          <Avatar source={user.avatar_url ?? undefined} name={user.full_name} size="lg" />
+          <View style={styles.headerText}>
+            <Text style={styles.name}>{user.full_name}</Text>
+            <Text style={styles.email}>{user.email}</Text>
+          </View>
         </View>
 
-        {/* Profile Card */}
-        <Card variant="default" style={styles.profileCard}>
-          <Avatar
-            source={profile.avatar_url ?? undefined}
-            name={displayName}
-            size="xl"
-          />
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{displayName}</Text>
-            <Text style={styles.profileEmail}>{profile.email ?? '—'}</Text>
-            <Badge label={t(`roles.${profile.role}`)} variant="default" />
-          </View>
-        </Card>
+        <Text style={styles.sectionLabel}>{t('admin.masterAdmin.users.detail.globalRole')}</Text>
+        <Badge label={user.role} variant="info" />
 
-        {/* Program Roles */}
-        <Text style={styles.sectionTitle}>
-          {t('dashboard.masterAdmin.programs')} ({programRoles.length})
-        </Text>
-        {programRoles.length === 0 ? (
-          <Card variant="outlined" style={styles.emptyCard}>
-            <Text style={styles.emptyText}>
-              {t('common.noResults')}
-            </Text>
-          </Card>
-        ) : (
-          programRoles.map((pr) => (
-            <Card key={pr.id} variant="outlined" style={styles.roleCard}>
-              <View style={styles.roleRow}>
-                <View style={styles.roleInfo}>
-                  <Text style={styles.roleProgramId}>
-                    {pr.program_id}
-                  </Text>
-                  <Badge label={t(`roles.${pr.role}`)} variant="default" size="sm" />
-                </View>
-              </View>
-            </Card>
+        <Text style={styles.sectionLabel}>{t('admin.masterAdmin.users.detail.programRoles')}</Text>
+        {user.program_roles_data.length > 0 ? (
+          user.program_roles_data.map((pr, i) => (
+            <View key={i} style={styles.roleRow}>
+              <Text style={styles.roleProgram}>{pr.program_name}</Text>
+              <Badge label={pr.role.replace('_', ' ')} variant="default" size="sm" />
+            </View>
           ))
+        ) : (
+          <Text style={styles.noRoles}>{t('admin.masterAdmin.users.detail.noRoles')}</Text>
         )}
 
-        {/* Assign to Program Button */}
         <Button
-          title={t('common.assign')}
-          onPress={() => {
-            // TODO: Show program/role picker bottom sheet
-          }}
-          variant="primary"
-          size="md"
-          fullWidth
-          style={styles.assignButton}
+          title={t('admin.masterAdmin.users.detail.manageRoles')}
+          onPress={() => setShowRoleSheet(true)}
+          style={styles.manageButton}
         />
+
+        {showRoleSheet && (
+          <RoleAssignmentSheet
+            isOpen={showRoleSheet}
+            onClose={() => setShowRoleSheet(false)}
+            user={user}
+          />
+        )}
       </View>
     </Screen>
   );
@@ -120,67 +89,70 @@ export default function UserDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: spacing.lg,
-    gap: spacing.md,
+    paddingTop: spacing.xl,
+  },
+  backButton: {
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+  },
+  backText: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.primary[500],
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.xl,
   },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
+  headerText: {
     flex: 1,
-  },
-  profileCard: {
-    alignItems: 'center',
-    paddingBlock: spacing.xl,
-    gap: spacing.md,
-  },
-  profileInfo: {
-    alignItems: 'center',
     gap: spacing.xs,
   },
-  profileName: {
-    ...typography.textStyles.subheading,
+  name: {
+    ...typography.textStyles.heading,
     color: lightTheme.text,
   },
-  profileEmail: {
-    ...typography.textStyles.caption,
+  email: {
+    ...typography.textStyles.body,
     color: lightTheme.textSecondary,
   },
-  sectionTitle: {
-    ...typography.textStyles.subheading,
-    color: lightTheme.text,
-    marginBlockStart: spacing.sm,
-  },
-  roleCard: {
-    padding: spacing.md,
+  sectionLabel: {
+    ...typography.textStyles.label,
+    color: lightTheme.textSecondary,
+    paddingHorizontal: spacing.base,
+    marginTop: spacing.xl,
+    marginBottom: spacing.sm,
+    textTransform: 'uppercase',
   },
   roleRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: lightTheme.border,
   },
-  roleInfo: {
+  roleProgram: {
+    ...typography.textStyles.body,
+    color: lightTheme.text,
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
-  roleProgramId: {
-    ...typography.textStyles.caption,
+  noRoles: {
+    ...typography.textStyles.body,
     color: lightTheme.textSecondary,
+    paddingHorizontal: spacing.base,
   },
-  emptyCard: {
-    padding: spacing.xl,
-    alignItems: 'center',
+  manageButton: {
+    marginHorizontal: spacing.base,
+    marginTop: spacing.xl,
   },
   emptyText: {
     ...typography.textStyles.body,
     color: lightTheme.textSecondary,
-  },
-  assignButton: {
-    marginBlockStart: spacing.lg,
+    textAlign: 'center',
+    padding: spacing['2xl'],
   },
 });

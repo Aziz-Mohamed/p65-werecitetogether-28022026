@@ -1,88 +1,93 @@
 import React, { useState, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, Pressable } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { View, Text, StyleSheet, TextInput, Pressable, RefreshControl } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { Screen } from '@/components/layout';
-import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui';
-import { SearchBar } from '@/components/ui/SearchBar';
-import { useSearchProfiles } from '@/features/programs/hooks/useRoleManagement';
-import { typography } from '@/theme/typography';
-import { lightTheme, neutral } from '@/theme/colors';
+import { Badge } from '@/components/ui/Badge';
+import { useAdminUsers } from '@/features/admin/hooks/useAdminUsers';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { typography } from '@/theme/typography';
+import { radius } from '@/theme/radius';
 import { normalize } from '@/theme/normalize';
 
 export default function UserListScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { data: users = [], isLoading } = useSearchProfiles(searchQuery);
-  const handleClear = useCallback(() => setSearchQuery(''), []);
+  const users = useAdminUsers(debouncedQuery);
+
+  const handleSearch = useCallback((text: string) => {
+    setQuery(text);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedQuery(text.trim()), 300);
+  }, []);
 
   return (
-    <Screen scroll={false}>
+    <Screen>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={lightTheme.text} />
-          </Pressable>
-          <Text style={styles.title}>
-            {t('dashboard.masterAdmin.users')}
-          </Text>
-        </View>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backText}>{t('common.back')}</Text>
+        </Pressable>
+
+        <Text style={styles.title}>{t('admin.masterAdmin.users.title')}</Text>
 
         <View style={styles.searchContainer}>
-          <SearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onClear={handleClear}
-            placeholder={t('common.search')}
+          <TextInput
+            style={styles.searchInput}
+            placeholder={t('admin.masterAdmin.users.searchPlaceholder')}
+            placeholderTextColor={lightTheme.textSecondary}
+            value={query}
+            onChangeText={handleSearch}
           />
         </View>
 
-        <FlatList
-          data={users}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
+        <FlashList
+          data={users.data ?? []}
+          estimatedItemSize={64}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={users.isRefetching} onRefresh={() => users.refetch()} />
+          }
           renderItem={({ item }) => (
-            <Card
-              variant="default"
-              onPress={() => router.push(`/(master-admin)/users/${item.id}`)}
-              style={styles.userCard}
+            <Pressable
+              style={styles.row}
+              onPress={() =>
+                router.push({
+                  pathname: '/(master-admin)/users/[id]',
+                  params: { id: item.id },
+                })
+              }
+              accessibilityRole="button"
             >
-              <View style={styles.userRow}>
-                <Avatar
-                  source={item.avatar_url ?? undefined}
-                  name={item.full_name}
-                  size="md"
-                />
-                <View style={styles.userInfo}>
-                  <Text style={styles.userName} numberOfLines={1}>
-                    {item.display_name ?? item.full_name}
-                  </Text>
-                  <Text style={styles.userRole}>
-                    {t(`roles.${item.role}`)}
-                  </Text>
-                </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={18}
-                  color={neutral[300]}
-                />
+              <Avatar
+                source={item.avatar_url ?? undefined}
+                name={item.full_name}
+                size="sm"
+              />
+              <View style={styles.rowText}>
+                <Text style={styles.rowName} numberOfLines={1}>{item.full_name}</Text>
+                <Text style={styles.rowEmail} numberOfLines={1}>{item.email}</Text>
               </View>
-            </Card>
+              <Badge label={item.role} variant="default" size="sm" />
+            </Pressable>
           )}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
-            searchQuery.length >= 2 && !isLoading ? (
-              <View style={styles.emptyState}>
-                <Ionicons name="search-outline" size={48} color={neutral[300]} />
-                <Text style={styles.emptyText}>{t('common.noResults')}</Text>
-              </View>
+            debouncedQuery.length >= 2 && !users.isLoading ? (
+              users.isError ? (
+                <ErrorState onRetry={() => users.refetch()} />
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>{t('common.noResults')}</Text>
+                </View>
+              )
             ) : null
           }
         />
@@ -94,56 +99,66 @@ export default function UserListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: spacing.xl,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.lg,
+  backButton: {
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+  },
+  backText: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.primary[500],
   },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
-    flex: 1,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.base,
   },
   searchContainer: {
-    paddingInline: spacing.lg,
-    marginBlockEnd: spacing.md,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.base,
   },
-  list: {
-    paddingInline: spacing.lg,
-    paddingBlockEnd: spacing['2xl'],
+  searchInput: {
+    ...typography.textStyles.body,
+    color: lightTheme.text,
+    borderWidth: 1,
+    borderColor: lightTheme.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    height: normalize(44),
   },
-  separator: {
-    height: spacing.sm,
+  listContent: {
+    paddingHorizontal: spacing.base,
   },
-  userCard: {
-    padding: spacing.md,
-  },
-  userRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: lightTheme.border,
   },
-  userInfo: {
+  rowText: {
     flex: 1,
-    gap: 2,
+    gap: spacing.xs,
   },
-  userName: {
+  rowName: {
     ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
   },
-  userRole: {
+  rowEmail: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
   },
-  emptyState: {
+  emptyContainer: {
+    padding: spacing['2xl'],
     alignItems: 'center',
-    padding: spacing['3xl'],
-    gap: spacing.md,
   },
   emptyText: {
     ...typography.textStyles.body,
     color: lightTheme.textSecondary,
+    textAlign: 'center',
   },
 });

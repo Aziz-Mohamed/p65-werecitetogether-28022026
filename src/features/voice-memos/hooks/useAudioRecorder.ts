@@ -1,7 +1,14 @@
 import { useState, useRef, useCallback } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
-import { Audio } from 'expo-av';
 import { useTranslation } from 'react-i18next';
+
+// Safe require — expo-av native module may not be available (e.g. Expo Go)
+let Audio: typeof import('expo-av').Audio | null = null;
+try {
+  Audio = require('expo-av').Audio;
+} catch {
+  // Native module unavailable
+}
 
 const MAX_DURATION_MS = 120_000; // 2 minutes
 const METERING_UPDATE_MS = 100;
@@ -16,7 +23,7 @@ interface RecorderState {
 
 export function useAudioRecorder() {
   const { t } = useTranslation();
-  const recordingRef = useRef<Audio.Recording | null>(null);
+  const recordingRef = useRef<any>(null);
   const [state, setState] = useState<RecorderState>({
     isRecording: false,
     durationMs: 0,
@@ -26,6 +33,10 @@ export function useAudioRecorder() {
   });
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
+    if (!Audio) {
+      Alert.alert(t('voiceMemo.unavailableTitle'), t('voiceMemo.unavailableMessage'));
+      return false;
+    }
     const { status } = await Audio.requestPermissionsAsync();
     if (status !== 'granted') {
       setState((prev) => ({ ...prev, permissionDenied: true }));
@@ -50,28 +61,28 @@ export function useAudioRecorder() {
     const hasPermission = await requestPermission();
     if (!hasPermission) return;
 
-    await Audio.setAudioModeAsync({
+    await Audio!.setAudioModeAsync({
       allowsRecordingIOS: true,
       playsInSilentModeIOS: true,
     });
 
-    const recording = new Audio.Recording();
+    const recording = new Audio!.Recording();
     await recording.prepareToRecordAsync({
       android: {
         extension: '.m4a',
-        outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-        audioEncoder: Audio.AndroidAudioEncoder.AAC,
+        outputFormat: Audio!.AndroidOutputFormat.MPEG_4,
+        audioEncoder: Audio!.AndroidAudioEncoder.AAC,
         sampleRate: 22050,
         numberOfChannels: 1,
         bitRate: 64000,
       },
       ios: {
         extension: '.m4a',
-        audioQuality: Audio.IOSAudioQuality.MEDIUM,
+        audioQuality: Audio!.IOSAudioQuality.MEDIUM,
         sampleRate: 22050,
         numberOfChannels: 1,
         bitRate: 64000,
-        outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
+        outputFormat: Audio!.IOSOutputFormat.MPEG4AAC,
       },
       web: {
         mimeType: 'audio/mp4',
@@ -119,7 +130,7 @@ export function useAudioRecorder() {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
 
-      await Audio.setAudioModeAsync({
+      await Audio?.setAudioModeAsync({
         allowsRecordingIOS: false,
       });
 
@@ -141,7 +152,7 @@ export function useAudioRecorder() {
 
     try {
       await recording.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({
+      await Audio?.setAudioModeAsync({
         allowsRecordingIOS: false,
       });
     } catch {

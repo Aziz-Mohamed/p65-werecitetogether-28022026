@@ -1112,7 +1112,10 @@
     "playbackSpeed": "سرعة التشغيل",
     "duration": "{{minutes}}:{{seconds}}",
     "retryPending": "{{count}} رسالة/رسائل صوتية بانتظار الرفع",
-    "warning15s": "١٥ ثانية متبقية"
+    "warning15s": "١٥ ثانية متبقية",
+    "unavailableTitle": "الرسائل الصوتية غير متاحة",
+    "unavailableMessage": "تتطلب الرسائل الصوتية نسخة تطوير. غير مدعومة في Expo Go.",
+    "unavailablePlayback": "تشغيل الصوت يتطلب نسخة تطوير"
   },
   "notification": {
     "voiceMemoReceived": "ترك لك معلمك رسالة صوتية",
@@ -1218,6 +1221,202 @@
       "joinFailed": "فشل الانضمام لقائمة الانتظار",
       "leaveFailed": "فشلت مغادرة قائمة الانتظار",
       "claimFailed": "فشل حجز المكان"
+    }
+  },
+  "admin": {
+    "supervisor": {
+      "title": "لوحة المشرف",
+      "teacherCount": "المعلمون",
+      "studentCount": "الطلاب",
+      "sessionsThisWeek": "جلسات هذا الأسبوع",
+      "inactiveFlag": "غير نشط",
+      "teacherCard": {
+        "students": "{{count}} طلاب",
+        "sessions": "{{count}} جلسات",
+        "rating": "التقييم: {{rating}}",
+        "noRating": "لا يوجد تقييم"
+      },
+      "teacherDetail": {
+        "title": "تفاصيل المعلم",
+        "students": "الطلاب",
+        "sessionHistory": "سجل الجلسات",
+        "noSessions": "لم يتم تسجيل جلسات",
+        "flagIssue": "الإبلاغ عن مشكلة",
+        "flagNote": "وصف المشكلة",
+        "flagNotePlaceholder": "أدخل ملاحظة حول هذا المعلم (500 حرف كحد أقصى)...",
+        "flagConfirm": "إرسال التنبيه لمديري البرنامج",
+        "flagSuccess": "تم الإبلاغ عن المشكلة بنجاح",
+        "flagError": "فشل الإبلاغ عن المشكلة"
+      },
+      "reassign": {
+        "title": "إعادة تعيين الطالب",
+        "selectTeacher": "اختر المعلم الجديد",
+        "confirm": "تأكيد إعادة التعيين",
+        "success": "تمت إعادة تعيين الطالب بنجاح",
+        "error": "فشلت إعادة تعيين الطالب"
+      },
+      "tabs": {
+        "home": "الرئيسية",
+        "teachers": "المعلمون",
+        "reports": "التقارير",
+        "profile": "الملف الشخصي"
+      },
+      "teacherList": {
+        "title": "معلموني",
+        "searchPlaceholder": "البحث عن معلمين...",
+        "filterInactive": "إظهار غير النشطين فقط",
+        "empty": "لا يوجد معلمون مسندون إليك"
+      },
+      "reports": {
+        "title": "التقارير",
+        "sessionsPerTeacher": "الجلسات لكل معلم",
+        "studentDistribution": "توزيع الطلاب",
+        "averageRating": "متوسط التقييم لكل معلم"
+      },
+      "profile": {
+        "title": "ملفي الشخصي",
+        "supervisedPrograms": "البرامج المُشرف عليها",
+        "teachersInProgram": "{{count}} معلمين"
+      }
+    },
+    "programAdmin": {
+      "selector": {
+        "title": "اختر البرنامج",
+        "empty": "لم يتم تعيينك لأي برنامج",
+        "enrolled": "{{count}} مسجلين"
+      },
+      "dashboard": {
+        "title": "لوحة البرنامج",
+        "totalEnrolled": "الطلاب المسجلون",
+        "activeCohorts": "المجموعات النشطة",
+        "totalTeachers": "المعلمون",
+        "sessionsThisWeek": "جلسات هذا الأسبوع",
+        "pendingEnrollments": "طلبات التسجيل المعلقة",
+        "pendingWarning": "{{count}} طلبات تسجيل بانتظار المراجعة"
+      },
+      "team": {
+        "title": "الفريق",
+        "addMember": "إضافة عضو للفريق",
+        "searchUsers": "البحث بالاسم أو البريد الإلكتروني",
+        "rolePicker": "اختر الدور",
+        "assignSuccess": "تمت إضافة عضو الفريق",
+        "assignError": "فشلت إضافة عضو الفريق",
+        "removeConfirm": "إزالة {{name}} من هذا البرنامج؟",
+        "removeWarning": "هذا المعلم لديه {{count}} طلاب نشطين",
+        "removeSuccess": "تمت إزالة عضو الفريق",
+        "removeError": "فشلت إزالة عضو الفريق",
+        "linkSupervisor": "ربط المشرف",
+        "selectSupervisor": "اختر المشرف",
+        "unlinkSupervisor": "فك ربط المشرف",
+        "linkSuccess": "تم ربط المشرف",
+        "linkError": "فشل ربط المشرف",
+        "sections": {
+          "supervisors": "المشرفون",
+          "teachers": "المعلمون",
+          "admins": "مديرو البرنامج"
+        }
+      },
+      "cohorts": {
+        "title": "المجموعات",
+        "createCohort": "إنشاء مجموعة",
+        "enrolled": "{{current}}/{{max}} طلاب",
+        "empty": "لا توجد مجموعات في هذا البرنامج"
+      },
+      "settings": {
+        "title": "إعدادات البرنامج",
+        "maxStudentsPerTeacher": "الحد الأقصى للطلاب لكل معلم",
+        "dailySessionLimit": "حد الجلسات المجانية اليومي",
+        "queueThreshold": "حد إشعار قائمة الانتظار",
+        "ratingThresholds": "حدود التقييم",
+        "goodStanding": "وضع جيد",
+        "warning": "تحذير",
+        "concern": "مقلق",
+        "saveSuccess": "تم حفظ الإعدادات",
+        "saveError": "فشل حفظ الإعدادات"
+      },
+      "reports": {
+        "title": "التقارير",
+        "teacherWorkload": "عبء عمل المعلمين",
+        "studentProgress": "توزيع تقدم الطلاب",
+        "sessionTrend": "تكرار الجلسات"
+      },
+      "tabs": {
+        "home": "الرئيسية",
+        "cohorts": "المجموعات",
+        "team": "الفريق",
+        "reports": "التقارير",
+        "settings": "الإعدادات"
+      }
+    },
+    "masterAdmin": {
+      "dashboard": {
+        "title": "لوحة المنصة",
+        "totalStudents": "إجمالي الطلاب",
+        "totalTeachers": "إجمالي المعلمين",
+        "activeSessions": "الجلسات النشطة",
+        "programsOverview": "نظرة عامة على البرامج",
+        "enrolled": "{{count}} مسجلين",
+        "sessions": "{{count}} جلسات"
+      },
+      "users": {
+        "title": "إدارة المستخدمين",
+        "searchPlaceholder": "البحث بالاسم أو البريد...",
+        "detail": {
+          "title": "تفاصيل المستخدم",
+          "globalRole": "الدور العام",
+          "programRoles": "أدوار البرامج",
+          "manageRoles": "إدارة الأدوار",
+          "noRoles": "لا توجد أدوار برامج معيّنة"
+        },
+        "roles": {
+          "assignProgram": "تعيين دور في برنامج",
+          "removeProgram": "إزالة دور من برنامج",
+          "promoteMasterAdmin": "ترقية لمدير عام",
+          "demoteMasterAdmin": "إزالة دور المدير العام",
+          "promoteConfirm": "ترقية {{name}} لمدير عام؟",
+          "demoteConfirm": "إزالة دور المدير العام من {{name}}؟",
+          "lastAdminError": "لا يمكن إزالة آخر مدير عام",
+          "alreadyAdmin": "المستخدم مدير عام بالفعل",
+          "promoteSuccess": "تمت ترقية المستخدم لمدير عام",
+          "demoteSuccess": "تمت إزالة دور المدير العام",
+          "promoteError": "فشلت ترقية المستخدم",
+          "demoteError": "فشل تخفيض رتبة المستخدم",
+          "selectProgram": "اختر البرنامج",
+          "selectRole": "اختر الدور"
+        }
+      },
+      "reports": {
+        "title": "تقارير المنصة",
+        "enrollmentTrend": "اتجاه التسجيل حسب البرنامج",
+        "sessionVolume": "حجم الجلسات حسب البرنامج",
+        "teacherActivity": "خريطة نشاط المعلمين"
+      },
+      "settings": {
+        "title": "إعدادات المنصة",
+        "platformName": "اسم المنصة",
+        "platformNameAr": "اسم المنصة (بالعربية)",
+        "meetingPlatform": "منصة الاجتماعات الافتراضية",
+        "meetingPlatformOptions": {
+          "google_meet": "جوجل ميت",
+          "zoom": "زووم",
+          "jitsi": "جيتسي",
+          "other": "أخرى"
+        },
+        "notifications": "إعدادات الإشعارات الافتراضية",
+        "quietHours": "ساعات الهدوء",
+        "quietHoursEnabled": "تفعيل ساعات الهدوء",
+        "quietHoursStart": "وقت البدء",
+        "quietHoursEnd": "وقت الانتهاء",
+        "saveSuccess": "تم حفظ إعدادات المنصة",
+        "saveError": "فشل حفظ إعدادات المنصة"
+      },
+      "nav": {
+        "dashboard": "لوحة التحكم",
+        "users": "المستخدمون",
+        "programs": "البرامج",
+        "reports": "التقارير",
+        "settings": "الإعدادات"
+      }
     }
   }
 }

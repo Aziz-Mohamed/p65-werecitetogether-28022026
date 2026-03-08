@@ -16,7 +16,7 @@ export default function SupervisorTabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: t('dashboard.supervisor.home'),
+          title: t('admin.supervisor.tabs.home'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
           ),
@@ -25,7 +25,7 @@ export default function SupervisorTabsLayout() {
       <Tabs.Screen
         name="teachers"
         options={{
-          title: t('dashboard.supervisor.teachers'),
+          title: t('admin.supervisor.tabs.teachers'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'people' : 'people-outline'} size={24} color={color} />
           ),
@@ -34,7 +34,7 @@ export default function SupervisorTabsLayout() {
       <Tabs.Screen
         name="reports"
         options={{
-          title: t('dashboard.supervisor.reports'),
+          title: t('admin.supervisor.tabs.reports'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={24} color={color} />
           ),
@@ -43,7 +43,7 @@ export default function SupervisorTabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: t('dashboard.supervisor.profile'),
+          title: t('admin.supervisor.tabs.profile'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
           ),

@@ -1,105 +1,114 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, Pressable } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Pressable, RefreshControl } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui';
-import { Button } from '@/components/ui/Button';
-import { useCohortsByProgram } from '@/features/cohorts/hooks/useCohorts';
-import { useAuthStore } from '@/stores/authStore';
-import { typography } from '@/theme/typography';
-import { lightTheme, neutral, primary, accent } from '@/theme/colors';
+import { Badge } from '@/components/ui/Badge';
+import { programsService } from '@/features/programs/services/programs.service';
+import type { CohortWithTeacher } from '@/features/programs/types/programs.types';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { typography } from '@/theme/typography';
 import { normalize } from '@/theme/normalize';
-import type { Cohort } from '@/features/cohorts/types';
+import { useRTL } from '@/hooks/useRTL';
 
-const STATUS_BADGE_MAP: Record<string, { variant: 'success' | 'warning' | 'info' | 'default' | 'error'; key: string }> = {
-  enrollment_open: { variant: 'success', key: 'open' },
-  enrollment_closed: { variant: 'warning', key: 'closed' },
-  in_progress: { variant: 'info', key: 'in_progress' },
-  completed: { variant: 'default', key: 'completed' },
-  archived: { variant: 'default', key: 'archived' },
+const statusVariant: Record<string, 'success' | 'info' | 'warning' | 'default'> = {
+  enrollment_open: 'success',
+  in_progress: 'info',
+  enrollment_closed: 'warning',
+  completed: 'default',
+  archived: 'default',
 };
 
-export default function CohortsScreen() {
-  const { t } = useTranslation();
-  const [showForm, setShowForm] = useState(false);
+export default function ProgramAdminCohorts() {
+  const { t, i18n } = useTranslation();
+  const { programId } = useLocalSearchParams<{ programId: string }>();
+  const router = useRouter();
 
-  // TODO: Get programId from context/store
-  const programId = undefined as string | undefined;
-  const { data: cohorts = [], isLoading } = useCohortsByProgram(programId);
-
-  const renderCohort = ({ item }: { item: Cohort }) => {
-    const statusConfig = STATUS_BADGE_MAP[item.status] ?? { variant: 'default' as const, key: item.status };
-
-    return (
-      <Card variant="default" style={styles.cohortCard}>
-        <View style={styles.cohortHeader}>
-          <Text style={styles.cohortName} numberOfLines={1}>
-            {item.name}
-          </Text>
-          <Badge
-            label={t(`cohorts.status.${statusConfig.key}`)}
-            variant={statusConfig.variant}
-            size="sm"
-          />
-        </View>
-
-        <View style={styles.cohortMeta}>
-          <View style={styles.metaItem}>
-            <Ionicons name="people-outline" size={16} color={neutral[400]} />
-            <Text style={styles.metaText}>
-              {t('cohorts.maxStudents')}: {item.max_students}
-            </Text>
-          </View>
-
-          {item.start_date && (
-            <View style={styles.metaItem}>
-              <Ionicons name="calendar-outline" size={16} color={neutral[400]} />
-              <Text style={styles.metaText}>
-                {new Date(item.start_date).toLocaleDateString()}
-              </Text>
-            </View>
-          )}
-        </View>
-      </Card>
-    );
-  };
+  const cohorts = useQuery({
+    queryKey: ['cohorts', programId],
+    queryFn: async () => {
+      const { data, error } = await programsService.getCohorts({ programId: programId! });
+      if (error) throw error;
+      return (data as CohortWithTeacher[]) ?? [];
+    },
+    enabled: !!programId,
+  });
 
   return (
-    <Screen scroll hasTabBar>
+    <Screen>
       <View style={styles.container}>
-        <Text style={styles.title}>{t('cohorts.title')}</Text>
+        <Text style={styles.title}>{t('admin.programAdmin.cohorts.title')}</Text>
 
-        {cohorts.length === 0 && !isLoading ? (
-          <View style={styles.placeholder}>
-            <Ionicons name="grid-outline" size={48} color={neutral[300]} />
-            <Text style={styles.placeholderText}>
-              {t('cohorts.emptyRoster')}
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={cohorts}
-            keyExtractor={(item) => item.id}
-            renderItem={renderCohort}
-            scrollEnabled={false}
-            contentContainerStyle={styles.list}
-          />
-        )}
+        <FlashList
+          data={cohorts.data ?? []}
+          estimatedItemSize={100}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={cohorts.isRefetching} onRefresh={() => cohorts.refetch()} />
+          }
+          renderItem={({ item }) => {
+            const enrolled = item.enrollments?.[0]?.count ?? 0;
+            return (
+              <Card variant="outlined" style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.cohortName} numberOfLines={1}>{item.name}</Text>
+                  <Badge
+                    label={item.status.replace('_', ' ')}
+                    variant={statusVariant[item.status] ?? 'default'}
+                    size="sm"
+                  />
+                </View>
+                <Text style={styles.cohortDetail}>
+                  {t('admin.programAdmin.cohorts.enrolled', { current: enrolled, max: item.max_students })}
+                </Text>
+                {item.profiles && (
+                  <Text style={styles.cohortTeacher}>
+                    {t('common.teacher')}: {item.profiles.full_name}
+                  </Text>
+                )}
+                {item.start_date && (
+                  <Text style={styles.cohortDate}>
+                    {new Date(item.start_date).toLocaleDateString()}
+                  </Text>
+                )}
+              </Card>
+            );
+          }}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ListEmptyComponent={
+            !cohorts.isLoading ? (
+              cohorts.isError ? (
+                <ErrorState onRetry={() => cohorts.refetch()} />
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>{t('admin.programAdmin.cohorts.empty')}</Text>
+                </View>
+              )
+            ) : null
+          }
+        />
+
+        <Pressable
+          style={styles.fab}
+          onPress={() =>
+            router.push({
+              pathname: '/(program-admin)/programs/[id]/cohorts/create',
+              params: { id: programId! },
+            })
+          }
+          accessibilityRole="button"
+          accessibilityLabel={t('admin.programAdmin.cohorts.createCohort')}
+        >
+          <Ionicons name="add" size={normalize(28)} color="#fff" />
+        </Pressable>
       </View>
-
-      {/* FAB */}
-      <Pressable
-        style={styles.fab}
-        onPress={() => setShowForm(true)}
-        accessibilityLabel={t('cohorts.create')}
-        accessibilityRole="button"
-      >
-        <Ionicons name="add" size={28} color="#fff" />
-      </Pressable>
     </Screen>
   );
 }
@@ -107,64 +116,65 @@ export default function CohortsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: spacing.lg,
-    gap: spacing.md,
+    paddingTop: spacing.xl,
   },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.base,
   },
-  list: {
-    gap: spacing.md,
+  listContent: {
+    paddingHorizontal: spacing.base,
   },
-  cohortCard: {
+  card: {
     padding: spacing.base,
+    gap: spacing.xs,
   },
-  cohortHeader: {
+  cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.sm,
   },
   cohortName: {
     ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
     flex: 1,
   },
-  cohortMeta: {
-    flexDirection: 'row',
-    gap: spacing.lg,
-    marginBlockStart: spacing.sm,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  metaText: {
+  cohortDetail: {
     ...typography.textStyles.caption,
-    color: neutral[500],
+    color: lightTheme.textSecondary,
   },
-  placeholder: {
+  cohortTeacher: {
+    ...typography.textStyles.caption,
+    color: lightTheme.textSecondary,
+  },
+  cohortDate: {
+    ...typography.textStyles.caption,
+    color: lightTheme.textSecondary,
+  },
+  separator: {
+    height: spacing.sm,
+  },
+  emptyContainer: {
+    padding: spacing['2xl'],
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.md,
-    paddingBlock: spacing['3xl'],
   },
-  placeholderText: {
+  emptyText: {
     ...typography.textStyles.body,
     color: lightTheme.textSecondary,
+    textAlign: 'center',
   },
   fab: {
     position: 'absolute',
-    bottom: normalize(90),
-    right: spacing.lg,
+    bottom: spacing['3xl'],
+    right: spacing.base,
     width: normalize(56),
     height: normalize(56),
     borderRadius: normalize(28),
-    backgroundColor: primary[500],
+    backgroundColor: colors.primary[500],
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)',
   },
 });
