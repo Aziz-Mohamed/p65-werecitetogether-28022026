@@ -29,7 +29,7 @@ export default function AvailabilityScreen() {
     },
   });
 
-  // Filter to free/mixed programs only
+  // Filter to free (open) programs only
   const eligiblePrograms = useMemo(() => {
     if (!programRoles) return [];
     return programRoles

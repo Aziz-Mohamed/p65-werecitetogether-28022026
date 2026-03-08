@@ -1807,7 +1807,7 @@
     "availableForPrograms": "Available for {{count}} programs",
     "offline": "Offline",
     "meetingSettings": "Meeting Settings",
-    "noFreePrograms": "You are not assigned to any free or mixed programs.",
+    "noFreePrograms": "You are not assigned to any open programs.",
     "platformLabels": {
       "google_meet": "Google Meet",
       "zoom": "Zoom",

@@ -1807,7 +1807,7 @@
     "availableForPrograms": "متاح في {{count}} برامج",
     "offline": "غير متاح",
     "meetingSettings": "إعدادات الاجتماع",
-    "noFreePrograms": "لم يتم تعيينك في أي برنامج حر أو مختلط.",
+    "noFreePrograms": "لم يتم تعيينك في أي برنامج حر.",
     "platformLabels": {
       "google_meet": "Google Meet",
       "zoom": "Zoom",
