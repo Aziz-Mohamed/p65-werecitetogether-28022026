@@ -1,11 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { I18nManager, Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import React, { useState } from 'react';
+import { I18nManager, LayoutAnimation, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -29,55 +23,32 @@ interface WikiAccordionItemProps {
 export function WikiAccordionItem({ topic }: WikiAccordionItemProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const [showContent, setShowContent] = useState(false);
-  const expandAnim = useSharedValue(0);
-
-  const hideContent = useCallback(() => setShowContent(false), []);
 
   const toggle = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const next = !expanded;
-    setExpanded(next);
-    if (next) {
-      setShowContent(true);
-      expandAnim.value = withTiming(1, { duration: 250 });
-    } else {
-      expandAnim.value = withTiming(0, { duration: 250 }, (finished) => {
-        if (finished) runOnJS(hideContent)();
-      });
-    }
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded((prev) => !prev);
   };
 
-  const contentStyle = useAnimatedStyle(() => ({
-    opacity: expandAnim.value,
-    maxHeight: expandAnim.value * 600,
-  }));
-
-  const chevronStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${expandAnim.value * 90}deg` }],
-  }));
+  const chevronName = expanded
+    ? 'chevron-down'
+    : I18nManager.isRTL ? 'chevron-back' : 'chevron-forward';
 
   return (
     <View style={styles.container}>
       <Pressable onPress={toggle} style={styles.header} accessibilityRole="button">
         <Text style={styles.title} numberOfLines={2}>{t(topic.titleKey)}</Text>
-        <Animated.View style={chevronStyle}>
-          <Ionicons
-            name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
-            size={16}
-            color={colors.neutral[400]}
-          />
-        </Animated.View>
+        <Ionicons name={chevronName} size={16} color={colors.neutral[400]} />
       </Pressable>
 
-      {showContent && (
-        <Animated.View style={[styles.content, contentStyle]}>
+      {expanded && (
+        <View style={styles.content}>
           <Text style={styles.description}>{t(topic.descriptionKey)}</Text>
           {topic.steps && topic.steps.length > 0 && (
             <WikiStepGuide steps={topic.steps} />
           )}
           {topic.tipKey && <WikiTip textKey={topic.tipKey} />}
-        </Animated.View>
+        </View>
       )}
     </View>
   );
@@ -89,7 +60,6 @@ const styles = StyleSheet.create({
   container: {
     borderBottomWidth: 1,
     borderBottomColor: colors.neutral[100],
-    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
@@ -107,7 +77,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.sm,
     paddingBottom: spacing.md,
-    overflow: 'hidden',
   },
   description: {
     ...typography.textStyles.body,

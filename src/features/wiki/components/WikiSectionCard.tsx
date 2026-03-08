@@ -1,11 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { I18nManager, Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import React from 'react';
+import { I18nManager, LayoutAnimation, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -30,73 +24,36 @@ interface WikiSectionCardProps {
 
 export function WikiSectionCard({ section, isExpanded, onToggle }: WikiSectionCardProps) {
   const { t } = useTranslation();
-  const [showContent, setShowContent] = useState(isExpanded);
-  const expandAnim = useSharedValue(isExpanded ? 1 : 0);
-
-  const hideContent = useCallback(() => setShowContent(false), []);
 
   const handleToggle = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const next = !isExpanded;
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     onToggle(section.id);
-
-    if (next) {
-      setShowContent(true);
-      expandAnim.value = withTiming(1, { duration: 300 });
-    } else {
-      expandAnim.value = withTiming(0, { duration: 250 }, (finished) => {
-        if (finished) runOnJS(hideContent)();
-      });
-    }
   };
 
-  // Sync external state changes (when another section opens and closes this one)
-  React.useEffect(() => {
-    if (!isExpanded && showContent) {
-      expandAnim.value = withTiming(0, { duration: 250 }, (finished) => {
-        if (finished) runOnJS(hideContent)();
-      });
-    }
-  }, [isExpanded]);
-
-  const contentStyle = useAnimatedStyle(() => ({
-    opacity: expandAnim.value,
-    maxHeight: expandAnim.value * 2000,
-  }));
-
-  const chevronStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${expandAnim.value * 90}deg` }],
-  }));
+  const chevronName = isExpanded
+    ? 'chevron-down'
+    : I18nManager.isRTL ? 'chevron-back' : 'chevron-forward';
 
   return (
     <Card variant="glass" style={styles.card}>
       <Pressable onPress={handleToggle} style={styles.header} accessibilityRole="button">
         <View style={[styles.iconContainer, { backgroundColor: section.color + '15' }]}>
-          <Ionicons
-            name={section.icon}
-            size={20}
-            color={section.color}
-          />
+          <Ionicons name={section.icon} size={20} color={section.color} />
         </View>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{t(section.titleKey)}</Text>
           <Text style={styles.subtitle} numberOfLines={1}>{t(section.subtitleKey)}</Text>
         </View>
-        <Animated.View style={chevronStyle}>
-          <Ionicons
-            name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
-            size={18}
-            color={colors.neutral[400]}
-          />
-        </Animated.View>
+        <Ionicons name={chevronName} size={18} color={colors.neutral[400]} />
       </Pressable>
 
-      {showContent && (
-        <Animated.View style={[styles.content, contentStyle]}>
+      {isExpanded && (
+        <View style={styles.content}>
           {section.topics.map((topic) => (
             <WikiAccordionItem key={topic.id} topic={topic} />
           ))}
-        </Animated.View>
+        </View>
       )}
     </Card>
   );
@@ -137,6 +94,5 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
-    overflow: 'hidden',
   },
 });
