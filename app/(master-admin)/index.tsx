@@ -91,22 +91,22 @@ export default function MasterAdminDashboard() {
         <Text style={styles.sectionTitle}>{t('dashboard.quickActions')}</Text>
         <View style={styles.actionsRow}>
           <ActionButton
-            title={t('admin.addStudent')}
-            onPress={() => router.push('/(master-admin)/students/create')}
-            icon="person-add"
-            color={theme.primary}
-          />
-          <ActionButton
-            title={t('admin.addTeacher')}
-            onPress={() => router.push('/(master-admin)/teachers/create')}
-            icon="school"
-            color={colors.accent.indigo[500]}
-          />
-          <ActionButton
             title={t('admin.addClass')}
             onPress={() => router.push('/(master-admin)/classes/create')}
             icon="add-circle"
             color={colors.accent.violet[500]}
+          />
+          <ActionButton
+            title={t('admin.masterAdmin.nav.programs')}
+            onPress={() => router.push('/(master-admin)/programs/create')}
+            icon="library"
+            color={colors.primary[500]}
+          />
+          <ActionButton
+            title={t('admin.masterAdmin.nav.users')}
+            onPress={() => router.push('/(master-admin)/users')}
+            icon="people"
+            color={theme.primary}
           />
         </View>
 
@@ -186,10 +186,10 @@ export default function MasterAdminDashboard() {
             color={colors.accent.sky[500]}
           />
           <NavCard
-            title={t('admin.dashboard.resetPassword')}
-            icon="key"
-            onPress={() => router.push('/(master-admin)/members/reset-password')}
-            color={colors.neutral[500]}
+            title={t('wiki.profileLink')}
+            icon="help-circle"
+            onPress={() => router.push('/(master-admin)/wiki')}
+            color={colors.primary[500]}
           />
           <Card variant="default" style={styles.navCard} onPress={toggleLanguage}>
             <View style={styles.navContent}>

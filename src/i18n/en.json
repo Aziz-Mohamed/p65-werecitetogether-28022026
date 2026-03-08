@@ -2197,5 +2197,727 @@
       "eventCancelledTitle": "Event Cancelled",
       "eventCancelledBody": "This week's Himam marathon has been cancelled."
     }
+  },
+
+  "wiki": {
+    "pageTitle": "Help Guide",
+    "profileLink": "Help Guide",
+
+    "student": {
+      "intro": "Welcome to your help guide! Here you'll find everything you need to get the most out of the app — from tracking your memorization to joining Himam marathons.",
+
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Your daily overview and quick actions",
+        "streak": {
+          "title": "Understanding Your Streak",
+          "description": "Your streak shows how many consecutive days you've been active in the app. It counts days where you attended a session or completed a revision. Keep it going to build strong habits!",
+          "tip": "Even a short revision session counts toward your daily streak."
+        },
+        "stats": {
+          "title": "Reading Your Stats",
+          "description": "The stats section on your dashboard shows key numbers at a glance: your Quran memorization percentage, total stickers earned, and sessions completed. These update automatically as you progress."
+        },
+        "upcomingSessions": {
+          "title": "Upcoming Sessions",
+          "description": "This section shows your next scheduled sessions with your teacher. Tap a session to view its details including time, teacher, and meeting link."
+        },
+        "quickActions": {
+          "title": "Quick Actions",
+          "description": "Quick action buttons let you jump directly to common tasks from your dashboard.",
+          "step1": "Tap any quick action button (Journey, Schedule, or Leaderboard)",
+          "step2": "You'll be taken directly to that section of the app"
+        }
+      },
+
+      "programs": {
+        "title": "Programs",
+        "subtitle": "Browse and enroll in learning programs",
+        "browse": {
+          "title": "Browsing Programs",
+          "description": "The Programs tab shows all available learning programs. Each program card displays its name, description, and number of enrolled students.",
+          "step1": "Go to the Programs tab at the bottom of your screen",
+          "step2": "Browse the list of available programs",
+          "step3": "Tap a program to view its details, tracks, and classes"
+        },
+        "enroll": {
+          "title": "Enrolling in a Program",
+          "description": "To join a program, you need to enroll in one of its available classes.",
+          "step1": "Open a program you're interested in",
+          "step2": "View available classes and pick one that fits your schedule",
+          "step3": "Tap the Enroll button and wait for approval if required",
+          "tip": "Some programs have open enrollment while others require admin approval. You'll be notified once your enrollment is confirmed."
+        },
+        "myPrograms": {
+          "title": "My Programs",
+          "description": "View all programs you're currently enrolled in. Access your class details, schedule, and program-specific features from here."
+        }
+      },
+
+      "memorization": {
+        "title": "Memorization",
+        "subtitle": "Track your Quran memorization progress",
+        "rubGrid": {
+          "title": "The Rub Grid",
+          "description": "The rub grid gives you a visual map of your entire Quran memorization progress. Each small block represents one rub' (quarter hizb). Colors indicate your memorization status — certified portions appear in green, while uncertified ones remain gray.",
+          "tip": "Tap any rub block to see its details including surah name, verse range, and your revision freshness."
+        },
+        "selfAssignment": {
+          "title": "Self-Assignment",
+          "description": "If your teacher has enabled self-assignment, you can set your own memorization goals.",
+          "step1": "Open the Memorization tab",
+          "step2": "Tap the assignment section and select the rub' blocks you want to work on",
+          "step3": "Your teacher will see your self-assigned goals in their session workspace"
+        },
+        "progress": {
+          "title": "Tracking Progress",
+          "description": "Your memorization progress is tracked automatically through sessions with your teacher. After each session, your teacher evaluates your recitation and updates your certified rub' blocks. You can view your overall progress as a percentage on both your dashboard and the Memorization tab."
+        }
+      },
+
+      "revision": {
+        "title": "Revision",
+        "subtitle": "Keep your memorization fresh with spaced repetition",
+        "freshness": {
+          "title": "Freshness Health",
+          "description": "Each memorized portion has a freshness status based on how recently you revised it. The colors tell you what needs attention:\n\n• Green (Fresh) — Revised recently, strong recall\n• Yellow (Fading) — Starting to fade, review soon\n• Orange (Warning) — Needs attention, review this week\n• Red (Critical) — At risk of being forgotten, review now\n• Gray (Dormant) — Not revised in a long time",
+          "tip": "Focus on red and orange items first. Revising a few rub' daily is more effective than large batches."
+        },
+        "revisionSheets": {
+          "title": "Using Revision Sheets",
+          "description": "Revision sheets help you systematically review your memorized portions.",
+          "step1": "Go to the Revision tab and select a certification",
+          "step2": "Open the revision sheet to see which rub' blocks need review",
+          "step3": "Mark each rub' as 'Good' or 'Needs Work' after reviewing it"
+        }
+      },
+
+      "journey": {
+        "title": "Journey",
+        "subtitle": "Milestones, badges, and achievements",
+        "milestones": {
+          "title": "Milestones",
+          "description": "Your journey page shows the milestones you've reached in your Quran memorization. Each milestone represents a significant achievement — completing a juz, reaching a certain number of sessions, or maintaining a streak."
+        },
+        "badges": {
+          "title": "Badges",
+          "description": "Badges are earned for specific accomplishments. They appear in your profile and on the journey page. Keep progressing to unlock more badges!",
+          "tip": "Check your profile to see all your earned badges and what you need to earn the next ones."
+        }
+      },
+
+      "sessions": {
+        "title": "Sessions & Schedule",
+        "subtitle": "View and manage your learning sessions",
+        "viewSchedule": {
+          "title": "Viewing Your Schedule",
+          "description": "Your schedule shows all upcoming sessions with your teachers.",
+          "step1": "Tap the Schedule quick action from the dashboard, or navigate to it from your program",
+          "step2": "Browse sessions by date to see time, teacher name, and meeting details"
+        },
+        "sessionDetails": {
+          "title": "Session Details",
+          "description": "Tap any session to view its full details. This includes the teacher's name, session time, meeting link, and — for completed sessions — your evaluation scores."
+        },
+        "scores": {
+          "title": "Understanding Your Scores",
+          "description": "After each session, your teacher evaluates your performance across three areas: Memorization (how well you recalled the verses), Tajweed (proper pronunciation rules), and Recitation (overall fluency and flow). Each is scored from 1 to 5.",
+          "tip": "Scores are meant to help you improve, not to judge you. Focus on gradual improvement over time."
+        }
+      },
+
+      "himam": {
+        "title": "Himam Marathon",
+        "subtitle": "Weekly Quran recitation marathon",
+        "overview": {
+          "title": "What is Himam?",
+          "description": "Himam (همم) is a weekly Quranic recitation marathon held every Saturday. Students register, choose how many juz they'll recite, and get paired with a partner for the 24-hour recitation event (from Fajr Saturday to Fajr Sunday, Makkah time)."
+        },
+        "registration": {
+          "title": "How to Register",
+          "description": "Registration opens each week and closes Friday midnight (Makkah time).",
+          "step1": "Open the Himam section from your dashboard or programs",
+          "step2": "Choose a track (3, 5, 10, 15, or 30 juz)",
+          "step3": "Select the specific juz numbers you want to recite",
+          "step4": "Pick your available prayer time slots (Fajr, Dhuhr, Asr, Maghrib, Isha, Night)",
+          "tip": "Choose prayer times when you know you'll be available — the system pairs you with someone who shares your time slots."
+        },
+        "tracks": {
+          "title": "Understanding Tracks",
+          "description": "Tracks determine how many juz you commit to reciting during the marathon:\n\n• 3 Juz — Light commitment, great for beginners\n• 5 Juz — Moderate pace\n• 10 Juz — Balanced challenge\n• 15 Juz — Ambitious goal\n• 30 Juz — Complete Quran in one day!\n\nYou'll be paired with someone on the same track."
+        },
+        "pairing": {
+          "title": "Partner Pairing",
+          "description": "After registration closes on Friday night, the system automatically pairs you with a partner. Partners are matched based on the same track and overlapping available time slots. You'll receive a notification when your partner is assigned."
+        },
+        "progress": {
+          "title": "Tracking Marathon Progress",
+          "description": "During the marathon, track your completion in real time.",
+          "step1": "Open your Himam progress screen on marathon day",
+          "step2": "As you complete each juz, tap 'Mark Complete' next to it",
+          "step3": "Watch your progress bar fill up — aim to complete all your juz before Sunday Fajr!"
+        }
+      },
+
+      "leaderboard": {
+        "title": "Leaderboard",
+        "subtitle": "See how you rank among peers",
+        "rankings": {
+          "title": "How Rankings Work",
+          "description": "The leaderboard shows how you compare with other students in your program. Rankings are based on your activity, session attendance, and memorization progress. You can view program-specific leaderboards from within each program."
+        }
+      },
+
+      "certificates": {
+        "title": "Certificates",
+        "subtitle": "View and verify your certifications",
+        "view": {
+          "title": "Viewing Your Certificates",
+          "description": "When you complete memorization of a specific portion and pass the certification evaluation, you earn a certificate. View all your earned certificates from the Certificates section."
+        },
+        "qr": {
+          "title": "QR Code Verification",
+          "description": "Each certificate comes with a unique QR code. Anyone can scan this QR code to verify the authenticity of your certificate. You can share your certificate or show the QR code for verification.",
+          "tip": "Your certificate QR code links to a verification page that confirms its authenticity."
+        }
+      },
+
+      "mutoon": {
+        "title": "Mutoon",
+        "subtitle": "Islamic texts and study materials",
+        "overview": {
+          "title": "What is Mutoon?",
+          "description": "Mutoon (متون) refers to Islamic texts that you study alongside your Quran memorization. Each program may have its own set of texts. Your progress is tracked by lines — your teacher advances you as you demonstrate mastery of each section."
+        }
+      },
+
+      "attendance": {
+        "title": "Attendance",
+        "subtitle": "How your attendance is tracked",
+        "howItWorks": {
+          "title": "How Attendance Works",
+          "description": "Your attendance is automatically recorded when you join a session. Your teacher marks you as present or absent. Consistent attendance contributes to your streak, helps earn badges, and keeps your memorization fresh."
+        }
+      },
+
+      "profile": {
+        "title": "Profile & Settings",
+        "subtitle": "Manage your account and preferences",
+        "badges": {
+          "title": "Your Badges",
+          "description": "View all badges you've earned in your profile. Badges are awarded for achievements like attendance milestones, memorization goals, and marathon completions."
+        },
+        "notifications": {
+          "title": "Notification Preferences",
+          "description": "Customize which notifications you receive. You can toggle notifications for session reminders, partner assignments, event announcements, and more."
+        },
+        "language": {
+          "title": "Language Settings",
+          "description": "Switch between English and Arabic at any time. The app will reload to apply the new language and text direction."
+        }
+      }
+    },
+
+    "teacher": {
+      "intro": "Welcome to your teaching guide! Here's how to manage your sessions, track student progress, and use all the tools available to you.",
+
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Your daily overview and quick actions",
+        "overview": {
+          "title": "Dashboard Overview",
+          "description": "Your dashboard shows today's key numbers: sessions scheduled, students seen, and your availability status. Below that you'll find quick actions, demand indicators showing students waiting, and your recent session history."
+        },
+        "insights": {
+          "title": "Student Insights",
+          "description": "The insights section highlights students who are performing well (top performers) and those who may need extra support. Use this to prioritize your attention where it's needed most.",
+          "tip": "Check insights regularly to identify students who may be struggling before they fall behind."
+        }
+      },
+
+      "students": {
+        "title": "Students",
+        "subtitle": "Manage and track your students",
+        "list": {
+          "title": "Student List",
+          "description": "The Students tab shows all students assigned to your classes. You can search by name and see each student's class, level, and recent activity."
+        },
+        "profiles": {
+          "title": "Viewing Student Profiles",
+          "description": "Each student profile shows their memorization progress, session history, and evaluation scores.",
+          "step1": "Go to the Students tab",
+          "step2": "Tap a student's name to open their profile",
+          "step3": "Review their memorization grid, session history, and scores"
+        },
+        "recommendations": {
+          "title": "Making Recommendations",
+          "description": "You can write recommendations for your students based on their progress. Recommendations help supervisors and program admins understand each student's journey."
+        }
+      },
+
+      "sessions": {
+        "title": "Sessions",
+        "subtitle": "Manage and conduct sessions",
+        "workspace": {
+          "title": "Session Workspace",
+          "description": "The session workspace is where you conduct and record sessions.",
+          "step1": "Open an upcoming session from your schedule",
+          "step2": "Mark student attendance",
+          "step3": "Conduct the session and evaluate the student's recitation",
+          "step4": "Submit scores for memorization, tajweed, and recitation (1-5 each)"
+        },
+        "evaluation": {
+          "title": "Evaluating Students",
+          "description": "After each session, provide evaluation scores across three categories: Memorization (recall accuracy), Tajweed (pronunciation rules), and Recitation (overall fluency). Each score ranges from 1 to 5.",
+          "tip": "Be consistent in your scoring so students can track meaningful progress over time."
+        }
+      },
+
+      "classProgress": {
+        "title": "Class Progress",
+        "subtitle": "Analytics and performance charts",
+        "charts": {
+          "title": "Understanding the Charts",
+          "description": "The Class Progress tab provides visual analytics for your classes including attendance trends, score distributions, and level breakdowns. Use the time period filter (day, week, month) to adjust the view."
+        },
+        "trends": {
+          "title": "Attendance & Score Trends",
+          "description": "Trend charts show how your class performance changes over time. Look for upward trends in scores and consistent attendance patterns. Sudden drops may indicate issues that need attention."
+        }
+      },
+
+      "availability": {
+        "title": "Availability",
+        "subtitle": "Set your teaching schedule",
+        "setSlots": {
+          "title": "Setting Your Availability",
+          "description": "Let students know when you're available for sessions.",
+          "step1": "Go to Availability from your dashboard or profile",
+          "step2": "Select the programs you teach",
+          "step3": "Set your available time slots for each program",
+          "tip": "Keep your availability up to date so students can book sessions during your free times."
+        }
+      },
+
+      "stickers": {
+        "title": "Sticker Awards",
+        "subtitle": "Motivate students with rewards",
+        "award": {
+          "title": "Awarding Stickers",
+          "description": "Stickers are a way to motivate and reward your students for their efforts.",
+          "step1": "Navigate to Awards from your dashboard",
+          "step2": "Select the student you want to reward",
+          "step3": "Choose a sticker and optionally add a reason or note"
+        }
+      },
+
+      "certifications": {
+        "title": "Certifications",
+        "subtitle": "Review and issue certifications",
+        "review": {
+          "title": "Reviewing Certifications",
+          "description": "When a student completes memorization of a portion, they may request certification. You can review their readiness and issue a certification upon successful evaluation."
+        }
+      },
+
+      "meeting": {
+        "title": "Meeting Settings",
+        "subtitle": "Configure your virtual meeting setup",
+        "setup": {
+          "title": "Setting Up Your Meeting Link",
+          "description": "Configure your virtual meeting details so students can join your sessions.",
+          "step1": "Go to your Profile screen",
+          "step2": "Enter your meeting link (Google Meet, Zoom, Jitsi, or other)",
+          "step3": "Select your meeting platform and teaching languages, then save"
+        }
+      },
+
+      "profile": {
+        "title": "Profile & Settings",
+        "subtitle": "Manage your account and preferences",
+        "notifications": {
+          "title": "Notification Preferences",
+          "description": "Customize which notifications you receive — including session reminders, student activity alerts, and rating notifications."
+        },
+        "language": {
+          "title": "Language Settings",
+          "description": "Switch between English and Arabic. The app will reload to apply the new language and layout direction."
+        }
+      }
+    },
+
+    "supervisor": {
+      "intro": "Welcome to your supervision guide! Here's how to oversee teachers, manage events, and access reports.",
+
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Key metrics and quick actions",
+        "overview": {
+          "title": "Dashboard Overview",
+          "description": "Your dashboard displays key metrics: total teachers supervised, total students, and sessions this week. Below you'll find quick action cards for certification queue, Himam management, and rewards."
+        },
+        "inactiveAlerts": {
+          "title": "Inactive Teacher Alerts",
+          "description": "The dashboard highlights teachers who haven't conducted sessions recently. This helps you follow up and ensure consistent teaching coverage.",
+          "tip": "Reach out to inactive teachers early — a brief check-in can help resolve scheduling issues before they become bigger problems."
+        }
+      },
+
+      "teachers": {
+        "title": "Teachers",
+        "subtitle": "Monitor and support your team",
+        "list": {
+          "title": "Teacher List",
+          "description": "The Teachers tab shows all teachers under your supervision, organized by program. You can see each teacher's student count and recent activity."
+        },
+        "details": {
+          "title": "Viewing Teacher Details",
+          "description": "Get detailed information about each teacher's performance.",
+          "step1": "Go to the Teachers tab",
+          "step2": "Tap a teacher's name to open their detail profile",
+          "step3": "Review their session history, student list, and ratings"
+        }
+      },
+
+      "reports": {
+        "title": "Reports",
+        "subtitle": "Analytics and performance data",
+        "sessionsPerTeacher": {
+          "title": "Sessions Per Teacher",
+          "description": "This chart shows how many sessions each teacher has conducted during the selected time period. Use it to identify workload imbalances and ensure fair distribution."
+        },
+        "ratings": {
+          "title": "Teacher Ratings",
+          "description": "View student ratings for each teacher. Ratings help you understand student satisfaction and identify areas where teachers may need additional support."
+        }
+      },
+
+      "himam": {
+        "title": "Himam Events",
+        "subtitle": "Manage weekly marathon events",
+        "events": {
+          "title": "Event Management",
+          "description": "View all upcoming, active, and completed Himam marathon events. Events are automatically created weekly, but you can also create them manually."
+        },
+        "registrations": {
+          "title": "Viewing Registrations",
+          "description": "For each event, view all registered students grouped by track. See registration counts, paired status, and track-level statistics."
+        },
+        "pairings": {
+          "title": "Managing Pairings",
+          "description": "Control how students are matched for the marathon.",
+          "step1": "Open an event's registrations page",
+          "step2": "Tap 'Run Pairing' to trigger the automatic pairing algorithm",
+          "step3": "Review pairings and swap partners if needed before the event starts",
+          "tip": "The pairing algorithm matches students by track and overlapping time slots. You can manually swap partners if a better match exists."
+        }
+      },
+
+      "certifications": {
+        "title": "Certifications",
+        "subtitle": "Verify student certifications",
+        "queue": {
+          "title": "Certification Queue",
+          "description": "Review and verify student certifications submitted by teachers.",
+          "step1": "Open the Certifications section from your dashboard",
+          "step2": "Review pending certifications in the queue",
+          "step3": "Verify or request changes for each certification"
+        }
+      },
+
+      "rewards": {
+        "title": "Rewards",
+        "subtitle": "Distribute stickers and badges",
+        "distribute": {
+          "title": "Distributing Rewards",
+          "description": "Manage the distribution of stickers and rewards across your supervised programs. You can view reward statistics and allocate new rewards to teachers."
+        }
+      },
+
+      "profile": {
+        "title": "Profile & Settings",
+        "subtitle": "Your account and preferences",
+        "supervised": {
+          "title": "Supervised Programs",
+          "description": "Your profile shows which programs you supervise and the number of teachers in each. This gives you a quick overview of your supervision scope."
+        },
+        "notifications": {
+          "title": "Notification Preferences",
+          "description": "Customize your notification settings — including alerts for inactive teachers, new certifications, and event updates."
+        }
+      }
+    },
+
+    "programAdmin": {
+      "intro": "Welcome to your program administration guide! Here's how to manage classes, teams, enrollments, and monitor your program's performance.",
+
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Program overview and key metrics",
+        "overview": {
+          "title": "Dashboard Overview",
+          "description": "Your dashboard provides a snapshot of your program's health: total enrolled students, active classes, teachers, and sessions this week. If you manage multiple programs, use the program selector at the top to switch between them."
+        },
+        "pendingEnrollments": {
+          "title": "Pending Enrollments",
+          "description": "When new students request to join your program, they appear as pending enrollments. Review and approve or decline enrollment requests promptly.",
+          "tip": "A high number of pending enrollments may indicate you need to open more classes or increase class capacity."
+        }
+      },
+
+      "classes": {
+        "title": "Classes",
+        "subtitle": "Create and manage learning groups",
+        "create": {
+          "title": "Creating a Class",
+          "description": "Set up new classes for your program to organize students into learning groups.",
+          "step1": "Go to the Classes tab",
+          "step2": "Tap 'Create Class'",
+          "step3": "Fill in the class details: name, teacher, max capacity, and start date",
+          "step4": "Save and the class will be available for student enrollment"
+        },
+        "manage": {
+          "title": "Managing Classes",
+          "description": "View and edit existing classes. You can see enrolled students, assigned teacher, class status (enrollment open, in progress, etc.), and schedule details."
+        },
+        "waitlist": {
+          "title": "Waitlist Management",
+          "description": "When a class reaches maximum capacity, new enrollments go to the waitlist. You can manage the waitlist by approving students when spots become available.",
+          "tip": "Monitor waitlists regularly — long waitlists may signal the need for new classes."
+        }
+      },
+
+      "team": {
+        "title": "Team",
+        "subtitle": "Manage teachers and supervisors",
+        "viewTeam": {
+          "title": "Viewing Your Team",
+          "description": "The Team tab shows all teachers and supervisors assigned to your program. You can view their profiles and track their involvement."
+        },
+        "addMembers": {
+          "title": "Adding Team Members",
+          "description": "Add teachers or supervisors to your program team.",
+          "step1": "Go to the Team tab",
+          "step2": "Tap 'Add Member'",
+          "step3": "Search for the user and assign them a role (teacher or supervisor)"
+        }
+      },
+
+      "reports": {
+        "title": "Reports",
+        "subtitle": "Program analytics and metrics",
+        "teacherWorkload": {
+          "title": "Teacher Workload",
+          "description": "View how sessions are distributed across your teachers. Identify teachers with heavy or light workloads to balance assignments."
+        },
+        "sessionTrends": {
+          "title": "Session Trends",
+          "description": "Track how session volume changes over time. This helps you understand program activity patterns and plan accordingly."
+        },
+        "enrollmentMetrics": {
+          "title": "Enrollment Metrics",
+          "description": "View enrollment statistics including total enrolled, pending, and capacity utilization across all your classes."
+        }
+      },
+
+      "programs": {
+        "title": "Programs",
+        "subtitle": "Program details and configuration",
+        "details": {
+          "title": "Program Details",
+          "description": "View and manage your program's information including name, description, and tracks. This is the central hub for your program's configuration."
+        },
+        "tracks": {
+          "title": "Understanding Tracks",
+          "description": "Tracks are distinct pathways within your program. Each track may have its own curriculum and learning objectives. You can view track details and see which students are in each track."
+        }
+      },
+
+      "certifications": {
+        "title": "Certifications",
+        "subtitle": "Certification queue and approvals",
+        "queue": {
+          "title": "Certification Queue",
+          "description": "Review and approve student certifications submitted by teachers in your program. Each certification shows the student's name, the portion they've certified, and the evaluating teacher."
+        }
+      },
+
+      "rewards": {
+        "title": "Rewards",
+        "subtitle": "Sticker distribution",
+        "distribute": {
+          "title": "Distributing Rewards",
+          "description": "Manage reward distribution across your program. View which stickers are available and track distribution statistics."
+        }
+      },
+
+      "profile": {
+        "title": "Profile & Settings",
+        "subtitle": "Your account and preferences",
+        "notifications": {
+          "title": "Notification Preferences",
+          "description": "Customize which notifications you receive including enrollment requests, certification submissions, and program activity alerts."
+        },
+        "language": {
+          "title": "Language Settings",
+          "description": "Switch between English and Arabic. The app will reload to apply the new language."
+        }
+      }
+    },
+
+    "masterAdmin": {
+      "intro": "Welcome to the platform administration guide! Here's how to manage users, programs, classes, and system settings across the entire platform.",
+
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Platform overview and navigation",
+        "overview": {
+          "title": "Dashboard Overview",
+          "description": "Your dashboard shows platform-wide statistics: total students, teachers, active sessions, and program count. Below the stats, you'll find quick action buttons and a management navigation grid to access all administration areas."
+        },
+        "quickActions": {
+          "title": "Quick Actions",
+          "description": "Use the quick action buttons to rapidly create new students, teachers, or classes without navigating through menus."
+        }
+      },
+
+      "users": {
+        "title": "User Management",
+        "subtitle": "Search and manage all users",
+        "search": {
+          "title": "Searching Users",
+          "description": "The Users section lets you search across all platform users by name or username. Use this to quickly find any user regardless of their role."
+        },
+        "details": {
+          "title": "User Details",
+          "description": "Each user profile shows their role, contact information, enrollment status, and activity history. You can edit user details or change their role from this view."
+        }
+      },
+
+      "teachers": {
+        "title": "Teacher Management",
+        "subtitle": "Create and manage teachers",
+        "create": {
+          "title": "Creating a Teacher",
+          "description": "Add new teachers to the platform.",
+          "step1": "Go to Teacher Management from the dashboard",
+          "step2": "Tap 'Create Teacher' and fill in their profile details",
+          "step3": "Assign them to a program and class"
+        },
+        "manage": {
+          "title": "Managing Teachers",
+          "description": "View all teachers on the platform. You can edit their profiles, view their session history, see student assignments, and manage their program memberships."
+        }
+      },
+
+      "students": {
+        "title": "Student Management",
+        "subtitle": "Create and manage students",
+        "create": {
+          "title": "Creating a Student",
+          "description": "Add new students to the platform.",
+          "step1": "Go to Student Management from the dashboard",
+          "step2": "Tap 'Create Student' and fill in their profile details",
+          "step3": "Enroll them in a program and class"
+        },
+        "manage": {
+          "title": "Managing Students",
+          "description": "View all students on the platform. Edit profiles, view memorization progress, manage class assignments, and review session history."
+        }
+      },
+
+      "classes": {
+        "title": "Class Management",
+        "subtitle": "Create and organize classes",
+        "create": {
+          "title": "Creating a Class",
+          "description": "Set up new classes and assign them to programs.",
+          "step1": "Go to Class Management from the dashboard",
+          "step2": "Tap 'Create Class'",
+          "step3": "Fill in class details: name, program, teacher, and capacity",
+          "step4": "Save to make the class available for enrollment"
+        },
+        "schedule": {
+          "title": "Class Schedules",
+          "description": "View and manage the session schedule for each class. See upcoming sessions, assigned teachers, and enrolled student counts."
+        }
+      },
+
+      "programs": {
+        "title": "Program Management",
+        "subtitle": "Create and configure programs",
+        "create": {
+          "title": "Creating a Program",
+          "description": "Create new learning programs on the platform. Each program can have multiple tracks, classes, and team members."
+        },
+        "tracks": {
+          "title": "Managing Tracks",
+          "description": "Tracks are sub-divisions within a program (e.g., different recitation levels or text types). Add, edit, or reorder tracks for each program."
+        },
+        "team": {
+          "title": "Team Assignment",
+          "description": "Assign program admins, supervisors, and teachers to each program. Team members get access to program-specific management tools."
+        }
+      },
+
+      "stickers": {
+        "title": "Sticker Management",
+        "subtitle": "Create and manage rewards",
+        "create": {
+          "title": "Creating Stickers",
+          "description": "Design new stickers that teachers can award to students.",
+          "step1": "Go to Sticker Management from the dashboard",
+          "step2": "Tap 'Create Sticker' and choose a name, icon, and category",
+          "step3": "Save and the sticker becomes available for all teachers to award"
+        },
+        "manage": {
+          "title": "Managing Stickers",
+          "description": "View the full sticker catalog. Edit existing stickers, change their icons, or deactivate ones no longer in use."
+        }
+      },
+
+      "reports": {
+        "title": "Reports",
+        "subtitle": "Platform-wide analytics",
+        "types": {
+          "title": "Available Reports",
+          "description": "Access five report types:\n\n• Platform Overview — High-level stats across all programs\n• Session Completion — Track session completion rates\n• Teacher Activity — Monitor teacher engagement and session counts\n• Teacher Attendance — Track teacher attendance patterns\n• Memorization — View memorization progress across students"
+        }
+      },
+
+      "certifications": {
+        "title": "Certifications",
+        "subtitle": "Verification queue",
+        "verify": {
+          "title": "Verifying Certifications",
+          "description": "Review the certification verification queue. Each certification shows the student, the certified portion, the issuing teacher, and a QR code for external verification."
+        }
+      },
+
+      "settings": {
+        "title": "Settings",
+        "subtitle": "Platform configuration",
+        "attendance": {
+          "title": "Attendance Settings",
+          "description": "Configure how attendance is tracked across the platform. Set attendance rules and policies that apply to all programs."
+        },
+        "permissions": {
+          "title": "Permissions",
+          "description": "Manage role-based permissions. Control what each role can do — for example, toggle whether teachers can create their own sessions."
+        }
+      },
+
+      "passwordReset": {
+        "title": "Password Reset",
+        "subtitle": "Reset user passwords",
+        "reset": {
+          "title": "Resetting a User's Password",
+          "description": "If a user can't access their account, you can reset their password.",
+          "step1": "Go to Password Reset from the dashboard",
+          "step2": "Search for the user by name or username",
+          "step3": "Set a new temporary password and share it with the user securely"
+        }
+      }
+    }
   }
 }

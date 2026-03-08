@@ -93,6 +93,23 @@ export default function SupervisorProfile() {
           <Badge label={t('roles.supervisor')} variant={theme.tag} size="md" />
         </Card>
 
+        {/* Help Guide */}
+        <Card
+          variant="default"
+          style={styles.settingCard}
+          onPress={() => router.push('/(supervisor)/wiki')}
+        >
+          <View style={styles.settingRow}>
+            <View style={styles.settingLabelContainer}>
+              <View style={[styles.settingIcon, { backgroundColor: colors.primary[50] }]}>
+                <Ionicons name="help-circle" size={20} color={colors.primary[500]} />
+              </View>
+              <Text style={styles.settingLabel}>{t('wiki.profileLink')}</Text>
+            </View>
+            <Ionicons name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'} size={20} color={colors.neutral[300]} />
+          </View>
+        </Card>
+
         {/* Settings Group */}
         <Text style={styles.sectionTitle}>{t('common.settings')}</Text>
 
