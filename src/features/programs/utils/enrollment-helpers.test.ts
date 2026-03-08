@@ -61,7 +61,6 @@ describe('getCategoryVariant', () => {
   it.each([
     ['free', 'success'],
     ['structured', 'info'],
-    ['mixed', 'violet'],
   ] as const)('maps "%s" to "%s"', (category, expected) => {
     expect(getCategoryVariant(category)).toBe(expected);
   });

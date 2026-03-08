@@ -1,6 +1,6 @@
 // ─── Enums & Literals ────────────────────────────────────────────────────────
 
-export type ProgramCategory = 'free' | 'structured' | 'mixed';
+export type ProgramCategory = 'free' | 'structured';
 
 export type TrackType = 'free' | 'structured';
 
@@ -60,6 +60,7 @@ export interface Program {
 export interface ProgramTrack {
   id: string;
   program_id: string;
+  parent_track_id: string | null;
   name: string;
   name_ar: string;
   description: string | null;
@@ -70,6 +71,10 @@ export interface ProgramTrack {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface ProgramTrackNode extends ProgramTrack {
+  children: ProgramTrackNode[];
 }
 
 export interface Enrollment {

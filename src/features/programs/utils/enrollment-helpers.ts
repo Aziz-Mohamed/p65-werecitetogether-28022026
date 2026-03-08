@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
 import { colors } from '@/theme/colors';
-import type { EnrollmentStatus, ClassStatus, ProgramCategory } from '../types/programs.types';
+import type { EnrollmentStatus, ClassStatus, ProgramCategory, ProgramTrack, ProgramTrackNode } from '../types/programs.types';
 
 // ─── Localized Field Hook ────────────────────────────────────────────────────
 
@@ -54,16 +54,49 @@ export function getEnrollmentStatusVariant(status: EnrollmentStatus): Enrollment
 
 // ─── Category Badge Mapping ──────────────────────────────────────────────────
 
-type CategoryVariant = 'success' | 'info' | 'violet';
+type CategoryVariant = 'success' | 'info';
 
 const categoryVariants: Record<ProgramCategory, CategoryVariant> = {
   free: 'success',
   structured: 'info',
-  mixed: 'violet',
 };
 
 export function getCategoryVariant(category: ProgramCategory): CategoryVariant {
   return categoryVariants[category] ?? 'info';
+}
+
+// ─── Track Hierarchy ────────────────────────────────────────────────────────
+
+/**
+ * Builds a tree from a flat list of tracks.
+ * Root tracks (no parent_track_id) appear at the top level.
+ * Child tracks are nested under their parent.
+ */
+export function buildTrackTree(tracks: ProgramTrack[]): ProgramTrackNode[] {
+  const nodeMap = new Map<string, ProgramTrackNode>();
+  const roots: ProgramTrackNode[] = [];
+
+  // Create nodes
+  for (const track of tracks) {
+    nodeMap.set(track.id, { ...track, children: [] });
+  }
+
+  // Build tree
+  for (const track of tracks) {
+    const node = nodeMap.get(track.id)!;
+    if (track.parent_track_id && nodeMap.has(track.parent_track_id)) {
+      nodeMap.get(track.parent_track_id)!.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+
+  // Sort children by sort_order
+  for (const node of nodeMap.values()) {
+    node.children.sort((a, b) => a.sort_order - b.sort_order);
+  }
+
+  return roots.sort((a, b) => a.sort_order - b.sort_order);
 }
 
 // ─── Class Status Label ──────────────────────────────────────────────────────

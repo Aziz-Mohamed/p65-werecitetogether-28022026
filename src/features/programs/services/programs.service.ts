@@ -28,7 +28,8 @@ class ProgramsService {
         *,
         program_tracks (
           id, name, name_ar, description, description_ar,
-          track_type, curriculum, sort_order, is_active
+          track_type, curriculum, sort_order, is_active,
+          parent_track_id
         )
       `)
       .eq('id', id)
