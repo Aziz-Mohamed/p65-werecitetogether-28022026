@@ -16,6 +16,7 @@ export default function ProgramAdminLayout() {
       <Stack.Screen name="programs/[id]/classes/create" />
       <Stack.Screen name="programs/[id]/classes/[classId]" />
       <Stack.Screen name="programs/[id]/team" />
+      <Stack.Screen name="students/[id]/index" />
       <Stack.Screen name="certifications/index" />
       <Stack.Screen name="certifications/[id]" />
       <Stack.Screen name="rewards/index" />

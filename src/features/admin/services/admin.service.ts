@@ -178,7 +178,7 @@ class AdminService {
   async getUserProgramRoles(userId: string) {
     return supabase
       .from('program_roles')
-      .select('id, program_id, role, programs!inner(name)')
+      .select('id, program_id, role, programs!inner(name, name_ar)')
       .eq('profile_id', userId);
   }
 

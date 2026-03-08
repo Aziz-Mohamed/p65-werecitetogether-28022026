@@ -181,6 +181,7 @@ export default function TeacherDashboard() {
             key={avail.id}
             programId={avail.program_id}
             programName={avail.programs?.name ?? ''}
+            programNameAr={avail.programs?.name_ar}
           />
         ))}
 

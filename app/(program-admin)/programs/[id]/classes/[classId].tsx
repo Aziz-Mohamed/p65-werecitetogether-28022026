@@ -1,8 +1,9 @@
 import React from 'react';
-import { StyleSheet, View, Text, Alert } from 'react-native';
+import { I18nManager, StyleSheet, View, Text, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { FlashList } from '@shopify/flash-list';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
@@ -120,16 +121,23 @@ export default function ClassDetailScreen() {
             keyExtractor={(item: any) => item.id}
             estimatedItemSize={70}
             renderItem={({ item }: { item: any }) => (
-              <Card variant="outlined" style={styles.card}>
+              <Card
+                variant="outlined"
+                style={styles.card}
+                onPress={() => router.push(`/(program-admin)/students/${item.student_id}`)}
+              >
                 <View style={styles.cardRow}>
                   <Text style={styles.studentName} numberOfLines={1}>
                     {item.profiles?.full_name ?? '—'}
                   </Text>
-                  <Badge
-                    label={t(`programs.status.${item.status}`)}
-                    variant={item.status === 'active' ? 'success' : item.status === 'pending' ? 'warning' : 'default'}
-                    size="sm"
-                  />
+                  <View style={styles.cardTrailing}>
+                    <Badge
+                      label={t(`programs.status.${item.status}`)}
+                      variant={item.status === 'active' ? 'success' : item.status === 'pending' ? 'warning' : 'default'}
+                      size="sm"
+                    />
+                    <Ionicons name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.neutral[300]} />
+                  </View>
                 </View>
                 {item.status === 'pending' && (
                   <View style={styles.actions}>
@@ -208,6 +216,11 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: lightTheme.text,
     flex: 1,
+  },
+  cardTrailing: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   actions: {
     flexDirection: 'row',

@@ -98,6 +98,7 @@ export interface AdminUserProgramRole {
   role_id: string;
   program_id: string;
   program_name: string;
+  program_name_ar: string;
   role: string;
 }
 

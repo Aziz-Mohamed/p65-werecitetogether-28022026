@@ -16,7 +16,7 @@ import { useRevokeCertification } from '@/features/certifications/hooks/useRevok
 import type { CertificationStatus } from '@/features/certifications/types/certifications.types';
 
 export default function MasterAdminCertificationDetailScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -86,8 +86,8 @@ export default function MasterAdminCertificationDetailScreen() {
         {cert.issuer && (
           <InfoRow label={t('certifications.detail.issuedBy')} value={cert.issuer.full_name} />
         )}
-        <InfoRow label={t('certifications.detail.program')} value={cert.program?.name} />
-        {cert.track && <InfoRow label={t('certifications.detail.track')} value={cert.track.name} />}
+        <InfoRow label={t('certifications.detail.program')} value={i18n.language === 'ar' ? cert.program?.name_ar : cert.program?.name} />
+        {cert.track && <InfoRow label={t('certifications.detail.track')} value={i18n.language === 'ar' ? cert.track.name_ar : cert.track.name} />}
         <InfoRow label={t('certifications.detail.type')} value={t(`certifications.types.${cert.type}`)} />
         <InfoRow label={t('certifications.detail.status')} value={t(`certifications.statuses.${cert.status}`)} />
         <InfoRow label={t('certifications.detail.createdAt')} value={new Date(cert.created_at).toLocaleDateString()} />

@@ -19,6 +19,7 @@ export function useUserDetail(id: string | undefined) {
           role_id: row.id,
           program_id: row.program_id,
           program_name: row.programs.name,
+          program_name_ar: row.programs.name_ar,
           role: row.role,
         }),
       );
