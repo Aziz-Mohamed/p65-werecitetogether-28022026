@@ -42,53 +42,52 @@
       "fri": "Fri",
       "sat": "Sat"
     },
-    "delete": "Delete",
-    "done": "Done",
-    "edit": "Edit",
-    "english": "English",
-    "error": "Something went wrong",
-    "goHome": "Go Home",
-    "inactive": "Inactive",
-    "language": "Language",
-    "level": "Level",
-    "loading": "Loading...",
-    "active": "Active",
-    "next": "Next",
-    "noMeetingLink": "No meeting link set",
-    "noResults": "No results found",
-    "noResultsDescription": "Try adjusting your search or filters",
-    "noResultsTitle": "No Results",
-    "notFound": "Not Found",
-    "notSet": "Not set",
-    "notes": "Notes",
-    "open": "Open",
-    "optional": "Optional",
-    "pending": "Pending",
-    "reject": "Reject",
-    "remove": "Remove",
-    "required": "Required",
-    "restartMessage": "Please restart the app to apply the language change.",
-    "restartRequired": "Restart Required",
-    "retry": "Retry",
-    "save": "Save",
-    "search": "Search",
-    "searchPlaceholder": "Search...",
-    "select": "Select...",
-    "selectDate": "Select Date",
-    "settings": "Settings",
-    "signOut": "Sign Out",
-    "somethingWrong": "Something went wrong",
-    "submit": "Submit",
-    "success": "Success",
-    "tapToChoose": "Tap to choose",
-    "tapToClose": "Tap to close",
-    "unexpectedError": "An unexpected error occurred",
-    "unknownError": "An unknown error occurred",
-    "validationFailed": "Validation failed",
-    "viewAll": "View All",
-    "add": "Add",
-    "accept": "Accept",
-    "decline": "Decline"
+    "scoreAbbrev": {
+      "memorization": "Memorization",
+      "tajweed": "Tajweed",
+      "recitation": "Recitation"
+    },
+    "all": "All"
+  },
+  "forms": {
+    "fullName": "Full Name",
+    "addNameIn": "Add name in {{language}}",
+    "nameInLanguage": "Name in {{language}}",
+    "hideOtherLanguages": "Hide other languages"
+  },
+  "iconCategories": {
+    "worship": "Worship",
+    "celestial": "Celestial",
+    "architecture": "Architecture",
+    "nature": "Nature",
+    "achievement": "Achievement",
+    "calligraphy": "Calligraphy"
+  },
+  "iconNames": {
+    "mosque": "Mosque",
+    "quran": "Quran",
+    "kaaba": "Kaaba",
+    "crescent-moon": "Crescent Moon",
+    "prayer-beads": "Prayer Beads",
+    "lantern": "Lantern",
+    "prayer-mat": "Prayer Mat",
+    "dua-hands": "Dua Hands",
+    "islamic-star": "Islamic Star",
+    "dome": "Dome",
+    "minaret": "Minaret",
+    "arch": "Arch",
+    "geometric-pattern": "Geometric Pattern",
+    "palm-tree": "Palm Tree",
+    "olive-branch": "Olive Branch",
+    "sword": "Sword",
+    "shield": "Shield",
+    "crown": "Crown",
+    "bismillah": "Bismillah",
+    "mashallah": "Masha'Allah",
+    "alhamdulillah": "Alhamdulillah",
+    "sun": "Sun",
+    "desert": "Desert",
+    "medal": "Medal"
   },
   "auth": {
     "login": "Welcome",
@@ -728,6 +727,222 @@
         "absent": "Absent",
         "late": "Late",
         "excused": "Excused"
+      }
+    },
+    "supervisor": {
+      "title": "Supervisor Dashboard",
+      "teacherCount": "Teachers",
+      "studentCount": "Students",
+      "sessionsThisWeek": "Sessions This Week",
+      "inactiveFlag": "Inactive",
+      "inactiveTeachersWarning": "{{count}} teacher(s) inactive this week",
+      "teacherCard": {
+        "students": "{{count}} students",
+        "sessions": "{{count}} sessions",
+        "rating": "Rating: {{rating}}",
+        "noRating": "No rating"
+      },
+      "teacherDetail": {
+        "title": "Teacher Detail",
+        "students": "Students",
+        "sessionHistory": "Session History",
+        "noSessions": "No sessions recorded",
+        "flagIssue": "Flag Issue",
+        "flagNote": "Describe the issue",
+        "flagNotePlaceholder": "Enter a note about this teacher (max 500 characters)...",
+        "flagConfirm": "Send Flag to Program Admins",
+        "flagSuccess": "Issue flagged successfully",
+        "flagError": "Failed to flag issue"
+      },
+      "reassign": {
+        "title": "Reassign Student",
+        "selectTeacher": "Select New Teacher",
+        "confirm": "Confirm Reassignment",
+        "success": "Student reassigned successfully",
+        "error": "Failed to reassign student"
+      },
+      "tabs": {
+        "home": "Home",
+        "teachers": "Teachers",
+        "reports": "Reports",
+        "profile": "Profile"
+      },
+      "teacherList": {
+        "title": "My Teachers",
+        "searchPlaceholder": "Search teachers...",
+        "filterInactive": "Show Inactive Only",
+        "empty": "No teachers assigned to you"
+      },
+      "reports": {
+        "title": "Reports",
+        "sessionsPerTeacher": "Sessions Per Teacher",
+        "studentDistribution": "Student Distribution",
+        "averageRating": "Average Rating Per Teacher",
+        "inactiveTeachers": "Inactive Teacher Alerts",
+        "noInactiveTeachers": "All teachers are active"
+      },
+      "profile": {
+        "title": "My Profile",
+        "supervisedPrograms": "Supervised Programs",
+        "teachersInProgram": "{{count}} teachers",
+        "editProfile": "Edit",
+        "saveProfile": "Save",
+        "cancelEdit": "Cancel",
+        "saveError": "Failed to save profile"
+      }
+    },
+    "programAdmin": {
+      "selector": {
+        "title": "Select Program",
+        "empty": "Not assigned to any programs",
+        "emptyDescription": "Contact your administrator to get assigned to a program",
+        "enrolled": "{{count}} enrolled"
+      },
+      "dashboard": {
+        "title": "Program Dashboard",
+        "totalEnrolled": "Enrolled Students",
+        "activeCohorts": "Active Cohorts",
+        "totalTeachers": "Teachers",
+        "sessionsThisWeek": "Sessions This Week",
+        "pendingEnrollments": "Pending Enrollments",
+        "pendingWarning": "{{count}} enrollment requests pending review",
+        "switchProgram": "Switch Program"
+      },
+      "team": {
+        "title": "Team",
+        "addMember": "Add Team Member",
+        "searchUsers": "Search users by name or email",
+        "rolePicker": "Select Role",
+        "assignSuccess": "Team member added",
+        "assignError": "Failed to add team member",
+        "removeConfirm": "Remove {{name}} from this program?",
+        "removeWarning": "This teacher has {{count}} active students",
+        "removeSuccess": "Team member removed",
+        "removeError": "Failed to remove team member",
+        "linkSupervisor": "Link Supervisor",
+        "selectSupervisor": "Select Supervisor",
+        "unlinkSupervisor": "Unlink Supervisor",
+        "linkSuccess": "Supervisor linked",
+        "linkError": "Failed to link supervisor",
+        "sections": {
+          "supervisors": "Supervisors",
+          "teachers": "Teachers",
+          "admins": "Program Admins"
+        }
+      },
+      "cohorts": {
+        "title": "Cohorts",
+        "createCohort": "Create Cohort",
+        "enrolled": "{{current}}/{{max}} students",
+        "empty": "No cohorts in this program"
+      },
+      "settings": {
+        "title": "Program Settings",
+        "maxStudentsPerTeacher": "Max Students Per Teacher",
+        "dailySessionLimit": "Daily Free Session Limit",
+        "queueThreshold": "Queue Notification Threshold",
+        "ratingThresholds": "Rating Thresholds",
+        "goodStanding": "Good Standing",
+        "warning": "Warning",
+        "concern": "Concern",
+        "saveSuccess": "Settings saved",
+        "saveError": "Failed to save settings"
+      },
+      "reports": {
+        "title": "Reports",
+        "teacherWorkload": "Teacher Workload",
+        "studentProgress": "Student Progress Distribution",
+        "sessionTrend": "Session Frequency"
+      },
+      "tabs": {
+        "home": "Home",
+        "cohorts": "Cohorts",
+        "team": "Team",
+        "reports": "Reports",
+        "settings": "Settings",
+        "profile": "Profile"
+      },
+      "selectProgram": "Select a program",
+      "selectProgramDescription": "Go to the Home tab to select a program"
+    },
+    "masterAdmin": {
+      "dashboard": {
+        "title": "Platform Dashboard",
+        "totalStudents": "Total Students",
+        "totalTeachers": "Total Teachers",
+        "activeSessions": "Active Sessions",
+        "programsOverview": "Programs Overview",
+        "enrolled": "{{count}} enrolled",
+        "sessions": "{{count}} sessions"
+      },
+      "users": {
+        "title": "User Management",
+        "searchPlaceholder": "Search by name or email...",
+        "detail": {
+          "title": "User Detail",
+          "globalRole": "Global Role",
+          "programRoles": "Program Roles",
+          "manageRoles": "Manage Roles",
+          "noRoles": "No program roles assigned"
+        },
+        "roles": {
+          "assignProgram": "Assign Program Role",
+          "removeProgram": "Remove Program Role",
+          "promoteMasterAdmin": "Promote to Master Admin",
+          "demoteMasterAdmin": "Remove Master Admin",
+          "promoteConfirm": "Promote {{name}} to Master Admin?",
+          "demoteConfirm": "Remove Master Admin role from {{name}}?",
+          "lastAdminError": "Cannot remove the last Master Admin",
+          "alreadyAdmin": "User is already a Master Admin",
+          "promoteSuccess": "User promoted to Master Admin",
+          "demoteSuccess": "Master Admin role removed",
+          "promoteError": "Failed to promote user",
+          "demoteError": "Failed to demote user",
+          "selectProgram": "Select Program",
+          "selectRole": "Select Role",
+          "assignSuccess": "Program role assigned successfully",
+          "assignError": "Failed to assign program role",
+          "removeConfirm": "Remove {{role}} role from {{program}}?",
+          "removeSuccess": "Program role removed",
+          "removeError": "Failed to remove program role"
+        }
+      },
+      "reports": {
+        "title": "Platform Reports",
+        "enrollmentTrend": "Enrollment Trend by Program",
+        "sessionVolume": "Session Volume by Program",
+        "teacherActivity": "Teacher Activity Heatmap"
+      },
+      "settings": {
+        "title": "Platform Settings",
+        "platformName": "Platform Name",
+        "platformNameAr": "Platform Name (Arabic)",
+        "meetingPlatform": "Default Meeting Platform",
+        "meetingPlatformOptions": {
+          "google_meet": "Google Meet",
+          "zoom": "Zoom",
+          "jitsi": "Jitsi",
+          "other": "Other"
+        },
+        "notifications": "Notification Defaults",
+        "quietHours": "Quiet Hours",
+        "quietHoursEnabled": "Enable Quiet Hours",
+        "quietHoursStart": "Start Time",
+        "quietHoursEnd": "End Time",
+        "saveSuccess": "Platform settings saved",
+        "saveError": "Failed to save platform settings"
+      },
+      "nav": {
+        "dashboard": "Dashboard",
+        "users": "Users",
+        "programs": "Programs",
+        "reports": "Reports",
+        "settings": "Settings",
+        "certifications": "Certifications"
+      },
+      "programs": {
+        "team": "Program Team",
+        "noTeam": "No team members assigned"
       }
     }
   },
@@ -1380,7 +1595,8 @@
       "cohortClosed": "This cohort is no longer accepting enrollments",
       "authRequired": "Please sign in to enroll",
       "studentsOnly": "Only students can enroll in programs",
-      "alreadyEnrolled": "You are already enrolled in this program"
+      "alreadyEnrolled": "You are already enrolled in this program",
+      "enrollFailed": "Failed to enroll in this program"
     },
     "success": {
       "enrolled": "Successfully enrolled!",
@@ -1619,202 +1835,6 @@
       "joinFailed": "Failed to join queue",
       "leaveFailed": "Failed to leave queue",
       "claimFailed": "Failed to claim slot"
-    }
-  },
-  "admin": {
-    "supervisor": {
-      "title": "Supervisor Dashboard",
-      "teacherCount": "Teachers",
-      "studentCount": "Students",
-      "sessionsThisWeek": "Sessions This Week",
-      "inactiveFlag": "Inactive",
-      "teacherCard": {
-        "students": "{{count}} students",
-        "sessions": "{{count}} sessions",
-        "rating": "Rating: {{rating}}",
-        "noRating": "No rating"
-      },
-      "teacherDetail": {
-        "title": "Teacher Detail",
-        "students": "Students",
-        "sessionHistory": "Session History",
-        "noSessions": "No sessions recorded",
-        "flagIssue": "Flag Issue",
-        "flagNote": "Describe the issue",
-        "flagNotePlaceholder": "Enter a note about this teacher (max 500 characters)...",
-        "flagConfirm": "Send Flag to Program Admins",
-        "flagSuccess": "Issue flagged successfully",
-        "flagError": "Failed to flag issue"
-      },
-      "reassign": {
-        "title": "Reassign Student",
-        "selectTeacher": "Select New Teacher",
-        "confirm": "Confirm Reassignment",
-        "success": "Student reassigned successfully",
-        "error": "Failed to reassign student"
-      },
-      "tabs": {
-        "home": "Home",
-        "teachers": "Teachers",
-        "reports": "Reports",
-        "profile": "Profile"
-      },
-      "teacherList": {
-        "title": "My Teachers",
-        "searchPlaceholder": "Search teachers...",
-        "filterInactive": "Show Inactive Only",
-        "empty": "No teachers assigned to you"
-      },
-      "reports": {
-        "title": "Reports",
-        "sessionsPerTeacher": "Sessions Per Teacher",
-        "studentDistribution": "Student Distribution",
-        "averageRating": "Average Rating Per Teacher"
-      },
-      "profile": {
-        "title": "My Profile",
-        "supervisedPrograms": "Supervised Programs",
-        "teachersInProgram": "{{count}} teachers"
-      }
-    },
-    "programAdmin": {
-      "selector": {
-        "title": "Select Program",
-        "empty": "Not assigned to any programs",
-        "enrolled": "{{count}} enrolled"
-      },
-      "dashboard": {
-        "title": "Program Dashboard",
-        "totalEnrolled": "Enrolled Students",
-        "activeCohorts": "Active Cohorts",
-        "totalTeachers": "Teachers",
-        "sessionsThisWeek": "Sessions This Week",
-        "pendingEnrollments": "Pending Enrollments",
-        "pendingWarning": "{{count}} enrollment requests pending review"
-      },
-      "team": {
-        "title": "Team",
-        "addMember": "Add Team Member",
-        "searchUsers": "Search users by name or email",
-        "rolePicker": "Select Role",
-        "assignSuccess": "Team member added",
-        "assignError": "Failed to add team member",
-        "removeConfirm": "Remove {{name}} from this program?",
-        "removeWarning": "This teacher has {{count}} active students",
-        "removeSuccess": "Team member removed",
-        "removeError": "Failed to remove team member",
-        "linkSupervisor": "Link Supervisor",
-        "selectSupervisor": "Select Supervisor",
-        "unlinkSupervisor": "Unlink Supervisor",
-        "linkSuccess": "Supervisor linked",
-        "linkError": "Failed to link supervisor",
-        "sections": {
-          "supervisors": "Supervisors",
-          "teachers": "Teachers",
-          "admins": "Program Admins"
-        }
-      },
-      "cohorts": {
-        "title": "Cohorts",
-        "createCohort": "Create Cohort",
-        "enrolled": "{{current}}/{{max}} students",
-        "empty": "No cohorts in this program"
-      },
-      "settings": {
-        "title": "Program Settings",
-        "maxStudentsPerTeacher": "Max Students Per Teacher",
-        "dailySessionLimit": "Daily Free Session Limit",
-        "queueThreshold": "Queue Notification Threshold",
-        "ratingThresholds": "Rating Thresholds",
-        "goodStanding": "Good Standing",
-        "warning": "Warning",
-        "concern": "Concern",
-        "saveSuccess": "Settings saved",
-        "saveError": "Failed to save settings"
-      },
-      "reports": {
-        "title": "Reports",
-        "teacherWorkload": "Teacher Workload",
-        "studentProgress": "Student Progress Distribution",
-        "sessionTrend": "Session Frequency"
-      },
-      "tabs": {
-        "home": "Home",
-        "cohorts": "Cohorts",
-        "team": "Team",
-        "reports": "Reports",
-        "settings": "Settings"
-      }
-    },
-    "masterAdmin": {
-      "dashboard": {
-        "title": "Platform Dashboard",
-        "totalStudents": "Total Students",
-        "totalTeachers": "Total Teachers",
-        "activeSessions": "Active Sessions",
-        "programsOverview": "Programs Overview",
-        "enrolled": "{{count}} enrolled",
-        "sessions": "{{count}} sessions"
-      },
-      "users": {
-        "title": "User Management",
-        "searchPlaceholder": "Search by name or email...",
-        "detail": {
-          "title": "User Detail",
-          "globalRole": "Global Role",
-          "programRoles": "Program Roles",
-          "manageRoles": "Manage Roles",
-          "noRoles": "No program roles assigned"
-        },
-        "roles": {
-          "assignProgram": "Assign Program Role",
-          "removeProgram": "Remove Program Role",
-          "promoteMasterAdmin": "Promote to Master Admin",
-          "demoteMasterAdmin": "Remove Master Admin",
-          "promoteConfirm": "Promote {{name}} to Master Admin?",
-          "demoteConfirm": "Remove Master Admin role from {{name}}?",
-          "lastAdminError": "Cannot remove the last Master Admin",
-          "alreadyAdmin": "User is already a Master Admin",
-          "promoteSuccess": "User promoted to Master Admin",
-          "demoteSuccess": "Master Admin role removed",
-          "promoteError": "Failed to promote user",
-          "demoteError": "Failed to demote user",
-          "selectProgram": "Select Program",
-          "selectRole": "Select Role"
-        }
-      },
-      "reports": {
-        "title": "Platform Reports",
-        "enrollmentTrend": "Enrollment Trend by Program",
-        "sessionVolume": "Session Volume by Program",
-        "teacherActivity": "Teacher Activity Heatmap"
-      },
-      "settings": {
-        "title": "Platform Settings",
-        "platformName": "Platform Name",
-        "platformNameAr": "Platform Name (Arabic)",
-        "meetingPlatform": "Default Meeting Platform",
-        "meetingPlatformOptions": {
-          "google_meet": "Google Meet",
-          "zoom": "Zoom",
-          "jitsi": "Jitsi",
-          "other": "Other"
-        },
-        "notifications": "Notification Defaults",
-        "quietHours": "Quiet Hours",
-        "quietHoursEnabled": "Enable Quiet Hours",
-        "quietHoursStart": "Start Time",
-        "quietHoursEnd": "End Time",
-        "saveSuccess": "Platform settings saved",
-        "saveError": "Failed to save platform settings"
-      },
-      "nav": {
-        "dashboard": "Dashboard",
-        "users": "Users",
-        "programs": "Programs",
-        "reports": "Reports",
-        "settings": "Settings"
-      }
     }
   },
   "certifications": {

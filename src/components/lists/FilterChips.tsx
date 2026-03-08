@@ -34,6 +34,7 @@ export function FilterChips({ chips, selected, onSelect, style }: FilterChipsPro
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.scroll}
       contentContainerStyle={[styles.container, style]}
     >
       {chips.map((chip) => {
@@ -65,6 +66,9 @@ export function FilterChips({ chips, selected, onSelect, style }: FilterChipsPro
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  scroll: {
+    flexGrow: 0,
+  },
   container: {
     flexDirection: 'row',
     gap: spacing.sm,

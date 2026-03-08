@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, I18nManager } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,7 @@ function NavButton({ label, icon, onPress }: { label: string; icon: string; onPr
     <Pressable style={navStyles.button} onPress={onPress} accessibilityRole="button">
       <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={normalize(20)} color={colors.primary[500]} />
       <Text style={navStyles.label}>{label}</Text>
-      <Ionicons name="chevron-forward" size={normalize(16)} color={lightTheme.textSecondary} />
+      <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={normalize(16)} color={lightTheme.textSecondary} />
     </Pressable>
   );
 }
@@ -56,7 +56,7 @@ export default function MasterAdminDashboard() {
             label={t('admin.masterAdmin.dashboard.totalTeachers')}
             value={dashboard.data?.total_teachers ?? 0}
             icon="people-outline"
-            iconColor={colors.accent.indigo}
+            iconColor={colors.accent.indigo[500]}
             isLoading={dashboard.isLoading}
           />
         </View>
@@ -66,7 +66,7 @@ export default function MasterAdminDashboard() {
             label={t('admin.masterAdmin.dashboard.activeSessions')}
             value={dashboard.data?.total_active_sessions ?? 0}
             icon="pulse-outline"
-            iconColor={colors.accent.violet}
+            iconColor={colors.accent.violet[500]}
             isLoading={dashboard.isLoading}
           />
         </View>
@@ -76,15 +76,21 @@ export default function MasterAdminDashboard() {
           <NavButton label={t('admin.masterAdmin.nav.programs')} icon="library-outline" onPress={() => router.push('/(master-admin)/programs')} />
           <NavButton label={t('admin.masterAdmin.nav.reports')} icon="bar-chart-outline" onPress={() => router.push('/(master-admin)/reports')} />
           <NavButton label={t('admin.masterAdmin.nav.settings')} icon="settings-outline" onPress={() => router.push('/(master-admin)/settings')} />
+          <NavButton label={t('admin.masterAdmin.nav.certifications')} icon="ribbon-outline" onPress={() => router.push('/(master-admin)/certifications')} />
         </View>
 
         <Text style={styles.sectionTitle}>{t('admin.masterAdmin.dashboard.programsOverview')}</Text>
 
-        {(dashboard.data?.programs ?? []).map((program) => (
-          <View key={program.program_id} style={styles.programItem}>
-            <ProgramSummaryRow program={program} />
-          </View>
-        ))}
+        <View style={styles.programsList}>
+          {(dashboard.data?.programs ?? []).map((program, index) => (
+            <ProgramSummaryRow
+              key={program.program_id}
+              program={program}
+              index={index}
+              onPress={() => router.push('/(master-admin)/programs')}
+            />
+          ))}
+        </View>
 
         <Button
           title={t('common.signOut')}
@@ -134,9 +140,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
   },
-  programItem: {
+  programsList: {
     paddingHorizontal: spacing.base,
-    marginBottom: spacing.sm,
+    gap: spacing.sm,
   },
   signOutButton: {
     marginHorizontal: spacing.base,

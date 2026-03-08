@@ -2,12 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Card } from '@/components/ui/Card';
 import { SkeletonLoader } from '@/components/feedback';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { normalize } from '@/theme/normalize';
+import { radius } from '@/theme/radius';
 
 interface StatCardProps {
   label: string;
@@ -18,23 +18,25 @@ interface StatCardProps {
 }
 
 export function StatCard({ label, value, icon, iconColor, isLoading }: StatCardProps) {
+  const color = iconColor ?? colors.primary[500];
+
   if (isLoading) {
     return (
-      <Card variant="outlined" style={styles.card}>
+      <View style={[styles.card, { borderColor: color + '30', backgroundColor: color + '08' }]}>
         <SkeletonLoader width={normalize(40)} height={normalize(40)} borderRadius={normalize(20)} />
         <View style={styles.textContainer}>
           <SkeletonLoader width={normalize(60)} height={normalize(24)} />
           <SkeletonLoader width={normalize(80)} height={normalize(14)} />
         </View>
-      </Card>
+      </View>
     );
   }
 
   return (
-    <Card variant="outlined" style={styles.card}>
+    <View style={[styles.card, { borderColor: color + '30', backgroundColor: color + '08' }]}>
       {icon && (
-        <View style={[styles.iconContainer, { backgroundColor: (iconColor ?? colors.primary[500]) + '15' }]}>
-          <Ionicons name={icon} size={normalize(20)} color={iconColor ?? colors.primary[500]} />
+        <View style={[styles.iconContainer, { backgroundColor: color + '15' }]}>
+          <Ionicons name={icon} size={normalize(20)} color={color} />
         </View>
       )}
       <View style={styles.textContainer}>
@@ -45,7 +47,7 @@ export function StatCard({ label, value, icon, iconColor, isLoading }: StatCardP
           {label}
         </Text>
       </View>
-    </Card>
+    </View>
   );
 }
 
@@ -58,6 +60,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md,
     minWidth: normalize(140),
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    overflow: 'hidden',
   },
   iconContainer: {
     width: normalize(40),

@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, RefreshControl, ScrollView } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, Pressable, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { Screen } from '@/components/layout';
 import { ErrorState } from '@/components/feedback/ErrorState';
-import { lightTheme } from '@/theme/colors';
+import { FilterChips } from '@/components/lists/FilterChips';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { CertificationCard } from '@/features/certifications/components/CertificationCard';
@@ -18,9 +19,9 @@ import type {
   CertificationFilters,
 } from '@/features/certifications/types/certifications.types';
 
-const TYPES: (CertificationType | null)[] = [null, 'ijazah', 'graduation', 'completion'];
-const STATUSES: (CertificationStatus | null)[] = [
-  null, 'recommended', 'supervisor_approved', 'issued', 'returned', 'rejected', 'revoked',
+const TYPES: CertificationType[] = ['ijazah', 'graduation', 'completion'];
+const STATUSES: CertificationStatus[] = [
+  'recommended', 'supervisor_approved', 'issued', 'returned', 'rejected', 'revoked',
 ];
 
 export default function MasterAdminCertificationsScreen() {
@@ -31,57 +32,49 @@ export default function MasterAdminCertificationsScreen() {
   const programs = usePrograms();
   const certs = useAllCertifications(filters);
 
-  const updateFilter = <K extends keyof CertificationFilters>(key: K, value: CertificationFilters[K]) => {
-    setFilters((prev) => ({ ...prev, [key]: value || undefined }));
-  };
+  const programChips = useMemo(() => [
+    { label: t('certifications.masterAdmin.allPrograms'), value: 'all' },
+    ...(programs.data ?? []).map((p) => ({
+      label: (p as { name: string }).name,
+      value: (p as { id: string }).id,
+    })),
+  ], [programs.data, t]);
+
+  const typeChips = useMemo(() => [
+    { label: t('certifications.masterAdmin.allTypes'), value: 'all' },
+    ...TYPES.map((type) => ({ label: t(`certifications.types.${type}`), value: type })),
+  ], [t]);
+
+  const statusChips = useMemo(() => [
+    { label: t('certifications.masterAdmin.allStatuses'), value: 'all' },
+    ...STATUSES.map((s) => ({ label: t(`certifications.statuses.${s}`), value: s })),
+  ], [t]);
 
   return (
     <Screen>
       <View style={styles.container}>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backText}>{t('common.back')}</Text>
+        </Pressable>
+
         <Text style={styles.title}>{t('certifications.masterAdmin.title')}</Text>
 
-        {/* Filter bar */}
         <View style={styles.filterSection}>
-          {/* Program filter */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-            <FilterChip
-              label={t('certifications.masterAdmin.allPrograms')}
-              active={!filters.programId}
-              onPress={() => updateFilter('programId', undefined)}
-            />
-            {(programs.data ?? []).map((p) => (
-              <FilterChip
-                key={(p as { id: string }).id}
-                label={(p as { name: string }).name}
-                active={filters.programId === (p as { id: string }).id}
-                onPress={() => updateFilter('programId', (p as { id: string }).id)}
-              />
-            ))}
-          </ScrollView>
-
-          {/* Type filter */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-            {TYPES.map((type) => (
-              <FilterChip
-                key={type ?? 'all-types'}
-                label={type ? t(`certifications.types.${type}`) : t('certifications.masterAdmin.allTypes')}
-                active={filters.type === type || (!filters.type && !type)}
-                onPress={() => updateFilter('type', type ?? undefined)}
-              />
-            ))}
-          </ScrollView>
-
-          {/* Status filter */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-            {STATUSES.map((status) => (
-              <FilterChip
-                key={status ?? 'all-statuses'}
-                label={status ? t(`certifications.statuses.${status}`) : t('certifications.masterAdmin.allStatuses')}
-                active={filters.status === status || (!filters.status && !status)}
-                onPress={() => updateFilter('status', status ?? undefined)}
-              />
-            ))}
-          </ScrollView>
+          <FilterChips
+            chips={programChips}
+            selected={filters.programId ?? 'all'}
+            onSelect={(v) => setFilters((prev) => ({ ...prev, programId: v === 'all' ? undefined : v }))}
+          />
+          <FilterChips
+            chips={typeChips}
+            selected={filters.type ?? 'all'}
+            onSelect={(v) => setFilters((prev) => ({ ...prev, type: v === 'all' ? undefined : v as CertificationType }))}
+          />
+          <FilterChips
+            chips={statusChips}
+            selected={filters.status ?? 'all'}
+            onSelect={(v) => setFilters((prev) => ({ ...prev, status: v === 'all' ? undefined : v as CertificationStatus }))}
+          />
         </View>
 
         <FlashList
@@ -132,23 +125,18 @@ export default function MasterAdminCertificationsScreen() {
   );
 }
 
-function FilterChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  return (
-    <Pressable
-      style={[styles.chip, active && styles.chipActive]}
-      onPress={onPress}
-    >
-      <Text style={[styles.chipText, active && styles.chipTextActive]}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: spacing.xl,
+  },
+  backButton: {
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+  },
+  backText: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.primary[500],
   },
   title: {
     ...typography.textStyles.heading,
@@ -157,32 +145,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   filterSection: {
-    gap: spacing.xs,
     marginBottom: spacing.sm,
-  },
-  filterRow: {
-    paddingHorizontal: spacing.base,
-    gap: spacing.xs,
-  },
-  chip: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: lightTheme.border,
-    backgroundColor: lightTheme.card,
-  },
-  chipActive: {
-    backgroundColor: lightTheme.text,
-    borderColor: lightTheme.text,
-  },
-  chipText: {
-    ...typography.textStyles.caption,
-    color: lightTheme.textSecondary,
-  },
-  chipTextActive: {
-    color: lightTheme.card,
-    fontWeight: '600',
   },
   listContent: {
     paddingHorizontal: spacing.base,

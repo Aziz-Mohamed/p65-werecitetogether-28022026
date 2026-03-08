@@ -143,6 +143,6 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeight.sm,
     color: lightTheme.text,
     minWidth: 28,
-    textAlign: 'right',
+    textAlign: 'auto',
   },
 });

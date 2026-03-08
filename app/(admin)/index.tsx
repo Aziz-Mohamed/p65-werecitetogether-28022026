@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   langValue: {
     ...typography.textStyles.body,
     color: colors.neutral[500],
-    marginRight: spacing.xs,
+    marginEnd: spacing.xs,
   },
   footer: {
     marginTop: spacing.xl,

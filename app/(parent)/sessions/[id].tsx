@@ -349,8 +349,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral[50],
     padding: spacing.md,
     borderRadius: normalize(10),
-    borderLeftWidth: 3,
-    borderLeftColor: colors.neutral[200],
+    borderStartWidth: 3,
+    borderStartColor: colors.neutral[200],
   },
   notesText: {
     ...typography.textStyles.body,

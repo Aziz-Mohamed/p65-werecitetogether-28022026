@@ -1,14 +1,24 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, I18nManager } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import { Card } from '@/components/ui/Card';
-import { lightTheme } from '@/theme/colors';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { normalize } from '@/theme/normalize';
+import { radius } from '@/theme/radius';
 import { useRTL } from '@/hooks/useRTL';
 import type { ProgramAdminProgram } from '../types/admin.types';
+
+const CARD_COLORS = [
+  colors.primary[500],
+  colors.accent.indigo[500],
+  colors.accent.violet[500],
+  colors.accent.sky[500],
+  colors.secondary[500],
+  colors.accent.rose[500],
+];
 
 interface ProgramSelectorProps {
   programs: ProgramAdminProgram[];
@@ -55,25 +65,34 @@ export function ProgramSelector({ programs, onSelect, isLoading }: ProgramSelect
         data={programs}
         keyExtractor={(item) => item.program_id}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const program = item.programs;
           if (!program) return null;
 
           const name = i18n.language === 'ar' ? program.name_ar : program.name;
+          const color = CARD_COLORS[index % CARD_COLORS.length];
 
           return (
-            <Card
-              variant="outlined"
+            <Pressable
               onPress={() => onSelect(program.id)}
-              style={styles.card}
+              style={[styles.card, { borderColor: color + '40', backgroundColor: color + '08' }]}
+              accessibilityRole="button"
             >
-              <Text style={styles.programName} numberOfLines={1}>
-                {name}
-              </Text>
-              <Text style={styles.category}>
-                {program.category}
-              </Text>
-            </Card>
+              <View style={[styles.dot, { backgroundColor: color }]} />
+              <View style={styles.cardTextContainer}>
+                <Text style={styles.programName} numberOfLines={1}>
+                  {name}
+                </Text>
+                <Text style={styles.category}>
+                  {program.category}
+                </Text>
+              </View>
+              <Ionicons
+                name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
+                size={18}
+                color={color + '80'}
+              />
+            </Pressable>
           );
         }}
       />
@@ -97,7 +116,21 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
     padding: spacing.base,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    overflow: 'hidden',
+  },
+  dot: {
+    width: normalize(10),
+    height: normalize(10),
+    borderRadius: normalize(5),
+  },
+  cardTextContainer: {
+    flex: 1,
     gap: spacing.xs,
   },
   programName: {

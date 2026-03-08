@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
   viewModeDropdown: {
     position: 'absolute',
     top: '100%',
-    right: 0,
+    end: 0,
     backgroundColor: colors.white,
     borderRadius: radius.md,
     paddingVertical: normalize(4),

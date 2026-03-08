@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, RefreshControl, I18nManager } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -63,7 +63,7 @@ export default function SupervisorHome() {
                   label={t('admin.supervisor.studentCount')}
                   value={dashboard.data?.student_count ?? 0}
                   icon="school-outline"
-                  iconColor={colors.accent.indigo}
+                  iconColor={colors.accent.indigo[500]}
                   isLoading={isLoading}
                 />
               </View>
@@ -73,10 +73,47 @@ export default function SupervisorHome() {
                   label={t('admin.supervisor.sessionsThisWeek')}
                   value={dashboard.data?.sessions_this_week ?? 0}
                   icon="calendar-outline"
-                  iconColor={colors.accent.violet}
+                  iconColor={colors.accent.violet[500]}
                   isLoading={isLoading}
                 />
               </View>
+
+              {(dashboard.data?.inactive_teachers?.length ?? 0) > 0 && (
+                <Card variant="outlined" style={styles.inactiveAlert}>
+                  <View style={styles.quickActionRow}>
+                    <Ionicons name="warning-outline" size={20} color={colors.secondary[500]} />
+                    <Text style={styles.inactiveAlertText}>
+                      {t('admin.supervisor.inactiveTeachersWarning', {
+                        count: dashboard.data!.inactive_teachers.length,
+                      })}
+                    </Text>
+                  </View>
+                </Card>
+              )}
+
+              <Card
+                variant="default"
+                style={styles.quickAction}
+                onPress={() => router.push('/(supervisor)/certifications')}
+              >
+                <View style={styles.quickActionRow}>
+                  <Ionicons name="ribbon-outline" size={20} color={colors.accent.indigo[500]} />
+                  <Text style={styles.quickActionText}>{t('certifications.queue.supervisorTitle')}</Text>
+                  <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />
+                </View>
+              </Card>
+
+              <Card
+                variant="default"
+                style={styles.quickAction}
+                onPress={() => router.push('/(supervisor)/himam')}
+              >
+                <View style={styles.quickActionRow}>
+                  <Ionicons name="book-outline" size={20} color={colors.accent.violet[500]} />
+                  <Text style={styles.quickActionText}>{t('himam.supervisor.title')}</Text>
+                  <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />
+                </View>
+              </Card>
 
               <Card
                 variant="default"
@@ -86,7 +123,7 @@ export default function SupervisorHome() {
                 <View style={styles.quickActionRow}>
                   <Ionicons name="gift-outline" size={20} color={colors.secondary[500]} />
                   <Text style={styles.quickActionText}>{t('gamification.rewardsDashboard.title')}</Text>
-                  <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+                  <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />
                 </View>
               </Card>
             </View>
@@ -154,6 +191,17 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: lightTheme.textSecondary,
     textAlign: 'center',
+  },
+  inactiveAlert: {
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+    borderColor: colors.secondary[300],
+    backgroundColor: colors.secondary[50],
+  },
+  inactiveAlertText: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.secondary[700],
+    flex: 1,
   },
   quickAction: {
     marginBottom: spacing.sm,

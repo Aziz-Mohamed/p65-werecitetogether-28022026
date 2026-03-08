@@ -1,22 +1,80 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, I18nManager, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
 import { StatCard } from '@/features/admin/components/StatCard';
+import { ProgramSelector } from '@/features/admin/components/ProgramSelector';
 import { useProgramAdminDashboard } from '@/features/admin/hooks/useProgramAdminDashboard';
+import { useProgramAdminPrograms } from '@/features/admin/hooks/useProgramAdminPrograms';
+import { useAuth } from '@/hooks/useAuth';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 
 export default function ProgramAdminDashboard() {
   const { t } = useTranslation();
   const router = useRouter();
   const { programId } = useLocalSearchParams<{ programId: string }>();
+  const { session } = useAuth();
+  const userId = session?.user?.id;
+  const { data: programs } = useProgramAdminPrograms(userId);
+  const { resolveName } = useLocalizedName();
+
+  const currentProgram = programs?.find((p) => p.program_id === programId);
+  const programName = currentProgram?.programs
+    ? resolveName({ en: currentProgram.programs.name, ar: currentProgram.programs.name_ar }, currentProgram.programs.name)
+    : undefined;
+
+  if (!programId) {
+    return <ProgramSelectorView programs={programs} />;
+  }
+
+  return <DashboardView programId={programId} programName={programName} />;
+}
+
+function ProgramSelectorView({ programs }: { programs: ReturnType<typeof useProgramAdminPrograms>['data'] }) {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const isLoading = programs === undefined;
+
+  if (!isLoading && (programs ?? []).length === 0) {
+    return (
+      <Screen>
+        <EmptyState
+          icon="folder-open-outline"
+          title={t('admin.programAdmin.selector.empty')}
+          description={t('admin.programAdmin.selector.emptyDescription')}
+        />
+      </Screen>
+    );
+  }
+
+  return (
+    <Screen scroll={false} padding={false}>
+      <ProgramSelector
+        programs={programs ?? []}
+        isLoading={isLoading}
+        onSelect={(selectedProgramId) => {
+          router.replace({
+            pathname: '/(program-admin)/(tabs)',
+            params: { programId: selectedProgramId },
+          });
+        }}
+      />
+    </Screen>
+  );
+}
+
+function DashboardView({ programId, programName }: { programId: string; programName?: string }) {
+  const { t } = useTranslation();
+  const router = useRouter();
   const dashboard = useProgramAdminDashboard(programId);
 
   return (
@@ -28,7 +86,17 @@ export default function ProgramAdminDashboard() {
           <RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()} />
         }
       >
-        <Text style={styles.title}>{t('admin.programAdmin.dashboard.title')}</Text>
+        <Pressable
+          style={styles.programHeader}
+          onPress={() => router.replace({ pathname: '/(program-admin)/(tabs)' })}
+          accessibilityRole="button"
+          accessibilityLabel={t('admin.programAdmin.dashboard.switchProgram')}
+        >
+          <Text style={styles.title} numberOfLines={1}>
+            {programName ?? t('admin.programAdmin.dashboard.title')}
+          </Text>
+          <Ionicons name="swap-horizontal-outline" size={20} color={colors.primary[500]} />
+        </Pressable>
 
         <View style={styles.statsRow}>
           <StatCard
@@ -42,7 +110,7 @@ export default function ProgramAdminDashboard() {
             label={t('admin.programAdmin.dashboard.activeCohorts')}
             value={dashboard.data?.active_cohorts ?? 0}
             icon="people-circle-outline"
-            iconColor={colors.accent.indigo}
+            iconColor={colors.accent.indigo[500]}
             isLoading={dashboard.isLoading}
           />
         </View>
@@ -52,14 +120,14 @@ export default function ProgramAdminDashboard() {
             label={t('admin.programAdmin.dashboard.totalTeachers')}
             value={dashboard.data?.total_teachers ?? 0}
             icon="people-outline"
-            iconColor={colors.accent.violet}
+            iconColor={colors.accent.violet[500]}
             isLoading={dashboard.isLoading}
           />
           <StatCard
             label={t('admin.programAdmin.dashboard.sessionsThisWeek')}
             value={dashboard.data?.sessions_this_week ?? 0}
             icon="calendar-outline"
-            iconColor={colors.accent.sky}
+            iconColor={colors.accent.sky[500]}
             isLoading={dashboard.isLoading}
           />
         </View>
@@ -93,7 +161,7 @@ export default function ProgramAdminDashboard() {
           <View style={styles.quickActionRow}>
             <Ionicons name="gift-outline" size={20} color={colors.secondary[500]} />
             <Text style={styles.quickActionText}>{t('gamification.rewardsDashboard.title')}</Text>
-            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+            <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />
           </View>
         </Card>
       </ScrollView>
@@ -109,11 +177,17 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xl,
     paddingBottom: spacing['3xl'],
   },
+  programHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.base,
+  },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.base,
+    flex: 1,
   },
   statsRow: {
     flexDirection: 'row',

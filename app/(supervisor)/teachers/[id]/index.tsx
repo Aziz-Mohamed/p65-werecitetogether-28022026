@@ -114,7 +114,7 @@ export default function TeacherDetailScreen() {
                 label={t('admin.supervisor.teacherCard.sessions', { count: teacher.sessions_this_week })}
                 value={teacher.sessions_this_week}
                 icon="calendar-outline"
-                iconColor={colors.accent.indigo}
+                iconColor={colors.accent.indigo[500]}
               />
             </View>
 
@@ -141,6 +141,19 @@ export default function TeacherDetailScreen() {
                 variant="secondary"
                 style={styles.actionButton}
               />
+              <Button
+                title={t('ratings.supervisor.reviews')}
+                onPress={() =>
+                  router.push({
+                    pathname: '/(supervisor)/teachers/[id]/reviews',
+                    params: { id: teacherId!, programId: programId ?? teacher.program_id },
+                  })
+                }
+                variant="secondary"
+                style={styles.actionButton}
+              />
+            </View>
+            <View style={styles.buttonRow}>
               <Button
                 title={t('admin.supervisor.teacherDetail.flagIssue')}
                 onPress={openFlagSheet}
@@ -330,7 +343,7 @@ const styles = StyleSheet.create({
   flagCharCount: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
-    textAlign: 'right',
+    textAlign: 'auto',
     marginTop: spacing.xs,
   },
   flagSubmitButton: {

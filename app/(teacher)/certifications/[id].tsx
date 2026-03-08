@@ -195,6 +195,6 @@ const infoStyles = StyleSheet.create({
     ...typography.textStyles.body,
     color: lightTheme.text,
     flex: 1,
-    textAlign: 'right',
+    textAlign: 'auto',
   },
 });

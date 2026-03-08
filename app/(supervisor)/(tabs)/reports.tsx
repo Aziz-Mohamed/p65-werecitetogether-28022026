@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { CartesianChart, Bar } from 'victory-native';
 
 import { Screen } from '@/components/layout';
+import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/hooks/useAuth';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -31,6 +32,8 @@ export default function SupervisorReports() {
       y: teacher.average_rating ?? 0,
       label: teacher.full_name,
     }));
+
+  const inactiveTeachers = (teachers.data ?? []).filter((t) => !t.is_active);
 
   return (
     <Screen>
@@ -66,6 +69,16 @@ export default function SupervisorReports() {
             <Text style={styles.noData}>{t('common.noResults')}</Text>
           )}
         </View>
+        {sessionsData.length > 0 && (
+          <View style={styles.legendContainer}>
+            {sessionsData.map((d, i) => (
+              <View key={i} style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: colors.primary[500] }]} />
+                <Text style={styles.legendText} numberOfLines={1}>{d.label}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* Student Distribution */}
         <Text style={styles.sectionTitle}>{t('admin.supervisor.reports.studentDistribution')}</Text>
@@ -102,6 +115,31 @@ export default function SupervisorReports() {
             </CartesianChart>
           ) : (
             <Text style={styles.noData}>{t('common.noResults')}</Text>
+          )}
+        </View>
+        {ratingsData.length > 0 && (
+          <View style={styles.legendContainer}>
+            {ratingsData.map((d, i) => (
+              <View key={i} style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: colors.secondary[500] }]} />
+                <Text style={styles.legendText} numberOfLines={1}>{d.label}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Inactive Teacher Alerts */}
+        <Text style={styles.sectionTitle}>{t('admin.supervisor.reports.inactiveTeachers')}</Text>
+        <View style={styles.listContainer}>
+          {inactiveTeachers.length > 0 ? (
+            inactiveTeachers.map((teacher) => (
+              <View key={teacher.teacher_id} style={styles.distRow}>
+                <Text style={styles.distName} numberOfLines={1}>{teacher.full_name}</Text>
+                <Badge label={t('admin.supervisor.inactiveFlag')} variant="warning" size="sm" />
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noData}>{t('admin.supervisor.reports.noInactiveTeachers')}</Text>
           )}
         </View>
       </ScrollView>
@@ -142,4 +180,26 @@ const styles = StyleSheet.create({
   distName: { ...typography.textStyles.body, color: lightTheme.text, flex: 1 },
   distValue: { ...typography.textStyles.bodyMedium, color: lightTheme.text },
   noData: { ...typography.textStyles.body, color: lightTheme.textSecondary, textAlign: 'center' },
+  legendContainer: {
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.xs,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  legendDot: {
+    width: normalize(8),
+    height: normalize(8),
+    borderRadius: normalize(4),
+  },
+  legendText: {
+    ...typography.textStyles.caption,
+    color: lightTheme.textSecondary,
+    maxWidth: normalize(100),
+  },
 });

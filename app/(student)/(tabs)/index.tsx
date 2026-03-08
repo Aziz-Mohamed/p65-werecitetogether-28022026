@@ -285,8 +285,155 @@ const styles = StyleSheet.create({
     ...typography.textStyles.heading,
     color: lightTheme.text,
   },
-  card: {
-    padding: spacing.lg,
+  subtitle: {
+    ...typography.textStyles.caption,
+    color: lightTheme.textSecondary,
+    marginTop: normalize(2),
+  },
+
+  // Cards
+  tasksCard: {
+    padding: spacing.md,
+  },
+  tasksHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  tasksIcon: {
+    width: normalize(36),
+    height: normalize(36),
+    borderRadius: normalize(10),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tasksTitle: {
+    flex: 1,
+    ...typography.textStyles.bodyMedium,
+    color: lightTheme.text,
+  },
+  tasksList: {
+    marginTop: spacing.md,
+    gap: spacing.sm,
+  },
+  taskRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  taskDot: {
+    width: normalize(8),
+    height: normalize(8),
+    borderRadius: normalize(4),
+  },
+  taskInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  taskSurah: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: normalize(13),
+    color: colors.neutral[900],
+    flexShrink: 1,
+  },
+  taskAyah: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: normalize(12),
+    color: colors.neutral[500],
+  },
+  seeAll: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: normalize(12),
+    color: colors.accent.indigo[500],
+    textAlign: 'center',
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.neutral[100],
+  },
+
+  // Revision Health
+  healthTitleCol: {
+    flex: 1,
+    gap: normalize(2),
+  },
+  healthSubtitle: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: normalize(11),
+    color: colors.neutral[500],
+  },
+  healthBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  healthBarTrack: {
+    flex: 1,
+    height: normalize(8),
+    borderRadius: normalize(4),
+    backgroundColor: colors.neutral[100],
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  healthBarLabel: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: normalize(11),
+    color: colors.neutral[500],
+  },
+
+  // Hero Card (Streak + Stats)
+  heroCard: {
+    padding: spacing.md,
+  },
+  streakBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  streakLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  streakNumber: {
+    fontFamily: typography.fontFamily.bold,
+    fontSize: normalize(26),
+    color: colors.neutral[900],
+    lineHeight: normalize(30),
+  },
+  streakLabel: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: normalize(12),
+    color: colors.neutral[500],
+  },
+  bestStreak: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: normalize(12),
+    color: colors.neutral[400],
+  },
+  startStreak: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: normalize(12),
+    color: colors.accent.rose[500],
+    flexShrink: 1,
+    textAlign: 'auto' as const,
+  },
+  heroDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.neutral[100],
+    marginVertical: spacing.md,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  statBlock: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
     borderRadius: radius.md,
   },
   cardTitle: {

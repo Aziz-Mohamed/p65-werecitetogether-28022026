@@ -143,7 +143,7 @@ export default function TeacherDashboard() {
               <Text style={styles.scheduleLabel}>{t('scheduling.mySchedule')}</Text>
               <Text style={styles.scheduleHint}>{t('scheduling.viewUpcoming')}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+            <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />
           </View>
         </Card>
 
@@ -165,7 +165,7 @@ export default function TeacherDashboard() {
                   : t('availability.offline')}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+            <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={18} color={colors.neutral[300]} />
           </View>
         </Card>
 

@@ -339,6 +339,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     color: lightTheme.textSecondary,
     minWidth: normalize(36),
-    textAlign: 'right',
+    textAlign: 'auto',
   },
 });

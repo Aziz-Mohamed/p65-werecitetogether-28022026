@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { CartesianChart, Bar, Line } from 'victory-native';
 
 import { Screen } from '@/components/layout';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -15,6 +16,18 @@ export default function ProgramAdminReports() {
   const { t } = useTranslation();
   const { programId } = useLocalSearchParams<{ programId: string }>();
   const { sessionTrend, teacherWorkload } = useProgramReports(programId);
+
+  if (!programId) {
+    return (
+      <Screen>
+        <EmptyState
+          icon="bar-chart-outline"
+          title={t('admin.programAdmin.selectProgram')}
+          description={t('admin.programAdmin.selectProgramDescription')}
+        />
+      </Screen>
+    );
+  }
 
   return (
     <Screen>

@@ -3,7 +3,6 @@ import { I18nManager, StyleSheet, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
@@ -14,58 +13,19 @@ import { useLogout } from '@/features/auth/hooks/useLogout';
 import { useChangeLanguage } from '@/hooks/useChangeLanguage';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
-import { supabase } from '@/lib/supabase';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
 
-interface ProgramInfo {
-  program_id: string;
-  program_name: string;
-  teacher_count: number;
-}
-
-export default function SupervisorProfile() {
+export default function ProgramAdminProfile() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { session, profile } = useAuth();
+  const { profile } = useAuth();
   const theme = useRoleTheme();
   const { logout, isPending: isLoggingOut } = useLogout();
   const { locale, toggleLanguage } = useChangeLanguage();
   const { resolveName } = useLocalizedName();
-  const userId = session?.user?.id;
-
-  const programs = useQuery({
-    queryKey: ['supervisor-programs', userId],
-    queryFn: async () => {
-      const { data: roles, error: roleError } = await supabase
-        .from('program_roles')
-        .select(`
-          program_id,
-          programs ( name, name_ar )
-        `)
-        .eq('profile_id', userId!)
-        .eq('role', 'supervisor');
-
-      if (roleError) throw roleError;
-      if (!roles) return [];
-
-      const programIds = roles.map((r: { program_id: string }) => r.program_id);
-      const { data: teamData } = await supabase
-        .from('program_roles')
-        .select('program_id, profile_id')
-        .in('program_id', programIds)
-        .eq('role', 'teacher');
-
-      return roles.map((r: { program_id: string; programs: { name: string; name_ar: string } | null }) => ({
-        program_id: r.program_id,
-        program_name: r.programs?.name ?? '',
-        teacher_count: (teamData ?? []).filter((tc: { program_id: string }) => tc.program_id === r.program_id).length,
-      })) as ProgramInfo[];
-    },
-    enabled: !!userId,
-  });
 
   const handleSignOut = useCallback(() => {
     logout();
@@ -76,21 +36,16 @@ export default function SupervisorProfile() {
   return (
     <Screen scroll hasTabBar>
       <View style={styles.container}>
-        <Text style={styles.title}>{t('admin.supervisor.profile.title')}</Text>
+        <Text style={styles.title}>{t('admin.programAdmin.tabs.profile')}</Text>
 
         {/* Profile Info */}
         <Card variant="primary-glow" style={styles.profileCard}>
-          <Avatar
-            name={displayName}
-            size="xl"
-            ring
-            variant={theme.tag}
-          />
+          <Avatar name={displayName} size="xl" ring variant={theme.tag} />
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{displayName ?? '—'}</Text>
             <Text style={styles.profileUsername}>@{profile?.username ?? '—'}</Text>
           </View>
-          <Badge label={t('roles.supervisor')} variant={theme.tag} size="md" />
+          <Badge label={t('roles.program_admin')} variant={theme.tag} size="md" />
         </Card>
 
         {/* Settings Group */}
@@ -130,18 +85,6 @@ export default function SupervisorProfile() {
             </View>
           </View>
         </Card>
-
-        {/* Supervised Programs */}
-        <Text style={styles.sectionTitle}>{t('admin.supervisor.profile.supervisedPrograms')}</Text>
-
-        {(programs.data ?? []).map((item) => (
-          <Card key={item.program_id} variant="default" style={styles.programCard}>
-            <Text style={styles.programName}>{item.program_name}</Text>
-            <Text style={styles.programTeachers}>
-              {t('admin.supervisor.profile.teachersInProgram', { count: item.teacher_count })}
-            </Text>
-          </Card>
-        ))}
 
         {/* Sign Out */}
         <View style={styles.footer}>
@@ -228,18 +171,6 @@ const styles = StyleSheet.create({
   languageText: {
     ...typography.textStyles.body,
     color: colors.neutral[500],
-  },
-  programCard: {
-    padding: spacing.md,
-    gap: spacing.xs,
-  },
-  programName: {
-    ...typography.textStyles.bodyMedium,
-    color: lightTheme.text,
-  },
-  programTeachers: {
-    ...typography.textStyles.caption,
-    color: lightTheme.textSecondary,
   },
   footer: {
     marginTop: spacing.xl,
