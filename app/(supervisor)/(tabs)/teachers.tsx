@@ -32,7 +32,7 @@ export default function SupervisorTeachers() {
   }, [teachers.data, query]);
 
   return (
-    <Screen>
+    <Screen scroll={false}>
       <View style={styles.container}>
         <Text style={styles.title}>{t('admin.supervisor.teacherList.title')}</Text>
 
