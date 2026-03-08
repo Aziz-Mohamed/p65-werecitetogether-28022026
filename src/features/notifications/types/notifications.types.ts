@@ -7,7 +7,20 @@ export type { UserRole, NotificationCategory };
 // ─── Database Row Types ──────────────────────────────────────────────────────
 
 export type PushToken = Tables<'push_tokens'>;
-export type NotificationPreference = Tables<'notification_preferences'>;
+export type NotificationPreferences = Tables<'notification_preferences'>;
+
+// ─── Notification Categories ─────────────────────────────────────────────────
+
+export type NotificationCategory =
+  | 'sticker_awarded'
+  | 'trophy_earned'
+  | 'achievement_unlocked'
+  | 'attendance_marked'
+  | 'session_completed'
+  | 'daily_summary'
+  | 'student_alert';
+
+export type UserRole = 'student' | 'teacher' | 'admin';
 
 // ─── Deep-Link Data ──────────────────────────────────────────────────────────
 

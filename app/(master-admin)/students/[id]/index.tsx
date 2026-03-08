@@ -11,6 +11,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { useStudentById, useUpdateStudent } from '@/features/students/hooks/useStudents';
+import { useStudentGuardians } from '@/features/profile/hooks/useGuardians';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
@@ -25,6 +26,7 @@ export default function StudentDetailScreen() {
 
   const { resolveName } = useLocalizedName();
   const { data: student, isLoading, error, refetch } = useStudentById(id);
+  const { data: guardians = [] } = useStudentGuardians(id);
   const updateStudent = useUpdateStudent();
 
   if (isLoading) return <LoadingState />;
@@ -129,9 +131,11 @@ export default function StudentDetailScreen() {
             <Text style={styles.infoValue}>{student.longest_streak ?? 0}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>{t('admin.students.parent')}</Text>
+            <Text style={styles.infoLabel}>{t('admin.students.guardian')}</Text>
             <Text style={styles.infoValue}>
-              {resolveName((student as any).parent?.name_localized, (student as any).parent?.full_name) ?? t('admin.students.noParent')}
+              {guardians.length > 0
+                ? guardians.map((g: any) => g.guardian_name).join(', ')
+                : t('admin.students.noGuardian')}
             </Text>
           </View>
           {student.enrollment_date && (

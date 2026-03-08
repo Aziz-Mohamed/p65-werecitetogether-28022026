@@ -30,21 +30,6 @@ export const useStudentById = (id: string | undefined) => {
 };
 
 /**
- * Query hook for students available to link to a parent.
- * Create flow: unlinked students only. Edit flow: unlinked + already linked to this parent.
- */
-export function useAvailableStudentsForParent(parentId?: string) {
-  return useQuery({
-    queryKey: ['students', 'available-for-parent', parentId ?? 'new'],
-    queryFn: async () => {
-      const { data, error } = await studentsService.getAvailableStudentsForParent(parentId);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-}
-
-/**
  * Mutation hook for creating a student via the create-member Edge Function.
  */
 export function useCreateStudent() {
@@ -70,15 +55,12 @@ export function useUpdateStudent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: { classId?: string | null; parentId?: string | null; isActive?: boolean; dateOfBirth?: string } }) =>
+    mutationFn: ({ id, input }: { id: string; input: { classId?: string | null; isActive?: boolean; dateOfBirth?: string } }) =>
       studentsService.updateStudent(id, input),
     onSuccess: (_data, variables) => {
       mutationTracker.record('students', variables.id);
       queryClient.invalidateQueries({ queryKey: ['students'] });
       queryClient.invalidateQueries({ queryKey: ['students', variables.id] });
-      if (variables.input.parentId !== undefined) {
-        queryClient.invalidateQueries({ queryKey: ['parents'] });
-      }
     },
   });
 }

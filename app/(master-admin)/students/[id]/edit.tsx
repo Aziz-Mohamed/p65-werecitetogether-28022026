@@ -2,18 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Alert, Switch } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { Select } from '@/components/forms/Select';
+import { Card } from '@/components/ui/Card';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { useStudentById, useUpdateStudent } from '@/features/students/hooks/useStudents';
 import { useClasses } from '@/features/classes/hooks/useClasses';
-import { useParents } from '@/features/parents/hooks/useParents';
+import { useStudentGuardians, useAddGuardian, useDeleteGuardian } from '@/features/profile/hooks/useGuardians';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
-import { lightTheme } from '@/theme/colors';
+import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 // ─── Edit Student Screen ─────────────────────────────────────────────────────
@@ -26,18 +28,22 @@ export default function EditStudentScreen() {
   const { resolveName } = useLocalizedName();
   const { data: student, isLoading, error, refetch } = useStudentById(id);
   const { data: classes = [] } = useClasses({ isActive: true });
-  const { data: parents = [] } = useParents();
+  const { data: guardians = [] } = useStudentGuardians(id);
+  const addGuardian = useAddGuardian();
+  const deleteGuardian = useDeleteGuardian();
   const updateStudent = useUpdateStudent();
 
   const [classId, setClassId] = useState<string | null>(null);
-  const [parentId, setParentId] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(true);
   const [dateOfBirth, setDateOfBirth] = useState('');
+
+  // Guardian form
+  const [guardianName, setGuardianName] = useState('');
+  const [guardianPhone, setGuardianPhone] = useState('');
 
   useEffect(() => {
     if (student) {
       setClassId(student.class_id);
-      setParentId(student.parent_id);
       setIsActive(student.is_active);
       setDateOfBirth(student.date_of_birth ?? '');
     }
@@ -48,7 +54,6 @@ export default function EditStudentScreen() {
   if (!student) return <ErrorState description={t('admin.students.notFound')} />;
 
   const handleSave = async () => {
-    // T115: Class capacity check
     if (classId && classId !== student.class_id) {
       const targetClass = classes.find((c: any) => c.id === classId);
       if (targetClass && targetClass.max_students) {
@@ -60,11 +65,10 @@ export default function EditStudentScreen() {
       }
     }
 
-    const { data, error: updateError } = await updateStudent.mutateAsync({
+    const { error: updateError } = await updateStudent.mutateAsync({
       id: student.id,
       input: {
         classId,
-        parentId,
         isActive,
         dateOfBirth: dateOfBirth || undefined,
       },
@@ -78,14 +82,32 @@ export default function EditStudentScreen() {
     router.back();
   };
 
+  const handleAddGuardian = async () => {
+    if (!guardianName.trim()) return;
+    await addGuardian.mutateAsync({
+      studentId: id!,
+      guardianName: guardianName.trim(),
+      guardianPhone: guardianPhone.trim() || undefined,
+      isPrimary: guardians.length === 0,
+    });
+    setGuardianName('');
+    setGuardianPhone('');
+  };
+
+  const handleRemoveGuardian = (guardianId: string) => {
+    Alert.alert(t('common.confirm'), t('admin.guardians.removeConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.remove'),
+        style: 'destructive',
+        onPress: () => deleteGuardian.mutate({ id: guardianId, studentId: id! }),
+      },
+    ]);
+  };
+
   const classOptions = classes.map((c: any) => ({
     label: resolveName(c.name_localized, c.name) ?? c.name,
     value: c.id,
-  }));
-
-  const parentOptions = parents.map((p: any) => ({
-    label: resolveName(p.name_localized, p.full_name),
-    value: p.id,
   }));
 
   return (
@@ -111,14 +133,6 @@ export default function EditStudentScreen() {
           onChange={setClassId}
         />
 
-        <Select
-          label={t('admin.students.parent')}
-          placeholder={t('admin.students.parentPlaceholder')}
-          options={parentOptions}
-          value={parentId}
-          onChange={setParentId}
-        />
-
         <TextField
           label={t('admin.students.dateOfBirth')}
           value={dateOfBirth}
@@ -129,6 +143,49 @@ export default function EditStudentScreen() {
         <View style={styles.switchRow}>
           <Text style={styles.switchLabel}>{t('common.active')}</Text>
           <Switch value={isActive} onValueChange={setIsActive} />
+        </View>
+
+        {/* Guardian Management */}
+        <Text style={styles.sectionTitle}>{t('admin.guardians.title')}</Text>
+        {guardians.map((g: any) => (
+          <Card key={g.id} variant="outlined" style={styles.guardianCard}>
+            <View style={styles.guardianRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.guardianName}>{g.guardian_name}</Text>
+                {g.guardian_phone && (
+                  <Text style={styles.guardianPhone}>{g.guardian_phone}</Text>
+                )}
+              </View>
+              <Ionicons
+                name="close-circle"
+                size={22}
+                color={colors.accent.rose[400]}
+                onPress={() => handleRemoveGuardian(g.id)}
+              />
+            </View>
+          </Card>
+        ))}
+        <View style={styles.addGuardianRow}>
+          <TextField
+            label={t('admin.guardians.name')}
+            value={guardianName}
+            onChangeText={setGuardianName}
+            placeholder={t('admin.guardians.namePlaceholder')}
+          />
+          <TextField
+            label={t('admin.guardians.phone')}
+            value={guardianPhone}
+            onChangeText={setGuardianPhone}
+            placeholder={t('admin.guardians.phonePlaceholder')}
+          />
+          <Button
+            title={t('admin.guardians.add')}
+            onPress={handleAddGuardian}
+            variant="secondary"
+            size="sm"
+            loading={addGuardian.isPending}
+            disabled={!guardianName.trim()}
+          />
         </View>
 
         <Button
@@ -169,6 +226,30 @@ const styles = StyleSheet.create({
   switchLabel: {
     ...typography.textStyles.body,
     color: lightTheme.text,
+  },
+  sectionTitle: {
+    ...typography.textStyles.subheading,
+    color: lightTheme.text,
+    marginTop: spacing.sm,
+  },
+  guardianCard: {
+    padding: spacing.sm,
+  },
+  guardianRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  guardianName: {
+    ...typography.textStyles.bodyMedium,
+    color: lightTheme.text,
+  },
+  guardianPhone: {
+    ...typography.textStyles.caption,
+    color: lightTheme.textSecondary,
+  },
+  addGuardianRow: {
+    gap: spacing.sm,
   },
   submitButton: {
     marginTop: spacing.md,

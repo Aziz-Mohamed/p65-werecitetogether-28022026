@@ -111,7 +111,6 @@
     "role": {
       "student": "Student",
       "teacher": "Teacher",
-      "parent": "Parent",
       "supervisor": "Supervisor",
       "program_admin": "Program Admin",
       "master_admin": "Master Admin"
@@ -137,7 +136,6 @@
   "roles": {
     "student": "Student",
     "teacher": "Teacher",
-    "parent": "Parent",
     "supervisor": "Supervisor",
     "program_admin": "Program Admin",
     "master_admin": "Master Admin"
@@ -417,52 +415,6 @@
     "attendance": "Attendance",
     "awards": "Awards"
   },
-  "parent": {
-    "dashboard": {
-      "title": "Parent Dashboard",
-      "subtitle": "Track your children's progress",
-      "lastSession": "Last Session",
-      "todayAtAGlance": "Today's Attendance",
-      "present": "Present",
-      "absent": "Absent",
-      "notMarked": "Not Marked",
-      "absentAlert": "{{name}} was absent today",
-      "allPresent": "All children present today!",
-      "averageAttendance": "Avg Attendance",
-      "totalStickers": "Total Stickers",
-      "activeStreaks": "Active Streaks",
-      "childrenStatus": "My Children",
-      "noRecentSessions": "No recent sessions yet"
-    },
-    "myChildren": "My Children",
-    "childProgress": "Child Progress",
-    "classStanding": "Class Standing",
-    "settings": {
-      "title": "Settings",
-      "subtitle": "Manage your preferences"
-    },
-    "classStandingDesc": "Anonymous ranking — only your child is highlighted",
-    "viewAttendance": "View Attendance",
-    "attendanceCalendar": "Attendance Calendar",
-    "recentSessions": "Recent Sessions",
-    "yourChild": "Your Child",
-    "sessionDetail": {
-      "title": "Session Details",
-      "teacher": "Teacher",
-      "scores": "Scores",
-      "memorization": "Memorization",
-      "tajweed": "Tajweed",
-      "recitation": "Recitation",
-      "recitations": "Recitations",
-      "notes": "Teacher Notes",
-      "due": "Due",
-      "pending": "Pending"
-    },
-    "children": {
-      "emptyTitle": "No Children Linked",
-      "emptyDescription": "Ask your school admin to link your children to your account"
-    }
-  },
   "admin": {
     "dashboard": {
       "title": "Admin Dashboard",
@@ -478,7 +430,6 @@
     "updateRoleFailed": "Failed to update role",
     "addStudent": "Add Student",
     "addTeacher": "Add Teacher",
-    "addParent": "Add Parent",
     "addClass": "Add Class",
     "bulkAttendance": "Bulk Attendance",
     "schoolHealth": "School Health",
@@ -521,9 +472,8 @@
       "deactivateMessage": "This student will no longer be able to log in.",
       "activateTitle": "Activate Student?",
       "activateMessage": "This student will be able to log in again.",
-      "parent": "Parent",
-      "parentPlaceholder": "Select a parent (optional)",
-      "noParent": "No Parent Linked"
+      "guardian": "Guardian",
+      "noGuardian": "No Guardian Linked"
     },
     "teachers": {
       "title": "Teachers",
@@ -552,30 +502,14 @@
       "activateTitle": "Activate Teacher?",
       "activateMessage": "This teacher will be able to log in again."
     },
-    "parents": {
-      "title": "Parents",
-      "subtitle": "Manage parents in your school",
-      "searchPlaceholder": "Search parents...",
-      "emptyTitle": "No Parents Yet",
-      "emptyDescription": "Add your first parent to get started",
-      "createTitle": "Create Parent",
-      "editTitle": "Edit Parent",
-      "fullName": "Full Name",
-      "fullNamePlaceholder": "Enter parent's full name",
-      "username": "Username",
-      "usernamePlaceholder": "Enter username",
-      "password": "Password",
-      "passwordPlaceholder": "Enter password (6+ characters)",
-      "createButton": "Create Parent",
-      "requiredFields": "Full name, username, and password are required",
-      "notFound": "Parent not found",
-      "children": "children",
-      "linkedChildren": "Linked Children",
-      "noChildren": "No Children Linked",
-      "selectChildren": "Link Children",
-      "selectChildrenPlaceholder": "Select at least one student...",
-      "selectChildrenRequired": "At least one child must be linked",
-      "manageChildren": "Manage Linked Children"
+    "guardians": {
+      "title": "Guardians",
+      "name": "Guardian Name",
+      "namePlaceholder": "Enter guardian name",
+      "phone": "Phone Number",
+      "phonePlaceholder": "Enter phone number",
+      "add": "Add Guardian",
+      "removeConfirm": "Are you sure you want to remove this guardian?"
     },
     "supervisors": {
       "title": "Supervisors",
@@ -989,7 +923,6 @@
       "body": {
         "student": "Get notified when you earn stickers, trophies, and achievements.",
         "teacher": "Get morning summaries and alerts when students need attention.",
-        "parent": "Get updates on your child's attendance and achievements.",
         "admin": "Get notified about important school activity."
       },
       "enable": "Enable Notifications",

@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const VALID_ROLES = ['student', 'teacher', 'parent', 'supervisor', 'program_admin', 'master_admin'];
+const VALID_ROLES = ['student', 'teacher', 'supervisor', 'program_admin', 'master_admin'];
 
 function jsonResponse(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {

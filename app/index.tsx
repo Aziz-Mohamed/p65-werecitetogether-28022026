@@ -28,8 +28,6 @@ export default function Index() {
       return <Redirect href="/(student)/" />;
     case 'teacher':
       return <Redirect href="/(teacher)/" />;
-    case 'parent':
-      return <Redirect href="/(parent)/" />;
     case 'supervisor':
       return <Redirect href="/(supervisor)/" />;
     case 'program_admin':

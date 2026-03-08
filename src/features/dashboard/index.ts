@@ -1,7 +1,6 @@
 export type {
   StudentDashboardData,
   TeacherDashboardData,
-  ParentDashboardData,
   AdminDashboardData,
 } from './types/dashboard.types';
 

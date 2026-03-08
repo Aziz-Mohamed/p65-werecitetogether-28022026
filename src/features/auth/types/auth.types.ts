@@ -41,9 +41,8 @@ export interface CreateMemberInput {
   fullName: string;
   username: string;
   password: string;
-  role: 'student' | 'teacher' | 'parent';
+  role: 'student' | 'teacher';
   classId?: string;
-  parentId?: string;
   dateOfBirth?: string;
   nameLocalized?: Record<string, string>;
 }
@@ -60,7 +59,6 @@ export interface CreateMemberResponse {
   student?: {
     id: string;
     class_id: string | null;
-    parent_id: string | null;
     current_level: number;
   };
 }

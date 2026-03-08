@@ -2,6 +2,33 @@ import type { CategoryConfig, UserRole } from '../types/notifications.types';
 
 export const NOTIFICATION_CATEGORIES: CategoryConfig[] = [
   {
+    id: 'sticker_awarded',
+    labelKey: 'notifications.categories.stickerAwarded',
+    descriptionKey: 'notifications.categories.stickerAwardedDesc',
+    icon: 'star-outline',
+    roles: ['student'],
+    preferenceColumn: 'sticker_awarded',
+    deepLink: { screen: '/(student)/(tabs)/stickers' },
+  },
+  {
+    id: 'trophy_earned',
+    labelKey: 'notifications.categories.trophyEarned',
+    descriptionKey: 'notifications.categories.trophyEarnedDesc',
+    icon: 'trophy-outline',
+    roles: ['student'],
+    preferenceColumn: 'trophy_earned',
+    deepLink: { screen: '/(student)/trophy-room' },
+  },
+  {
+    id: 'achievement_unlocked',
+    labelKey: 'notifications.categories.achievementUnlocked',
+    descriptionKey: 'notifications.categories.achievementUnlockedDesc',
+    icon: 'ribbon-outline',
+    roles: ['student'],
+    preferenceColumn: 'achievement_unlocked',
+    deepLink: { screen: '/(student)/(tabs)/stickers' },
+  },
+  {
     id: 'session_completed',
     labelKey: 'notifications.categories.sessionCompleted',
     descriptionKey: 'notifications.categories.sessionCompletedDesc',

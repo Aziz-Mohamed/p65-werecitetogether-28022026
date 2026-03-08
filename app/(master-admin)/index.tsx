@@ -99,12 +99,6 @@ export default function MasterAdminDashboard() {
             icon="add-circle"
             color={colors.accent.violet[500]}
           />
-          <ActionButton
-            title={t('admin.addParent')}
-            onPress={() => router.push('/(master-admin)/parents/create')}
-            icon="people"
-            color={colors.accent.rose[500]}
-          />
         </View>
 
         {/* Management Navigation */}
@@ -133,12 +127,6 @@ export default function MasterAdminDashboard() {
             icon="person-circle"
             onPress={() => router.push('/(master-admin)/teachers')}
             color={colors.accent.indigo[500]}
-          />
-          <NavCard
-            title={t('admin.parents.title')}
-            icon="people"
-            onPress={() => router.push('/(master-admin)/parents')}
-            color={colors.accent.rose[500]}
           />
           <NavCard
             title={t('admin.students.title')}

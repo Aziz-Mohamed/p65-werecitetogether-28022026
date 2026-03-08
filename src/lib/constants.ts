@@ -20,7 +20,6 @@ export const APP_NAME = 'WeReciteTogether';
 export const ROLES: readonly UserRole[] = [
   'student',
   'teacher',
-  'parent',
   'supervisor',
   'program_admin',
   'master_admin',

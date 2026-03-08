@@ -7,7 +7,6 @@ import type { RoleSubscriptionProfile, RealtimeStatus } from '../types/realtime.
 import {
   buildStudentProfile,
   buildTeacherProfile,
-  buildParentProfile,
   buildAdminProfile,
 } from '../config/subscription-profiles';
 import { useRealtimeSubscription } from './useRealtimeSubscription';
@@ -18,7 +17,6 @@ import { useRealtimeSubscription } from './useRealtimeSubscription';
  *
  * - Student: needs class_id from student record
  * - Teacher: needs assigned class_ids
- * - Parent: needs linked child_ids
  * - Admin: uses school_id directly
  *
  * Skips subscription setup if profile/role is not yet available.
@@ -49,14 +47,6 @@ export function useRealtimeManager(): RealtimeStatus {
             .eq('teacher_id', userId);
           return { classIds: (data ?? []).map((c) => c.id) };
         }
-        case 'parent': {
-          const { data } = await supabase
-            .from('students')
-            .select('id')
-            .eq('parent_id', userId)
-            .eq('is_active', true);
-          return { childIds: (data ?? []).map((s) => s.id) };
-        }
         case 'master_admin':
           return {};
         default:
@@ -79,10 +69,6 @@ export function useRealtimeManager(): RealtimeStatus {
       case 'teacher': {
         const ctx = roleContext as { classIds: string[] };
         return buildTeacherProfile(userId, schoolId, ctx.classIds);
-      }
-      case 'parent': {
-        const ctx = roleContext as { childIds: string[] };
-        return buildParentProfile(userId, ctx.childIds);
       }
       case 'master_admin':
         return buildAdminProfile(schoolId);
