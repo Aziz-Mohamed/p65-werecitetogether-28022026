@@ -92,7 +92,7 @@ export function AvailabilityToggle({ eligiblePrograms }: AvailabilityToggleProps
           <Ionicons
             name={availableCount > 0 ? 'radio-button-on' : 'radio-button-off'}
             size={24}
-            color={availableCount > 0 ? '#22C55E' : colors.neutral[400]}
+            color={availableCount > 0 ? colors.primary[500] : colors.neutral[400]}
           />
         </View>
       </Card>
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     fontSize: normalize(16),
   },
   availableButton: {
-    backgroundColor: '#22C55E',
+    backgroundColor: colors.primary[500],
   },
   offlineButton: {
     backgroundColor: colors.accent.rose[50],

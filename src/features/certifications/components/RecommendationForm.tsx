@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/Button';
-import { lightTheme } from '@/theme/colors';
+import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import type { CertificationType } from '../types/certifications.types';
@@ -198,17 +198,17 @@ const styles = StyleSheet.create({
     color: lightTheme.textSecondary,
   },
   chipTextSelected: {
-    color: '#fff',
+    color: colors.white,
   },
   warningBox: {
-    backgroundColor: '#FFF3CD',
+    backgroundColor: colors.secondary[100],
     borderRadius: 8,
     padding: spacing.sm,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#FFEEBA',
+    borderColor: colors.secondary[200],
   },
   warningText: {
     ...typography.textStyles.caption,
-    color: '#856404',
+    color: colors.secondary[700],
   },
 });

@@ -30,7 +30,7 @@ export const useStudentBadges = (
     queryFn: async () => {
       const { data, error } = await gamificationService.getMilestoneBadges();
       if (error) throw error;
-      return (data ?? []) as unknown as MilestoneBadge[];
+      return (data ?? []) as MilestoneBadge[];
     },
     staleTime: 1000 * 60 * 60,
   });
@@ -40,10 +40,9 @@ export const useStudentBadges = (
 
     const earnedMap = new Map<string, { earned_at: string; program_id: string | null }>();
     for (const earned of earnedQuery.data ?? []) {
-      const record = earned as Record<string, unknown>;
-      earnedMap.set(record.badge_id as string, {
-        earned_at: record.earned_at as string,
-        program_id: (record.program_id as string) ?? null,
+      earnedMap.set(earned.badge_id, {
+        earned_at: earned.earned_at,
+        program_id: earned.program_id ?? null,
       });
     }
 

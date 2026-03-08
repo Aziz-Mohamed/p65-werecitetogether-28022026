@@ -232,7 +232,7 @@ class GamificationService {
    */
   async getMilestoneBadges() {
     return supabase
-      .from('milestone_badges' as never)
+      .from('milestone_badges')
       .select('*')
       .order('sort_order');
   }
@@ -243,8 +243,8 @@ class GamificationService {
    */
   async getStudentBadges(studentId: string, programId?: string) {
     let query = supabase
-      .from('student_badges' as never)
-      .select('*, milestone_badges(*)' as never)
+      .from('student_badges')
+      .select('*, milestone_badges(*)')
       .eq('student_id', studentId);
 
     if (programId) {
@@ -258,19 +258,19 @@ class GamificationService {
    * GS-019: Check and award session milestones after a session is saved.
    */
   async checkSessionMilestones(studentId: string, programId: string) {
-    return supabase.rpc('check_session_milestones' as never, {
+    return supabase.rpc('check_session_milestones', {
       p_student_id: studentId,
       p_program_id: programId,
-    } as never);
+    });
   }
 
   /**
    * GS-020: Get rewards dashboard data for a program.
    */
   async getRewardsDashboard(programId: string) {
-    return supabase.rpc('get_rewards_dashboard' as never, {
+    return supabase.rpc('get_rewards_dashboard', {
       p_program_id: programId,
-    } as never);
+    });
   }
 }
 

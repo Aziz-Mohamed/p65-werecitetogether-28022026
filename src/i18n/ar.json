@@ -925,11 +925,14 @@
       "assignRole": "إضافة عضو",
       "removeRole": "إزالة",
       "deactivate": "تعطيل",
-      "reactivate": "تفعيل"
+      "reactivate": "تفعيل",
+      "joinWaitlist": "الانضمام لقائمة الانتظار",
+      "cancelWaitlist": "إلغاء الانتظار"
     },
     "labels": {
       "tracks": "المسارات",
       "cohorts": "الدفعات",
+      "waitlist": "قائمة الانتظار",
       "enrollments": "التسجيلات",
       "team": "الفريق",
       "students": "الطلاب",
@@ -1024,6 +1027,38 @@
       "manageTeam": "إدارة الفريق",
       "pendingApprovals": "الموافقات المعلّقة",
       "allPrograms": "جميع البرامج"
+    },
+    "waitlist": {
+      "promoteTitle": "ترقية من قائمة الانتظار",
+      "promoteBody": "سيتم عرض مقعد على الطالب التالي في القائمة. لديه ٤٨ ساعة للقبول.",
+      "promoteNext": "ترقية التالي",
+      "empty": "لا يوجد أحد في قائمة الانتظار",
+      "expiresAt": "ينتهي العرض: {{date}}",
+      "status": {
+        "waiting": "بالانتظار",
+        "offered": "تم العرض"
+      }
+    }
+  },
+  "mutoon": {
+    "title": "تقدّم المتون",
+    "empty": "لا يوجد تقدّم بعد",
+    "emptyDesc": "سيقوم معلّمك بإعداد مسارات النصوص. سيظهر التقدّم هنا بمجرد البدء.",
+    "linesCompleted": "{{count}} سطر",
+    "reviews": "{{count}} مراجعات",
+    "certifiedOn": "أُجيز بتاريخ {{date}}",
+    "status": {
+      "in_progress": "قيد التقدّم",
+      "completed": "مكتمل",
+      "certified": "مُجاز"
+    },
+    "teacher": {
+      "trackProgress": "تقدّم الطلاب",
+      "noStudents": "لا يوجد تقدّم للطلاب",
+      "advanceLine": "تقديم سطر",
+      "certify": "إجازة",
+      "certifyTitle": "إجازة الإكمال",
+      "certifyBody": "تأكيد إجازة حفظ {{name}}؟ لا يمكن التراجع عن هذا الإجراء."
     }
   },
   "availability": {

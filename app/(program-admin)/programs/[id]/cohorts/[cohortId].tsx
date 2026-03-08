@@ -11,9 +11,10 @@ import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useCohortEnrollments, useUpdateEnrollmentStatus } from '@/features/programs/hooks/useAdminEnrollments';
 import { useUpdateCohortStatus, useBulkApproveEnrollments } from '@/features/programs/hooks/useAdminCohorts';
 import { useCohorts } from '@/features/programs/hooks/useCohorts';
+import { useCohortWaitlist } from '@/features/programs/hooks/useWaitlist';
 import { getNextCohortStatus } from '@/features/programs/utils/enrollment-helpers';
 import { typography } from '@/theme/typography';
-import { lightTheme } from '@/theme/colors';
+import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import type { CohortStatus } from '@/features/programs/types/programs.types';
 
@@ -26,6 +27,7 @@ export default function CohortDetailScreen() {
   const cohort = cohorts?.find((c) => c.id === cohortId);
 
   const { data: enrollments = [], isLoading, error, refetch } = useCohortEnrollments(cohortId);
+  const { data: waitlist = [] } = useCohortWaitlist(cohortId);
   const updateCohortStatus = useUpdateCohortStatus(id!);
   const updateEnrollment = useUpdateEnrollmentStatus();
   const bulkApprove = useBulkApproveEnrollments(id!);
@@ -89,6 +91,20 @@ export default function CohortDetailScreen() {
               />
             )}
           </View>
+        )}
+
+        {waitlist.length > 0 && (
+          <Button
+            title={`${t('programs.labels.waitlist')} (${waitlist.length})`}
+            onPress={() =>
+              router.push({
+                pathname: '/(program-admin)/waitlist/[cohortId]',
+                params: { cohortId: cohortId! },
+              })
+            }
+            variant="secondary"
+            size="sm"
+          />
         )}
 
         <Text style={styles.sectionTitle}>{t('programs.labels.enrollments')}</Text>

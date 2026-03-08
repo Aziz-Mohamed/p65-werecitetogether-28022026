@@ -18,6 +18,7 @@ export default function ProgramAdminLayout() {
       <Stack.Screen name="certifications/index" />
       <Stack.Screen name="certifications/[id]" />
       <Stack.Screen name="rewards/index" />
+      <Stack.Screen name="waitlist/[cohortId]" />
     </Stack>
   );
 }

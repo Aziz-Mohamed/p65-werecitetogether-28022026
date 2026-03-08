@@ -61,90 +61,24 @@ export default function StudentProfile() {
           <Badge label={t('roles.student')} variant={theme.tag as any} size="md" />
         </Card>
 
-        <Text style={styles.sectionTitle}>{t('profile.demographics')}</Text>
-
-        <Card variant="default" style={styles.infoCard}>
-          <InfoRow
-            icon="person-outline"
-            label={t('onboarding.gender')}
-            value={profile?.gender ? t(`onboarding.${profile.gender}`) : '—'}
-          />
-          <InfoRow
-            icon="calendar-outline"
-            label={t('onboarding.ageRange')}
-            value={
-              profile?.age_range
-                ? t(`onboarding.ageRanges.${profile.age_range}`)
-                : '—'
-            }
-          />
-          <InfoRow
-            icon="globe-outline"
-            label={t('onboarding.country')}
-            value={profile?.country || '—'}
-          />
-          {profile?.region && (
-            <InfoRow
-              icon="location-outline"
-              label={t('onboarding.region')}
-              value={profile.region}
-            />
-          )}
+        {/* Badges */}
+        <Card
+          variant="default"
+          style={styles.settingCard}
+          onPress={() => router.push('/(student)/profile/badges')}
+        >
+          <View style={styles.settingRow}>
+            <View style={styles.settingLabelContainer}>
+              <View style={[styles.settingIcon, { backgroundColor: colors.secondary[50] }]}>
+                <Ionicons name="ribbon" size={20} color={colors.secondary[500]} />
+              </View>
+              <Text style={styles.settingLabel}>{t('gamification.badges.title')}</Text>
+            </View>
+            <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={20} color={colors.neutral[300]} />
+          </View>
         </Card>
 
-        {/* Guardians Section */}
-        <View style={styles.guardianHeader}>
-          <Text style={styles.sectionTitle}>{t('guardians.title')}</Text>
-          <Button
-            variant="secondary"
-            size="sm"
-            onPress={() => {
-              setEditingGuardian(null);
-              setShowGuardianForm(!showGuardianForm);
-            }}
-            title={showGuardianForm ? t('common.cancel') : t('guardians.addGuardian')}
-          />
-        </View>
-
-        {showGuardianForm && (
-          <Card variant="default" style={styles.infoCard}>
-            <GuardianForm
-              studentId={profile?.id}
-              mode={editingGuardian ? 'edit' : 'create'}
-              initialValues={editingGuardian ? {
-                guardian_name: editingGuardian.guardian_name,
-                guardian_phone: editingGuardian.guardian_phone ?? '',
-                guardian_email: editingGuardian.guardian_email ?? '',
-                relationship: editingGuardian.relationship as any,
-                is_primary: editingGuardian.is_primary,
-              } : undefined}
-              loading={addGuardianMutation.isPending || updateGuardianMutation.isPending}
-              onSubmit={(values) => {
-                if (editingGuardian) {
-                  updateGuardianMutation.mutate(
-                    { guardianId: editingGuardian.id, input: values },
-                    { onSuccess: () => { setShowGuardianForm(false); setEditingGuardian(null); } },
-                  );
-                } else {
-                  addGuardianMutation.mutate(values as any, {
-                    onSuccess: () => setShowGuardianForm(false),
-                  });
-                }
-              }}
-            />
-          </Card>
-        )}
-
-        <GuardianList
-          guardians={guardians}
-          onEdit={(guardian) => {
-            setEditingGuardian(guardian);
-            setShowGuardianForm(true);
-          }}
-          onRemove={(id) => removeGuardianMutation.mutate(id)}
-          removeLoading={removeGuardianMutation.isPending}
-        />
-
+        {/* Settings Group */}
         <Text style={styles.sectionTitle}>{t('common.settings')}</Text>
 
         <Card variant="default" style={styles.settingCard} onPress={toggleLanguage}>

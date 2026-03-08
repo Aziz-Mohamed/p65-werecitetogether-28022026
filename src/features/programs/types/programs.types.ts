@@ -198,3 +198,28 @@ export interface AssignRoleInput {
   programId: string;
   role: ProgramRoleType;
 }
+
+// ─── Waitlist Types ───────────────────────────────────────────────────────────
+
+export type WaitlistStatus = 'waiting' | 'offered' | 'accepted' | 'expired' | 'cancelled';
+
+export interface WaitlistEntry {
+  id: string;
+  student_id: string;
+  program_id: string;
+  cohort_id: string;
+  track_id: string | null;
+  position: number;
+  status: WaitlistStatus;
+  notified_at: string | null;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WaitlistEntryWithStudent extends WaitlistEntry {
+  profiles: {
+    id: string;
+    full_name: string;
+  } | null;
+}

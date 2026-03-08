@@ -16,6 +16,7 @@ export default function TeacherLayout() {
         <Stack.Screen name="schedule/[id]/index" />
         <Stack.Screen name="schedule/[id]/workspace" />
         <Stack.Screen name="availability" />
+        <Stack.Screen name="mutoon/[trackId]" />
       </Stack>
     </ErrorBoundary>
   );
