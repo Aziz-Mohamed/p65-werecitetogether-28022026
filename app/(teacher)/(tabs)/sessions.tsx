@@ -107,7 +107,7 @@ export default function SessionsScreen() {
                 onPress={handleOpenCreateSheet}
                 accessibilityLabel={t('scheduling.createSession')}
               >
-                <Ionicons name="add" size={22} color={colors.primary[600]} />
+                <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
               </Pressable>
             )}
           </View>
@@ -336,8 +336,6 @@ const styles = StyleSheet.create({
   addButton: {
     width: normalize(38),
     height: normalize(38),
-    borderRadius: radius.sm,
-    backgroundColor: colors.primary[50],
     alignItems: 'center',
     justifyContent: 'center',
   },

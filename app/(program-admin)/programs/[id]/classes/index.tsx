@@ -1,13 +1,13 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { Pressable, StyleSheet, View, Text } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
-import { Button, Badge } from '@/components/ui';
+import { Badge } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useProgramClasses } from '@/features/programs/hooks/useClasses';
 import { colors } from '@/theme/colors';
@@ -29,17 +29,18 @@ export default function ClassListScreen() {
   return (
     <Screen scroll={false}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title}>{t('programs.labels.classes')}</Text>
-          <Button
-            title={t('common.create')}
-            onPress={() => router.push(`/(program-admin)/programs/${id}/classes/create`)}
-            variant="primary"
-            size="sm"
-            icon={<Ionicons name="add" size={18} color={colors.white} />}
-          />
-        </View>
+        <PageHeader
+          title={t('programs.labels.classes')}
+          rightAction={
+            <Pressable
+              onPress={() => router.push(`/(program-admin)/programs/${id}/classes/create`)}
+              hitSlop={8}
+              style={styles.addButton}
+            >
+              <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
+            </Pressable>
+          }
+        />
 
         {classes.length === 0 ? (
           <EmptyState
@@ -102,16 +103,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
+  addButton: {
+    width: normalize(38),
+    height: normalize(38),
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
+    justifyContent: 'center',
   },
   card: {
     marginBottom: spacing.sm,

@@ -43,7 +43,7 @@ export default function AdminTeachersScreen() {
               onPress={() => router.push('/(master-admin)/teachers/create')}
               hitSlop={8}
             >
-              <Ionicons name="add" size={24} color={lightTheme.text} />
+              <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
             </Pressable>
           }
         />

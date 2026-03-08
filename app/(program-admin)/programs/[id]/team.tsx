@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Alert } from 'react-native';
+import { Pressable, StyleSheet, View, Text, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Button, Badge, TextField } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useProgramRoles, useAssignProgramRole, useRemoveProgramRole } from '@/features/programs/hooks/useProgramRoles';
 import { useAuthStore } from '@/stores/authStore';
 import { typography } from '@/theme/typography';
-import { lightTheme } from '@/theme/colors';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { normalize } from '@/theme/normalize';
 import type { ProgramRoleWithProfile, ProgramRoleType } from '@/features/programs/types/programs.types';
 
 export default function TeamManagementScreen() {
@@ -74,16 +76,18 @@ export default function TeamManagementScreen() {
   return (
     <Screen scroll={false}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title}>{t('programs.labels.team')}</Text>
-          <Button
-            title={t('common.add')}
-            onPress={() => setShowAddForm(!showAddForm)}
-            variant="primary"
-            size="sm"
-          />
-        </View>
+        <PageHeader
+          title={t('programs.labels.team')}
+          rightAction={
+            <Pressable
+              onPress={() => setShowAddForm(!showAddForm)}
+              hitSlop={8}
+              style={styles.addButton}
+            >
+              <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
+            </Pressable>
+          }
+        />
 
         {showAddForm && (
           <Card variant="outlined" style={styles.form}>
@@ -160,16 +164,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
+  addButton: {
+    width: normalize(38),
+    height: normalize(38),
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
+    justifyContent: 'center',
   },
   form: {
     gap: spacing.md,
