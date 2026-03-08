@@ -1602,8 +1602,13 @@
     "programDetail": "تفاصيل البرنامج",
     "category": {
       "free": "حر",
-      "structured": "مقيّد",
-      "mixed": "مختلط"
+      "structured": "منظّم"
+    },
+    "sections": {
+      "open": "القسم الحر",
+      "structured": "القسم المنظم",
+      "openDescription": "مفتوح للانضمام في أي وقت — بدون فصول أو مواعيد منظمة",
+      "structuredDescription": "فصول بمواعيد محددة وعدد طلاب لكل فصل"
     },
     "status": {
       "pending": "بانتظار الموافقة",

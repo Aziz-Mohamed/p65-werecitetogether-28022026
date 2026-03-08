@@ -35,7 +35,7 @@ export default function AvailabilityScreen() {
     return programRoles
       .filter((pr) => {
         const cat = pr.programs?.category;
-        return cat === 'free' || cat === 'mixed';
+        return cat === 'free';
       })
       .map((pr) => ({
         program_id: pr.program_id,
