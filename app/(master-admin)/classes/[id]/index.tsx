@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, Alert } from 'react-native';
+import { I18nManager, StyleSheet, View, Text, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -98,17 +98,25 @@ export default function ClassDetailScreen() {
           />
         ) : (
           students.map((s: any) => (
-            <Card key={s.id} variant="outlined" style={styles.studentCard}>
+            <Card
+              key={s.id}
+              variant="outlined"
+              style={styles.studentCard}
+              onPress={() => router.push(`/(master-admin)/students/${s.id}`)}
+            >
               <View style={styles.studentRow}>
                 <Text style={styles.studentName}>
                   {resolveName(s.profiles?.name_localized, s.profiles?.full_name) ?? '—'}
                 </Text>
-                <Button
-                  title={t('common.remove')}
-                  onPress={() => handleRemoveStudent(s.id, resolveName(s.profiles?.name_localized, s.profiles?.full_name) ?? '—')}
-                  variant="ghost"
-                  size="sm"
-                />
+                <View style={styles.studentActions}>
+                  <Button
+                    title={t('common.remove')}
+                    onPress={() => handleRemoveStudent(s.id, resolveName(s.profiles?.name_localized, s.profiles?.full_name) ?? '—')}
+                    variant="ghost"
+                    size="sm"
+                  />
+                  <Ionicons name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.neutral[300]} />
+                </View>
               </View>
             </Card>
           ))
@@ -186,6 +194,11 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: lightTheme.text,
     flex: 1,
+  },
+  studentActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
   actions: {
     flexDirection: 'row',
