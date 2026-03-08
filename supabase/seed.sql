@@ -74,15 +74,21 @@ DECLARE
   _prog1 UUID;  -- Alternating Recitation
   _prog2 UUID;  -- Children's Program
   _prog3 UUID;  -- Non-Arabic Speakers
+  _prog4 UUID;  -- Qiraat Program
   _prog5 UUID;  -- Mutoon Program
+  _prog6 UUID;  -- Arabic Language
   _prog7 UUID;  -- Quran Memorization
-  _prog8 UUID;  -- Himam Marathon
+  _prog8 UUID;  -- Himam Quranic Marathon
 
-  -- ── Track IDs ──
-  _track_p1_1 UUID;  _track_p1_2 UUID;
+  -- ── Track IDs (looked up by name_ar for deterministic results after 00026) ──
+  _track_p1_quran_students UUID;  -- "Students" child under Quran Section
+  _track_p1_mutoon UUID;          -- "Mutoon Section" flat track
   _track_p2_1 UUID;  _track_p2_2 UUID;  _track_p2_3 UUID;
-  _track_p5_2 UUID;
-  _track_p7_1 UUID;  _track_p7_3 UUID;
+  _track_p4_1 UUID;  -- Hafs from Asim
+  _track_p5_2 UUID;  -- Tuhfat Al-Atfal
+  _track_p6_1 UUID;  -- Al-Ajrumiyyah
+  _track_p7_memorization UUID;  -- Memorization flat track
+  _track_p7_mateen10 UUID;      -- Mateen 10 child under Revision
 
   -- ── Class IDs ──
   _class_a UUID := gen_random_uuid();
@@ -91,6 +97,8 @@ DECLARE
   _class_d UUID := gen_random_uuid();
   _class_e UUID := gen_random_uuid();
   _class_f UUID := gen_random_uuid();
+  _class_g UUID := gen_random_uuid();  -- Qiraat class
+  _class_h UUID := gen_random_uuid();  -- Arabic Language class
 
   -- ── Session IDs (for FK references) ──
   _sess1 UUID := gen_random_uuid();
@@ -119,6 +127,28 @@ DECLARE
   _sess24 UUID := gen_random_uuid();
   _sess25 UUID := gen_random_uuid();
 
+  -- ── Scheduled Session IDs ──
+  _sched1  UUID := gen_random_uuid();
+  _sched2  UUID := gen_random_uuid();
+  _sched3  UUID := gen_random_uuid();
+  _sched4  UUID := gen_random_uuid();
+  _sched5  UUID := gen_random_uuid();
+  _sched6  UUID := gen_random_uuid();
+  _sched7  UUID := gen_random_uuid();
+  _sched8  UUID := gen_random_uuid();
+  _sched9  UUID := gen_random_uuid();
+  _sched10 UUID := gen_random_uuid();
+  _sched11 UUID := gen_random_uuid();
+  _sched12 UUID := gen_random_uuid();
+  _sched13 UUID := gen_random_uuid();
+  _sched14 UUID := gen_random_uuid();
+  _sched15 UUID := gen_random_uuid();
+  _sched16 UUID := gen_random_uuid();
+  _sched17 UUID := gen_random_uuid();
+  _sched18 UUID := gen_random_uuid();
+  _sched19 UUID := gen_random_uuid();
+  _sched20 UUID := gen_random_uuid();
+
   -- ── Himam IDs ──
   _himam_event1 UUID := gen_random_uuid();
   _himam_event2 UUID := gen_random_uuid();
@@ -139,6 +169,11 @@ DECLARE
   _sticker4 TEXT := 'book_diamond';
   _sticker5 TEXT := 'lamp_gold';
   _sticker6 TEXT := 'quran_seasonal';
+
+  -- ── Class Schedule IDs (looked up after insert) ──
+  _cs_a_sun UUID;  _cs_a_tue UUID;  _cs_a_thu UUID;
+  _cs_b_sun UUID;  _cs_b_mon UUID;  _cs_b_wed UUID;
+  _cs_c_sat UUID;  _cs_c_mon UUID;  _cs_c_wed UUID;
 
 BEGIN
   -- ════════════════════════════════════════════════════════════════════════════
@@ -317,6 +352,9 @@ BEGIN
     current_streak = EXCLUDED.current_streak,
     longest_streak = EXCLUDED.longest_streak;
 
+  -- Beginners/new students cannot self-assign
+  UPDATE students SET can_self_assign = false WHERE id IN (_student4, _student7);
+
   -- ════════════════════════════════════════════════════════════════════════════
   -- SECTION 5: Look up program & track IDs from migrations
   -- ════════════════════════════════════════════════════════════════════════════
@@ -324,40 +362,61 @@ BEGIN
   SELECT id INTO _prog1 FROM programs WHERE sort_order = 1; -- Alternating Recitation
   SELECT id INTO _prog2 FROM programs WHERE sort_order = 2; -- Children's Program
   SELECT id INTO _prog3 FROM programs WHERE sort_order = 3; -- Non-Arabic Speakers
+  SELECT id INTO _prog4 FROM programs WHERE sort_order = 4; -- Qiraat Program
   SELECT id INTO _prog5 FROM programs WHERE sort_order = 5; -- Mutoon Program
+  SELECT id INTO _prog6 FROM programs WHERE sort_order = 6; -- Arabic Language
   SELECT id INTO _prog7 FROM programs WHERE sort_order = 7; -- Quran Memorization
-  SELECT id INTO _prog8 FROM programs WHERE sort_order = 8; -- Himam Marathon
+  SELECT id INTO _prog8 FROM programs WHERE sort_order = 8; -- Himam Quranic Marathon
 
   IF _prog1 IS NULL THEN
     RAISE NOTICE 'Seed: programs not found, skipping';
     RETURN;
   END IF;
 
-  -- Tracks for Alternating Recitation
-  SELECT id INTO _track_p1_1 FROM program_tracks WHERE program_id = _prog1 AND sort_order = 1;
-  SELECT id INTO _track_p1_2 FROM program_tracks WHERE program_id = _prog1 AND sort_order = 2;
+  -- Program 1: Alternating Recitation (restructured in 00026 — use name_ar)
+  SELECT id INTO _track_p1_mutoon FROM program_tracks
+    WHERE program_id = _prog1 AND name_ar = 'قسم المتون' AND is_active = true;
+  SELECT id INTO _track_p1_quran_students FROM program_tracks
+    WHERE program_id = _prog1 AND name_ar = 'طلاب' AND is_active = true;
 
-  -- Tracks for Children's Program
-  SELECT id INTO _track_p2_1 FROM program_tracks WHERE program_id = _prog2 AND sort_order = 1;
-  SELECT id INTO _track_p2_2 FROM program_tracks WHERE program_id = _prog2 AND sort_order = 2;
-  SELECT id INTO _track_p2_3 FROM program_tracks WHERE program_id = _prog2 AND sort_order = 3;
+  -- Program 2: Children's Program (unchanged)
+  SELECT id INTO _track_p2_1 FROM program_tracks
+    WHERE program_id = _prog2 AND sort_order = 1 AND is_active = true AND parent_track_id IS NULL;
+  SELECT id INTO _track_p2_2 FROM program_tracks
+    WHERE program_id = _prog2 AND sort_order = 2 AND is_active = true AND parent_track_id IS NULL;
+  SELECT id INTO _track_p2_3 FROM program_tracks
+    WHERE program_id = _prog2 AND sort_order = 3 AND is_active = true AND parent_track_id IS NULL;
 
-  -- Track for Mutoon
-  SELECT id INTO _track_p5_2 FROM program_tracks WHERE program_id = _prog5 AND sort_order = 2;
+  -- Program 4: Qiraat
+  SELECT id INTO _track_p4_1 FROM program_tracks
+    WHERE program_id = _prog4 AND sort_order = 1 AND is_active = true;
 
-  -- Tracks for Quran Memorization
-  SELECT id INTO _track_p7_1 FROM program_tracks WHERE program_id = _prog7 AND sort_order = 1;
-  SELECT id INTO _track_p7_3 FROM program_tracks WHERE program_id = _prog7 AND sort_order = 3;
+  -- Program 5: Mutoon (Free Section deactivated in 00026, Tuhfat still sort_order 2)
+  SELECT id INTO _track_p5_2 FROM program_tracks
+    WHERE program_id = _prog5 AND sort_order = 2 AND is_active = true;
+
+  -- Program 6: Arabic Language
+  SELECT id INTO _track_p6_1 FROM program_tracks
+    WHERE program_id = _prog6 AND sort_order = 1 AND is_active = true;
+
+  -- Program 7: Quran Memorization (restructured in 00026 — use name_ar)
+  SELECT id INTO _track_p7_memorization FROM program_tracks
+    WHERE program_id = _prog7 AND name_ar = 'تحفيظ' AND is_active = true;
+  SELECT id INTO _track_p7_mateen10 FROM program_tracks
+    WHERE program_id = _prog7 AND name_ar = 'متين ١٠ أجزاء' AND is_active = true;
 
   -- ════════════════════════════════════════════════════════════════════════════
   -- SECTION 6: Program roles (staff assignments)
   -- ════════════════════════════════════════════════════════════════════════════
 
-  -- Program admin on multiple programs
+  -- Program admin on all programs
   INSERT INTO program_roles (profile_id, program_id, role, assigned_by) VALUES
     (_pa1, _prog1, 'program_admin', _ma1),
     (_pa1, _prog2, 'program_admin', _ma1),
+    (_pa1, _prog3, 'program_admin', _ma1),
+    (_pa1, _prog4, 'program_admin', _ma1),
     (_pa1, _prog5, 'program_admin', _ma1),
+    (_pa1, _prog6, 'program_admin', _ma1),
     (_pa1, _prog7, 'program_admin', _ma1),
     (_pa1, _prog8, 'program_admin', _ma1)
   ON CONFLICT (profile_id, program_id, role) DO NOTHING;
@@ -365,36 +424,46 @@ BEGIN
   -- Supervisors
   INSERT INTO program_roles (profile_id, program_id, role, assigned_by) VALUES
     (_supervisor1, _prog1, 'supervisor', _pa1),
+    (_supervisor1, _prog4, 'supervisor', _pa1),
     (_supervisor1, _prog7, 'supervisor', _pa1),
     (_supervisor2, _prog2, 'supervisor', _pa1),
-    (_supervisor2, _prog5, 'supervisor', _pa1)
+    (_supervisor2, _prog3, 'supervisor', _pa1),
+    (_supervisor2, _prog5, 'supervisor', _pa1),
+    (_supervisor2, _prog6, 'supervisor', _pa1)
   ON CONFLICT (profile_id, program_id, role) DO NOTHING;
 
   -- Teachers (with supervisor linkage)
   INSERT INTO program_roles (profile_id, program_id, role, assigned_by, supervisor_id) VALUES
     (_teacher1, _prog1, 'teacher', _pa1, _supervisor1),
+    (_teacher1, _prog4, 'teacher', _pa1, _supervisor1),
     (_teacher1, _prog7, 'teacher', _pa1, _supervisor1),
     (_teacher2, _prog1, 'teacher', _pa1, _supervisor1),
     (_teacher3, _prog2, 'teacher', _pa1, _supervisor2),
+    (_teacher3, _prog3, 'teacher', _pa1, _supervisor2),
+    (_teacher3, _prog6, 'teacher', _pa1, _supervisor2),
     (_teacher4, _prog2, 'teacher', _pa1, _supervisor2),
     (_teacher4, _prog5, 'teacher', _pa1, _supervisor2)
   ON CONFLICT (profile_id, program_id, role) DO NOTHING;
 
   -- ════════════════════════════════════════════════════════════════════════════
-  -- SECTION 7: Classes (6 classes across programs)
+  -- SECTION 7: Classes (8 classes across programs)
   -- ════════════════════════════════════════════════════════════════════════════
 
   INSERT INTO classes (id, school_id, name, teacher_id, max_students, is_active, program_id, track_id, status, supervisor_id, start_date, meeting_link) VALUES
-    -- Alternating Recitation classes
-    (_class_a, _school_id, 'Morning Circle A',  _teacher1, 10, true, _prog1, _track_p1_1, 'in_progress',     _supervisor1, CURRENT_DATE - 30, 'https://meet.google.com/class-a'),
-    (_class_b, _school_id, 'Evening Circle B',  _teacher2, 8,  true, _prog1, _track_p1_2, 'in_progress',     _supervisor1, CURRENT_DATE - 20, 'https://meet.google.com/class-b'),
+    -- Alternating Recitation classes (Quran Section > Students track)
+    (_class_a, _school_id, 'Morning Circle A',  _teacher1, 10, true, _prog1, _track_p1_quran_students, 'in_progress',     _supervisor1, CURRENT_DATE - 30, 'https://meet.google.com/class-a'),
+    (_class_b, _school_id, 'Evening Circle B',  _teacher2, 8,  true, _prog1, _track_p1_quran_students, 'in_progress',     _supervisor1, CURRENT_DATE - 20, 'https://meet.google.com/class-b'),
     -- Children's Program classes
     (_class_c, _school_id, 'Talqeen Group 1',   _teacher3, 12, true, _prog2, _track_p2_1, 'in_progress',     _supervisor2, CURRENT_DATE - 60, 'https://zoom.us/j/class-c'),
     (_class_d, _school_id, 'Nooraniah Group',   _teacher4, 10, true, _prog2, _track_p2_2, 'enrollment_open', _supervisor2, CURRENT_DATE - 10, 'https://zoom.us/j/class-d'),
-    -- Quran Memorization class
-    (_class_e, _school_id, 'Mateen 10 - Batch 1', _teacher1, 6, true, _prog7, _track_p7_1, 'in_progress',   _supervisor1, CURRENT_DATE - 45, 'https://meet.google.com/class-e'),
+    -- Quran Memorization class (Mateen 10 track)
+    (_class_e, _school_id, 'Mateen 10 - Batch 1', _teacher1, 6, true, _prog7, _track_p7_mateen10, 'in_progress', _supervisor1, CURRENT_DATE - 45, 'https://meet.google.com/class-e'),
     -- Mutoon class
-    (_class_f, _school_id, 'Tuhfat Al-Atfal A', _teacher4, 8, true, _prog5, _track_p5_2, 'enrollment_open', _supervisor2, CURRENT_DATE - 5,  'https://zoom.us/j/class-f')
+    (_class_f, _school_id, 'Tuhfat Al-Atfal A', _teacher4, 8, true, _prog5, _track_p5_2, 'enrollment_open', _supervisor2, CURRENT_DATE - 5,  'https://zoom.us/j/class-f'),
+    -- Qiraat class
+    (_class_g, _school_id, 'Hafs Recitation',    _teacher1, 6, true, _prog4, _track_p4_1, 'in_progress',     _supervisor1, CURRENT_DATE - 25, 'https://meet.google.com/class-g'),
+    -- Arabic Language class
+    (_class_h, _school_id, 'Al-Ajrumiyyah Beginners', _teacher3, 10, true, _prog6, _track_p6_1, 'in_progress', _supervisor2, CURRENT_DATE - 15, 'https://zoom.us/j/class-h')
   ON CONFLICT (id) DO NOTHING;
 
   -- ════════════════════════════════════════════════════════════════════════════
@@ -403,27 +472,33 @@ BEGIN
 
   INSERT INTO enrollments (student_id, program_id, track_id, class_id, teacher_id, status, enrolled_at) VALUES
     -- Alternating Recitation — Morning Circle A (Teacher 1)
-    (_student1, _prog1, _track_p1_1, _class_a, _teacher1, 'active',    now() - INTERVAL '80 days'),
-    (_student2, _prog1, _track_p1_1, _class_a, _teacher1, 'active',    now() - INTERVAL '55 days'),
-    (_student3, _prog1, _track_p1_1, _class_a, _teacher1, 'active',    now() - INTERVAL '100 days'),
-    (_student6, _prog1, _track_p1_1, _class_a, _teacher1, 'active',    now() - INTERVAL '180 days'),
+    (_student1, _prog1, _track_p1_quran_students, _class_a, _teacher1, 'active',    now() - INTERVAL '80 days'),
+    (_student2, _prog1, _track_p1_quran_students, _class_a, _teacher1, 'active',    now() - INTERVAL '55 days'),
+    (_student3, _prog1, _track_p1_quran_students, _class_a, _teacher1, 'active',    now() - INTERVAL '100 days'),
+    (_student6, _prog1, _track_p1_quran_students, _class_a, _teacher1, 'active',    now() - INTERVAL '180 days'),
     -- Alternating Recitation — Evening Circle B (Teacher 2)
-    (_student4, _prog1, _track_p1_2, _class_b, _teacher2, 'active',    now() - INTERVAL '18 days'),
-    (_student5, _prog1, _track_p1_2, _class_b, _teacher2, 'active',    now() - INTERVAL '40 days'),
-    (_student8, _prog1, _track_p1_2, _class_b, _teacher2, 'active',    now() - INTERVAL '65 days'),
+    (_student4, _prog1, _track_p1_quran_students, _class_b, _teacher2, 'active',    now() - INTERVAL '18 days'),
+    (_student5, _prog1, _track_p1_quran_students, _class_b, _teacher2, 'active',    now() - INTERVAL '40 days'),
+    (_student8, _prog1, _track_p1_quran_students, _class_b, _teacher2, 'active',    now() - INTERVAL '65 days'),
     -- Children's Program — Talqeen (Teacher 3)
     (_student7, _prog2, _track_p2_1, _class_c, _teacher3, 'active',    now() - INTERVAL '12 days'),
     -- Children's Program — Nooraniah (Teacher 4) — one waitlisted
     (_student5, _prog2, _track_p2_2, _class_d, _teacher4, 'active',    now() - INTERVAL '8 days'),
-    -- Quran Memorization (Teacher 1)
-    (_student3, _prog7, _track_p7_1, _class_e, _teacher1, 'active',    now() - INTERVAL '40 days'),
-    (_student6, _prog7, _track_p7_1, _class_e, _teacher1, 'active',    now() - INTERVAL '40 days'),
+    -- Quran Memorization — Mateen 10 (Teacher 1)
+    (_student3, _prog7, _track_p7_mateen10, _class_e, _teacher1, 'active',    now() - INTERVAL '40 days'),
+    (_student6, _prog7, _track_p7_mateen10, _class_e, _teacher1, 'active',    now() - INTERVAL '40 days'),
     -- Mutoon (Teacher 4)
     (_student1, _prog5, _track_p5_2, _class_f, _teacher4, 'active',    now() - INTERVAL '3 days'),
+    -- Qiraat — Hafs (Teacher 1)
+    (_student6, _prog4, _track_p4_1, _class_g, _teacher1, 'active',    now() - INTERVAL '20 days'),
+    (_student3, _prog4, _track_p4_1, _class_g, _teacher1, 'active',    now() - INTERVAL '15 days'),
+    -- Arabic Language — Al-Ajrumiyyah (Teacher 3)
+    (_student2, _prog6, _track_p6_1, _class_h, _teacher3, 'active',    now() - INTERVAL '10 days'),
+    (_student4, _prog6, _track_p6_1, _class_h, _teacher3, 'active',    now() - INTERVAL '10 days'),
     -- Completed enrollment
     (_student8, _prog2, _track_p2_3, NULL,     _teacher3, 'completed', now() - INTERVAL '200 days'),
     -- Dropped enrollment
-    (_student4, _prog7, _track_p7_3, NULL,     _teacher1, 'dropped',   now() - INTERVAL '60 days')
+    (_student4, _prog7, _track_p7_mateen10, NULL, _teacher1, 'dropped', now() - INTERVAL '60 days')
   ON CONFLICT DO NOTHING;
 
   -- Update students.class_id to match their primary enrollment
@@ -498,7 +573,7 @@ BEGIN
     (_sess25, _school_id, _student1, _teacher1, _prog1, CURRENT_DATE,                    'draft',     NULL, NULL, NULL, 'Session in progress',    now());
 
   -- ════════════════════════════════════════════════════════════════════════════
-  -- SECTION 11: Attendance records
+  -- SECTION 11: Attendance records (comprehensive — past 2 weeks)
   -- ════════════════════════════════════════════════════════════════════════════
 
   INSERT INTO attendance (school_id, student_id, class_id, date, status) VALUES
@@ -508,30 +583,53 @@ BEGIN
     (_school_id, _student1, _class_a, CURRENT_DATE - INTERVAL '2 days','present'),
     (_school_id, _student1, _class_a, CURRENT_DATE - INTERVAL '3 days','late'),
     (_school_id, _student1, _class_a, CURRENT_DATE - INTERVAL '4 days','present'),
+    (_school_id, _student1, _class_a, CURRENT_DATE - INTERVAL '5 days','present'),
+    (_school_id, _student1, _class_a, CURRENT_DATE - INTERVAL '6 days','present'),
     (_school_id, _student1, _class_a, CURRENT_DATE - INTERVAL '7 days','present'),
     (_school_id, _student1, _class_a, CURRENT_DATE - INTERVAL '8 days','absent'),
 
     -- Student 2
+    (_school_id, _student2, _class_a, CURRENT_DATE,                    'present'),
     (_school_id, _student2, _class_a, CURRENT_DATE - INTERVAL '1 day', 'present'),
     (_school_id, _student2, _class_a, CURRENT_DATE - INTERVAL '3 days','present'),
+    (_school_id, _student2, _class_a, CURRENT_DATE - INTERVAL '4 days','present'),
     (_school_id, _student2, _class_a, CURRENT_DATE - INTERVAL '6 days','excused'),
     (_school_id, _student2, _class_a, CURRENT_DATE - INTERVAL '9 days','present'),
 
     -- Student 3
     (_school_id, _student3, _class_a, CURRENT_DATE,                    'present'),
+    (_school_id, _student3, _class_a, CURRENT_DATE - INTERVAL '1 day', 'present'),
     (_school_id, _student3, _class_a, CURRENT_DATE - INTERVAL '2 days','present'),
+    (_school_id, _student3, _class_a, CURRENT_DATE - INTERVAL '3 days','present'),
     (_school_id, _student3, _class_a, CURRENT_DATE - INTERVAL '5 days','present'),
 
     -- Student 4
     (_school_id, _student4, _class_b, CURRENT_DATE - INTERVAL '1 day', 'present'),
+    (_school_id, _student4, _class_b, CURRENT_DATE - INTERVAL '3 days','present'),
     (_school_id, _student4, _class_b, CURRENT_DATE - INTERVAL '5 days','absent'),
+    (_school_id, _student4, _class_b, CURRENT_DATE - INTERVAL '7 days','present'),
+
+    -- Student 5
+    (_school_id, _student5, _class_b, CURRENT_DATE - INTERVAL '2 days','present'),
+    (_school_id, _student5, _class_b, CURRENT_DATE - INTERVAL '5 days','present'),
+    (_school_id, _student5, _class_b, CURRENT_DATE - INTERVAL '8 days','late'),
+    (_school_id, _student5, _class_b, CURRENT_DATE - INTERVAL '10 days','present'),
 
     -- Student 6
     (_school_id, _student6, _class_a, CURRENT_DATE,                    'present'),
     (_school_id, _student6, _class_a, CURRENT_DATE - INTERVAL '1 day', 'present'),
+    (_school_id, _student6, _class_a, CURRENT_DATE - INTERVAL '2 days','present'),
+    (_school_id, _student6, _class_a, CURRENT_DATE - INTERVAL '3 days','present'),
 
     -- Student 7
-    (_school_id, _student7, _class_c, CURRENT_DATE - INTERVAL '1 day', 'present')
+    (_school_id, _student7, _class_c, CURRENT_DATE - INTERVAL '1 day', 'present'),
+    (_school_id, _student7, _class_c, CURRENT_DATE - INTERVAL '3 days','present'),
+
+    -- Student 8
+    (_school_id, _student8, _class_b, CURRENT_DATE - INTERVAL '3 days','present'),
+    (_school_id, _student8, _class_b, CURRENT_DATE - INTERVAL '6 days','present'),
+    (_school_id, _student8, _class_b, CURRENT_DATE - INTERVAL '9 days','absent'),
+    (_school_id, _student8, _class_b, CURRENT_DATE - INTERVAL '12 days','present')
   ON CONFLICT DO NOTHING;
 
   -- ════════════════════════════════════════════════════════════════════════════
@@ -664,7 +762,7 @@ BEGIN
 
   INSERT INTO certifications (id, student_id, teacher_id, program_id, track_id, type, status, title, title_ar, notes, chain_of_narration, certificate_number, issued_by, reviewed_by, issue_date, metadata) VALUES
     -- Issued ijazah (Student 6 — veteran)
-    (_cert1, _student6, _teacher1, _prog1, _track_p1_1, 'ijazah', 'issued',
+    (_cert1, _student6, _teacher1, _prog1, _track_p1_quran_students, 'ijazah', 'issued',
      'Ijazah in Quran Recitation',
      'إجازة في تلاوة القرآن الكريم',
      'Student has demonstrated mastery of tajweed rules and can recite with precision.',
@@ -674,7 +772,7 @@ BEGIN
      '{"surah_count": 114, "juz_count": 30}'::jsonb),
 
     -- Supervisor approved (Student 3 — awaiting issuance)
-    (_cert2, _student3, _teacher1, _prog7, _track_p7_1, 'completion', 'supervisor_approved',
+    (_cert2, _student3, _teacher1, _prog7, _track_p7_mateen10, 'completion', 'supervisor_approved',
      'Completion of Mateen 10 Juz',
      'إتمام متين ١٠ أجزاء',
      'Completed memorization of 10 juz with excellent review scores.',
@@ -684,7 +782,7 @@ BEGIN
      '{"juz_completed": 10}'::jsonb),
 
     -- Recommended (Student 1 — pending supervisor review)
-    (_cert3, _student1, _teacher1, _prog1, _track_p1_1, 'graduation', 'recommended',
+    (_cert3, _student1, _teacher1, _prog1, _track_p1_quran_students, 'graduation', 'recommended',
      'Graduation from Alternating Recitation',
      'تخرّج من برنامج التسميع بالتناوب',
      'Student has shown consistent progress and is ready to graduate.',
@@ -917,7 +1015,15 @@ BEGIN
 
     -- Mateen 10 Batch 1: Sun, Wed
     (_school_id, _class_e, 0, '09:00', '10:00'),
-    (_school_id, _class_e, 3, '09:00', '10:00')
+    (_school_id, _class_e, 3, '09:00', '10:00'),
+
+    -- Hafs Recitation: Tue, Thu
+    (_school_id, _class_g, 2, '10:00', '11:00'),
+    (_school_id, _class_g, 4, '10:00', '11:00'),
+
+    -- Al-Ajrumiyyah: Mon, Wed
+    (_school_id, _class_h, 1, '14:00', '15:00'),
+    (_school_id, _class_h, 3, '14:00', '15:00')
   ON CONFLICT (class_id, day_of_week, start_time) DO NOTHING;
 
   -- ════════════════════════════════════════════════════════════════════════════
@@ -940,6 +1046,339 @@ BEGIN
 
     -- Completed assignment
     (_school_id, _student3, _teacher1, 18, 1, 110,  'new_hifz',       CURRENT_DATE - 20, 'completed',  'Al-Kahf complete')
+  ON CONFLICT DO NOTHING;
+
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- SECTION 27: Student Rub Certifications (revision health data)
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- Freshness computation: percentage = max(0, (1 - days_elapsed / interval) * 100)
+  -- Intervals by review_count: 0→14d, 1→21d, 2→30d, 3→45d, 4-5→60d, 6-8→75d, 9-11→90d, 12+→120d
+  -- States: fresh(>=75%), fading(50-74%), warning(25-49%), critical(1-24%), dormant(dormant_since!=null)
+
+  -- Student 6 (Khalid, level 9) — 50 certified rubs
+  -- Fresh: rubs 1-15, review_count=8 (75d interval), reviewed 2d ago → 97%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student6, g, _teacher1, now() - INTERVAL '180 days', 8, now() - INTERVAL '2 days', NULL
+  FROM generate_series(1, 15) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Fading: rubs 16-25, review_count=5 (60d interval), reviewed 20d ago → 66%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student6, g, _teacher1, now() - INTERVAL '150 days', 5, now() - INTERVAL '20 days', NULL
+  FROM generate_series(16, 25) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Warning: rubs 26-33, review_count=3 (45d interval), reviewed 30d ago → 33%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student6, g, _teacher1, now() - INTERVAL '120 days', 3, now() - INTERVAL '30 days', NULL
+  FROM generate_series(26, 33) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Critical: rubs 34-40, review_count=2 (30d interval), reviewed 25d ago → 16%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student6, g, _teacher1, now() - INTERVAL '100 days', 2, now() - INTERVAL '25 days', NULL
+  FROM generate_series(34, 40) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Dormant: rubs 41-45
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student6, g, _teacher1, now() - INTERVAL '90 days', 1, now() - INTERVAL '100 days', now() - INTERVAL '10 days'
+  FROM generate_series(41, 45) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Extra fresh: rubs 46-50, review_count=12 (120d interval), reviewed 3d ago → 97%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student6, g, _teacher1, now() - INTERVAL '200 days', 12, now() - INTERVAL '3 days', NULL
+  FROM generate_series(46, 50) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Student 3 (Fatima, level 7) — 30 certified rubs
+  -- Fresh: rubs 1-10, review_count=6 (75d interval), reviewed 5d ago → 93%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student3, g, _teacher1, now() - INTERVAL '120 days', 6, now() - INTERVAL '5 days', NULL
+  FROM generate_series(1, 10) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Fading: rubs 11-18, review_count=5 (60d interval), reviewed 20d ago → 66%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student3, g, _teacher1, now() - INTERVAL '100 days', 5, now() - INTERVAL '20 days', NULL
+  FROM generate_series(11, 18) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Warning: rubs 19-24, review_count=3 (45d interval), reviewed 30d ago → 33%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student3, g, _teacher1, now() - INTERVAL '80 days', 3, now() - INTERVAL '30 days', NULL
+  FROM generate_series(19, 24) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Critical: rubs 25-28, review_count=2 (30d interval), reviewed 25d ago → 16%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student3, g, _teacher1, now() - INTERVAL '70 days', 2, now() - INTERVAL '25 days', NULL
+  FROM generate_series(25, 28) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Dormant: rubs 29-30
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student3, g, _teacher1, now() - INTERVAL '60 days', 1, now() - INTERVAL '90 days', now() - INTERVAL '10 days'
+  FROM generate_series(29, 30) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Student 1 (Ahmad, level 5) — 18 certified rubs
+  -- Fresh: rubs 1-7, review_count=4 (60d interval), reviewed 5d ago → 91%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student1, g, _teacher1, now() - INTERVAL '90 days', 4, now() - INTERVAL '5 days', NULL
+  FROM generate_series(1, 7) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Fading: rubs 8-12, review_count=5 (60d interval), reviewed 20d ago → 66%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student1, g, _teacher1, now() - INTERVAL '70 days', 5, now() - INTERVAL '20 days', NULL
+  FROM generate_series(8, 12) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Warning: rubs 13-15, review_count=3 (45d interval), reviewed 30d ago → 33%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student1, g, _teacher1, now() - INTERVAL '50 days', 3, now() - INTERVAL '30 days', NULL
+  FROM generate_series(13, 15) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Critical: rubs 16-17, review_count=0 (14d interval), reviewed 12d ago → 14%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student1, g, _teacher1, now() - INTERVAL '30 days', 0, now() - INTERVAL '12 days', NULL
+  FROM generate_series(16, 17) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Dormant: rub 18
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  VALUES (_student1, 18, _teacher1, now() - INTERVAL '40 days', 1, now() - INTERVAL '60 days', now() - INTERVAL '5 days')
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Student 2 (Yusuf, level 3) — 10 certified rubs
+  -- Fresh: rubs 1-4, review_count=2 (30d interval), reviewed 2d ago → 93%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student2, g, _teacher1, now() - INTERVAL '60 days', 2, now() - INTERVAL '2 days', NULL
+  FROM generate_series(1, 4) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Fading: rubs 5-7, review_count=1 (21d interval), reviewed 6d ago → 71%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student2, g, _teacher1, now() - INTERVAL '45 days', 1, now() - INTERVAL '6 days', NULL
+  FROM generate_series(5, 7) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Warning: rubs 8-9, review_count=2 (30d interval), reviewed 18d ago → 40%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student2, g, _teacher1, now() - INTERVAL '35 days', 2, now() - INTERVAL '18 days', NULL
+  FROM generate_series(8, 9) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Dormant: rub 10
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  VALUES (_student2, 10, _teacher1, now() - INTERVAL '30 days', 0, now() - INTERVAL '50 days', now() - INTERVAL '5 days')
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Student 8 (Hassan, level 4) — 10 certified rubs (last 2 juz area)
+  -- Fresh: rubs 221-224, review_count=3 (45d interval), reviewed 3d ago → 93%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student8, g, _teacher2, now() - INTERVAL '75 days', 3, now() - INTERVAL '3 days', NULL
+  FROM generate_series(221, 224) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Fading: rubs 225-228, review_count=2 (30d interval), reviewed 10d ago → 66%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student8, g, _teacher2, now() - INTERVAL '60 days', 2, now() - INTERVAL '10 days', NULL
+  FROM generate_series(225, 228) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Critical: rubs 229-230, review_count=1 (21d interval), reviewed 18d ago → 14%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student8, g, _teacher2, now() - INTERVAL '40 days', 1, now() - INTERVAL '18 days', NULL
+  FROM generate_series(229, 230) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Student 4 (Omar, level 1) — 4 certified rubs (last juz)
+  -- Fresh: rubs 237-238, review_count=1 (21d interval), reviewed 2d ago → 90%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  SELECT _student4, g, _teacher2, now() - INTERVAL '20 days', 1, now() - INTERVAL '2 days', NULL
+  FROM generate_series(237, 238) AS g
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Fading: rub 239, review_count=1 (21d interval), reviewed 6d ago → 71%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  VALUES (_student4, 239, _teacher2, now() - INTERVAL '15 days', 1, now() - INTERVAL '6 days', NULL)
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- Warning: rub 240, review_count=2 (30d interval), reviewed 18d ago → 40%
+  INSERT INTO student_rub_certifications (student_id, rub_number, certified_by, certified_at, review_count, last_reviewed_at, dormant_since)
+  VALUES (_student4, 240, _teacher2, now() - INTERVAL '25 days', 2, now() - INTERVAL '18 days', NULL)
+  ON CONFLICT (student_id, rub_number) DO NOTHING;
+
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- SECTION 28: Scheduled Sessions
+  -- ════════════════════════════════════════════════════════════════════════════
+
+  -- Look up class_schedule IDs for linking
+  SELECT id INTO _cs_a_sun FROM class_schedules WHERE class_id = _class_a AND day_of_week = 0 LIMIT 1;
+  SELECT id INTO _cs_a_tue FROM class_schedules WHERE class_id = _class_a AND day_of_week = 2 LIMIT 1;
+  SELECT id INTO _cs_a_thu FROM class_schedules WHERE class_id = _class_a AND day_of_week = 4 LIMIT 1;
+  SELECT id INTO _cs_b_sun FROM class_schedules WHERE class_id = _class_b AND day_of_week = 0 LIMIT 1;
+  SELECT id INTO _cs_b_mon FROM class_schedules WHERE class_id = _class_b AND day_of_week = 1 LIMIT 1;
+  SELECT id INTO _cs_b_wed FROM class_schedules WHERE class_id = _class_b AND day_of_week = 3 LIMIT 1;
+  SELECT id INTO _cs_c_sat FROM class_schedules WHERE class_id = _class_c AND day_of_week = 6 LIMIT 1;
+  SELECT id INTO _cs_c_mon FROM class_schedules WHERE class_id = _class_c AND day_of_week = 1 LIMIT 1;
+  SELECT id INTO _cs_c_wed FROM class_schedules WHERE class_id = _class_c AND day_of_week = 3 LIMIT 1;
+
+  INSERT INTO scheduled_sessions (id, school_id, class_id, class_schedule_id, teacher_id, student_id, session_date, start_time, end_time, session_type, status, title, notes, evaluation_session_id) VALUES
+    -- ── Past completed class sessions (linked to evaluation sessions) ──
+    -- Morning Circle A — last week
+    (_sched1,  _school_id, _class_a, _cs_a_sun, _teacher1, NULL, CURRENT_DATE - 7, '08:30', '09:30', 'class', 'completed', 'Morning Circle A', 'Regular class session', _sess3),
+    (_sched2,  _school_id, _class_a, _cs_a_tue, _teacher1, NULL, CURRENT_DATE - 5, '08:30', '09:30', 'class', 'completed', 'Morning Circle A', 'Regular class session', _sess4),
+    (_sched3,  _school_id, _class_a, _cs_a_thu, _teacher1, NULL, CURRENT_DATE - 3, '08:30', '09:30', 'class', 'completed', 'Morning Circle A', 'Regular class session', _sess2),
+
+    -- Evening Circle B — last week
+    (_sched4,  _school_id, _class_b, _cs_b_sun, _teacher2, NULL, CURRENT_DATE - 7, '17:00', '18:00', 'class', 'completed', 'Evening Circle B', 'Regular class session', _sess18),
+    (_sched5,  _school_id, _class_b, _cs_b_mon, _teacher2, NULL, CURRENT_DATE - 6, '17:00', '18:00', 'class', 'completed', 'Evening Circle B', 'Regular class session', _sess19),
+
+    -- Talqeen Group 1 — last week
+    (_sched6,  _school_id, _class_c, _cs_c_mon, _teacher3, NULL, CURRENT_DATE - 6, '09:30', '10:30', 'class', 'completed', 'Talqeen Group 1', 'Regular class session', _sess23),
+
+    -- ── Upcoming scheduled class sessions ──
+    -- Morning Circle A — upcoming Sun, Tue, Thu
+    (_sched7,  _school_id, _class_a, _cs_a_sun, _teacher1, NULL,
+     CURRENT_DATE + ((0 - EXTRACT(DOW FROM CURRENT_DATE)::int + 7) % 7),
+     '08:30', '09:30', 'class', 'scheduled', 'Morning Circle A', NULL, NULL),
+    (_sched8,  _school_id, _class_a, _cs_a_tue, _teacher1, NULL,
+     CURRENT_DATE + ((2 - EXTRACT(DOW FROM CURRENT_DATE)::int + 7) % 7),
+     '08:30', '09:30', 'class', 'scheduled', 'Morning Circle A', NULL, NULL),
+    (_sched9,  _school_id, _class_a, _cs_a_thu, _teacher1, NULL,
+     CURRENT_DATE + ((4 - EXTRACT(DOW FROM CURRENT_DATE)::int + 7) % 7),
+     '08:30', '09:30', 'class', 'scheduled', 'Morning Circle A', NULL, NULL),
+
+    -- Evening Circle B — upcoming Sun, Mon, Wed
+    (_sched10, _school_id, _class_b, _cs_b_sun, _teacher2, NULL,
+     CURRENT_DATE + ((0 - EXTRACT(DOW FROM CURRENT_DATE)::int + 7) % 7),
+     '17:00', '18:00', 'class', 'scheduled', 'Evening Circle B', NULL, NULL),
+    (_sched11, _school_id, _class_b, _cs_b_mon, _teacher2, NULL,
+     CURRENT_DATE + ((1 - EXTRACT(DOW FROM CURRENT_DATE)::int + 7) % 7),
+     '17:00', '18:00', 'class', 'scheduled', 'Evening Circle B', NULL, NULL),
+
+    -- Talqeen — upcoming Mon, Wed
+    (_sched12, _school_id, _class_c, _cs_c_mon, _teacher3, NULL,
+     CURRENT_DATE + ((1 - EXTRACT(DOW FROM CURRENT_DATE)::int + 7) % 7),
+     '09:30', '10:30', 'class', 'scheduled', 'Talqeen Group 1', NULL, NULL),
+
+    -- ── Individual sessions ──
+    -- Upcoming individual: Student 1 with Teacher 1
+    (_sched13, _school_id, NULL, NULL, _teacher1, _student1,
+     CURRENT_DATE + 1, '10:00', '10:30', 'individual', 'scheduled', 'Extra memorization review', 'Surah Yasin continuation', NULL),
+
+    -- Upcoming individual: Student 3 with Teacher 1
+    (_sched14, _school_id, NULL, NULL, _teacher1, _student3,
+     CURRENT_DATE + 2, '10:00', '10:30', 'individual', 'scheduled', 'Quran memorization check', 'Juz 6 review', NULL),
+
+    -- Completed individual: Student 6 yesterday
+    (_sched15, _school_id, NULL, NULL, _teacher1, _student6,
+     CURRENT_DATE - 1, '11:00', '11:30', 'individual', 'completed', 'Ijazah preparation', 'Final review before certification', _sess22),
+
+    -- In-progress: Student 1 today
+    (_sched16, _school_id, NULL, NULL, _teacher1, _student1,
+     CURRENT_DATE, '08:30', '09:00', 'individual', 'in_progress', 'Morning recitation', 'Ongoing session', NULL),
+
+    -- ── Edge cases ──
+    -- Cancelled session
+    (_sched17, _school_id, _class_a, _cs_a_sun, _teacher1, NULL,
+     CURRENT_DATE - 14, '08:30', '09:30', 'class', 'cancelled', 'Morning Circle A', 'Teacher unavailable due to illness', NULL),
+
+    -- Missed session
+    (_sched18, _school_id, NULL, NULL, _teacher2, _student4,
+     CURRENT_DATE - 10, '17:00', '17:30', 'individual', 'missed', 'Catch-up session', 'Student did not attend', NULL)
+  ON CONFLICT DO NOTHING;
+
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- SECTION 29: Teacher Checkins
+  -- ════════════════════════════════════════════════════════════════════════════
+
+  INSERT INTO teacher_checkins (school_id, teacher_id, class_id, checked_in_at, checked_out_at, date, checkin_latitude, checkin_longitude, checkout_latitude, checkout_longitude, checkin_distance_meters, checkout_distance_meters, verification_method, is_verified, notes) VALUES
+    -- Today's check-ins
+    (_school_id, _teacher1, _class_a,
+     CURRENT_DATE::timestamptz + INTERVAL '8 hours', NULL,
+     CURRENT_DATE,
+     24.7138, 46.6755, NULL, NULL, 35, NULL, 'gps', true, 'Morning session'),
+    (_school_id, _teacher2, _class_b,
+     CURRENT_DATE::timestamptz + INTERVAL '16 hours', NULL,
+     CURRENT_DATE,
+     24.7134, 46.6750, NULL, NULL, 42, NULL, 'gps', true, 'Evening session'),
+
+    -- Yesterday
+    (_school_id, _teacher1, _class_a,
+     (CURRENT_DATE - 1)::timestamptz + INTERVAL '8 hours',
+     (CURRENT_DATE - 1)::timestamptz + INTERVAL '12 hours',
+     CURRENT_DATE - 1,
+     24.7137, 46.6752, 24.7136, 46.6753, 20, 5, 'gps', true, 'Full morning shift'),
+    (_school_id, _teacher2, _class_b,
+     (CURRENT_DATE - 1)::timestamptz + INTERVAL '16 hours',
+     (CURRENT_DATE - 1)::timestamptz + INTERVAL '20 hours',
+     CURRENT_DATE - 1,
+     24.7135, 46.6754, 24.7136, 46.6753, 15, 5, 'gps', true, 'Evening shift'),
+
+    -- 2 days ago
+    (_school_id, _teacher1, _class_a,
+     (CURRENT_DATE - 2)::timestamptz + INTERVAL '8 hours',
+     (CURRENT_DATE - 2)::timestamptz + INTERVAL '12 hours',
+     CURRENT_DATE - 2,
+     24.7136, 46.6753, 24.7136, 46.6753, 5, 5, 'gps', true, NULL),
+    (_school_id, _teacher3, _class_c,
+     (CURRENT_DATE - 2)::timestamptz + INTERVAL '9 hours',
+     (CURRENT_DATE - 2)::timestamptz + INTERVAL '13 hours',
+     CURRENT_DATE - 2,
+     24.7140, 46.6758, 24.7139, 46.6756, 65, 50, 'gps', true, NULL),
+
+    -- 3 days ago (WiFi check-in)
+    (_school_id, _teacher1, _class_a,
+     (CURRENT_DATE - 3)::timestamptz + INTERVAL '8 hours',
+     (CURRENT_DATE - 3)::timestamptz + INTERVAL '12 hours',
+     CURRENT_DATE - 3,
+     NULL, NULL, NULL, NULL, NULL, NULL, 'wifi', true, 'WiFi verified'),
+
+    -- 4 days ago (manual override)
+    (_school_id, _teacher2, _class_b,
+     (CURRENT_DATE - 4)::timestamptz + INTERVAL '16 hours',
+     (CURRENT_DATE - 4)::timestamptz + INTERVAL '20 hours',
+     CURRENT_DATE - 4,
+     NULL, NULL, NULL, NULL, NULL, NULL, 'manual', true, 'Supervisor override — GPS unavailable'),
+
+    -- 5 days ago
+    (_school_id, _teacher1, _class_a,
+     (CURRENT_DATE - 5)::timestamptz + INTERVAL '8 hours',
+     (CURRENT_DATE - 5)::timestamptz + INTERVAL '12 hours',
+     CURRENT_DATE - 5,
+     24.7136, 46.6753, 24.7136, 46.6753, 5, 5, 'gps', true, NULL),
+    (_school_id, _teacher2, _class_b,
+     (CURRENT_DATE - 5)::timestamptz + INTERVAL '16 hours',
+     (CURRENT_DATE - 5)::timestamptz + INTERVAL '20 hours',
+     CURRENT_DATE - 5,
+     24.7135, 46.6751, 24.7136, 46.6753, 18, 5, 'gps', true, NULL),
+    (_school_id, _teacher3, _class_c,
+     (CURRENT_DATE - 5)::timestamptz + INTERVAL '9 hours',
+     (CURRENT_DATE - 5)::timestamptz + INTERVAL '13 hours',
+     CURRENT_DATE - 5,
+     24.7138, 46.6755, 24.7137, 46.6754, 35, 20, 'gps', true, NULL)
+  ON CONFLICT DO NOTHING;
+
+  -- ════════════════════════════════════════════════════════════════════════════
+  -- SECTION 30: Program Queue Entries
+  -- ════════════════════════════════════════════════════════════════════════════
+
+  INSERT INTO program_queue_entries (program_id, student_id, position, status, notified_at, claim_expires_at, expires_at, created_at) VALUES
+    -- Active waiting in Alternating Recitation queue
+    (_prog1, _student5, 1, 'waiting', NULL, NULL, now() + INTERVAL '24 hours', now() - INTERVAL '30 minutes'),
+    (_prog1, _student7, 2, 'waiting', NULL, NULL, now() + INTERVAL '24 hours', now() - INTERVAL '15 minutes'),
+    -- Notified for Children's Program (claim window open)
+    (_prog2, _student4, 1, 'notified', now() - INTERVAL '10 minutes', now() + INTERVAL '30 minutes', now() + INTERVAL '24 hours', now() - INTERVAL '1 hour'),
+    -- Historical expired entry
+    (_prog7, _student8, 1, 'expired', now() - INTERVAL '2 days', now() - INTERVAL '1 day', now() - INTERVAL '1 day', now() - INTERVAL '3 days'),
+    -- Successfully claimed
+    (_prog2, _student2, 1, 'claimed', now() - INTERVAL '1 hour', now() + INTERVAL '1 hour', now() + INTERVAL '24 hours', now() - INTERVAL '2 hours')
   ON CONFLICT DO NOTHING;
 
   -- ════════════════════════════════════════════════════════════════════════════
