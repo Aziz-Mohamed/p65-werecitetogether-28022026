@@ -5,9 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
 import { CustomTabBar } from '@/components/layout/CustomTabBar';
-import { PostSessionPrompt } from '@/features/sessions/components/PostSessionPrompt';
-import { usePostSessionDetection } from '@/features/sessions/hooks/usePostSessionDetection';
-import { useAuthStore } from '@/stores/authStore';
+
+// ─── Student Tabs Layout ──────────────────────────────────────────────────────
+// Order: Dashboard | Programs | Memorization | Revision (center) | Journey | Profile
 
 export default function StudentTabsLayout() {
   const { t } = useTranslation();
@@ -39,6 +39,15 @@ export default function StudentTabsLayout() {
       />
       <Tabs.Screen
         name="programs"
+        options={{
+          title: t('student.tabs.programs'),
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "library" : "library-outline"} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="memorization"
         options={{
           title: t('dashboard.student.programs'),
           tabBarIcon: ({ color, focused }) => (

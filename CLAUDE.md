@@ -49,6 +49,8 @@
 - TypeScript 5.9 (strict mode) + Expo ~54, React Native 0.83, React 19, Expo Router v6, Supabase JS 2, i18next + react-i18nex (001-phase0-setup)
 - Supabase PostgreSQL (remote) — no schema changes in this spec (001-phase0-setup)
 - TypeScript 5.9 (strict mode) + Deno (Edge Functions) + React Native 0.83, Expo ~54, Expo Router v6, @supabase/supabase-js 2, @react-native-google-signin/google-signin, expo-apple-authentication, zustand 5, react-hook-form 7 + zod 4, i18next + react-i18nex (001-auth-evolution)
+- TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Supabase JS 2, Zustand 5, react-hook-form 7 + zod 4, i18next + react-i18next, FlashList 2, Ionicons (003-programs-enrollment)
+- Supabase PostgreSQL (remote) — 5 new tables, 0 modified tables (003-programs-enrollment)
 
 ## Recent Changes
 - 005-session-join-flow: Added TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, @gorhom/bottom-sheet 5, expo-linking, expo-notifications, react-native-reanimated 4, i18nex

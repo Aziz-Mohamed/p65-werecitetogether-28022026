@@ -1,61 +1,66 @@
 import React from 'react';
-import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { FlatList } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 
-import { Screen } from '@/components/layout';
+import { Screen } from '@/components/layout/Screen';
+import { Button } from '@/components/ui';
+import { LoadingState, ErrorState } from '@/components/feedback';
 import { ProgramCard } from '@/features/programs/components/ProgramCard';
+import { EmptyProgramState } from '@/features/programs/components/EmptyProgramState';
 import { usePrograms } from '@/features/programs/hooks/usePrograms';
 import { typography } from '@/theme/typography';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import type { Program } from '@/features/programs/types';
+import type { Program } from '@/features/programs/types/programs.types';
 
-export default function ProgramsScreen() {
+export default function ProgramsTab() {
   const { t } = useTranslation();
-  const { data: programs, isLoading, error } = usePrograms();
   const router = useRouter();
+  const { data: programs, isLoading, error, refetch } = usePrograms();
 
-  const handleProgramPress = (program: Program) => {
-    router.push(`/(student)/program/${program.id}` as any);
-  };
+  if (isLoading) {
+    return (
+      <Screen>
+        <LoadingState />
+      </Screen>
+    );
+  }
+
+  if (error) {
+    return (
+      <Screen>
+        <ErrorState onRetry={refetch} />
+      </Screen>
+    );
+  }
 
   return (
     <Screen scroll={false} hasTabBar>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('programs.allPrograms')}</Text>
+        <Text style={styles.title}>{t('student.tabs.programs')}</Text>
+        <Button
+          title={t('programs.myPrograms')}
+          onPress={() => router.push('/(student)/programs/my-programs')}
+          variant="ghost"
+          size="sm"
+        />
       </View>
-
-      {isLoading && (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={lightTheme.primary} />
-        </View>
-      )}
-
-      {error && (
-        <View style={styles.center}>
-          <Text style={styles.errorText}>{t('common.error')}</Text>
-        </View>
-      )}
-
-      {programs && (
-        <FlatList
+      {!programs || programs.length === 0 ? (
+        <EmptyProgramState />
+      ) : (
+        <FlashList
           data={programs}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
+          estimatedItemSize={90}
+          contentContainerStyle={{ padding: spacing.base }}
+          renderItem={({ item }: { item: Program }) => (
             <ProgramCard
               program={item}
-              onPress={() => handleProgramPress(item)}
+              onPress={() => router.push(`/(student)/programs/${item.id}`)}
             />
           )}
-          contentContainerStyle={{ paddingHorizontal: spacing.base, paddingBottom: spacing.xl }}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={styles.emptyText}>{t('common.noResults')}</Text>
-            </View>
-          }
         />
       )}
     </Screen>
@@ -64,29 +69,14 @@ export default function ProgramsScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingBlockStart: spacing.lg,
-    paddingBlockEnd: spacing.base,
-    paddingInline: spacing.base,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
   },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBlock: spacing['2xl'],
-  },
-  errorText: {
-    ...typography.textStyles.body,
-    color: lightTheme.error,
-  },
-  emptyText: {
-    ...typography.textStyles.body,
-    color: lightTheme.textSecondary,
-  },
-  separator: {
-    height: spacing.md,
   },
 });

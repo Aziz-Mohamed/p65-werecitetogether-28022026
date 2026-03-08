@@ -1,167 +1,252 @@
 import { supabase } from '@/lib/supabase';
-import type { ServiceResult } from '@/types/common.types';
-import type { Json } from '@/types/database.types';
-import type { Program, ProgramTrack, ProgramWithTracks } from '../types';
+import type {
+  CohortFilters,
+  EnrollInput,
+  CreateCohortInput,
+  UpdateProgramInput,
+  CreateTrackInput,
+  AssignRoleInput,
+} from '../types/programs.types';
 
 class ProgramsService {
-  async getPrograms(): Promise<ServiceResult<Program[]>> {
-    const { data, error } = await supabase
+  // ─── Read Operations ──────────────────────────────────────────────────────
+
+  /** PR-001: List active programs ordered by sort_order */
+  async getPrograms() {
+    return supabase
       .from('programs')
       .select('*')
       .eq('is_active', true)
-      .order('name');
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data: data ?? [] };
+      .order('sort_order', { ascending: true });
   }
 
-  async getProgramById(id: string): Promise<ServiceResult<ProgramWithTracks>> {
-    const { data, error } = await supabase
+  /** PR-002: Get program detail with active tracks */
+  async getProgram(id: string) {
+    return supabase
       .from('programs')
-      .select('*, program_tracks(*)')
+      .select(`
+        *,
+        program_tracks (
+          id, name, name_ar, description, description_ar,
+          track_type, curriculum, sort_order, is_active
+        )
+      `)
       .eq('id', id)
       .eq('program_tracks.is_active', true)
-      .order('sort_order', { referencedTable: 'program_tracks' })
+      .order('sort_order', { referencedTable: 'program_tracks', ascending: true })
       .single();
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data: data as ProgramWithTracks };
   }
 
-  async getProgramTracks(programId: string): Promise<ServiceResult<ProgramTrack[]>> {
-    const { data, error } = await supabase
-      .from('program_tracks')
-      .select('*')
+  /** PR-003: List cohorts for a track/program */
+  async getCohorts(filters: CohortFilters) {
+    let query = supabase
+      .from('cohorts')
+      .select(`
+        *,
+        profiles!cohorts_teacher_id_fkey ( id, full_name, meeting_link ),
+        enrollments ( count )
+      `)
+      .eq('program_id', filters.programId)
+      .in('status', ['enrollment_open', 'enrollment_closed', 'in_progress'])
+      .order('created_at', { ascending: false });
+
+    if (filters.trackId) {
+      query = query.eq('track_id', filters.trackId);
+    }
+
+    return query;
+  }
+
+  /** PR-004: Get student's enrollments with program/track/cohort details */
+  async getMyEnrollments(userId: string) {
+    return supabase
+      .from('enrollments')
+      .select(`
+        *,
+        programs ( id, name, name_ar, category ),
+        program_tracks ( id, name, name_ar ),
+        cohorts ( id, name, status, teacher_id,
+          profiles!cohorts_teacher_id_fkey ( full_name )
+        )
+      `)
+      .eq('student_id', userId)
+      .order('enrolled_at', { ascending: false });
+  }
+
+  /** PR-005: Get program roles with profile info */
+  async getProgramRoles(programId: string) {
+    return supabase
+      .from('program_roles')
+      .select(`
+        *,
+        profiles!program_roles_profile_id_fkey ( id, full_name, role )
+      `)
       .eq('program_id', programId)
-      .eq('is_active', true)
-      .order('sort_order');
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data: data ?? [] };
+      .order('role');
   }
 
-  async createProgram(input: {
-    name: string;
-    name_ar: string;
-    description?: string;
-    description_ar?: string;
-    category: string;
-    settings?: Json;
-  }): Promise<ServiceResult<Program>> {
-    const { data, error } = await supabase
-      .from('programs')
+  // ─── Write Operations ─────────────────────────────────────────────────────
+
+  /** PR-006: Enroll in structured program via RPC */
+  async enrollStructured(input: EnrollInput) {
+    return supabase.rpc('enroll_student', {
+      p_program_id: input.programId,
+      p_track_id: input.trackId ?? null,
+      p_cohort_id: input.cohortId ?? null,
+    });
+  }
+
+  /** PR-007: Join free program via direct insert */
+  async joinFreeProgram(userId: string, programId: string, trackId?: string) {
+    return supabase
+      .from('enrollments')
       .insert({
-        name: input.name,
-        name_ar: input.name_ar,
-        description: input.description ?? null,
-        description_ar: input.description_ar ?? null,
-        category: input.category,
-        settings: input.settings ?? ({} as Json),
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data };
-  }
-
-  async updateProgram(
-    id: string,
-    input: {
-      name?: string;
-      name_ar?: string;
-      description?: string | null;
-      description_ar?: string | null;
-      category?: string;
-      is_active?: boolean;
-      settings?: Json;
-    },
-  ): Promise<ServiceResult<Program>> {
-    const { data, error } = await supabase
-      .from('programs')
-      .update(input as any)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data };
-  }
-
-  async createTrack(
-    programId: string,
-    input: {
-      name: string;
-      name_ar: string;
-      description?: string;
-      description_ar?: string;
-      track_type?: string;
-      curriculum?: Json;
-      sort_order?: number;
-    },
-  ): Promise<ServiceResult<ProgramTrack>> {
-    const { data, error } = await supabase
-      .from('program_tracks')
-      .insert({
+        student_id: userId,
         program_id: programId,
+        track_id: trackId ?? null,
+        status: 'active',
+      })
+      .select()
+      .single();
+  }
+
+  /** PR-008: Leave/drop program */
+  async leaveProgram(enrollmentId: string, userId: string) {
+    return supabase
+      .from('enrollments')
+      .update({ status: 'dropped' })
+      .eq('id', enrollmentId)
+      .eq('student_id', userId)
+      .select()
+      .single();
+  }
+
+  /** PR-009: Approve/reject enrollment */
+  async updateEnrollmentStatus(enrollmentId: string, status: 'active' | 'dropped') {
+    return supabase
+      .from('enrollments')
+      .update({ status })
+      .eq('id', enrollmentId)
+      .select()
+      .single();
+  }
+
+  /** PR-010: Create cohort */
+  async createCohort(input: CreateCohortInput) {
+    return supabase
+      .from('cohorts')
+      .insert({
+        program_id: input.programId,
+        track_id: input.trackId ?? null,
+        name: input.name,
+        max_students: input.maxStudents,
+        teacher_id: input.teacherId,
+        supervisor_id: input.supervisorId ?? null,
+        meeting_link: input.meetingLink ?? null,
+        schedule: input.schedule ?? null,
+        start_date: input.startDate ?? null,
+        end_date: input.endDate ?? null,
+        status: 'enrollment_open',
+      })
+      .select()
+      .single();
+  }
+
+  /** PR-011: Update cohort status */
+  async updateCohortStatus(cohortId: string, status: string) {
+    return supabase
+      .from('cohorts')
+      .update({ status })
+      .eq('id', cohortId)
+      .select()
+      .single();
+  }
+
+  /** Update program details */
+  async updateProgram(programId: string, input: UpdateProgramInput) {
+    return supabase
+      .from('programs')
+      .update(input)
+      .eq('id', programId)
+      .select()
+      .single();
+  }
+
+  /** Create new program (master_admin only) */
+  async createProgram(input: UpdateProgramInput) {
+    return supabase
+      .from('programs')
+      .insert(input)
+      .select()
+      .single();
+  }
+
+  /** Create new track */
+  async createTrack(input: CreateTrackInput) {
+    return supabase
+      .from('program_tracks')
+      .insert({
+        program_id: input.programId,
         name: input.name,
         name_ar: input.name_ar,
         description: input.description ?? null,
         description_ar: input.description_ar ?? null,
-        track_type: input.track_type ?? null,
-        curriculum: input.curriculum ?? null,
-        sort_order: input.sort_order ?? 0,
+        track_type: input.trackType ?? null,
+        sort_order: input.sortOrder ?? 0,
       })
       .select()
       .single();
-
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
-
-    return { data };
   }
 
-  async updateTrack(
-    id: string,
-    input: {
-      name?: string;
-      name_ar?: string;
-      description?: string | null;
-      description_ar?: string | null;
-      track_type?: string | null;
-      curriculum?: Json;
-      sort_order?: number;
-      is_active?: boolean;
-    },
-  ): Promise<ServiceResult<ProgramTrack>> {
-    const { data, error } = await supabase
-      .from('program_tracks')
-      .update(input as any)
-      .eq('id', id)
+  /** PR-012: Assign program role */
+  async assignProgramRole(input: AssignRoleInput, assignedBy: string) {
+    return supabase
+      .from('program_roles')
+      .insert({
+        profile_id: input.profileId,
+        program_id: input.programId,
+        role: input.role,
+        assigned_by: assignedBy,
+      })
       .select()
       .single();
+  }
 
-    if (error) {
-      return { error: { message: error.message, code: error.code } };
-    }
+  /** PR-013: Remove program role */
+  async removeProgramRole(roleId: string) {
+    return supabase
+      .from('program_roles')
+      .delete()
+      .eq('id', roleId);
+  }
 
-    return { data };
+  /** Bulk update enrollments for cohort status transition (in_progress → approve all pending) */
+  async bulkApproveEnrollments(cohortId: string) {
+    return supabase
+      .from('enrollments')
+      .update({ status: 'active' })
+      .eq('cohort_id', cohortId)
+      .eq('status', 'pending');
+  }
+
+  /** Get enrollments for a specific cohort (admin view) */
+  async getCohortEnrollments(cohortId: string) {
+    return supabase
+      .from('enrollments')
+      .select(`
+        *,
+        profiles:student_id ( id, full_name )
+      `)
+      .eq('cohort_id', cohortId)
+      .order('enrolled_at', { ascending: true });
+  }
+
+  /** Get all programs (admin — no is_active filter) */
+  async getAllPrograms() {
+    return supabase
+      .from('programs')
+      .select('*')
+      .order('sort_order', { ascending: true });
   }
 }
 

@@ -1,100 +1,63 @@
 import React from 'react';
-import { StyleSheet, View, Text, Pressable } from 'react-native';
-import { useTranslation } from 'react-i18next';
-
-import { Card, Badge } from '@/components/ui';
-import { useLocaleStore } from '@/stores/localeStore';
+import { View, Text, StyleSheet } from 'react-native';
+import { Card } from '@/components/ui/Card';
+import { CategoryBadge } from './CategoryBadge';
+import { useLocalizedField } from '../utils/enrollment-helpers';
 import { typography } from '@/theme/typography';
-import { lightTheme, primary, accent } from '@/theme/colors';
+import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import { radius } from '@/theme/radius';
-import type { Program } from '../types';
-import type { ProgramCategory } from '@/types/common.types';
+import { normalize } from '@/theme/normalize';
+import type { Program } from '../types/programs.types';
 
 interface ProgramCardProps {
   program: Program;
   onPress: () => void;
 }
 
-const CATEGORY_COLORS: Record<ProgramCategory, string> = {
-  free: accent.emerald[500],
-  structured: accent.indigo[500],
-  mixed: accent.violet[500],
-};
-
-export const ProgramCard: React.FC<ProgramCardProps> = ({ program, onPress }) => {
-  const { t } = useTranslation();
-  const locale = useLocaleStore((s) => s.locale);
-  const isArabic = locale === 'ar';
-
-  const name = isArabic ? program.name_ar : program.name;
-  const description = isArabic
-    ? program.description_ar
-    : program.description;
-  const category = program.category as ProgramCategory;
+export function ProgramCard({ program, onPress }: ProgramCardProps) {
+  const localize = useLocalizedField();
 
   return (
-    <Pressable onPress={onPress}>
-      <Card style={styles.card}>
-        <View style={styles.header}>
-          <Text style={styles.name} numberOfLines={2}>
-            {name}
+    <Card variant="outlined" style={styles.card} onPress={onPress}>
+      <View style={styles.header}>
+        <View style={styles.titleRow}>
+          <Text style={styles.name} numberOfLines={1}>
+            {localize(program.name, program.name_ar)}
           </Text>
-          <View
-            style={[
-              styles.categoryBadge,
-              { backgroundColor: (CATEGORY_COLORS[category] ?? primary[500]) + '20' },
-            ]}
-          >
-            <Text
-              style={[
-                styles.categoryText,
-                { color: CATEGORY_COLORS[category] ?? primary[500] },
-              ]}
-            >
-              {t(`programs.category.${category}`)}
-            </Text>
-          </View>
+          <CategoryBadge category={program.category} />
         </View>
-
-        {description && (
-          <Text style={styles.description} numberOfLines={2}>
-            {description}
-          </Text>
-        )}
-      </Card>
-    </Pressable>
+      </View>
+      {(program.description || program.description_ar) && (
+        <Text style={styles.description} numberOfLines={2}>
+          {localize(program.description, program.description_ar)}
+        </Text>
+      )}
+    </Card>
   );
-};
+}
 
 const styles = StyleSheet.create({
   card: {
-    padding: spacing.lg,
-    borderRadius: radius.md,
+    marginBottom: spacing.sm,
   },
   header: {
+    gap: spacing.xs,
+  },
+  titleRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
     gap: spacing.sm,
   },
   name: {
-    ...typography.textStyles.subheading,
+    ...typography.textStyles.body,
+    fontFamily: typography.fontFamily.semiBold,
     color: lightTheme.text,
     flex: 1,
   },
-  categoryBadge: {
-    paddingBlock: spacing.xs,
-    paddingInline: spacing.sm,
-    borderRadius: radius.full,
-  },
-  categoryText: {
-    ...typography.textStyles.caption,
-    fontFamily: typography.fontFamily.semiBold,
-  },
   description: {
-    ...typography.textStyles.body,
+    ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
-    marginBlockStart: spacing.sm,
+    marginTop: normalize(4),
   },
 });
