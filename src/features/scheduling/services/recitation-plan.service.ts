@@ -45,6 +45,7 @@ class RecitationPlanService {
       .maybeSingle();
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   /**
    * Upsert a teacher/admin plan. Uses select-then-insert/update
    * to work with partial unique index (source != 'student_suggestion').
@@ -100,6 +101,7 @@ class RecitationPlanService {
       .single();
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   /**
    * Upsert a student suggestion.
    */
@@ -159,6 +161,7 @@ class RecitationPlanService {
       .eq('source', 'student_suggestion');
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   /**
    * Replace all student suggestions for a session with a new batch.
    * Deletes existing suggestions first, then inserts new ones.

@@ -1,6 +1,18 @@
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
-import type { AuthResult } from '../types/auth.types';
+import type {
+  UpdateRoleInput,
+  UpdateRoleResponse,
+  CreateMemberInput,
+  CreateMemberResponse,
+  AuthResult,
+  Profile,
+} from '../types/auth.types';
+import i18n from '@/i18n/config';
+
+const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL
+  ? `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1`
+  : '';
 
 class AuthService {
   async signInWithGoogle(idToken: string): Promise<AuthResult<Session>> {
@@ -28,72 +40,177 @@ class AuthService {
     }
   }
 
-  async signInWithApple(identityToken: string): Promise<AuthResult<Session>> {
+  /**
+   * Admin updates a user's role via the create-member Edge Function.
+   */
+  async updateRole(input: UpdateRoleInput): Promise<AuthResult<UpdateRoleResponse>> {
     try {
-      const { data, error } = await supabase.auth.signInWithIdToken({
-        provider: 'apple',
-        token: identityToken,
+      const token = await this.getFreshToken();
+
+      if (__DEV__) {
+        console.log('[AuthService] updateRole called for user:', input.userId, 'to role:', input.role);
+      }
+
+      const response = await fetch(`${FUNCTIONS_URL}/create-member`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'apikey': process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '',
+        },
+        body: JSON.stringify(input),
       });
 
+      const result = await response.json();
+
+      if (__DEV__) {
+        console.log('[AuthService] updateRole response status:', response.status);
+      }
+
+      if (!response.ok) {
+        return {
+          error: {
+            message: result.error || result.message || i18n.t('admin.updateRoleFailed'),
+            code: result.code,
+          },
+        };
+      }
+
+      return { data: result as UpdateRoleResponse };
+    } catch (error) {
+      return {
+        error: {
+          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
+        },
+      };
+    }
+  }
+
+  /**
+   * @deprecated Member creation via password is removed (FR-022).
+   * Existing admin screens still reference this method — returns an error.
+   */
+  async createMember(_input: CreateMemberInput): Promise<AuthResult<CreateMemberResponse>> {
+    return {
+      error: {
+        message: 'Password-based member creation has been removed. Use OAuth sign-up instead.',
+        code: 'DEPRECATED',
+      },
+    };
+  }
+
+  /**
+   * @deprecated Password reset is removed (FR-022).
+   */
+  async resetMemberPassword(_input: { userId: string; newPassword: string }): Promise<AuthResult> {
+    return {
+      error: {
+        message: 'Password reset has been removed. Users sign in via OAuth.',
+        code: 'DEPRECATED',
+      },
+    };
+  }
+
+  /**
+   * Sign out the current user
+   */
+  async logout(): Promise<AuthResult> {
+    try {
+      const { error } = await supabase.auth.signOut();
+
       if (error) {
-        return { error: { message: error.message, code: error.code } };
+        return {
+          error: {
+            message: error.message,
+            code: error.code,
+          },
+        };
+      }
+
+      return {};
+    } catch (error) {
+      return {
+        error: {
+          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
+        },
+      };
+    }
+  }
+
+  /**
+   * Fetch user profile from database
+   */
+  async getProfile(userId: string): Promise<AuthResult<Profile>> {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        return {
+          error: {
+            message: error.message,
+            code: error.code,
+          },
+        };
+      }
+
+      if (!data) {
+        return {
+          error: { message: 'Profile not found' },
+        };
+      }
+
+      return { data };
+    } catch (error) {
+      return {
+        error: {
+          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
+        },
+      };
+    }
+  }
+
+  /**
+   * Get current session
+   */
+  async getSession(): Promise<AuthResult<Session>> {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error) {
+        return {
+          error: {
+            message: error.message,
+            code: error.code,
+          },
+        };
       }
 
       if (!data.session) {
-        return { error: { message: 'No session returned' } };
+        return {
+          error: { message: 'No active session' },
+        };
       }
 
       return { data: data.session };
     } catch (error) {
       return {
         error: {
-          message: error instanceof Error ? error.message : 'An unexpected error occurred',
+          message: error instanceof Error ? error.message : i18n.t('common.unexpectedError'),
         },
       };
     }
   }
 
-  async signInWithPassword(
-    email: string,
-    password: string,
-  ): Promise<AuthResult<Session>> {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        return { error: { message: error.message, code: error.code } };
-      }
-
-      if (!data.session) {
-        return { error: { message: 'No session returned' } };
-      }
-
-      return { data: data.session };
-    } catch (error) {
-      return {
-        error: {
-          message:
-            error instanceof Error
-              ? error.message
-              : 'An unexpected error occurred',
-        },
-      };
-    }
-  }
-
-  async signOut(): Promise<void> {
-    await supabase.auth.signOut();
-  }
-
-  async getCurrentSession(): Promise<Session | null> {
-    const { data } = await supabase.auth.getSession();
-    return data.session;
-  }
-
-  onAuthStateChange(callback: (event: string, session: Session | null) => void) {
+  /**
+   * Subscribe to auth state changes
+   */
+  onAuthStateChange(
+    callback: (event: string, session: Session | null) => void
+  ) {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       callback(event, session);
     });

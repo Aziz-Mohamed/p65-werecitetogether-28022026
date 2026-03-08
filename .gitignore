@@ -28,6 +28,11 @@ yarn-error.*
 
 # macOS
 .DS_Store
+
+# editor
+*.swp
+*.swo
+*~
 *.pem
 
 # editor

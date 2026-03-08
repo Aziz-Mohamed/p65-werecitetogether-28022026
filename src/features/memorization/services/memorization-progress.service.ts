@@ -15,6 +15,7 @@ class MemorizationProgressService {
     return query.order('surah_number').order('from_ayah');
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   async upsertProgress(
     studentId: string,
     surahNumber: number,

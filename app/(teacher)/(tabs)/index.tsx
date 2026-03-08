@@ -6,7 +6,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui';
-import { useAuthStore } from '@/stores/authStore';
+import { LoadingState, ErrorState } from '@/components/feedback';
+import { useAuth } from '@/hooks/useAuth';
+import { useTeacherDashboard } from '@/features/dashboard/hooks/useTeacherDashboard';
+import { useTeacherUpcomingSessions } from '@/features/scheduling/hooks/useScheduledSessions';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
 import {
   useToggleAvailability,
@@ -92,38 +95,6 @@ export default function TeacherDashboard() {
           </View>
           <Badge label={t('roles.teacher')} variant="violet" size="md" />
         </View>
-
-        {/* Availability Toggle */}
-        <Card variant="primary-glow" style={styles.availabilityCard}>
-          <View style={styles.availabilityRow}>
-            <View style={styles.availabilityInfo}>
-              <Ionicons
-                name={isAvailable ? 'radio-button-on' : 'radio-button-off'}
-                size={24}
-                color={isAvailable ? semantic.success : neutral[400]}
-              />
-              <View>
-                <Text style={styles.availabilityTitle}>
-                  {isAvailable
-                    ? t('teacherAvailability.available')
-                    : t('teacherAvailability.unavailable')}
-                </Text>
-                <Text style={styles.availabilityHint}>
-                  {isAvailable
-                    ? t('teacherAvailability.goUnavailable')
-                    : t('teacherAvailability.goAvailable')}
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={isAvailable}
-              onValueChange={handleToggle}
-              trackColor={{ false: neutral[200], true: primary[200] }}
-              thumbColor={isAvailable ? primary[500] : neutral[400]}
-              disabled={!selectedProgramId}
-            />
-          </View>
-        </Card>
 
         {/* Stats Row */}
         <View style={styles.statsRow}>

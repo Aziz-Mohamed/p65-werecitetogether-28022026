@@ -6,6 +6,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const VALID_ROLES = ['student', 'teacher', 'parent', 'admin', 'supervisor', 'program_admin', 'master_admin'];
+const ADMIN_ASSIGNABLE_ROLES = ['student', 'teacher', 'parent'];
+
 function jsonResponse(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -23,7 +26,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Verify caller is admin
+    // Verify caller is authenticated
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return errorResponse("Missing authorization header", "UNAUTHORIZED", 401);
@@ -44,7 +47,7 @@ Deno.serve(async (req: Request) => {
       }
     );
 
-    // Verify JWT by getting user from the auth service directly using admin client
+    // Verify JWT by getting user from the auth service
     const { data: { user: caller }, error: callerError } = await supabaseAdmin.auth.getUser(token);
     if (callerError || !caller) {
       return errorResponse(
@@ -54,7 +57,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Get caller's profile to check role and school_id
+    // Get caller's profile to check role
     const { data: callerProfile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("role, school_id")
@@ -63,162 +66,91 @@ Deno.serve(async (req: Request) => {
 
     if (profileError || !callerProfile) {
       return errorResponse(
-        `Profile lookup failed: ${profileError?.message ?? 'No profile found'} (user: ${caller.id})`,
+        `Profile lookup failed: ${profileError?.message ?? 'No profile found'}`,
         "UNAUTHORIZED",
         401
       );
     }
 
-    if (callerProfile.role !== "admin") {
-      return errorResponse("Only admins can create members", "UNAUTHORIZED", 403);
-    }
-
-    const schoolId = callerProfile.school_id;
-
     // Parse request body
-    const { fullName, username, password, role, classId, parentId, dateOfBirth, nameLocalized } = await req.json();
+    const body = await req.json();
+    const { action } = body;
 
-    // Validate inputs
-    if (!fullName || typeof fullName !== "string" || fullName.length < 2 || fullName.length > 100) {
-      return errorResponse("Full name is required (2-100 characters)", "INVALID_NAME");
-    }
-    if (!username || typeof username !== "string" || username.length < 3 || username.length > 30) {
-      return errorResponse("Username is required (3-30 characters)", "INVALID_USERNAME");
-    }
-    if (!/^[a-z0-9_]+$/.test(username)) {
-      return errorResponse("Username must be lowercase alphanumeric with underscores only", "INVALID_USERNAME");
-    }
-    if (!password || typeof password !== "string" || password.length < 6) {
-      return errorResponse("Password must be at least 6 characters", "WEAK_PASSWORD");
-    }
-    if (!role || !['student', 'teacher', 'parent'].includes(role)) {
-      return errorResponse("Role must be student, teacher, or parent", "INVALID_ROLE");
-    }
+    // ─── Action: update-role ──────────────────────────────────────────────────
+    if (action === 'update-role') {
+      const { userId, role } = body;
 
-    // Check username uniqueness within school
-    const { data: existingUser } = await supabaseAdmin
-      .from("profiles")
-      .select("id")
-      .eq("school_id", schoolId)
-      .eq("username", username)
-      .maybeSingle();
+      // Validate caller has admin or master_admin role
+      if (callerProfile.role !== 'admin' && callerProfile.role !== 'master_admin') {
+        return errorResponse("Only admins can change roles", "UNAUTHORIZED", 403);
+      }
 
-    if (existingUser) {
-      return errorResponse("Username is already taken in this school", "USERNAME_TAKEN");
-    }
+      // Validate target role
+      if (!role || !VALID_ROLES.includes(role)) {
+        return errorResponse(
+          `Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`,
+          "INVALID_ROLE"
+        );
+      }
 
-    // If student with classId, validate class exists and belongs to school
-    if (role === "student" && classId) {
-      const { data: classData, error: classError } = await supabaseAdmin
-        .from("classes")
-        .select("id, max_students")
-        .eq("id", classId)
-        .eq("school_id", schoolId)
+      // Validate target user ID
+      if (!userId || typeof userId !== 'string') {
+        return errorResponse("Target userId is required", "INVALID_INPUT");
+      }
+
+      // Prevent self-role-change
+      if (userId === caller.id) {
+        return errorResponse("Cannot change your own role", "SELF_ROLE_CHANGE", 403);
+      }
+
+      // Enforce role-gating: admin can only assign student/teacher/parent
+      if (callerProfile.role === 'admin' && !ADMIN_ASSIGNABLE_ROLES.includes(role)) {
+        return errorResponse(
+          `Admin can only assign: ${ADMIN_ASSIGNABLE_ROLES.join(', ')}. Contact a master admin for higher roles.`,
+          "INSUFFICIENT_PERMISSIONS",
+          403
+        );
+      }
+
+      // Verify target user exists
+      const { data: targetProfile, error: targetError } = await supabaseAdmin
+        .from("profiles")
+        .select("id, role, full_name")
+        .eq("id", userId)
         .single();
 
-      if (classError || !classData) {
-        return errorResponse("Class not found in this school", "CLASS_NOT_FOUND");
+      if (targetError || !targetProfile) {
+        return errorResponse("Target user not found", "USER_NOT_FOUND", 404);
       }
 
-      // Check class capacity
-      const { count: studentCount } = await supabaseAdmin
-        .from("students")
-        .select("*", { count: "exact", head: true })
-        .eq("class_id", classId)
-        .eq("is_active", true);
+      // Update the role using service_role client (bypasses prevent_role_self_update trigger)
+      const { error: updateError } = await supabaseAdmin
+        .from("profiles")
+        .update({ role })
+        .eq("id", userId);
 
-      if (studentCount !== null && studentCount >= classData.max_students) {
-        return errorResponse("Class is full", "CLASS_FULL");
-      }
-    }
-
-    // Get school slug for synthetic email
-    const { data: school } = await supabaseAdmin
-      .from("schools")
-      .select("slug")
-      .eq("id", schoolId)
-      .single();
-
-    if (!school) {
-      return errorResponse("School not found", "SCHOOL_NOT_FOUND", 500);
-    }
-
-    const email = `${username}@${school.slug}.app`;
-
-    // Build name_localized: use provided value or fall back to { en: fullName }
-    const resolvedNameLocalized = nameLocalized && typeof nameLocalized === "object"
-      ? nameLocalized
-      : { en: fullName };
-
-    // Create auth user (triggers handle_new_profile)
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: {
-        school_id: schoolId,
-        role,
-        full_name: fullName,
-        username,
-        name_localized: JSON.stringify(resolvedNameLocalized),
-      },
-    });
-
-    if (authError) {
-      return errorResponse(`Failed to create user: ${authError.message}`, "AUTH_CREATE_FAILED", 500);
-    }
-
-    // If student, create student record
-    let studentRecord = null;
-    if (role === "student") {
-      const studentData: Record<string, unknown> = {
-        id: authData.user.id,
-        school_id: schoolId,
-        class_id: classId || null,
-        parent_id: parentId || null,
-        current_level: 1,
-      };
-
-      if (dateOfBirth) {
-        studentData.date_of_birth = dateOfBirth;
+      if (updateError) {
+        return errorResponse(
+          `Failed to update role: ${updateError.message}`,
+          "UPDATE_FAILED",
+          500
+        );
       }
 
-      const { data: student, error: studentError } = await supabaseAdmin
-        .from("students")
-        .insert(studentData)
-        .select()
-        .single();
-
-      if (studentError) {
-        // Rollback: delete auth user
-        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-        return errorResponse(`Failed to create student record: ${studentError.message}`, "STUDENT_CREATE_FAILED", 500);
-      }
-
-      studentRecord = {
-        id: student.id,
-        class_id: student.class_id,
-        parent_id: student.parent_id,
-        current_level: student.current_level,
-      };
+      return jsonResponse({
+        profile: {
+          id: userId,
+          role,
+          full_name: targetProfile.full_name,
+        },
+      });
     }
 
-    const response: Record<string, unknown> = {
-      profile: {
-        id: authData.user.id,
-        username,
-        role,
-        full_name: fullName,
-        school_id: schoolId,
-        name_localized: resolvedNameLocalized,
-      },
-    };
-
-    if (studentRecord) {
-      response.student = studentRecord;
-    }
-
-    return jsonResponse(response);
+    // ─── Unknown action ───────────────────────────────────────────────────────
+    return errorResponse(
+      `Unknown action: ${action ?? 'none'}. Supported actions: update-role`,
+      "INVALID_ACTION"
+    );
   } catch (err) {
     return errorResponse(
       err instanceof Error ? err.message : "Internal server error",

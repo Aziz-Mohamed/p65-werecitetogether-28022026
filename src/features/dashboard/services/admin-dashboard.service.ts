@@ -4,6 +4,8 @@ class AdminDashboardService {
   /**
    * DS-004: Get admin dashboard summary statistics.
    * Runs parallel queries for student/teacher/class counts and today's attendance rate.
+   *
+   * @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5.
    */
   async getDashboard(schoolId: string) {
     const today = new Date().toISOString().split('T')[0];

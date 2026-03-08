@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "نتلو معاً",
+    "name": "WeReciteTogether",
     "slug": "werecitetogether",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,8 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.werecitetogether.app",
       "infoPlist": {
-        "ExpoLocalization_supportsRTL": true,
-        "NSMicrophoneUsageDescription": "We need microphone access to record voice memos for your sessions."
+        "ExpoLocalization_supportsRTL": true
       }
     },
     "android": {
@@ -28,9 +27,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.werecitetogether.app",
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": []
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -54,9 +51,11 @@
       [
         "expo-av",
         {
-          "microphonePermission": "We need microphone access to record voice memos for your sessions."
+          "icon": "./assets/icon.png",
+          "sounds": []
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin"
     ]
   }
 }

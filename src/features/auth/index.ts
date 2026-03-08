@@ -2,10 +2,25 @@
 export { authService } from './services/auth.service';
 
 // Types
-export type { AuthResult, Profile } from './types/auth.types';
+export type {
+  OAuthProvider,
+  OAuthLoginResult,
+  DevLoginInput,
+  UpdateRoleInput,
+  UpdateRoleResponse,
+  OAuthErrorCategory,
+  AuthError,
+  AuthResult,
+  Profile,
+  CreateMemberInput,
+  CreateMemberResponse,
+} from './types/auth.types';
 
 // Hooks
+export { useOAuthLogin } from './hooks/useOAuthLogin';
+export { useDevLogin } from './hooks/useDevLogin';
 export { useLogout } from './hooks/useLogout';
 
 // Components
-export { AuthFormField } from './components/AuthFormField';
+export { OAuthButtons } from './components/OAuthButtons';
+export { DevRolePills } from './components/DevRolePills';

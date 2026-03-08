@@ -6,7 +6,7 @@ type Recitation = Tables<'recitations'>;
 type MemorizationProgress = Tables<'memorization_progress'>;
 type MemorizationAssignment = Tables<'memorization_assignments'>;
 
-// Input for creating a recitation (used in the RecitationForm)
+/** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
 export interface CreateRecitationInput {
   session_id: string;
   student_id: string;
@@ -24,7 +24,7 @@ export interface CreateRecitationInput {
   recitation_date?: string;
 }
 
-// Input for creating an assignment
+/** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
 export interface CreateAssignmentInput {
   student_id: string;
   assigned_by: string;

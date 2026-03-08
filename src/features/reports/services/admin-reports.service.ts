@@ -26,6 +26,7 @@ const SCORE_RANGES: Array<{
 ];
 
 class AdminReportsService {
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   async getSchoolKPIs(
     schoolId: string,
     dateRange: DateRange,
@@ -120,6 +121,8 @@ class AdminReportsService {
     };
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
+  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   async getAttendanceTrend(
     schoolId: string,
     dateRange: DateRange,
@@ -145,6 +148,8 @@ class AdminReportsService {
     }));
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
+  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   async getScoreDistribution(
     schoolId: string,
     dateRange: DateRange,
@@ -206,6 +211,8 @@ class AdminReportsService {
     return buckets;
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
+  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   async getLevelDistribution(
     schoolId: string,
     classId?: string,
@@ -244,6 +251,7 @@ class AdminReportsService {
       }));
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   async getTeacherActivity(
     schoolId: string,
     dateRange: DateRange,
@@ -266,6 +274,7 @@ class AdminReportsService {
       lastActiveDate: row.last_active_date,
     }));
   }
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   async getTeacherAttendanceKPIs(
     schoolId: string,
     dateRange: DateRange,
@@ -291,6 +300,7 @@ class AdminReportsService {
     }));
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   async getSessionCompletionStats(
     schoolId: string,
     dateRange: DateRange,

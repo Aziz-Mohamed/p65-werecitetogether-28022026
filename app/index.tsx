@@ -22,8 +22,24 @@ export default function Index() {
     return <Redirect href="/(auth)/login" />;
   }
 
-  if (!onboardingCompleted) {
-    return <Redirect href="/(auth)/onboarding" />;
+  // Redirect to role-based dashboard
+  switch (role) {
+    case 'student':
+      return <Redirect href="/(student)/" />;
+    case 'teacher':
+      return <Redirect href="/(teacher)/" />;
+    case 'parent':
+      return <Redirect href="/(parent)/" />;
+    case 'admin':
+      return <Redirect href="/(admin)/" />;
+    case 'supervisor':
+      return <Redirect href="/(supervisor)/" />;
+    case 'program_admin':
+      return <Redirect href="/(program-admin)/" />;
+    case 'master_admin':
+      return <Redirect href="/(master-admin)/" />;
+    default:
+      return <Redirect href="/(auth)/login" />;
   }
 
   const route = role ? ROLE_ROUTES[role] : null;

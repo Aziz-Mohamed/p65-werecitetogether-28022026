@@ -10,10 +10,28 @@ import type {
 } from '../types';
 
 class SessionsService {
-  async createDraftSession(
-    input: CreateDraftSessionInput,
-  ): Promise<ServiceResult<Session>> {
-    const { data, error } = await supabase
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
+  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
+  /**
+   * SS-001: Create a new session record.
+   * Looks up the teacher's school_id from their profile and inserts the session.
+   */
+  async createSession(input: CreateSessionInput) {
+    // Fetch the teacher's school_id from their profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('school_id')
+      .eq('id', input.teacher_id)
+      .single();
+
+    if (profileError || !profile) {
+      return { data: null, error: profileError ?? new Error('Teacher profile not found') };
+    }
+
+    const schoolId = profile.school_id;
+
+    // Insert the session record
+    const { data: session, error: sessionError } = await supabase
       .from('sessions')
       .insert({
         teacher_id: input.teacherId,
@@ -32,19 +50,17 @@ class SessionsService {
     return { data };
   }
 
-  async addAttendance(
-    input: AddAttendanceInput,
-  ): Promise<ServiceResult<SessionAttendance>> {
-    const { data, error } = await supabase
-      .from('session_attendance')
-      .insert({
-        session_id: input.sessionId,
-        student_id: input.studentId,
-        score: input.score ?? null,
-        notes: input.notes ?? null,
-      })
-      .select()
-      .single();
+  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
+  /**
+   * SS-002: Retrieve a paginated, filtered list of sessions.
+   * Joins teacher profile and student profile.
+   */
+  async getSessions(filters: SessionFilters) {
+    let query = supabase
+      .from('sessions')
+      .select(
+        '*, teacher:profiles!sessions_teacher_id_fkey(full_name, name_localized, avatar_url), student:students!sessions_student_id_fkey(profiles!students_id_fkey(full_name, name_localized, avatar_url))',
+      );
 
     if (error) {
       return { error: { message: error.message, code: error.code } };

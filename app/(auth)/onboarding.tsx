@@ -1,217 +1,208 @@
 import React from 'react';
-import { StyleSheet, View, Text, Pressable } from 'react-native';
+import { StyleSheet, View, Text, Pressable, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import { Screen } from '@/components/layout';
-import { Button, TextField } from '@/components/ui';
-import { Select } from '@/components/forms';
-import { useCompleteOnboarding } from '@/features/onboarding/hooks/useOnboarding';
-import { onboardingSchema, type OnboardingData } from '@/features/onboarding/types';
-import { GENDERS, AGE_RANGES } from '@/lib/constants';
+import { TextField, Button } from '@/components/ui';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/stores/authStore';
+import { useLocaleStore } from '@/stores/localeStore';
 import { typography } from '@/theme/typography';
-import { lightTheme, primary } from '@/theme/colors';
+import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
-import { normalize } from '@/theme/normalize';
+import type { SupportedLocale } from '@/types/common.types';
 
-const COUNTRIES = [
-  { value: 'SA', label: 'Saudi Arabia' },
-  { value: 'AE', label: 'United Arab Emirates' },
-  { value: 'KW', label: 'Kuwait' },
-  { value: 'QA', label: 'Qatar' },
-  { value: 'BH', label: 'Bahrain' },
-  { value: 'OM', label: 'Oman' },
-  { value: 'EG', label: 'Egypt' },
-  { value: 'JO', label: 'Jordan' },
-  { value: 'LB', label: 'Lebanon' },
-  { value: 'IQ', label: 'Iraq' },
-  { value: 'SY', label: 'Syria' },
-  { value: 'PS', label: 'Palestine' },
-  { value: 'YE', label: 'Yemen' },
-  { value: 'LY', label: 'Libya' },
-  { value: 'TN', label: 'Tunisia' },
-  { value: 'DZ', label: 'Algeria' },
-  { value: 'MA', label: 'Morocco' },
-  { value: 'SD', label: 'Sudan' },
-  { value: 'SO', label: 'Somalia' },
-  { value: 'TR', label: 'Turkey' },
-  { value: 'PK', label: 'Pakistan' },
-  { value: 'MY', label: 'Malaysia' },
-  { value: 'ID', label: 'Indonesia' },
-  { value: 'BD', label: 'Bangladesh' },
-  { value: 'IN', label: 'India' },
-  { value: 'GB', label: 'United Kingdom' },
-  { value: 'US', label: 'United States' },
-  { value: 'CA', label: 'Canada' },
-  { value: 'AU', label: 'Australia' },
-  { value: 'FR', label: 'France' },
-  { value: 'DE', label: 'Germany' },
-];
+// ─── Validation Schema ────────────────────────────────────────────────────────
+
+const onboardingSchema = z.object({
+  displayName: z.string().min(2),
+  language: z.enum(['en', 'ar']),
+  bio: z.string().optional(),
+});
+
+type OnboardingFormData = z.infer<typeof onboardingSchema>;
+
+// ─── Onboarding Screen ───────────────────────────────────────────────────────
 
 export default function OnboardingScreen() {
   const { t } = useTranslation();
-  const { mutate: completeOnboarding, isPending, error } = useCompleteOnboarding();
+  const profile = useAuthStore((s) => s.profile);
+  const setProfile = useAuthStore((s) => s.setProfile);
+  const setLocale = useLocaleStore((s) => s.setLocale);
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
-  } = useForm<OnboardingData>({
+    formState: { errors, isSubmitting },
+  } = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: {
-      fullName: '',
-      gender: 'male',
-      ageRange: '18_24',
-      country: '',
-      region: undefined,
+      displayName: profile?.full_name ?? '',
+      language: (profile?.preferred_language as SupportedLocale) ?? 'en',
+      bio: '',
     },
   });
 
-  const onSubmit = (data: OnboardingData) => {
-    completeOnboarding(data);
+  const completeOnboarding = async (data: OnboardingFormData) => {
+    if (!profile?.id) return;
+
+    const updates: Record<string, unknown> = {
+      full_name: data.displayName,
+      preferred_language: data.language,
+      bio: data.bio || null,
+      name_localized: { [data.language]: data.displayName },
+      onboarding_completed: true,
+    };
+
+    const { data: updatedProfile, error } = await supabase
+      .from('profiles')
+      .update(updates as never)
+      .eq('id', profile.id)
+      .select()
+      .single();
+
+    if (error) {
+      if (__DEV__) {
+        console.log('[Onboarding] Update error:', error.message);
+      }
+      Alert.alert(t('common.error'), t('common.unexpectedError'));
+      return;
+    }
+
+    if (updatedProfile) {
+      setProfile(updatedProfile);
+    }
+
+    // Update app locale
+    setLocale(data.language as SupportedLocale);
   };
 
-  const genderOptions = GENDERS.map((g) => ({
-    value: g,
-    label: t(`onboarding.${g}`),
-  }));
+  const skipOnboarding = async () => {
+    if (!profile?.id) return;
 
-  const ageRangeOptions = AGE_RANGES.map((ar) => ({
-    value: ar,
-    label: t(`onboarding.ageRanges.${ar}`),
-  }));
+    const { data: updatedProfile, error } = await supabase
+      .from('profiles')
+      .update({ onboarding_completed: true } as never)
+      .eq('id', profile.id)
+      .select()
+      .single();
+
+    if (!error && updatedProfile) {
+      setProfile(updatedProfile);
+    }
+  };
 
   return (
     <Screen>
       <View style={styles.container}>
-        <Text style={styles.title}>{t('onboarding.title')}</Text>
-        <Text style={styles.subtitle}>{t('onboarding.subtitle')}</Text>
-
-        {error && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>
-              {error instanceof Error ? error.message : t('common.error')}
-            </Text>
-          </View>
-        )}
+        <Text style={styles.title}>{t('auth.onboarding.title')}</Text>
+        <Text style={styles.subtitle}>{t('auth.onboarding.subtitle')}</Text>
 
         <View style={styles.form}>
           <Controller
             control={control}
-            name="fullName"
+            name="displayName"
             render={({ field: { onChange, value } }) => (
               <TextField
-                label={t('onboarding.displayName')}
-                placeholder={t('onboarding.displayNamePlaceholder')}
+                label={t('auth.onboarding.displayName')}
+                placeholder={t('auth.onboarding.displayNamePlaceholder')}
                 value={value}
                 onChangeText={onChange}
-                error={errors.fullName?.message}
+                error={errors.displayName ? t('auth.validation.fullNameMin') : undefined}
               />
             )}
           />
 
-          <Controller
-            control={control}
-            name="gender"
-            render={({ field: { onChange, value } }) => (
-              <View>
-                <Text style={styles.fieldLabel}>{t('onboarding.gender')}</Text>
-                <View style={styles.radioGroup}>
-                  {genderOptions.map((option) => (
-                    <Pressable
-                      key={option.value}
+          <View style={styles.languageSection}>
+            <Text style={styles.languageLabel}>{t('auth.onboarding.language')}</Text>
+            <Controller
+              control={control}
+              name="language"
+              render={({ field: { onChange, value } }) => (
+                <View style={styles.languageOptions} accessibilityRole="radiogroup">
+                  <Pressable
+                    style={[
+                      styles.languageOption,
+                      value === 'en' && styles.languageOptionSelected,
+                    ]}
+                    onPress={() => onChange('en')}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: value === 'en' }}
+                  >
+                    <Text
                       style={[
-                        styles.radioOption,
-                        value === option.value && styles.radioOptionSelected,
+                        styles.languageOptionText,
+                        value === 'en' && styles.languageOptionTextSelected,
                       ]}
-                      onPress={() => onChange(option.value)}
                     >
-                      <View
-                        style={[
-                          styles.radioCircle,
-                          value === option.value && styles.radioCircleSelected,
-                        ]}
-                      >
-                        {value === option.value && (
-                          <View style={styles.radioInner} />
-                        )}
-                      </View>
-                      <Text
-                        style={[
-                          styles.radioLabel,
-                          value === option.value && styles.radioLabelSelected,
-                        ]}
-                      >
-                        {option.label}
-                      </Text>
-                    </Pressable>
-                  ))}
+                      {t('common.english')}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={[
+                      styles.languageOption,
+                      value === 'ar' && styles.languageOptionSelected,
+                    ]}
+                    onPress={() => onChange('ar')}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: value === 'ar' }}
+                  >
+                    <Text
+                      style={[
+                        styles.languageOptionText,
+                        value === 'ar' && styles.languageOptionTextSelected,
+                      ]}
+                    >
+                      {t('common.arabic')}
+                    </Text>
+                  </Pressable>
                 </View>
-                {errors.gender?.message && (
-                  <Text style={styles.fieldError}>{errors.gender.message}</Text>
-                )}
-              </View>
-            )}
-          />
+              )}
+            />
+          </View>
 
           <Controller
             control={control}
-            name="ageRange"
-            render={({ field: { onChange, value } }) => (
-              <Select
-                label={t('onboarding.ageRange')}
-                placeholder={t('common.select')}
-                options={ageRangeOptions}
-                value={value || null}
-                onChange={onChange}
-                error={errors.ageRange?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="country"
-            render={({ field: { onChange, value } }) => (
-              <Select
-                label={t('onboarding.country')}
-                placeholder={t('onboarding.countryPlaceholder')}
-                options={COUNTRIES}
-                value={value || null}
-                onChange={onChange}
-                error={errors.country?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="region"
+            name="bio"
             render={({ field: { onChange, value } }) => (
               <TextField
-                label={`${t('onboarding.region')} (${t('common.optional')})`}
-                placeholder={t('onboarding.regionPlaceholder')}
+                label={`${t('auth.onboarding.bio')} (${t('common.optional')})`}
+                placeholder={t('auth.onboarding.bioPlaceholder')}
                 value={value ?? ''}
                 onChangeText={onChange}
+                multiline
               />
             )}
           />
 
           <Button
-            title={isPending ? t('onboarding.completing') : t('common.done')}
-            onPress={handleSubmit(onSubmit)}
-            disabled={isPending}
-            loading={isPending}
+            title={t('auth.onboarding.continue')}
+            onPress={handleSubmit(completeOnboarding)}
+            disabled={isSubmitting}
+            loading={isSubmitting}
             fullWidth
-            style={styles.submitButton}
+            style={styles.continueButton}
           />
+
+          <Pressable
+            onPress={skipOnboarding}
+            disabled={isSubmitting}
+            style={styles.skipButton}
+            accessibilityRole="button"
+          >
+            <Text style={styles.skipText}>{t('auth.onboarding.skip')}</Text>
+          </Pressable>
         </View>
       </View>
     </Screen>
   );
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   container: {
@@ -228,75 +219,48 @@ const styles = StyleSheet.create({
     color: lightTheme.textSecondary,
     marginBlockEnd: spacing.xl,
   },
-  errorContainer: {
-    backgroundColor: lightTheme.error + '20',
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.base,
-    borderRadius: radius.sm,
-    marginBlockEnd: spacing.base,
-  },
-  errorText: {
-    ...typography.textStyles.caption,
-    color: lightTheme.error,
-  },
   form: {
-    gap: spacing.lg,
+    gap: spacing.base,
   },
-  fieldLabel: {
+  languageSection: {
+    gap: spacing.sm,
+  },
+  languageLabel: {
     ...typography.textStyles.label,
     color: lightTheme.text,
-    marginBlockEnd: spacing.sm,
   },
-  radioGroup: {
+  languageOptions: {
     flexDirection: 'row',
-    gap: spacing.md,
-  },
-  radioOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.sm,
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.md,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: lightTheme.border,
+  },
+  languageOption: {
     flex: 1,
-  },
-  radioOptionSelected: {
-    borderColor: primary[500],
-    backgroundColor: primary[50],
-  },
-  radioCircle: {
-    width: normalize(20),
-    height: normalize(20),
-    borderRadius: normalize(10),
+    paddingBlock: spacing.base,
+    borderRadius: radius.md,
     borderWidth: 2,
     borderColor: lightTheme.border,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  radioCircleSelected: {
-    borderColor: primary[500],
+  languageOptionSelected: {
+    borderColor: lightTheme.primary,
+    backgroundColor: lightTheme.primary + '10',
   },
-  radioInner: {
-    width: normalize(10),
-    height: normalize(10),
-    borderRadius: normalize(5),
-    backgroundColor: primary[500],
-  },
-  radioLabel: {
-    ...typography.textStyles.body,
+  languageOptionText: {
+    ...typography.textStyles.label,
     color: lightTheme.textSecondary,
   },
-  radioLabelSelected: {
-    color: lightTheme.text,
+  languageOptionTextSelected: {
+    color: lightTheme.primary,
   },
-  fieldError: {
-    ...typography.textStyles.caption,
-    color: lightTheme.error,
-    marginBlockStart: spacing.xs,
+  continueButton: {
+    marginBlockStart: spacing.sm,
   },
-  submitButton: {
-    marginBlockStart: spacing.base,
+  skipButton: {
+    alignItems: 'center',
+    paddingBlock: spacing.sm,
+  },
+  skipText: {
+    ...typography.textStyles.label,
+    color: lightTheme.textSecondary,
   },
 });

@@ -68,6 +68,8 @@ export const useAuthStore = create<AuthStore>()(
       name: 'auth-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
+        // Persist profile for session restoration.
+        // Session is managed by Supabase's own SecureStore adapter.
         profile: state.profile,
       }),
     },

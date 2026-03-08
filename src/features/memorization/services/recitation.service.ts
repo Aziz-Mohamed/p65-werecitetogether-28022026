@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import type { CreateRecitationInput, RecitationFilters } from '../types/memorization.types';
 
 class RecitationService {
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   async createRecitation(input: CreateRecitationInput) {
     return supabase
       .from('recitations')
@@ -25,6 +26,7 @@ class RecitationService {
       .single();
   }
 
+  /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
   async createRecitations(inputs: CreateRecitationInput[]) {
     if (inputs.length === 0) return { data: [], error: null };
     const rows = inputs.map((input) => ({

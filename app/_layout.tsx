@@ -17,12 +17,12 @@ import { useAuth } from '@/hooks/useAuth';
 import i18n from '@/i18n/config';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
-import type { UserRole } from '@/types/common.types';
-
-const asyncStoragePersister = createAsyncStoragePersister({
-  storage: AsyncStorage,
-  key: 'wrt-query-cache',
-});
+import { useRealtimeManager, useRealtimeReconnect } from '@/features/realtime';
+import { useNotificationSetup } from '@/features/notifications/hooks/useNotificationSetup';
+import { useNotificationHandler } from '@/features/notifications/hooks/useNotificationHandler';
+import { NotificationSoftAsk } from '@/features/notifications/components/NotificationSoftAsk';
+import { InAppBanner } from '@/features/notifications/components/InAppBanner';
+import type { UserRole as NotifUserRole, NotificationPayload } from '@/features/notifications/types/notifications.types';
 
 // ─── Keep Splash Screen Visible ──────────────────────────────────────────────
 
@@ -85,6 +85,8 @@ export default function RootLayout() {
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(student)" />
               <Stack.Screen name="(teacher)" />
+              <Stack.Screen name="(parent)" />
+              <Stack.Screen name="(admin)" />
               <Stack.Screen name="(supervisor)" />
               <Stack.Screen name="(program-admin)" />
               <Stack.Screen name="(master-admin)" />
@@ -98,6 +100,12 @@ export default function RootLayout() {
 }
 
 // ─── Auth Guard ───────────────────────────────────────────────────────────────
+
+/** Map extended roles to notification-compatible 4-role subset */
+function toNotifRole(role: string | null): NotifUserRole {
+  if (role === 'student' || role === 'teacher' || role === 'parent' || role === 'admin') return role;
+  return 'admin';
+}
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
@@ -136,6 +144,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+        // Token expired or user signed out — clear auth state
         clearAuth();
         return;
       }
@@ -174,21 +183,59 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     } else {
       if (!profile) return;
 
-      if (inAuthGroup) {
-        if (!onboardingCompleted) {
-          router.replace('/(auth)/onboarding');
-          return;
-        }
+      // Check onboarding status — redirect to onboarding if not completed
+      const onboardingCompleted = (profile as Record<string, unknown>).onboarding_completed;
+      const inOnboarding = (segments as string[])[1] === 'onboarding';
+      if (!onboardingCompleted && !inOnboarding) {
+        router.replace('/(auth)/onboarding');
+        return;
+      }
 
-        const route = role ? ROLE_ROUTES[role] : null;
-        if (route) {
-          router.replace(route as any);
-        } else {
-          router.replace('/(auth)/login');
+      // Authenticated - redirect to role-based dashboard if in auth group
+      if (inAuthGroup && onboardingCompleted) {
+        switch (role) {
+          case 'student':
+            router.replace('/(student)/');
+            break;
+          case 'teacher':
+            router.replace('/(teacher)/');
+            break;
+          case 'parent':
+            router.replace('/(parent)/');
+            break;
+          case 'admin':
+            router.replace('/(admin)/');
+            break;
+          case 'supervisor':
+            router.replace('/(supervisor)/');
+            break;
+          case 'program_admin':
+            router.replace('/(program-admin)/');
+            break;
+          case 'master_admin':
+            router.replace('/(master-admin)/');
+            break;
+          default:
+            router.replace('/(auth)/login');
         }
       }
     }
   }, [isAuthenticated, isLoading, role, profile, onboardingCompleted, segments, router]);
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <NotificationSoftAsk
+        visible={showSoftAsk && isAuthenticated && !!profile}
+        role={toNotifRole(role)}
+        onEnable={handleEnableNotifications}
+        onDismiss={dismissSoftAsk}
+      />
+      <InAppBanner
+        notification={bannerNotification}
+        onPress={handleBannerPress}
+        onDismiss={handleBannerDismiss}
+      />
+    </>
+  );
 }

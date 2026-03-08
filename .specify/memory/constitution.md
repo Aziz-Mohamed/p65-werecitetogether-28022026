@@ -1,19 +1,17 @@
 <!--
   SYNC IMPACT REPORT
   ==================
-  Version change: 2.0.0 → 2.0.1 (PATCH)
+  Version change: 1.0.0 → 2.0.2
 
-  Bump rationale: Clarification — Principle VII auth method
-  updated from "email or phone-based auth" to "OAuth (Google +
-  Apple Sign-In)" to align with spec clarification decision
-  (OAuth-only, no email/password or phone/SMS).
+  Bump rationale: MAJOR — multi-tenant → single-tenant evolution,
+  4 → 7 roles, new Principle IX, Quran School → WeReciteTogether.
+  PATCH — Principle I backward-compatibility clarification for
+  branch-and-customize workflow.
 
   Modified principles:
-  - VII: Auth method clarified — "email or phone-based" → "OAuth (Google + Apple)"
-
-  Previous version history:
-  - 2.0.0: MAJOR — multi-tenant → single-tenant, 4 → 5 roles,
-    new Principle IX, Quran School → WeReciteTogether
+  - I: Multi-Tenant → Single-Tenant, Program-Scoped (with backward-compat)
+  - II: 4 Roles → 7 Roles (original 4 PRESERVED + 3 new)
+  - VII: Auth method expanded — password-based + OAuth (Google + Apple)
 
   Unchanged principles:
   - III: TypeScript-First, Strict Mode
@@ -24,6 +22,7 @@
 
   Added sections:
   - Principle IX: External Meeting Integration (Zero Streaming Cost)
+  - Backward-compatibility notes throughout
 
   Removed sections: None
 
@@ -49,18 +48,29 @@
 ### I. Single-Tenant, Program-Scoped
 
 WeReciteTogether operates as a single organization (مقرأة
-إلكترونية). There is no `school_id` or multi-tenant scoping.
-Instead, all data MUST be scoped by `program_id`. Every
-program-scoped table MUST include a `program_id` foreign key.
-All Row Level Security (RLS) policies MUST enforce program-scoping
-via `get_user_programs()` for non-master-admin roles. Global
-tables (platform config, shared reference data) are the only
-exceptions. Master Admins bypass program scoping and see all data.
+إلكترونية). New features MUST be scoped by `program_id` rather
+than `school_id`. Every program-scoped table MUST include a
+`program_id` foreign key. All Row Level Security (RLS) policies
+for new tables MUST enforce program-scoping via
+`get_user_programs()` for non-master-admin roles. Global tables
+(platform config, shared reference data) are the only exceptions.
+Master Admins bypass program scoping and see all data.
 
-### II. Role-Based Access (5 Roles)
+**Backward Compatibility**: Legacy `school_id` references from
+the Quran School codebase are DEPRECATED but MUST be preserved
+for backward compatibility. Existing tables with `school_id`
+MUST NOT be dropped or altered to remove the column. Existing
+RLS policies using `get_user_school_id()` MUST NOT be deleted.
+New features MUST use `program_id` scoping exclusively. Removal
+of deprecated columns/tables is deferred to a dedicated cleanup
+spec after all features are migrated. See PRD Section 0.5 for
+full schema migration rules.
 
-The system recognizes exactly five roles: `student`, `teacher`,
-`supervisor`, `program_admin`, `master_admin`. Every RLS policy
+### II. Role-Based Access (7 Roles)
+
+The system recognizes seven roles: `student`, `teacher`, `parent`,
+`admin` (original four, PRESERVED), plus `supervisor`,
+`program_admin`, `master_admin` (three new). Every RLS policy
 and application-level guard MUST be scoped to one or more of
 these roles using `get_user_role()`. Role assignment occurs at
 the `profiles` table level. The `program_roles` junction table
@@ -69,6 +79,12 @@ No implicit role escalation is permitted — a user MUST have the
 declared role to access role-gated functionality. Program Admins
 and Supervisors MUST only access data within their assigned
 programs.
+
+**Backward Compatibility**: The original `admin` and `parent`
+roles are preserved in the role CHECK constraint. Existing
+`app/(admin)/` and `app/(parent)/` route groups continue to
+function. New admin capabilities are added via `app/(master-admin)/`
+and `app/(program-admin)/` alongside the existing admin.
 
 ### III. TypeScript-First, Strict Mode
 
@@ -108,9 +124,11 @@ switching MUST trigger RTL/LTR layout reconfiguration via
 
 ### VII. Supabase-Native Patterns
 
-Authentication MUST use Supabase Auth. Students self-register
-via OAuth providers (Google Sign-In, Apple Sign-In) — no
-email/password or phone/SMS authentication.
+Authentication MUST use Supabase Auth. For new users, OAuth
+providers (Google Sign-In, Apple Sign-In) are the primary
+authentication method. Existing password-based authentication
+from Quran School is PRESERVED during the transition period —
+both auth methods coexist until migration is complete.
 Teachers, supervisors, and admins are created by higher-level
 admins. Data access MUST use the Supabase JS SDK directly in
 service files — no ORM or repository abstraction layer. RLS
@@ -162,12 +180,14 @@ after the external session concludes.
     filter by `is_active` — app layer handles it
   - `updated_at` triggers on tables that need them
   - Program-scoped tables MUST include `program_id` FK
+  - New columns on existing tables MUST be NULLABLE
 
 ## Development Workflow
 
 - **Routing**: File-based via Expo Router. Route groups map to
-  roles: `(auth)`, `(student)`, `(teacher)`, `(supervisor)`,
-  `(program-admin)`, `(master-admin)`.
+  roles: `(auth)`, `(student)`, `(teacher)`, `(parent)` (preserved),
+  `(admin)` (preserved), `(supervisor)` (new), `(program-admin)`
+  (new), `(master-admin)` (new).
 - **Query keys**: Follow `[feature, ...params]` convention
 - **Services**: Each feature has a `.service.ts` file that wraps
   Supabase SDK calls. Services MUST NOT throw raw errors.
@@ -207,5 +227,9 @@ project. It supersedes ad-hoc practices and local conventions.
   `memory-bank/PRD_WeReciteTogether.md` is the product-level
   source of truth. This constitution governs technical execution
   of that PRD.
+- **Branch strategy**: WeReciteTogether is a branch-and-customize
+  evolution of Quran School (see PRD Section 0). All specs MUST
+  respect the preservation rules in PRD Section 0.2 and removal
+  whitelist in PRD Section 0.3.
 
-**Version**: 2.0.1 | **Ratified**: 2026-02-08 | **Last Amended**: 2026-02-28
+**Version**: 2.0.2 | **Ratified**: 2026-02-08 | **Last Amended**: 2026-03-02

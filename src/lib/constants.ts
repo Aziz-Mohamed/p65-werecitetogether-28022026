@@ -14,13 +14,14 @@ import type {
 // ─── App ────────────────────────────────────────────────────────────────────
 
 export const APP_NAME = 'WeReciteTogether';
-export const APP_NAME_AR = 'نتلو معاً';
 
 // ─── Roles ──────────────────────────────────────────────────────────────────
 
 export const ROLES: readonly UserRole[] = [
   'student',
   'teacher',
+  'parent',
+  'admin',
   'supervisor',
   'program_admin',
   'master_admin',

@@ -5,6 +5,8 @@ class AttendanceService {
   /**
    * AT-001: Mark bulk attendance for a class on a given date.
    * Uses upsert on (student_id, date) to handle re-submissions.
+   *
+   * @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5.
    */
   async markBulkAttendance(input: BulkAttendanceInput, schoolId: string, markedBy: string) {
     const rows = input.records.map((r) => ({
