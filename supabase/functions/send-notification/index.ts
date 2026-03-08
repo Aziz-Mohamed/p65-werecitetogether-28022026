@@ -73,7 +73,10 @@ type NotificationCategory =
   | "certification_returned"
   | "certification_issued"
   | "certification_rejected"
-  | "certification_revoked";
+  | "certification_revoked"
+  | "himam_partner_assigned"
+  | "himam_event_reminder"
+  | "himam_event_cancelled";
 
 // Direct notification categories (invoked via pg_net or Edge Functions, not standard webhooks)
 const DIRECT_CATEGORIES = new Set<string>([
@@ -88,6 +91,9 @@ const DIRECT_CATEGORIES = new Set<string>([
   "certification_issued",
   "certification_rejected",
   "certification_revoked",
+  "himam_partner_assigned",
+  "himam_event_reminder",
+  "himam_event_cancelled",
 ]);
 
 // ─── Table → Categories Mapping ─────────────────────────────────────────────
@@ -388,6 +394,55 @@ async function getRecipients(
           if (!recipients.includes(a.profile_id)) {
             recipients.push(a.profile_id);
           }
+        }
+      }
+    }
+    return recipients;
+  }
+
+  // Himam: partner assigned → notify student
+  if (category === "himam_partner_assigned") {
+    const studentId = record.student_id as string | undefined;
+    if (studentId) recipients.push(studentId);
+    return recipients;
+  }
+
+  // Himam: event reminder → notify all registered students for the event
+  if (category === "himam_event_reminder") {
+    const eventId = record.event_id as string | undefined;
+    if (!eventId) return recipients;
+
+    const { data: registrations } = await supabase
+      .from("himam_registrations")
+      .select("student_id")
+      .eq("event_id", eventId)
+      .in("status", ["registered", "paired"]);
+
+    if (registrations) {
+      for (const reg of registrations) {
+        if (!recipients.includes(reg.student_id)) {
+          recipients.push(reg.student_id);
+        }
+      }
+    }
+    return recipients;
+  }
+
+  // Himam: event cancelled → notify all registered/paired students
+  if (category === "himam_event_cancelled") {
+    const eventId = record.event_id as string | undefined;
+    if (!eventId) return recipients;
+
+    const { data: registrations } = await supabase
+      .from("himam_registrations")
+      .select("student_id")
+      .eq("event_id", eventId)
+      .in("status", ["registered", "paired", "in_progress"]);
+
+    if (registrations) {
+      for (const reg of registrations) {
+        if (!recipients.includes(reg.student_id)) {
+          recipients.push(reg.student_id);
         }
       }
     }
@@ -886,6 +941,39 @@ async function buildNotificationContent(
           ? `شهادة "${certTitle}" تم إلغاؤها${reasonPreview ? `: ${reasonPreview}` : ""}`
           : `"${certTitle}" has been revoked${reasonPreview ? `: ${reasonPreview}` : ""}`,
         data: { screen: "/(student)/certificates" },
+      };
+    }
+
+    case "himam_partner_assigned": {
+      const partnerName = record.partner_name as string ?? "";
+      return {
+        title: lang === "ar" ? "تم تعيين شريكك" : "Partner Assigned",
+        body: lang === "ar"
+          ? `شريكك في ماراثون همم هو ${partnerName}`
+          : `Your Himam marathon partner is ${partnerName}`,
+        data: { screen: "/(student)/himam" },
+      };
+    }
+
+    case "himam_event_reminder": {
+      const eventDate = record.event_date as string ?? "";
+      return {
+        title: lang === "ar" ? "تذكير ماراثون همم" : "Himam Marathon Reminder",
+        body: lang === "ar"
+          ? `ماراثون همم يبدأ غداً ${eventDate}. سجّل الآن!`
+          : `Himam marathon starts tomorrow ${eventDate}. Register now!`,
+        data: { screen: "/(student)/himam" },
+      };
+    }
+
+    case "himam_event_cancelled": {
+      const eventDate = record.event_date as string ?? "";
+      return {
+        title: lang === "ar" ? "إلغاء ماراثون همم" : "Himam Marathon Cancelled",
+        body: lang === "ar"
+          ? `تم إلغاء ماراثون همم بتاريخ ${eventDate}`
+          : `Himam marathon on ${eventDate} has been cancelled`,
+        data: { screen: "/(student)/himam" },
       };
     }
 

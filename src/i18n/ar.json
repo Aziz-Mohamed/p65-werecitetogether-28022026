@@ -1547,5 +1547,125 @@
       "orgNameAr": "نتلو معاً",
       "issuedByOrg": "WeReciteTogether (نتلو معاً)"
     }
+  },
+  "himam": {
+    "title": "ماراثون همم",
+    "subtitle": "ماراثون تلاوة القرآن الأسبوعي",
+    "noUpcomingEvent": "لا يوجد حدث قادم. تحقق لاحقاً!",
+    "registerButton": "سجّل",
+    "cancelRegistration": "إلغاء التسجيل",
+    "cancelRegistrationConfirm": "هل أنت متأكد من إلغاء تسجيلك؟",
+    "registered": "مسجّل",
+    "registrationSuccess": "تم التسجيل بنجاح في الماراثون!",
+    "registrationCancelled": "تم إلغاء التسجيل.",
+    "eventDate": "تاريخ الحدث",
+    "deadline": "آخر موعد للتسجيل",
+    "makkahTime": "بتوقيت مكة",
+    "countdown": "يبدأ خلال",
+    "tracks": {
+      "label": "المسار",
+      "3_juz": "3 أجزاء",
+      "5_juz": "5 أجزاء",
+      "10_juz": "10 أجزاء",
+      "15_juz": "15 جزءاً",
+      "30_juz": "30 جزءاً"
+    },
+    "prayerTimes": {
+      "label": "الأوقات المتاحة",
+      "fajr": "الفجر",
+      "dhuhr": "الظهر",
+      "asr": "العصر",
+      "maghrib": "المغرب",
+      "isha": "العشاء",
+      "night": "الليل"
+    },
+    "juzPicker": {
+      "label": "اختر الأجزاء",
+      "selected": "{{count}} مختار",
+      "selectAll": "اختر الكل (30 جزءاً)",
+      "juzNumber": "الجزء {{number}}"
+    },
+    "partner": {
+      "label": "شريكك",
+      "noPartner": "بانتظار تعيين الشريك",
+      "meetingLink": "رابط الاجتماع",
+      "joinMeeting": "انضم",
+      "partnerMeetingLink": "رابط الشريك",
+      "yourMeetingLink": "رابطك"
+    },
+    "progress": {
+      "title": "التقدم",
+      "markComplete": "تم الختم",
+      "completed": "مكتمل",
+      "pending": "قيد الانتظار",
+      "juzProgress": "{{completed}}/{{total}} أجزاء",
+      "allComplete": "تم ختم جميع الأجزاء!",
+      "eventNotActive": "لم يبدأ الحدث بعد",
+      "completionCelebration": "تهانينا! أتممت جميع أجزائك!"
+    },
+    "status": {
+      "upcoming": "قادم",
+      "active": "نشط",
+      "completed": "مكتمل",
+      "cancelled": "ملغى",
+      "registered": "مسجّل",
+      "paired": "تم الإقران",
+      "in_progress": "جاري",
+      "incomplete": "غير مكتمل"
+    },
+    "supervisor": {
+      "title": "إدارة همم",
+      "createEvent": "إنشاء حدث",
+      "cancelEvent": "إلغاء الحدث",
+      "cancelEventConfirm": "إلغاء هذا الحدث؟ سيتم إلغاء جميع التسجيلات.",
+      "runPairing": "تشغيل الإقران",
+      "pairingSuccess": "اكتمل الإقران: {{pairs}} أزواج، {{unpaired}} بدون شريك.",
+      "registrations": "التسجيلات",
+      "pairings": "الأزواج",
+      "stats": "الإحصائيات",
+      "unpaired": "طلاب بدون شريك",
+      "swapPartners": "تبديل الأزواج",
+      "completionRate": "نسبة الإتمام",
+      "eventCancelled": "تم إلغاء الحدث."
+    },
+    "history": {
+      "title": "سجل الأحداث",
+      "noHistory": "لا توجد أحداث سابقة.",
+      "pastEvents": "الأحداث السابقة"
+    },
+    "dashboard": {
+      "nextEvent": "حدث همم القادم",
+      "viewDetails": "عرض التفاصيل"
+    },
+    "errors": {
+      "HIMAM_EVENT_NOT_FOUND": "الحدث غير موجود.",
+      "HIMAM_REGISTRATION_CLOSED": "التسجيل مغلق.",
+      "HIMAM_ALREADY_REGISTERED": "أنت مسجّل بالفعل في هذا الحدث.",
+      "HIMAM_INVALID_TRACK": "المسار المحدد غير صالح.",
+      "HIMAM_INVALID_JUZ_COUNT": "عدد الأجزاء لا يتطابق مع المسار المحدد.",
+      "HIMAM_INVALID_JUZ_RANGE": "قيم الأجزاء يجب أن تكون بين 1 و 30 بدون تكرار.",
+      "HIMAM_NOT_ENROLLED": "أنت غير مسجّل في برنامج همم.",
+      "HIMAM_REG_NOT_FOUND": "التسجيل غير موجود.",
+      "HIMAM_ALREADY_PAIRED": "لا يمكن الإلغاء بعد الإقران.",
+      "HIMAM_DEADLINE_PASSED": "انتهى موعد التسجيل.",
+      "HIMAM_NOT_PARTICIPANT": "أنت لست مشاركاً في هذا الحدث.",
+      "HIMAM_EVENT_NOT_ACTIVE": "الحدث غير نشط.",
+      "HIMAM_JUZ_NOT_IN_SELECTION": "هذا الجزء ليس في اختيارك.",
+      "HIMAM_JUZ_ALREADY_COMPLETE": "هذا الجزء مكتمل بالفعل.",
+      "HIMAM_UNAUTHORIZED": "ليس لديك صلاحية لهذا الإجراء.",
+      "HIMAM_DIFFERENT_EVENTS": "يجب أن يكون التسجيلان لنفس الحدث.",
+      "HIMAM_EVENT_NOT_UPCOMING": "الحدث ليس في حالة القادم.",
+      "HIMAM_INVALID_DATE": "تاريخ الحدث يجب أن يكون يوم سبت.",
+      "HIMAM_EVENT_EXISTS": "يوجد حدث بالفعل لهذا التاريخ.",
+      "unknown": "حدث خطأ غير متوقع."
+    },
+    "notifications": {
+      "partnerAssignedTitle": "تم تعيين الشريك!",
+      "partnerAssignedBody": "تم إقرانك مع {{partnerName}} لماراثون همم هذا الأسبوع.",
+      "eventReminderTitle": "ماراثون همم غداً!",
+      "eventReminderBody": "ماراثون همم الأسبوعي يبدأ غداً عند الفجر. استعد!",
+      "eventCancelledTitle": "تم إلغاء الحدث",
+      "eventCancelledBody": "تم إلغاء ماراثون همم لهذا الأسبوع."
+    }
   }
 }

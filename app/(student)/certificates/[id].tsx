@@ -2,8 +2,19 @@ import React, { useRef } from 'react';
 import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import ViewShot, { captureRef } from 'react-native-view-shot';
-import * as Sharing from 'expo-sharing';
+
+// Safe require — native modules may not be available (e.g. Expo Go)
+let ViewShot: any = null;
+let captureRef: any = null;
+let Sharing: any = null;
+try {
+  const viewShotModule = require('react-native-view-shot');
+  ViewShot = viewShotModule.default;
+  captureRef = viewShotModule.captureRef;
+  Sharing = require('expo-sharing');
+} catch {
+  // Native modules unavailable
+}
 
 import { Screen } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
@@ -18,11 +29,15 @@ import type { CertificationWithDetails } from '@/features/certifications/types/c
 export default function StudentCertificateDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const viewShotRef = useRef<ViewShot>(null);
+  const viewShotRef = useRef(null);
 
   const { data: cert, isLoading, isError, refetch } = useCertificationDetail(id);
 
   const handleShare = async () => {
+    if (!captureRef || !Sharing) {
+      Alert.alert(t('common.error'), t('certifications.student.shareError'));
+      return;
+    }
     try {
       const uri = await captureRef(viewShotRef, {
         format: 'png',
@@ -40,18 +55,25 @@ export default function StudentCertificateDetailScreen() {
   if (isLoading) return <Screen><Text style={styles.loading}>{t('common.loading')}</Text></Screen>;
   if (isError || !cert) return <Screen><ErrorState onRetry={refetch} /></Screen>;
 
+  const certContent = <CertificateView certification={cert as CertificationWithDetails} />;
+
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
-        <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }}>
-          <CertificateView certification={cert as CertificationWithDetails} />
-        </ViewShot>
+        {ViewShot ? (
+          <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }}>
+            {certContent}
+          </ViewShot>
+        ) : (
+          certContent
+        )}
 
         <View style={styles.actions}>
           <Button
             title={t('certifications.student.share')}
             onPress={handleShare}
             variant="primary"
+            disabled={!ViewShot}
           />
         </View>
       </ScrollView>

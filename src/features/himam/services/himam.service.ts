@@ -1,67 +1,106 @@
 import { supabase } from '@/lib/supabase';
-import type { Json } from '@/types/database.types';
-import type { CreateEventInput, TimeSlot } from '../types/himam.types';
+import type {
+  RegisterInput,
+  MarkJuzCompleteInput,
+  SwapPartnersInput,
+  RegisterResponse,
+  MarkJuzCompleteResponse,
+  PairingStats,
+  EventStats,
+  CreateEventResponse,
+} from '../types/himam.types';
 
 class HimamService {
-  /**
-   * Get upcoming/active events for a program.
-   */
-  async getUpcomingEvents(programId: string) {
+  // ─── RPC Operations ──────────────────────────────────────────────────────
+
+  async register(input: RegisterInput) {
+    return supabase.rpc('register_for_himam_event', {
+      p_event_id: input.eventId,
+      p_track: input.track,
+      p_selected_juz: input.selectedJuz,
+      p_time_slots: input.timeSlots,
+    }) as unknown as { data: RegisterResponse | null; error: Error | null };
+  }
+
+  async cancel(registrationId: string) {
+    return supabase.rpc('cancel_himam_registration', {
+      p_registration_id: registrationId,
+    });
+  }
+
+  async markComplete(input: MarkJuzCompleteInput) {
+    return supabase.rpc('mark_juz_complete', {
+      p_registration_id: input.registrationId,
+      p_juz_number: input.juzNumber,
+    }) as unknown as { data: MarkJuzCompleteResponse | null; error: Error | null };
+  }
+
+  async runPairing(eventId: string) {
+    return supabase.rpc('generate_himam_pairings', {
+      p_event_id: eventId,
+    }) as unknown as { data: PairingStats | null; error: Error | null };
+  }
+
+  async swapPartners(input: SwapPartnersInput) {
+    return supabase.rpc('swap_himam_partners', {
+      p_registration_id_a: input.registrationIdA,
+      p_registration_id_b: input.registrationIdB,
+    });
+  }
+
+  async cancelEvent(eventId: string) {
+    return supabase.rpc('cancel_himam_event', {
+      p_event_id: eventId,
+    });
+  }
+
+  async createEvent(eventDate: string) {
+    return supabase.rpc('create_himam_event', {
+      p_event_date: eventDate,
+    }) as unknown as { data: CreateEventResponse | null; error: Error | null };
+  }
+
+  async getStats(eventId: string) {
+    return supabase.rpc('get_himam_event_stats', {
+      p_event_id: eventId,
+    }) as unknown as { data: EventStats | null; error: Error | null };
+  }
+
+  // ─── Direct Queries ────────────────────────────────────────────────────
+
+  async getUpcomingEvent(programId: string) {
     return supabase
       .from('himam_events')
       .select('*')
       .eq('program_id', programId)
-      .in('status', ['upcoming', 'active'])
-      .order('event_date', { ascending: true });
-  }
-
-  /**
-   * Get a single event by ID.
-   */
-  async getEventById(eventId: string) {
-    return supabase
-      .from('himam_events')
-      .select('*')
-      .eq('id', eventId)
-      .single();
-  }
-
-  /**
-   * Get a student's registration for a specific event.
-   */
-  async getRegistration(eventId: string, studentId: string) {
-    return supabase
-      .from('himam_registrations')
-      .select(
-        '*, partner:profiles!himam_registrations_partner_id_fkey(full_name, display_name, avatar_url, meeting_link)',
-      )
-      .eq('event_id', eventId)
-      .eq('student_id', studentId)
+      .eq('status', 'upcoming')
+      .order('event_date', { ascending: true })
+      .limit(1)
       .maybeSingle();
   }
 
-  /**
-   * Get all registrations for an event, optionally filtered by track.
-   */
-  async getEventRegistrations(eventId: string, track?: string) {
-    let query = supabase
-      .from('himam_registrations')
-      .select(
-        '*, student:profiles!himam_registrations_student_id_fkey(full_name, display_name), partner:profiles!himam_registrations_partner_id_fkey(full_name, display_name)',
-      )
-      .eq('event_id', eventId)
-      .order('created_at', { ascending: true });
-
-    if (track) {
-      query = query.eq('track', track);
-    }
-
-    return query;
+  async getEvents(programId: string) {
+    return supabase
+      .from('himam_events')
+      .select('*')
+      .eq('program_id', programId)
+      .order('event_date', { ascending: false });
   }
 
-  /**
-   * Get Juz' progress for a registration.
-   */
+  async getMyRegistration(eventId: string, studentId: string) {
+    return supabase
+      .from('himam_registrations')
+      .select(`
+        *,
+        student:profiles!himam_registrations_student_id_fkey ( id, full_name, avatar_url, meeting_link ),
+        partner:profiles!himam_registrations_partner_id_fkey ( id, full_name, avatar_url, meeting_link )
+      `)
+      .eq('event_id', eventId)
+      .or(`student_id.eq.${studentId},partner_id.eq.${studentId}`)
+      .limit(1)
+      .maybeSingle();
+  }
+
   async getProgress(registrationId: string) {
     return supabase
       .from('himam_progress')
@@ -70,154 +109,29 @@ class HimamService {
       .order('juz_number', { ascending: true });
   }
 
-  /**
-   * Create a new Himam event (program admin only).
-   */
-  async createEvent(input: CreateEventInput, createdBy: string) {
-    return supabase
-      .from('himam_events')
-      .insert({
-        program_id: input.program_id,
-        event_date: input.event_date,
-        start_time: input.start_time,
-        end_time: input.end_time,
-        timezone: input.timezone,
-        status: 'upcoming',
-        created_by: createdBy,
-      })
-      .select()
-      .single();
-  }
-
-  /**
-   * Register a student for an event with a chosen track.
-   * Also creates himam_progress rows for each Juz' in the track.
-   */
-  async registerForEvent(eventId: string, studentId: string, track: string) {
-    // Insert registration
-    const { data: registration, error: regError } = await supabase
-      .from('himam_registrations')
-      .insert({
-        event_id: eventId,
-        student_id: studentId,
-        track,
-        status: 'registered',
-      })
-      .select()
-      .single();
-
-    if (regError || !registration) return { data: null, error: regError };
-
-    // Determine Juz' count from track
-    const juzCount = parseInt(track.split('_')[0], 10);
-
-    // Create progress rows
-    const progressRows = Array.from({ length: juzCount }, (_, i) => ({
-      registration_id: registration.id,
-      juz_number: i + 1,
-      status: 'pending',
-    }));
-
-    const { error: progressError } = await supabase
-      .from('himam_progress')
-      .insert(progressRows);
-
-    if (progressError) return { data: registration, error: progressError };
-
-    return { data: registration, error: null };
-  }
-
-  /**
-   * Update time slots for a registration.
-   */
-  async updateTimeSlots(registrationId: string, timeSlots: TimeSlot[]) {
+  async getHistory(studentId: string) {
     return supabase
       .from('himam_registrations')
-      .update({ time_slots: timeSlots as unknown as Json })
-      .eq('id', registrationId)
-      .select()
-      .single();
+      .select(`
+        *,
+        event:himam_events!himam_registrations_event_id_fkey ( id, event_date, status ),
+        partner:profiles!himam_registrations_partner_id_fkey ( id, full_name )
+      `)
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false });
   }
 
-  /**
-   * Log block completion for a specific Juz'.
-   */
-  async logBlockCompletion(
-    registrationId: string,
-    juzNumber: number,
-    loggedBy: string,
-    status: 'completed' | 'partner_absent',
-    notes?: string,
-  ) {
-    const updateFields: Record<string, unknown> = {
-      status,
-      logged_by: loggedBy,
-      notes: notes ?? null,
-    };
-
-    if (status === 'completed') {
-      updateFields.completed_at = new Date().toISOString();
-    }
-
-    const { data, error } = await supabase
-      .from('himam_progress')
-      .update(updateFields)
-      .eq('registration_id', registrationId)
-      .eq('juz_number', juzNumber)
-      .select()
-      .single();
-
-    if (error) return { data: null, error };
-
-    // Check if all Juz' are completed (partner_absent does NOT count)
-    if (status === 'completed') {
-      const { data: allProgress } = await supabase
-        .from('himam_progress')
-        .select('status')
-        .eq('registration_id', registrationId);
-
-      const allCompleted = allProgress?.every((p) => p.status === 'completed');
-      if (allCompleted) {
-        await supabase
-          .from('himam_registrations')
-          .update({ status: 'completed' })
-          .eq('id', registrationId);
-      }
-    }
-
-    return { data, error: null };
-  }
-
-  /**
-   * Cancel a student's registration.
-   */
-  async cancelRegistration(registrationId: string) {
+  async getEventRegistrations(eventId: string) {
     return supabase
       .from('himam_registrations')
-      .update({ status: 'cancelled' })
-      .eq('id', registrationId)
-      .select()
-      .single();
-  }
-
-  /**
-   * Cancel an entire event and all its registrations.
-   */
-  async cancelEvent(eventId: string) {
-    // Cancel all non-completed registrations
-    await supabase
-      .from('himam_registrations')
-      .update({ status: 'cancelled' })
+      .select(`
+        *,
+        student:profiles!himam_registrations_student_id_fkey ( id, full_name, avatar_url ),
+        partner:profiles!himam_registrations_partner_id_fkey ( id, full_name )
+      `)
       .eq('event_id', eventId)
-      .neq('status', 'completed');
-
-    // Cancel the event itself
-    return supabase
-      .from('himam_events')
-      .update({ status: 'cancelled' })
-      .eq('id', eventId)
-      .select()
-      .single();
+      .order('track')
+      .order('created_at');
   }
 }
 
