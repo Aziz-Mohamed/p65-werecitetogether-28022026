@@ -84,7 +84,16 @@ export default function MyProgramsScreen() {
           estimatedItemSize={100}
           contentContainerStyle={{ padding: spacing.base }}
           renderItem={({ item }: { item: EnrollmentWithDetails }) => (
-            <Card variant="outlined" style={styles.card}>
+            <Card
+              variant="outlined"
+              style={styles.card}
+              onPress={() =>
+                router.push({
+                  pathname: '/(student)/programs/[id]',
+                  params: { id: item.program_id },
+                })
+              }
+            >
               <View style={styles.cardHeader}>
                 <Text style={styles.programName} numberOfLines={1}>
                   {item.programs
