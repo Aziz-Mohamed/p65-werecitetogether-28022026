@@ -1,3 +1,5 @@
+import type { AttendanceStatus } from '@/types/common.types';
+import { LEVELS } from '@/lib/constants';
 import { semantic } from '@/theme/colors';
 
 // ─── String Helpers ─────────────────────────────────────────────────────────
@@ -78,6 +80,66 @@ export const formatRelativeTime = (date: Date | string): string => {
   return `${diffMonths} month${diffMonths === 1 ? '' : 's'} ago`;
 };
 
+// ─── Level Calculation ──────────────────────────────────────────────────────
+
+export interface LevelInfo {
+  level: number;
+  title: string;
+  nextLevelPoints: number;
+  progress: number;
+}
+
+/**
+ * Given a point total, determines the user's current level, title,
+ * the points required for the next level, and fractional progress (0–1).
+ */
+export const calculateLevel = (points: number): LevelInfo => {
+  let currentIndex = 0;
+
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (points >= LEVELS[i].points) {
+      currentIndex = i;
+      break;
+    }
+  }
+
+  const current = LEVELS[currentIndex];
+  const isMaxLevel = currentIndex === LEVELS.length - 1;
+  const next = isMaxLevel ? current : LEVELS[currentIndex + 1];
+
+  const rangeStart = current.points;
+  const rangeEnd = next.points;
+  const range = rangeEnd - rangeStart;
+
+  const progress =
+    isMaxLevel || range === 0
+      ? 1
+      : clamp((points - rangeStart) / range, 0, 1);
+
+  return {
+    level: current.level,
+    title: current.title,
+    nextLevelPoints: next.points,
+    progress,
+  };
+};
+
+// ─── Attendance Color Mapping ───────────────────────────────────────────────
+
+const ATTENDANCE_COLORS: Record<AttendanceStatus, string> = {
+  present: semantic.success,
+  absent: semantic.error,
+  late: semantic.warning,
+  excused: semantic.info,
+};
+
+/**
+ * Maps an attendance status to its semantic color hex.
+ */
+export const getAttendanceColor = (status: AttendanceStatus): string => {
+  return ATTENDANCE_COLORS[status];
+};
+
 // ─── Numeric Helpers ────────────────────────────────────────────────────────
 
 /**
@@ -85,15 +147,4 @@ export const formatRelativeTime = (date: Date | string): string => {
  */
 export const clamp = (value: number, min: number, max: number): number => {
   return Math.min(Math.max(value, min), max);
-};
-
-// ─── Session Score Helpers ──────────────────────────────────────────────────
-
-/**
- * Maps a session score (1-10) to a semantic color.
- */
-export const getScoreColor = (score: number): string => {
-  if (score >= 8) return semantic.success;
-  if (score >= 5) return semantic.warning;
-  return semantic.error;
 };

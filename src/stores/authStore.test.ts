@@ -21,8 +21,7 @@ const mockProfile = {
   id: 'user-1',
   full_name: 'Test User',
   role: 'teacher',
-  country: 'SA',
-  onboarding_completed: true,
+  school_id: 'school-1',
 } as ReturnType<typeof useAuthStore.getState>['profile'];
 
 describe('authStore', () => {

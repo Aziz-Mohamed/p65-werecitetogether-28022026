@@ -5,12 +5,7 @@ import type {
   SelectionMode,
   RecitationPlanType,
 } from '@/features/scheduling/types/recitation-plan.types';
-/** Locally-defined homework item shape (gamification feature removed). */
-interface HomeworkItem {
-  assignmentId: string;
-  rubNumber: number;
-  juz: number;
-}
+import type { HomeworkItem } from '@/features/gamification/hooks/useRevisionHomework';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

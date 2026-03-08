@@ -8,9 +8,13 @@ interface UseAuthReturn {
   isLoading: boolean;
   isAuthenticated: boolean;
   role: UserRole | null;
-  onboardingCompleted: boolean;
+  schoolId: string | null;
 }
 
+/**
+ * Convenience hook that wraps the auth store and derives commonly needed
+ * values such as the current user's role and school ID.
+ */
 export const useAuth = (): UseAuthReturn => {
   const session = useAuthStore((s) => s.session);
   const profile = useAuthStore((s) => s.profile);
@@ -23,6 +27,6 @@ export const useAuth = (): UseAuthReturn => {
     isLoading,
     isAuthenticated,
     role: (profile?.role as UserRole) ?? null,
-    onboardingCompleted: profile?.onboarding_completed ?? false,
+    schoolId: profile?.school_id ?? null,
   };
 };

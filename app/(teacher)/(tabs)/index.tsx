@@ -1,10 +1,12 @@
 import React from 'react';
 import { I18nManager, RefreshControl, StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,25 +17,28 @@ import { useTeacherRatingStats } from '@/features/ratings/hooks/useTeacherRating
 import { RatingStatsCard } from '@/features/ratings/components/RatingStatsCard';
 import { DemandIndicator } from '@/features/queue/components/DemandIndicator';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
-import {
-  useToggleAvailability,
-} from '@/features/teacher-availability/hooks/useTeacherAvailability';
-import { RatingStatsDisplay } from '@/features/teacher-ratings/components/RatingStatsDisplay';
-import { sessionsService } from '@/features/sessions/services/sessions.service';
-import { useSessionsRealtime } from '@/features/realtime';
-import { useQuery } from '@tanstack/react-query';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
-import { lightTheme, primary, accent, neutral, semantic } from '@/theme/colors';
+import { lightTheme, colors, semantic } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import { radius } from '@/theme/radius';
 import { normalize } from '@/theme/normalize';
+
+const STATUS_BADGE_VARIANT: Record<string, 'sky' | 'warning' | 'success' | 'default'> = {
+  scheduled: 'sky',
+  in_progress: 'warning',
+  completed: 'success',
+  cancelled: 'default',
+  missed: 'warning',
+};
+
+// ─── Teacher Dashboard ────────────────────────────────────────────────────────
 
 export default function TeacherDashboard() {
   const { t } = useTranslation();
-  const profile = useAuthStore((s) => s.profile);
+  const { profile, schoolId } = useAuth();
+  const router = useRouter();
   const theme = useRoleTheme();
-  const teacherId = profile?.id ?? '';
-  const displayName = profile?.display_name ?? profile?.full_name ?? '';
+  const { resolveFirstName, resolveName } = useLocalizedName();
 
   const { data, isLoading, error, refetch } = useTeacherDashboard(profile?.id);
   const { data: upcomingSessions = [] } = useTeacherUpcomingSessions(profile?.id, schoolId ?? undefined);
@@ -44,51 +49,16 @@ export default function TeacherDashboard() {
   const { data: ratingStats } = useTeacherRatingStats(profile?.id, firstProgramId);
   const nextSession = upcomingSessions[0] ?? null;
 
-  // Track whether teacher is currently available
-  const [isAvailable, setIsAvailable] = useState(false);
+  const handleNextSession = () => {
+    if (nextSession) {
+      router.push(`/(teacher)/schedule/${nextSession.id}`);
+    } else {
+      router.navigate('/(teacher)/(tabs)/sessions');
+    }
+  };
 
-  // Realtime sessions subscription
-  useSessionsRealtime(teacherId || undefined, 'teacher_id');
-
-  // Today's completed count
-  const { data: todayCount = 0 } = useQuery({
-    queryKey: ['sessions', 'today-completed', teacherId],
-    queryFn: async () => {
-      const result = await sessionsService.getTodayCompletedCount(teacherId);
-      if (result.error) throw new Error(result.error.message);
-      return result.data!;
-    },
-    enabled: !!teacherId,
-    staleTime: 30_000,
-  });
-
-  // Recent sessions
-  const { data: recentSessions = [] } = useQuery({
-    queryKey: ['sessions', 'teacher', teacherId],
-    queryFn: async () => {
-      const result = await sessionsService.getSessionsByTeacher(teacherId);
-      if (result.error) throw new Error(result.error.message);
-      return result.data!;
-    },
-    enabled: !!teacherId,
-    staleTime: 30_000,
-  });
-
-  const draftSessions = recentSessions.filter((s) => s.status === 'draft');
-
-  const handleToggle = useCallback(
-    (value: boolean) => {
-      if (!selectedProgramId) return;
-      setIsAvailable(value);
-      toggleAvailability.mutate(
-        { programId: selectedProgramId, isAvailable: value },
-        {
-          onError: () => setIsAvailable(!value),
-        },
-      );
-    },
-    [selectedProgramId, toggleAvailability],
-  );
+  if (isLoading) return <LoadingState />;
+  if (error) return <ErrorState description={error.message} onRetry={refetch} />;
 
   return (
     <Screen
@@ -103,37 +73,45 @@ export default function TeacherDashboard() {
         <View style={styles.header}>
           <View style={styles.headerContent}>
             <Text style={styles.greeting}>
-              {t('dashboard.welcome', { name: displayName })}
+              {t('dashboard.welcome', { name: resolveFirstName(profile?.name_localized, profile?.full_name) })} 👋
             </Text>
+            <Text style={styles.subtitle}>{t('teacher.dashboard.readyToTeach')}</Text>
           </View>
-          <Badge label={t('roles.teacher')} variant="violet" size="md" />
+          <Badge label={t('roles.teacher')} variant={theme.tag} size="md" />
         </View>
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
           <Card variant="default" style={styles.statCard}>
-            <Text style={[styles.statValue, { color: theme.primary }]}>
-              {todayCount}
-            </Text>
-            <Text style={styles.statLabel}>
-              {t('sessions.todayCompleted', { count: todayCount })}
-            </Text>
+            <Text style={[styles.statValue, { color: theme.primary }]}>{data?.todaySessionCount ?? 0}</Text>
+            <Text style={styles.statLabel}>{t('teacher.dashboard.sessionsToday')}</Text>
           </Card>
           <Card variant="default" style={styles.statCard}>
-            <Text style={[styles.statValue, { color: accent.sky[500] }]}>
-              {draftSessions.length}
-            </Text>
-            <Text style={styles.statLabel}>{t('sessions.draft')}</Text>
+            <Text style={[styles.statValue, { color: colors.accent.sky[500] }]}>{data?.todayStudentsSeen ?? 0}</Text>
+            <Text style={styles.statLabel}>{t('teacher.dashboard.studentsSeen')}</Text>
           </Card>
         </View>
 
-        {/* Rating Stats */}
-        {selectedProgramId && (
-          <>
-            <Text style={styles.sectionTitle}>{t('ratings.myRatings')}</Text>
-            <RatingStatsDisplay teacherId={teacherId} programId={selectedProgramId} />
-          </>
-        )}
+        {/* Quick Actions */}
+        <Text style={styles.sectionTitle}>{t('dashboard.quickActions')}</Text>
+        <View style={styles.actionsRow}>
+          <Button
+            title={t('scheduling.nextSession')}
+            onPress={handleNextSession}
+            variant={theme.tag}
+            size="md"
+            icon={<Ionicons name="arrow-forward-circle" size={20} color={colors.white} />}
+            style={styles.actionButton}
+          />
+          <Button
+            title={t('teacher.awardSticker')}
+            onPress={() => router.push('/(teacher)/awards')}
+            variant="ghost"
+            size="md"
+            icon={<Ionicons name="star" size={20} color={colors.secondary[500]} />}
+            style={[styles.actionButton, { backgroundColor: colors.secondary[50] }]}
+          />
+        </View>
 
         {/* My Schedule */}
         <Card
@@ -252,43 +230,28 @@ export default function TeacherDashboard() {
                       variant={score >= 4 ? 'success' : 'warning'}
                       size="sm"
                     />
-                    <View style={styles.sessionInfo}>
-                      <Text style={styles.sessionStudent} numberOfLines={1}>
-                        {t('sessions.draft')}
-                      </Text>
-                      <Text style={styles.sessionMeta}>
-                        {new Date(item.created_at).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </Text>
-                    </View>
-                    <Badge label={t('sessions.draft')} variant="sky" size="sm" />
-                  </View>
-                </Card>
-              )}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
-            />
-          </>
-        )}
-
-        {/* Empty state when no drafts */}
-        {draftSessions.length === 0 && (
-          <Card variant="outlined" style={styles.emptyCard}>
-            <Ionicons
-              name="calendar-outline"
-              size={32}
-              color={neutral[300]}
-            />
-            <Text style={styles.emptyText}>
-              {t('sessions.noSessions')}
-            </Text>
-          </Card>
+                  )}
+                  <Badge
+                    label={t(`scheduling.status.${session.status}`)}
+                    variant={STATUS_BADGE_VARIANT[session.status] ?? 'default'}
+                    size="sm"
+                  />
+                  <Ionicons
+                    name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
+                    size={16}
+                    color={colors.neutral[300]}
+                  />
+                </View>
+              </Card>
+            );
+          })
         )}
       </View>
     </Screen>
   );
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   container: {
@@ -300,7 +263,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBlockEnd: spacing.xs,
+    marginBottom: spacing.xs,
   },
   headerContent: {
     flex: 1,
@@ -310,26 +273,10 @@ const styles = StyleSheet.create({
     color: lightTheme.text,
     fontSize: normalize(22),
   },
-  availabilityCard: {
-    padding: spacing.base,
-  },
-  availabilityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  availabilityInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  availabilityTitle: {
-    ...typography.textStyles.bodyMedium,
-    color: lightTheme.text,
-  },
-  availabilityHint: {
+  subtitle: {
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
+    marginTop: normalize(2),
   },
   statsRow: {
     flexDirection: 'row',
@@ -338,7 +285,7 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     alignItems: 'center',
-    paddingBlock: spacing.lg,
+    paddingVertical: spacing.lg,
   },
   statValue: {
     ...typography.textStyles.display,
@@ -346,46 +293,93 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     ...typography.textStyles.label,
-    color: neutral[500],
-    marginBlockStart: spacing.xs,
-    textAlign: 'center',
+    color: colors.neutral[500],
+    marginTop: spacing.xs,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.sm,
   },
   sectionTitle: {
     ...typography.textStyles.subheading,
     color: lightTheme.text,
   },
-  sessionCard: {
+  actionsRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  actionButton: {
+    flex: 1,
+    borderRadius: normalize(16),
+  },
+  scheduleCard: {
     padding: spacing.md,
   },
-  sessionRow: {
+  scheduleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
   },
-  sessionInfo: {
+  scheduleInfo: {
     flex: 1,
-    gap: 2,
   },
-  sessionStudent: {
+  scheduleLabel: {
     ...typography.textStyles.bodyMedium,
-    color: lightTheme.text,
+    color: colors.neutral[900],
   },
-  sessionMeta: {
+  scheduleHint: {
+    ...typography.textStyles.label,
+    color: colors.neutral[500],
+    marginTop: normalize(2),
+  },
+  insightCard: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
+    gap: spacing.sm,
+  },
+  insightIcon: {
+    width: normalize(44),
+    height: normalize(44),
+    borderRadius: normalize(22),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  insightLabel: {
+    ...typography.textStyles.label,
+    color: colors.neutral[700],
+    textAlign: 'center',
+  },
+  recentCard: {
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  recentCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  recentCardInfo: {
+    flex: 1,
+    gap: normalize(3),
+  },
+  recentCardTitle: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.neutral[900],
+  },
+  recentCardMeta: {
     ...typography.textStyles.caption,
-    color: lightTheme.textSecondary,
-  },
-  separator: {
-    height: spacing.sm,
+    color: colors.neutral[400],
   },
   emptyCard: {
     padding: spacing.xl,
     alignItems: 'center',
-    gap: spacing.md,
     borderStyle: 'dashed',
   },
   emptyText: {
     ...typography.textStyles.body,
     color: lightTheme.textSecondary,
-    textAlign: 'center',
   },
 });

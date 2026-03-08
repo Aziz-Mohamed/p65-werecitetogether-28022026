@@ -35,11 +35,6 @@ yarn-error.*
 *~
 *.pem
 
-# editor
-*.swp
-*.swo
-*~
-
 # env files
 .env
 .env*.local

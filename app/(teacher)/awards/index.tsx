@@ -1,7 +1,8 @@
-import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, Pressable, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 
 import { Screen } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
@@ -16,10 +17,14 @@ import { useUndoTimer } from '@/hooks/useUndoTimer';
 import { getStickerImageUrl } from '@/lib/storage';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
-import { lightTheme, neutral } from '@/theme/colors';
+import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { radius } from '@/theme/radius';
+import { normalize } from '@/theme/normalize';
 
-export default function AwardsScreen() {
+// ─── Award Sticker Screen ────────────────────────────────────────────────────
+
+export default function AwardStickerScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { profile } = useAuth();
@@ -186,15 +191,17 @@ export default function AwardsScreen() {
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: spacing.lg,
+    gap: spacing.md,
   },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
-    marginBlockEnd: spacing.xl,
   },
   sectionTitle: {
     ...typography.textStyles.subheading,
@@ -266,13 +273,5 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.md,
-    paddingBlock: spacing['4xl'],
-  },
-  placeholderText: {
-    ...typography.textStyles.body,
-    color: lightTheme.textSecondary,
   },
 });

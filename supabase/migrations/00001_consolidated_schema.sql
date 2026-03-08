@@ -1,9 +1,9 @@
 -- =============================================================================
--- WeReciteTogether — Consolidated Schema Migration
+-- Quran School — Consolidated Schema Migration
 -- =============================================================================
 -- This single migration creates the entire database schema from scratch.
--- It includes: extensions, helper functions, tables, indexes, RLS policies,
--- triggers, realtime publication, and storage configuration.
+-- It includes: extensions, tables, functions, indexes, RLS policies,
+-- triggers, realtime publication, cron jobs, and seed data.
 -- =============================================================================
 
 -- =============================================================================
@@ -13,9 +13,10 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS "pg_cron" WITH SCHEMA cron;
+CREATE EXTENSION IF NOT EXISTS "http" WITH SCHEMA extensions;
 
 -- =============================================================================
--- Section 2: Shared Functions (before tables that reference them)
+-- Section 2: Tables (20 tables in FK dependency order)
 -- =============================================================================
 
 -- Table 1: schools
@@ -448,897 +449,277 @@ BEGIN
   NEW.updated_at = now();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
-
--- =============================================================================
--- Section 3: Tables (19 tables in FK dependency order)
--- =============================================================================
-
--- Table 1: platform_config (singleton)
-CREATE TABLE platform_config (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL DEFAULT 'WeReciteTogether',
-  name_ar TEXT NOT NULL DEFAULT 'نتلو معاً',
-  description TEXT,
-  logo_url TEXT,
-  settings JSONB NOT NULL DEFAULT '{
-    "maintenance_mode": false,
-    "default_language": "ar",
-    "support_email": "support@werecitetogether.com",
-    "terms_url": "",
-    "privacy_url": "",
-    "min_app_version": "1.0.0",
-    "max_voice_memo_seconds": 120,
-    "default_queue_expiry_minutes": 120,
-    "default_waitlist_offer_hours": 24
-  }'::jsonb,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER set_platform_config_updated_at
-  BEFORE UPDATE ON platform_config
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- Table 2: profiles (extends auth.users)
-CREATE TABLE profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  role TEXT NOT NULL DEFAULT 'student'
-    CHECK (role IN ('student', 'teacher', 'supervisor', 'program_admin', 'master_admin')),
-  full_name TEXT NOT NULL DEFAULT '',
-  display_name TEXT,
-  username TEXT UNIQUE,
-  avatar_url TEXT,
-  email TEXT,
-  phone TEXT,
-  gender TEXT CHECK (gender IN ('male', 'female')),
-  age_range TEXT CHECK (age_range IN ('under_13', '13_17', '18_25', '26_35', '36_50', '50_plus')),
-  country TEXT NOT NULL DEFAULT '',
-  region TEXT,
-  meeting_link TEXT,
-  meeting_platform TEXT CHECK (meeting_platform IN ('google_meet', 'zoom', 'jitsi', 'other')),
-  bio TEXT,
-  languages TEXT[],
-  onboarding_completed BOOLEAN NOT NULL DEFAULT false,
-  is_active BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE INDEX idx_profiles_role ON profiles (role);
-CREATE INDEX idx_profiles_active ON profiles (id) WHERE is_active = true;
-
-CREATE TRIGGER set_profiles_updated_at
-  BEFORE UPDATE ON profiles
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- Table 3: programs
-CREATE TABLE programs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  name_ar TEXT NOT NULL,
-  description TEXT,
-  description_ar TEXT,
-  category TEXT NOT NULL CHECK (category IN ('free', 'structured', 'mixed')),
-  is_active BOOLEAN NOT NULL DEFAULT true,
-  settings JSONB NOT NULL DEFAULT '{
-    "max_students_per_teacher": 10,
-    "max_daily_free_sessions": 2,
-    "queue_expiry_minutes": 120,
-    "waitlist_offer_hours": 24,
-    "notify_teachers_queue_threshold": 5,
-    "enrollment_auto_approve": false,
-    "min_reviews_for_display": 5,
-    "good_standing_threshold": 4.0,
-    "warning_threshold": 3.5,
-    "concern_threshold": 3.0,
-    "review_window_hours": 48
-  }'::jsonb,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER set_programs_updated_at
-  BEFORE UPDATE ON programs
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- Table 4: program_tracks
-CREATE TABLE program_tracks (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  name_ar TEXT NOT NULL,
-  description TEXT,
-  description_ar TEXT,
-  track_type TEXT CHECK (track_type IN ('free', 'structured')),
-  curriculum JSONB,
-  sort_order INT NOT NULL DEFAULT 0,
-  is_active BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- Table 5: program_roles (junction — profiles ↔ programs)
-CREATE TABLE program_roles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  role TEXT NOT NULL CHECK (role IN ('program_admin', 'supervisor', 'teacher')),
-  assigned_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (profile_id, program_id, role)
-);
-
-CREATE INDEX idx_program_roles_lookup ON program_roles (profile_id, program_id);
-
--- Table 6: cohorts
-CREATE TABLE cohorts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  track_id UUID REFERENCES program_tracks(id) ON DELETE SET NULL,
-  name TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'enrollment_open'
-    CHECK (status IN ('enrollment_open', 'enrollment_closed', 'in_progress', 'completed', 'archived')),
-  max_students INT NOT NULL DEFAULT 30 CHECK (max_students > 0),
-  teacher_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  supervisor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  meeting_link TEXT,
-  schedule JSONB,
-  start_date DATE,
-  end_date DATE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER set_cohorts_updated_at
-  BEFORE UPDATE ON cohorts
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- Table 7: enrollments
-CREATE TABLE enrollments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  student_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  track_id UUID REFERENCES program_tracks(id) ON DELETE SET NULL,
-  cohort_id UUID REFERENCES cohorts(id) ON DELETE SET NULL,
-  teacher_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  status TEXT NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'approved', 'active', 'completed', 'dropped', 'waitlisted')),
-  enrolled_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  completed_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- Partial unique index: prevent duplicate active enrollments (allow re-enrollment after drop/complete)
-CREATE UNIQUE INDEX idx_enrollments_active_unique
-  ON enrollments (student_id, program_id, track_id, cohort_id)
-  WHERE status NOT IN ('dropped', 'completed');
-
-CREATE INDEX idx_enrollments_student_status ON enrollments (student_id, status);
-CREATE INDEX idx_enrollments_program_status ON enrollments (program_id, status);
-
-CREATE TRIGGER set_enrollments_updated_at
-  BEFORE UPDATE ON enrollments
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- Table 8: teacher_availability
-CREATE TABLE teacher_availability (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  teacher_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  is_available BOOLEAN NOT NULL DEFAULT false,
-  available_since TIMESTAMPTZ,
-  max_concurrent_students INT NOT NULL DEFAULT 1 CHECK (max_concurrent_students > 0),
-  current_session_count INT NOT NULL DEFAULT 0 CHECK (current_session_count >= 0),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (teacher_id, program_id)
-);
-
-CREATE INDEX idx_teacher_availability_available
-  ON teacher_availability (program_id)
-  WHERE is_available = true;
-
-CREATE TRIGGER set_teacher_availability_updated_at
-  BEFORE UPDATE ON teacher_availability
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- Table 9: sessions
-CREATE TABLE sessions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  teacher_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  cohort_id UUID REFERENCES cohorts(id) ON DELETE SET NULL,
-  status TEXT NOT NULL DEFAULT 'draft'
-    CHECK (status IN ('draft', 'completed', 'cancelled')),
-  meeting_link_used TEXT,
-  started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  completed_at TIMESTAMPTZ,
-  duration_minutes INT CHECK (duration_minutes > 0),
-  notes TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE INDEX idx_sessions_teacher_status ON sessions (teacher_id, status);
-CREATE INDEX idx_sessions_program_date ON sessions (program_id, created_at);
-
-CREATE TRIGGER set_sessions_updated_at
-  BEFORE UPDATE ON sessions
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- Table 10: session_attendance
-CREATE TABLE session_attendance (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-  student_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  score INT CHECK (score >= 0 AND score <= 5),
-  notes TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (session_id, student_id)
-);
-
--- Table 11: session_voice_memos
-CREATE TABLE session_voice_memos (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-  teacher_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  student_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  storage_path TEXT NOT NULL,
-  duration_seconds INT NOT NULL CHECK (duration_seconds >= 1 AND duration_seconds <= 120),
-  file_size_bytes INT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  expires_at TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '30 days'),
-  UNIQUE (session_id, student_id)
-);
-
-CREATE INDEX idx_voice_memos_expires ON session_voice_memos (expires_at);
-
--- Table 12: teacher_reviews
-CREATE TABLE teacher_reviews (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  teacher_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  student_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-  tags TEXT[],
-  comment TEXT,
-  is_flagged BOOLEAN NOT NULL DEFAULT false,
-  is_excluded BOOLEAN NOT NULL DEFAULT false,
-  excluded_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  exclusion_reason TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (student_id, session_id)
-);
-
-CREATE INDEX idx_reviews_teacher_program ON teacher_reviews (teacher_id, program_id, is_excluded);
-
--- Table 13: teacher_rating_stats (materialized aggregate)
-CREATE TABLE teacher_rating_stats (
-  teacher_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  total_reviews INT NOT NULL DEFAULT 0,
-  average_rating NUMERIC(3,2) NOT NULL DEFAULT 0.00,
-  rating_1_count INT NOT NULL DEFAULT 0,
-  rating_2_count INT NOT NULL DEFAULT 0,
-  rating_3_count INT NOT NULL DEFAULT 0,
-  rating_4_count INT NOT NULL DEFAULT 0,
-  rating_5_count INT NOT NULL DEFAULT 0,
-  common_positive_tags TEXT[],
-  common_constructive_tags TEXT[],
-  last_updated TIMESTAMPTZ NOT NULL DEFAULT now(),
-  PRIMARY KEY (teacher_id, program_id)
-);
-
--- Table 14: free_program_queue
-CREATE TABLE free_program_queue (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  student_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  position INT NOT NULL,
-  joined_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  notified_at TIMESTAMPTZ,
-  status TEXT NOT NULL DEFAULT 'waiting'
-    CHECK (status IN ('waiting', 'notified', 'claimed', 'expired', 'cancelled')),
-  expires_at TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '2 hours')
-);
-
--- Partial unique: one active queue entry per student per program
-CREATE UNIQUE INDEX idx_queue_active_unique
-  ON free_program_queue (student_id, program_id)
-  WHERE status IN ('waiting', 'notified');
-
-CREATE INDEX idx_queue_program_status ON free_program_queue (program_id, status);
-
--- Table 15: daily_session_count
-CREATE TABLE daily_session_count (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  student_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  date DATE NOT NULL DEFAULT CURRENT_DATE,
-  session_count INT NOT NULL DEFAULT 0,
-  UNIQUE (student_id, program_id, date)
-);
-
--- Table 16: program_waitlist
-CREATE TABLE program_waitlist (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  student_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  track_id UUID REFERENCES program_tracks(id) ON DELETE SET NULL,
-  cohort_id UUID REFERENCES cohorts(id) ON DELETE SET NULL,
-  teacher_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  position INT NOT NULL,
-  joined_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  notified_at TIMESTAMPTZ,
-  status TEXT NOT NULL DEFAULT 'waiting'
-    CHECK (status IN ('waiting', 'offered', 'accepted', 'expired', 'cancelled')),
-  offer_expires_at TIMESTAMPTZ,
-  notes TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER set_program_waitlist_updated_at
-  BEFORE UPDATE ON program_waitlist
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- Table 17: session_schedules
-CREATE TABLE session_schedules (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  cohort_id UUID NOT NULL REFERENCES cohorts(id) ON DELETE CASCADE,
-  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  day_of_week INT NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6),
-  start_time TIME NOT NULL,
-  end_time TIME NOT NULL,
-  meeting_link TEXT,
-  is_active BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- Table 18: notification_preferences
-CREATE TABLE notification_preferences (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  category TEXT NOT NULL,
-  enabled BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (profile_id, category)
-);
-
--- Table 19: push_tokens
-CREATE TABLE push_tokens (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  token TEXT NOT NULL,
-  platform TEXT NOT NULL CHECK (platform IN ('ios', 'android')),
-  is_active BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (profile_id, token)
-);
-
-CREATE TRIGGER set_push_tokens_updated_at
-  BEFORE UPDATE ON push_tokens
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- =============================================================================
--- Section 4: RLS Helper Functions
--- =============================================================================
-
--- Returns the global role from profiles table
-CREATE OR REPLACE FUNCTION get_user_role()
-RETURNS TEXT
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT role FROM profiles WHERE id = auth.uid();
 $$;
 
--- Returns program IDs the user has access to
--- Teachers/supervisors/program_admins: from program_roles
--- Students: from active enrollments
--- Master admins: returns NULL (bypass)
-CREATE OR REPLACE FUNCTION get_user_programs()
-RETURNS UUID[]
-LANGUAGE plpgsql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  user_role TEXT;
-  program_ids UUID[];
-BEGIN
-  SELECT role INTO user_role FROM profiles WHERE id = auth.uid();
-
-  IF user_role = 'master_admin' THEN
-    RETURN NULL; -- NULL = bypass all program scoping
-  END IF;
-
-  IF user_role = 'student' THEN
-    SELECT array_agg(DISTINCT program_id) INTO program_ids
-    FROM enrollments
-    WHERE student_id = auth.uid()
-      AND status IN ('active', 'approved', 'pending');
-  ELSE
-    SELECT array_agg(DISTINCT program_id) INTO program_ids
-    FROM program_roles
-    WHERE profile_id = auth.uid();
-  END IF;
-
-  RETURN COALESCE(program_ids, ARRAY[]::UUID[]);
-END;
-$$;
-
--- Convenience check for master admin
-CREATE OR REPLACE FUNCTION is_master_admin()
-RETURNS BOOLEAN
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'master_admin'
-  );
-$$;
-
--- =============================================================================
--- Section 5: RLS Policies
--- =============================================================================
-
--- Enable RLS on all tables
-ALTER TABLE platform_config ENABLE ROW LEVEL SECURITY;
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE programs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE program_tracks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE program_roles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE cohorts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE teacher_availability ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE session_attendance ENABLE ROW LEVEL SECURITY;
-ALTER TABLE session_voice_memos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE teacher_reviews ENABLE ROW LEVEL SECURITY;
-ALTER TABLE teacher_rating_stats ENABLE ROW LEVEL SECURITY;
-ALTER TABLE free_program_queue ENABLE ROW LEVEL SECURITY;
-ALTER TABLE daily_session_count ENABLE ROW LEVEL SECURITY;
-ALTER TABLE program_waitlist ENABLE ROW LEVEL SECURITY;
-ALTER TABLE session_schedules ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notification_preferences ENABLE ROW LEVEL SECURITY;
-ALTER TABLE push_tokens ENABLE ROW LEVEL SECURITY;
-
--- ─── platform_config ─────────────────────────────────────────────────────────
-CREATE POLICY platform_config_select ON platform_config
-  FOR SELECT TO authenticated USING (true);
-CREATE POLICY platform_config_update ON platform_config
-  FOR UPDATE TO authenticated USING (is_master_admin());
-CREATE POLICY platform_config_insert ON platform_config
-  FOR INSERT TO authenticated WITH CHECK (is_master_admin());
-
--- ─── profiles ────────────────────────────────────────────────────────────────
-CREATE POLICY profiles_select ON profiles
-  FOR SELECT TO authenticated USING (id = auth.uid() OR is_master_admin());
-CREATE POLICY profiles_update ON profiles
-  FOR UPDATE TO authenticated USING (id = auth.uid() OR is_master_admin());
-
--- Allow teachers/supervisors/admins to see profiles in their programs
-CREATE POLICY profiles_select_program_staff ON profiles
-  FOR SELECT TO authenticated
-  USING (
-    get_user_role() IN ('teacher', 'supervisor', 'program_admin')
-    AND (
-      -- Students enrolled in their programs
-      EXISTS (
-        SELECT 1 FROM enrollments e
-        WHERE e.student_id = profiles.id
-          AND e.program_id = ANY(get_user_programs())
-          AND e.status IN ('active', 'approved', 'pending')
-      )
-      -- Or staff in their programs
-      OR EXISTS (
-        SELECT 1 FROM program_roles pr
-        WHERE pr.profile_id = profiles.id
-          AND pr.program_id = ANY(get_user_programs())
-      )
-    )
-  );
-
--- ─── programs ────────────────────────────────────────────────────────────────
-CREATE POLICY programs_select ON programs
-  FOR SELECT TO authenticated USING (true);
-CREATE POLICY programs_insert ON programs
-  FOR INSERT TO authenticated WITH CHECK (is_master_admin());
-CREATE POLICY programs_update ON programs
-  FOR UPDATE TO authenticated
-  USING (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND id = ANY(get_user_programs()))
-  );
-
--- ─── program_tracks ──────────────────────────────────────────────────────────
-CREATE POLICY program_tracks_select ON program_tracks
-  FOR SELECT TO authenticated USING (true);
-CREATE POLICY program_tracks_insert ON program_tracks
-  FOR INSERT TO authenticated
-  WITH CHECK (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY program_tracks_update ON program_tracks
-  FOR UPDATE TO authenticated
-  USING (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-
--- ─── program_roles ───────────────────────────────────────────────────────────
-CREATE POLICY program_roles_select ON program_roles
-  FOR SELECT TO authenticated
-  USING (
-    profile_id = auth.uid()
-    OR is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY program_roles_insert ON program_roles
-  FOR INSERT TO authenticated
-  WITH CHECK (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY program_roles_update ON program_roles
-  FOR UPDATE TO authenticated
-  USING (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY program_roles_delete ON program_roles
-  FOR DELETE TO authenticated
-  USING (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-
--- ─── cohorts ─────────────────────────────────────────────────────────────────
-CREATE POLICY cohorts_select ON cohorts
-  FOR SELECT TO authenticated
-  USING (
-    is_master_admin()
-    OR get_user_programs() IS NULL
-    OR program_id = ANY(get_user_programs())
-  );
-CREATE POLICY cohorts_insert ON cohorts
-  FOR INSERT TO authenticated
-  WITH CHECK (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY cohorts_update ON cohorts
-  FOR UPDATE TO authenticated
-  USING (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-
--- ─── enrollments ─────────────────────────────────────────────────────────────
-CREATE POLICY enrollments_select ON enrollments
-  FOR SELECT TO authenticated
-  USING (
-    student_id = auth.uid()
-    OR is_master_admin()
-    OR (get_user_role() IN ('teacher', 'supervisor', 'program_admin')
-        AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY enrollments_insert ON enrollments
-  FOR INSERT TO authenticated
-  WITH CHECK (student_id = auth.uid() OR is_master_admin());
-CREATE POLICY enrollments_update ON enrollments
-  FOR UPDATE TO authenticated
-  USING (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-    OR (get_user_role() = 'teacher' AND teacher_id = auth.uid())
-  );
-
--- ─── teacher_availability ────────────────────────────────────────────────────
-CREATE POLICY teacher_availability_select ON teacher_availability
-  FOR SELECT TO authenticated USING (true);
-CREATE POLICY teacher_availability_insert ON teacher_availability
-  FOR INSERT TO authenticated WITH CHECK (teacher_id = auth.uid());
-CREATE POLICY teacher_availability_update ON teacher_availability
-  FOR UPDATE TO authenticated USING (teacher_id = auth.uid());
-CREATE POLICY teacher_availability_delete ON teacher_availability
-  FOR DELETE TO authenticated USING (teacher_id = auth.uid());
-
--- ─── sessions ────────────────────────────────────────────────────────────────
-CREATE POLICY sessions_select ON sessions
-  FOR SELECT TO authenticated
-  USING (
-    teacher_id = auth.uid()
-    OR is_master_admin()
-    OR EXISTS (
-      SELECT 1 FROM session_attendance sa WHERE sa.session_id = id AND sa.student_id = auth.uid()
-    )
-    OR (get_user_role() = 'supervisor' AND EXISTS (
-      SELECT 1 FROM cohorts c WHERE c.id = cohort_id AND c.supervisor_id = auth.uid()
-    ))
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY sessions_insert ON sessions
-  FOR INSERT TO authenticated
-  WITH CHECK (get_user_role() IN ('teacher', 'master_admin'));
-CREATE POLICY sessions_update ON sessions
-  FOR UPDATE TO authenticated USING (teacher_id = auth.uid() OR is_master_admin());
-
--- ─── session_attendance ──────────────────────────────────────────────────────
-CREATE POLICY session_attendance_select ON session_attendance
-  FOR SELECT TO authenticated
-  USING (
-    student_id = auth.uid()
-    OR is_master_admin()
-    OR EXISTS (
-      SELECT 1 FROM sessions s WHERE s.id = session_id AND s.teacher_id = auth.uid()
-    )
-    OR EXISTS (
-      SELECT 1 FROM sessions s
-      JOIN cohorts c ON c.id = s.cohort_id
-      WHERE s.id = session_id AND c.supervisor_id = auth.uid()
-    )
-    OR EXISTS (
-      SELECT 1 FROM sessions s
-      WHERE s.id = session_id AND s.program_id = ANY(get_user_programs())
-        AND get_user_role() = 'program_admin'
-    )
-  );
-CREATE POLICY session_attendance_insert ON session_attendance
-  FOR INSERT TO authenticated
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM sessions s WHERE s.id = session_id AND s.teacher_id = auth.uid()
-    )
-  );
-CREATE POLICY session_attendance_update ON session_attendance
-  FOR UPDATE TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM sessions s WHERE s.id = session_id AND s.teacher_id = auth.uid()
-    )
-  );
-
--- ─── session_voice_memos ─────────────────────────────────────────────────────
-CREATE POLICY voice_memos_select ON session_voice_memos
-  FOR SELECT TO authenticated
-  USING (
-    teacher_id = auth.uid()
-    OR student_id = auth.uid()
-    OR is_master_admin()
-    OR (get_user_role() = 'supervisor' AND EXISTS (
-      SELECT 1 FROM sessions s
-      JOIN cohorts c ON c.id = s.cohort_id
-      WHERE s.id = session_id AND c.supervisor_id = auth.uid()
-    ))
-  );
-CREATE POLICY voice_memos_insert ON session_voice_memos
-  FOR INSERT TO authenticated
-  WITH CHECK (teacher_id = auth.uid());
-
--- ─── teacher_reviews ─────────────────────────────────────────────────────────
--- Students see own reviews
-CREATE POLICY teacher_reviews_student_select ON teacher_reviews
-  FOR SELECT TO authenticated
-  USING (student_id = auth.uid());
-
--- Teachers see reviews about them (student_id masked at app layer)
-CREATE POLICY teacher_reviews_teacher_select ON teacher_reviews
-  FOR SELECT TO authenticated
-  USING (teacher_id = auth.uid());
-
--- Supervisors see reviews in their cohorts
-CREATE POLICY teacher_reviews_supervisor_select ON teacher_reviews
-  FOR SELECT TO authenticated
-  USING (
-    get_user_role() = 'supervisor'
-    AND EXISTS (
-      SELECT 1 FROM sessions s
-      JOIN cohorts c ON c.id = s.cohort_id
-      WHERE s.id = session_id AND c.supervisor_id = auth.uid()
-    )
-  );
-
--- Program admins and master admins see all in program
-CREATE POLICY teacher_reviews_admin_select ON teacher_reviews
-  FOR SELECT TO authenticated
-  USING (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-
-CREATE POLICY teacher_reviews_insert ON teacher_reviews
-  FOR INSERT TO authenticated
-  WITH CHECK (student_id = auth.uid());
-
-CREATE POLICY teacher_reviews_update ON teacher_reviews
-  FOR UPDATE TO authenticated
-  USING (
-    get_user_role() IN ('supervisor', 'program_admin', 'master_admin')
-    AND (is_master_admin() OR program_id = ANY(get_user_programs()))
-  );
-
--- ─── teacher_rating_stats ────────────────────────────────────────────────────
-CREATE POLICY rating_stats_select ON teacher_rating_stats
-  FOR SELECT TO authenticated USING (true);
-
--- ─── free_program_queue ──────────────────────────────────────────────────────
-CREATE POLICY queue_select ON free_program_queue
-  FOR SELECT TO authenticated
-  USING (
-    student_id = auth.uid()
-    OR is_master_admin()
-    OR (get_user_role() IN ('teacher', 'program_admin') AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY queue_insert ON free_program_queue
-  FOR INSERT TO authenticated WITH CHECK (student_id = auth.uid());
-
--- ─── daily_session_count ─────────────────────────────────────────────────────
-CREATE POLICY daily_count_select ON daily_session_count
-  FOR SELECT TO authenticated USING (student_id = auth.uid() OR is_master_admin());
-
--- ─── program_waitlist ────────────────────────────────────────────────────────
-CREATE POLICY waitlist_select ON program_waitlist
-  FOR SELECT TO authenticated
-  USING (
-    student_id = auth.uid()
-    OR is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY waitlist_insert ON program_waitlist
-  FOR INSERT TO authenticated WITH CHECK (student_id = auth.uid());
-
--- ─── session_schedules ───────────────────────────────────────────────────────
-CREATE POLICY schedules_select ON session_schedules
-  FOR SELECT TO authenticated
-  USING (
-    is_master_admin()
-    OR get_user_programs() IS NULL
-    OR program_id = ANY(get_user_programs())
-  );
-CREATE POLICY schedules_insert ON session_schedules
-  FOR INSERT TO authenticated
-  WITH CHECK (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY schedules_update ON session_schedules
-  FOR UPDATE TO authenticated
-  USING (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-CREATE POLICY schedules_delete ON session_schedules
-  FOR DELETE TO authenticated
-  USING (
-    is_master_admin()
-    OR (get_user_role() = 'program_admin' AND program_id = ANY(get_user_programs()))
-  );
-
--- ─── notification_preferences ────────────────────────────────────────────────
-CREATE POLICY notification_prefs_select ON notification_preferences
-  FOR SELECT TO authenticated USING (profile_id = auth.uid());
-CREATE POLICY notification_prefs_insert ON notification_preferences
-  FOR INSERT TO authenticated WITH CHECK (profile_id = auth.uid());
-CREATE POLICY notification_prefs_update ON notification_preferences
-  FOR UPDATE TO authenticated USING (profile_id = auth.uid());
-CREATE POLICY notification_prefs_delete ON notification_preferences
-  FOR DELETE TO authenticated USING (profile_id = auth.uid());
-
--- ─── push_tokens ─────────────────────────────────────────────────────────────
-CREATE POLICY push_tokens_select ON push_tokens
-  FOR SELECT TO authenticated USING (profile_id = auth.uid());
-CREATE POLICY push_tokens_insert ON push_tokens
-  FOR INSERT TO authenticated WITH CHECK (profile_id = auth.uid());
-CREATE POLICY push_tokens_update ON push_tokens
-  FOR UPDATE TO authenticated USING (profile_id = auth.uid());
-CREATE POLICY push_tokens_delete ON push_tokens
-  FOR DELETE TO authenticated USING (profile_id = auth.uid());
-
--- =============================================================================
--- Section 6: Triggers
--- =============================================================================
-
--- Profile creation on auth signup
-CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER
+CREATE OR REPLACE FUNCTION handle_new_profile()
+RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path TO 'public'
 AS $$
 BEGIN
-  INSERT INTO profiles (id, role, full_name, email, onboarding_completed, is_active)
+  INSERT INTO public.profiles (id, school_id, role, full_name, username, name_localized)
   VALUES (
     NEW.id,
-    'student',
+    (NEW.raw_user_meta_data->>'school_id')::UUID,
+    COALESCE(NEW.raw_user_meta_data->>'role', 'student'),
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-    NEW.email,
-    false,
-    true
+    NEW.raw_user_meta_data->>'username',
+    COALESCE(
+      (NEW.raw_user_meta_data->>'name_localized')::JSONB,
+      jsonb_build_object('en', COALESCE(NEW.raw_user_meta_data->>'full_name', ''))
+    )
   );
   RETURN NEW;
 END;
 $$;
 
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+-- 3b. Utility Functions
 
--- Rating stats recalculation
-CREATE OR REPLACE FUNCTION recalculate_teacher_rating_stats()
-RETURNS TRIGGER
+CREATE OR REPLACE FUNCTION resolve_localized_name(localized jsonb, fallback text, lang text)
+RETURNS text
 LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
+IMMUTABLE
+SET search_path TO 'public'
 AS $$
-DECLARE
-  target_teacher_id UUID;
-  target_program_id UUID;
 BEGIN
-  target_teacher_id := COALESCE(NEW.teacher_id, OLD.teacher_id);
-  target_program_id := COALESCE(NEW.program_id, OLD.program_id);
-
-  INSERT INTO teacher_rating_stats (
-    teacher_id, program_id, total_reviews, average_rating,
-    rating_1_count, rating_2_count, rating_3_count, rating_4_count, rating_5_count,
-    last_updated
-  )
-  SELECT
-    target_teacher_id,
-    target_program_id,
-    COUNT(*),
-    COALESCE(AVG(rating)::NUMERIC(3,2), 0.00),
-    COUNT(*) FILTER (WHERE rating = 1),
-    COUNT(*) FILTER (WHERE rating = 2),
-    COUNT(*) FILTER (WHERE rating = 3),
-    COUNT(*) FILTER (WHERE rating = 4),
-    COUNT(*) FILTER (WHERE rating = 5),
-    now()
-  FROM teacher_reviews
-  WHERE teacher_id = target_teacher_id
-    AND program_id = target_program_id
-    AND is_excluded = false
-  ON CONFLICT (teacher_id, program_id) DO UPDATE SET
-    total_reviews = EXCLUDED.total_reviews,
-    average_rating = EXCLUDED.average_rating,
-    rating_1_count = EXCLUDED.rating_1_count,
-    rating_2_count = EXCLUDED.rating_2_count,
-    rating_3_count = EXCLUDED.rating_3_count,
-    rating_4_count = EXCLUDED.rating_4_count,
-    rating_5_count = EXCLUDED.rating_5_count,
-    last_updated = now();
-
-  RETURN NULL;
+  IF localized IS NOT NULL AND localized ? lang THEN
+    RETURN localized ->> lang;
+  END IF;
+  IF localized IS NOT NULL AND localized ? 'en' THEN
+    RETURN localized ->> 'en';
+  END IF;
+  IF localized IS NOT NULL AND localized != '{}' THEN
+    RETURN (SELECT value FROM jsonb_each_text(localized) LIMIT 1);
+  END IF;
+  RETURN fallback;
 END;
 $$;
 
-CREATE TRIGGER update_rating_stats
-  AFTER INSERT OR UPDATE OR DELETE ON teacher_reviews
-  FOR EACH ROW EXECUTE FUNCTION recalculate_teacher_rating_stats();
-
--- Auto-flag low reviews
-CREATE OR REPLACE FUNCTION auto_flag_low_review()
-RETURNS TRIGGER
+-- NOTE: Update the URL below when deploying to a new Supabase project
+CREATE OR REPLACE FUNCTION notify_on_insert()
+RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path TO 'public'
 AS $$
+DECLARE
+  edge_function_url TEXT;
+  payload JSONB;
 BEGIN
-  IF NEW.rating <= 2 THEN
-    NEW.is_flagged = true;
-  END IF;
+  edge_function_url := 'https://cwakivlyvnxdeqrkbzxc.supabase.co/functions/v1/send-notification';
+
+  payload := jsonb_build_object(
+    'type', 'INSERT',
+    'table', TG_TABLE_NAME,
+    'schema', TG_TABLE_SCHEMA,
+    'record', to_jsonb(NEW),
+    'old_record', NULL
+  );
+
+  PERFORM extensions.http_post(
+    url := edge_function_url,
+    body := payload,
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json'
+    )
+  );
+
   RETURN NEW;
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION increment_review_count(cert_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+BEGIN
+  UPDATE student_rub_certifications
+  SET review_count = review_count + 1,
+      last_reviewed_at = now(),
+      dormant_since = NULL,
+      updated_at = now()
+  WHERE id = cert_id;
+END;
+$$;
+
+-- 3c. RPC Report Functions
+
+CREATE OR REPLACE FUNCTION get_attendance_trend(p_school_id uuid, p_start_date date, p_end_date date, p_granularity text, p_class_id uuid DEFAULT NULL::uuid)
+ RETURNS TABLE(bucket_date date, present_count bigint, absent_count bigint, late_count bigint, excused_count bigint, attendance_rate numeric)
+ LANGUAGE sql
+ SET search_path TO 'public'
+AS $function$
+  SELECT
+    date_trunc(p_granularity, a.date)::DATE AS bucket_date,
+    COUNT(*) FILTER (WHERE a.status = 'present') AS present_count,
+    COUNT(*) FILTER (WHERE a.status = 'absent') AS absent_count,
+    COUNT(*) FILTER (WHERE a.status = 'late') AS late_count,
+    COUNT(*) FILTER (WHERE a.status = 'excused') AS excused_count,
+    ROUND(
+      (COUNT(*) FILTER (WHERE a.status = 'present') + COUNT(*) FILTER (WHERE a.status = 'late'))::NUMERIC
+      / NULLIF(
+          (COUNT(*) FILTER (WHERE a.status = 'present')
+           + COUNT(*) FILTER (WHERE a.status = 'absent')
+           + COUNT(*) FILTER (WHERE a.status = 'late')),
+          0
+        )
+      * 100,
+      1
+    ) AS attendance_rate
+  FROM attendance a
+  WHERE a.school_id = p_school_id
+    AND a.date >= p_start_date
+    AND a.date <= p_end_date
+    AND (p_class_id IS NULL OR a.class_id = p_class_id)
+  GROUP BY bucket_date
+  ORDER BY bucket_date;
+$function$;
+
+CREATE OR REPLACE FUNCTION get_score_trend(p_school_id uuid, p_start_date date, p_end_date date, p_granularity text, p_class_id uuid DEFAULT NULL::uuid)
+ RETURNS TABLE(bucket_date date, avg_memorization numeric, avg_tajweed numeric, avg_recitation numeric)
+ LANGUAGE sql
+ SET search_path TO 'public'
+AS $function$
+  SELECT
+    date_trunc(p_granularity, s.session_date)::DATE AS bucket_date,
+    ROUND(AVG(s.memorization_score)::NUMERIC, 2) AS avg_memorization,
+    ROUND(AVG(s.tajweed_score)::NUMERIC, 2) AS avg_tajweed,
+    ROUND(AVG(s.recitation_quality)::NUMERIC, 2) AS avg_recitation
+  FROM sessions s
+  WHERE s.school_id = p_school_id
+    AND s.session_date >= p_start_date
+    AND s.session_date <= p_end_date
+    AND (p_class_id IS NULL OR s.class_id = p_class_id)
+    AND (s.memorization_score IS NOT NULL
+         OR s.tajweed_score IS NOT NULL
+         OR s.recitation_quality IS NOT NULL)
+  GROUP BY bucket_date
+  ORDER BY bucket_date;
+$function$;
+
+CREATE OR REPLACE FUNCTION get_teacher_activity(p_school_id uuid, p_start_date date, p_end_date date)
+ RETURNS TABLE(teacher_id uuid, full_name text, avatar_url text, sessions_logged bigint, unique_students bigint, stickers_awarded bigint, last_active_date date)
+ LANGUAGE sql
+ SET search_path TO 'public'
+AS $function$
+  SELECT
+    p.id AS teacher_id,
+    p.full_name,
+    p.avatar_url,
+    COUNT(DISTINCT s.id) AS sessions_logged,
+    COUNT(DISTINCT s.student_id) AS unique_students,
+    COUNT(DISTINCT ss.id) AS stickers_awarded,
+    MAX(s.session_date) AS last_active_date
+  FROM profiles p
+  LEFT JOIN sessions s
+    ON s.teacher_id = p.id
+    AND s.session_date >= p_start_date
+    AND s.session_date <= p_end_date
+  LEFT JOIN student_stickers ss
+    ON ss.awarded_by = p.id
+    AND ss.awarded_at >= p_start_date::TIMESTAMPTZ
+    AND ss.awarded_at < (p_end_date + INTERVAL '1 day')::TIMESTAMPTZ
+  WHERE p.school_id = p_school_id
+    AND p.role = 'teacher'
+  GROUP BY p.id, p.full_name, p.avatar_url
+  ORDER BY sessions_logged DESC, p.full_name ASC;
+$function$;
+
+CREATE OR REPLACE FUNCTION get_students_needing_attention(p_class_id uuid, p_start_date date DEFAULT NULL::date, p_end_date date DEFAULT NULL::date)
+ RETURNS TABLE(student_id uuid, full_name text, avatar_url text, current_avg numeric, previous_avg numeric, decline_amount numeric, flag_reason text)
+ LANGUAGE plpgsql
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  RETURN QUERY
+  WITH ranked_sessions AS (
+    SELECT
+      s.student_id,
+      s.memorization_score,
+      s.tajweed_score,
+      s.recitation_quality,
+      s.session_date,
+      ROW_NUMBER() OVER (
+        PARTITION BY s.student_id
+        ORDER BY s.session_date DESC, s.created_at DESC
+      ) AS rn
+    FROM sessions s
+    INNER JOIN students st ON st.id = s.student_id
+    WHERE st.class_id = p_class_id
+      AND (p_start_date IS NULL OR s.session_date >= p_start_date)
+      AND (p_end_date IS NULL OR s.session_date <= p_end_date)
+      AND (s.memorization_score IS NOT NULL
+           OR s.tajweed_score IS NOT NULL
+           OR s.recitation_quality IS NOT NULL)
+  ),
+  student_avgs AS (
+    SELECT
+      rs.student_id,
+      AVG(
+        CASE WHEN rs.rn <= 3 THEN
+          (COALESCE(rs.memorization_score, 0)
+           + COALESCE(rs.tajweed_score, 0)
+           + COALESCE(rs.recitation_quality, 0))::NUMERIC
+          / NULLIF(
+              (CASE WHEN rs.memorization_score IS NOT NULL THEN 1 ELSE 0 END
+               + CASE WHEN rs.tajweed_score IS NOT NULL THEN 1 ELSE 0 END
+               + CASE WHEN rs.recitation_quality IS NOT NULL THEN 1 ELSE 0 END),
+              0
+            )
+        END
+      ) AS curr_avg,
+      AVG(
+        CASE WHEN rs.rn BETWEEN 4 AND 6 THEN
+          (COALESCE(rs.memorization_score, 0)
+           + COALESCE(rs.tajweed_score, 0)
+           + COALESCE(rs.recitation_quality, 0))::NUMERIC
+          / NULLIF(
+              (CASE WHEN rs.memorization_score IS NOT NULL THEN 1 ELSE 0 END
+               + CASE WHEN rs.tajweed_score IS NOT NULL THEN 1 ELSE 0 END
+               + CASE WHEN rs.recitation_quality IS NOT NULL THEN 1 ELSE 0 END),
+              0
+            )
+        END
+      ) AS prev_avg,
+      BOOL_OR(
+        CASE WHEN rs.rn <= 2 THEN
+          (rs.memorization_score IS NOT NULL AND rs.memorization_score < 3)
+          OR (rs.tajweed_score IS NOT NULL AND rs.tajweed_score < 3)
+          OR (rs.recitation_quality IS NOT NULL AND rs.recitation_quality < 3)
+        ELSE FALSE END
+      ) AS has_low_recent,
+      COUNT(*) FILTER (WHERE rs.rn <= 3) AS session_count
+    FROM ranked_sessions rs
+    WHERE rs.rn <= 6
+    GROUP BY rs.student_id
+  )
+  SELECT
+    sa.student_id,
+    p.full_name,
+    p.avatar_url,
+    ROUND(sa.curr_avg, 2) AS current_avg,
+    ROUND(COALESCE(sa.prev_avg, 0), 2) AS previous_avg,
+    ROUND(COALESCE(sa.prev_avg - sa.curr_avg, 0), 2) AS decline_amount,
+    CASE
+      WHEN sa.session_count >= 3 AND sa.prev_avg IS NOT NULL AND sa.curr_avg < sa.prev_avg
+        THEN 'declining'
+      WHEN sa.has_low_recent
+        THEN 'low_scores'
+      ELSE NULL
+    END AS flag_reason
+  FROM student_avgs sa
+  INNER JOIN profiles p ON p.id = sa.student_id
+  WHERE (
+    (sa.session_count >= 3 AND sa.prev_avg IS NOT NULL AND sa.curr_avg < sa.prev_avg)
+    OR sa.has_low_recent
+  )
+  ORDER BY decline_amount DESC
+  LIMIT 10;
+END;
+$function$;
 
 CREATE OR REPLACE FUNCTION get_child_score_trend(p_student_id uuid, p_class_id uuid, p_start_date date, p_end_date date, p_granularity text)
  RETURNS TABLE(bucket_date date, avg_memorization numeric, avg_tajweed numeric, avg_recitation numeric, class_avg_memorization numeric, class_avg_tajweed numeric, class_avg_recitation numeric)
@@ -2109,14 +1490,330 @@ CREATE TRIGGER on_session_insert AFTER INSERT ON sessions FOR EACH ROW EXECUTE F
 -- Section 7: Realtime Publication
 -- =============================================================================
 
-ALTER PUBLICATION supabase_realtime ADD TABLE teacher_availability;
+ALTER PUBLICATION supabase_realtime ADD TABLE attendance;
+ALTER PUBLICATION supabase_realtime ADD TABLE classes;
+ALTER PUBLICATION supabase_realtime ADD TABLE memorization_assignments;
+ALTER PUBLICATION supabase_realtime ADD TABLE recitations;
+ALTER PUBLICATION supabase_realtime ADD TABLE scheduled_sessions;
+ALTER PUBLICATION supabase_realtime ADD TABLE session_recitation_plans;
 ALTER PUBLICATION supabase_realtime ADD TABLE sessions;
-ALTER PUBLICATION supabase_realtime ADD TABLE free_program_queue;
-ALTER PUBLICATION supabase_realtime ADD TABLE enrollments;
-ALTER PUBLICATION supabase_realtime ADD TABLE teacher_reviews;
+ALTER PUBLICATION supabase_realtime ADD TABLE student_stickers;
+ALTER PUBLICATION supabase_realtime ADD TABLE students;
+ALTER PUBLICATION supabase_realtime ADD TABLE teacher_checkins;
 
 -- =============================================================================
--- Section 8: Initial platform_config row
+-- Section 8: Cron Jobs
 -- =============================================================================
 
-INSERT INTO platform_config (id) VALUES (gen_random_uuid());
+-- NOTE: Update the URLs below when deploying to a new Supabase project
+SELECT cron.schedule(
+  'generate-sessions',
+  '*/15 * * * *',
+  $$
+  SELECT extensions.http_post(
+    url := 'https://cwakivlyvnxdeqrkbzxc.supabase.co/functions/v1/generate-sessions',
+    body := '{"time": "' || now()::text || '"}'::jsonb,
+    headers := '{"Content-Type": "application/json"}'::jsonb
+  );
+  $$
+);
+
+SELECT cron.schedule(
+  'teacher-daily-summary',
+  '*/15 * * * *',
+  $$
+  SELECT extensions.http_post(
+    url := 'https://cwakivlyvnxdeqrkbzxc.supabase.co/functions/v1/teacher-daily-summary',
+    body := '{"time": "' || now()::text || '"}'::jsonb,
+    headers := '{"Content-Type": "application/json"}'::jsonb
+  );
+  $$
+);
+
+-- =============================================================================
+-- Section 9: Seed Data
+-- =============================================================================
+
+-- 9a. Quran Rub Reference (240 rows)
+INSERT INTO quran_rub_reference (rub_number, juz_number, hizb_number, quarter_in_hizb, start_surah, start_ayah, end_surah, end_ayah) VALUES
+(1,1,1,1,1,1,2,25),
+(2,1,1,2,2,26,2,43),
+(3,1,1,3,2,44,2,59),
+(4,1,1,4,2,60,2,74),
+(5,1,2,1,2,75,2,91),
+(6,1,2,2,2,92,2,105),
+(7,1,2,3,2,106,2,123),
+(8,1,2,4,2,124,2,141),
+(9,2,3,1,2,142,2,157),
+(10,2,3,2,2,158,2,176),
+(11,2,3,3,2,177,2,188),
+(12,2,3,4,2,189,2,202),
+(13,2,4,1,2,203,2,218),
+(14,2,4,2,2,219,2,232),
+(15,2,4,3,2,233,2,242),
+(16,2,4,4,2,243,2,252),
+(17,3,5,1,2,253,2,262),
+(18,3,5,2,2,263,2,271),
+(19,3,5,3,2,272,2,282),
+(20,3,5,4,2,283,3,14),
+(21,3,6,1,3,15,3,32),
+(22,3,6,2,3,33,3,51),
+(23,3,6,3,3,52,3,74),
+(24,3,6,4,3,75,3,92),
+(25,4,7,1,3,93,3,112),
+(26,4,7,2,3,113,3,132),
+(27,4,7,3,3,133,3,152),
+(28,4,7,4,3,153,3,170),
+(29,4,8,1,3,171,3,185),
+(30,4,8,2,3,186,3,200),
+(31,4,8,3,4,1,4,11),
+(32,4,8,4,4,12,4,23),
+(33,5,9,1,4,24,4,35),
+(34,5,9,2,4,36,4,57),
+(35,5,9,3,4,58,4,73),
+(36,5,9,4,4,74,4,87),
+(37,5,10,1,4,88,4,99),
+(38,5,10,2,4,100,4,113),
+(39,5,10,3,4,114,4,134),
+(40,5,10,4,4,135,4,147),
+(41,6,11,1,4,148,4,162),
+(42,6,11,2,4,163,4,176),
+(43,6,11,3,5,1,5,11),
+(44,6,11,4,5,12,5,26),
+(45,6,12,1,5,27,5,40),
+(46,6,12,2,5,41,5,50),
+(47,6,12,3,5,51,5,66),
+(48,6,12,4,5,67,5,81),
+(49,7,13,1,5,82,5,96),
+(50,7,13,2,5,97,5,108),
+(51,7,13,3,5,109,6,12),
+(52,7,13,4,6,13,6,35),
+(53,7,14,1,6,36,6,58),
+(54,7,14,2,6,59,6,73),
+(55,7,14,3,6,74,6,94),
+(56,7,14,4,6,95,6,110),
+(57,8,15,1,6,111,6,126),
+(58,8,15,2,6,127,6,140),
+(59,8,15,3,6,141,6,150),
+(60,8,15,4,6,151,6,165),
+(61,8,16,1,7,1,7,30),
+(62,8,16,2,7,31,7,46),
+(63,8,16,3,7,47,7,64),
+(64,8,16,4,7,65,7,87),
+(65,9,17,1,7,88,7,116),
+(66,9,17,2,7,117,7,141),
+(67,9,17,3,7,142,7,155),
+(68,9,17,4,7,156,7,170),
+(69,9,18,1,7,171,7,188),
+(70,9,18,2,7,189,7,206),
+(71,9,18,3,8,1,8,21),
+(72,9,18,4,8,22,8,40),
+(73,10,19,1,8,41,8,60),
+(74,10,19,2,8,61,8,75),
+(75,10,19,3,9,1,9,18),
+(76,10,19,4,9,19,9,33),
+(77,10,20,1,9,34,9,45),
+(78,10,20,2,9,46,9,59),
+(79,10,20,3,9,60,9,74),
+(80,10,20,4,9,75,9,92),
+(81,11,21,1,9,93,9,110),
+(82,11,21,2,9,111,9,121),
+(83,11,21,3,9,122,10,10),
+(84,11,21,4,10,11,10,25),
+(85,11,22,1,10,26,10,52),
+(86,11,22,2,10,53,10,70),
+(87,11,22,3,10,71,10,89),
+(88,11,22,4,10,90,11,5),
+(89,12,23,1,11,6,11,23),
+(90,12,23,2,11,24,11,40),
+(91,12,23,3,11,41,11,60),
+(92,12,23,4,11,61,11,83),
+(93,12,24,1,11,84,11,107),
+(94,12,24,2,11,108,12,6),
+(95,12,24,3,12,7,12,29),
+(96,12,24,4,12,30,12,52),
+(97,13,25,1,12,53,12,76),
+(98,13,25,2,12,77,12,100),
+(99,13,25,3,12,101,13,4),
+(100,13,25,4,13,5,13,18),
+(101,13,26,1,13,19,13,34),
+(102,13,26,2,13,35,14,9),
+(103,13,26,3,14,10,14,27),
+(104,13,26,4,14,28,14,52),
+(105,14,27,1,15,1,15,49),
+(106,14,27,2,15,50,15,99),
+(107,14,27,3,16,1,16,29),
+(108,14,27,4,16,30,16,50),
+(109,14,28,1,16,51,16,74),
+(110,14,28,2,16,75,16,89),
+(111,14,28,3,16,90,16,110),
+(112,14,28,4,16,111,16,128),
+(113,15,29,1,17,1,17,22),
+(114,15,29,2,17,23,17,49),
+(115,15,29,3,17,50,17,69),
+(116,15,29,4,17,70,17,98),
+(117,15,30,1,17,99,18,16),
+(118,15,30,2,18,17,18,31),
+(119,15,30,3,18,32,18,50),
+(120,15,30,4,18,51,18,74),
+(121,16,31,1,18,75,18,98),
+(122,16,31,2,18,99,19,21),
+(123,16,31,3,19,22,19,58),
+(124,16,31,4,19,59,19,98),
+(125,16,32,1,20,1,20,54),
+(126,16,32,2,20,55,20,82),
+(127,16,32,3,20,83,20,110),
+(128,16,32,4,20,111,20,135),
+(129,17,33,1,21,1,21,28),
+(130,17,33,2,21,29,21,50),
+(131,17,33,3,21,51,21,82),
+(132,17,33,4,21,83,21,112),
+(133,17,34,1,22,1,22,18),
+(134,17,34,2,22,19,22,37),
+(135,17,34,3,22,38,22,59),
+(136,17,34,4,22,60,22,78),
+(137,18,35,1,23,1,23,35),
+(138,18,35,2,23,36,23,74),
+(139,18,35,3,23,75,23,118),
+(140,18,35,4,24,1,24,20),
+(141,18,36,1,24,21,24,34),
+(142,18,36,2,24,35,24,52),
+(143,18,36,3,24,53,24,64),
+(144,18,36,4,25,1,25,20),
+(145,19,37,1,25,21,25,52),
+(146,19,37,2,25,53,25,77),
+(147,19,37,3,26,1,26,51),
+(148,19,37,4,26,52,26,110),
+(149,19,38,1,26,111,26,180),
+(150,19,38,2,26,181,26,227),
+(151,19,38,3,27,1,27,26),
+(152,19,38,4,27,27,27,55),
+(153,20,39,1,27,56,27,81),
+(154,20,39,2,27,82,28,11),
+(155,20,39,3,28,12,28,28),
+(156,20,39,4,28,29,28,50),
+(157,20,40,1,28,51,28,75),
+(158,20,40,2,28,76,28,88),
+(159,20,40,3,29,1,29,25),
+(160,20,40,4,29,26,29,45),
+(161,21,41,1,29,46,29,69),
+(162,21,41,2,30,1,30,30),
+(163,21,41,3,30,31,30,53),
+(164,21,41,4,30,54,31,21),
+(165,21,42,1,31,22,32,10),
+(166,21,42,2,32,11,32,30),
+(167,21,42,3,33,1,33,17),
+(168,21,42,4,33,18,33,30),
+(169,22,43,1,33,31,33,50),
+(170,22,43,2,33,51,33,59),
+(171,22,43,3,33,60,34,9),
+(172,22,43,4,34,10,34,23),
+(173,22,44,1,34,24,34,45),
+(174,22,44,2,34,46,35,14),
+(175,22,44,3,35,15,35,40),
+(176,22,44,4,35,41,36,27),
+(177,23,45,1,36,28,36,59),
+(178,23,45,2,36,60,37,21),
+(179,23,45,3,37,22,37,82),
+(180,23,45,4,37,83,37,144),
+(181,23,46,1,37,145,38,20),
+(182,23,46,2,38,21,38,51),
+(183,23,46,3,38,52,39,7),
+(184,23,46,4,39,8,39,31),
+(185,24,47,1,39,32,39,52),
+(186,24,47,2,39,53,39,75),
+(187,24,47,3,40,1,40,20),
+(188,24,47,4,40,21,40,40),
+(189,24,48,1,40,41,40,65),
+(190,24,48,2,40,66,41,8),
+(191,24,48,3,41,9,41,24),
+(192,24,48,4,41,25,41,46),
+(193,25,49,1,41,47,42,12),
+(194,25,49,2,42,13,42,26),
+(195,25,49,3,42,27,42,50),
+(196,25,49,4,42,51,43,23),
+(197,25,50,1,43,24,43,56),
+(198,25,50,2,43,57,44,16),
+(199,25,50,3,44,17,45,11),
+(200,25,50,4,45,12,45,37),
+(201,26,51,1,46,1,46,20),
+(202,26,51,2,46,21,47,9),
+(203,26,51,3,47,10,47,32),
+(204,26,51,4,47,33,48,17),
+(205,26,52,1,48,18,48,29),
+(206,26,52,2,49,1,49,13),
+(207,26,52,3,49,14,50,26),
+(208,26,52,4,50,27,51,30),
+(209,27,53,1,51,31,52,23),
+(210,27,53,2,52,24,53,25),
+(211,27,53,3,53,26,54,8),
+(212,27,53,4,54,9,54,55),
+(213,27,54,1,55,1,55,78),
+(214,27,54,2,56,1,56,74),
+(215,27,54,3,56,75,57,15),
+(216,27,54,4,57,16,57,29),
+(217,28,55,1,58,1,58,13),
+(218,28,55,2,58,14,59,10),
+(219,28,55,3,59,11,60,6),
+(220,28,55,4,60,7,61,14),
+(221,28,56,1,62,1,63,3),
+(222,28,56,2,63,4,64,18),
+(223,28,56,3,65,1,65,12),
+(224,28,56,4,66,1,66,12),
+(225,29,57,1,67,1,67,30),
+(226,29,57,2,68,1,68,52),
+(227,29,57,3,69,1,70,18),
+(228,29,57,4,70,19,71,28),
+(229,29,58,1,72,1,73,19),
+(230,29,58,2,73,20,74,56),
+(231,29,58,3,75,1,76,18),
+(232,29,58,4,76,19,77,50),
+(233,30,59,1,78,1,79,46),
+(234,30,59,2,80,1,81,29),
+(235,30,59,3,82,1,83,36),
+(236,30,59,4,84,1,86,17),
+(237,30,60,1,87,1,89,30),
+(238,30,60,2,90,1,93,11),
+(239,30,60,3,94,1,100,8),
+(240,30,60,4,100,9,114,6);
+
+-- 9b. Stickers (38 rows)
+INSERT INTO stickers (id, name_ar, name_en, tier, image_path) VALUES
+('dates-and-milk', 'التمر واللبن', 'Dates & Milk', 'bronze', 'dates-and-milk.png'),
+('decorative-column', 'العمود', 'Decorative Column', 'bronze', 'decorative-column.png'),
+('holy-quran', 'المصحف الشريف', 'Holy Quran', 'bronze', 'holy-quran.png'),
+('memorization-tablet', 'لوح المحفوظ', 'Memorization Tablet', 'bronze', 'memorization-tablet.png'),
+('mosque', 'المسجد', 'Mosque', 'bronze', 'mosque.png'),
+('ornate-key', 'المفتاح', 'Ornate Key', 'bronze', 'ornate-key.png'),
+('prayer-beads', 'المسبحة', 'Prayer Beads', 'bronze', 'prayer-beads.png'),
+('prayer-rug', 'سجادة الصلاة', 'Prayer Rug', 'bronze', 'prayer-rug.png'),
+('quill-and-inkwell', 'القلم والمحبرة', 'Quill & Inkwell', 'bronze', 'quill-and-inkwell.png'),
+('salah-eldins-eagle-v3', 'نسر صلاح الدين', 'Salah El-Din''s Eagle', 'bronze', 'salah-eldins-eagle-v3.png'),
+('traditional-lantern', 'الفانوس', 'Traditional Lantern', 'bronze', 'traditional-lantern.png'),
+('arabesque-arch', 'بوابة الأرابيسك', 'Arabesque Arch', 'silver', 'arabesque-arch.png'),
+('astrolabe-v2', 'الأسطرلاب', 'Astrolabe', 'silver', 'astrolabe-v2.png'),
+('compass', 'البوصلة', 'Compass', 'silver', 'compass.png'),
+('house-of-wisdom-scroll-v2', 'بيت الحكمة', 'House of Wisdom Scroll', 'silver', 'house-of-wisdom-scroll-v2.png'),
+('islamic-dome', 'القبة', 'Islamic Dome', 'silver', 'islamic-dome.png'),
+('kufic-calligraphy', 'الخط الكوفي', 'Kufic Calligraphy', 'silver', 'kufic-calligraphy.png'),
+('minaret-v2', 'المئذنة', 'Minaret', 'silver', 'minaret-v2.png'),
+('mishkat-lamp', 'المشكاة', 'Mishkat Lamp', 'silver', 'mishkat-lamp.png'),
+('noahs-ark', 'السفينة', 'Noah''s Ark', 'silver', 'noahs-ark.png'),
+('dhul-fiqar-sword', 'ذو الفقار', 'Dhul Fiqar Sword', 'gold', 'dhul-fiqar-sword.png'),
+('dome-of-the-rock', 'قبة الصخرة', 'Dome of the Rock', 'gold', 'dome-of-the-rock.png'),
+('gate-of-peace', 'باب السلام', 'Gate of Peace', 'gold', 'gate-of-peace.png'),
+('islamic-dinar', 'الدرهم الإسلامي', 'Islamic Dinar', 'gold', 'islamic-dinar.png'),
+('muqarnas', 'المقرنصات', 'Muqarnas', 'gold', 'muqarnas.png'),
+('prophets-minbar-v2', 'المنبر النبوي', 'Prophet''s Minbar', 'gold', 'prophets-minbar-v2.png'),
+('salihs-camel', 'الناقة', 'Salih''s Camel', 'gold', 'salihs-camel.png'),
+('staff-of-musa', 'عصا موسى', 'Staff of Musa', 'gold', 'staff-of-musa.png'),
+('the-kaaba', 'الكعبة المشرفة', 'The Kaaba', 'gold', 'the-kaaba.png'),
+('zamzam-well', 'عين زمزم', 'Zamzam Well', 'gold', 'zamzam-well.png'),
+('seal-of-prophethood', 'خاتم النبوة', 'Seal of Prophethood', 'diamond', 'seal-of-prophethood.png'),
+('the-rawdah', 'الروضة الشريفة', 'The Rawdah', 'diamond', 'the-rawdah.png'),
+('eid-cookies', 'كعك العيد', 'Eid Cookies', 'seasonal', 'eid-cookies.png'),
+('eid-lamb', 'خروف العيد', 'Eid Lamb', 'seasonal', 'eid-lamb.png'),
+('kiswah-cloth', 'كسوة الكعبة', 'Kiswah Cloth', 'seasonal', 'kiswah-cloth.png'),
+('ramadan-cannon', 'مدفع رمضان', 'Ramadan Cannon', 'seasonal', 'ramadan-cannon.png'),
+('ramadan-crescent', 'هلال رمضان', 'Ramadan Crescent', 'seasonal', 'ramadan-crescent.png'),
+('tent-of-arafah', 'خيمة عرفة', 'Tent of Arafah', 'seasonal', 'tent-of-arafah.png');

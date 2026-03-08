@@ -1,12 +1,4 @@
-import { QueryClient, onlineManager } from '@tanstack/react-query';
-import NetInfo from '@react-native-community/netinfo';
-
-// Auto-refetch when connectivity restores
-onlineManager.setEventListener((setOnline) => {
-  return NetInfo.addEventListener((state) => {
-    setOnline(!!state.isConnected);
-  });
-});
+import { QueryClient } from '@tanstack/react-query';
 
 export const queryClient = new QueryClient({
   defaultOptions: {

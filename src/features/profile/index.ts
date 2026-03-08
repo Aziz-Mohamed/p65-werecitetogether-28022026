@@ -1,5 +1,5 @@
 export type {
-  Profile,
+  ProfileViewData,
   UpdateProfileInput,
 } from './types/profile.types';
 

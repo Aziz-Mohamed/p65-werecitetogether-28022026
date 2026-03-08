@@ -10,7 +10,6 @@ import { typography } from '@/theme/typography';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
-import type { UserRole } from '@/types/common.types';
 
 // ─── Login Screen ─────────────────────────────────────────────────────────────
 
@@ -30,8 +29,8 @@ export default function LoginScreen() {
           />
         </View>
 
-        <Text style={styles.title}>{t('auth.signInTitle')}</Text>
-        <Text style={styles.subtitle}>{t('auth.signInSubtitle')}</Text>
+        <Text style={styles.title}>{t('auth.login')}</Text>
+        <Text style={styles.subtitle}>{t('auth.loginSubtitle')}</Text>
 
         <View style={styles.oauthSection}>
           <OAuthButtons />
@@ -47,30 +46,29 @@ export default function LoginScreen() {
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingBlockStart: spacing.xl,
-    justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'center',
     marginBlockEnd: spacing.xl,
   },
   logo: {
-    width: normalize(120),
-    height: normalize(120),
+    width: normalize(100),
+    height: normalize(100),
   },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
-    textAlign: 'center',
     marginBlockEnd: spacing.xs,
   },
   subtitle: {
     ...typography.textStyles.body,
     color: lightTheme.textSecondary,
-    textAlign: 'center',
     marginBlockEnd: spacing.xl,
   },
   oauthSection: {

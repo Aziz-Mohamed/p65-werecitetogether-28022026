@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { I18nManager, Pressable, RefreshControl, StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
@@ -18,20 +20,100 @@ import { HimamDashboardCard } from '@/features/himam/components/HimamDashboardCa
 import { useUpcomingEvent } from '@/features/himam/hooks/useUpcomingEvent';
 import { useMyRegistration } from '@/features/himam/hooks/useMyRegistration';
 import { typography } from '@/theme/typography';
-import { lightTheme, neutral } from '@/theme/colors';
+import { lightTheme, colors, secondary } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
+import { normalize } from '@/theme/normalize';
+import { useLocalizedName } from '@/hooks/useLocalizedName';
 
-export default function StudentHomeScreen() {
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const MAX_PREVIEW_ITEMS = 4;
+const MAX_SESSION_PREVIEW = 3;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+interface HomeworkRowProps {
+  item: { assignmentId: string; rubNumber: number; juz: number };
+  enriched: EnrichedCertification[];
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}
+
+const HomeworkRow = React.memo(function HomeworkRow({ item, enriched, t }: HomeworkRowProps) {
+  const cert = enriched.find((c) => c.rub_number === item.rubNumber);
+  const dotColor = cert
+    ? (FRESHNESS_DOT_COLORS[cert.freshness.state] ?? colors.primary[400])
+    : colors.primary[400];
+
+  return (
+    <View style={styles.taskRow}>
+      <View style={[styles.taskDot, { backgroundColor: dotColor }]} />
+      <View style={styles.taskInfo}>
+        <Text style={styles.taskSurah} numberOfLines={1}>
+          {t('gamification.rub')} {item.rubNumber}
+        </Text>
+        <Text style={styles.taskAyah}>
+          {t('gamification.juz')} {item.juz}
+        </Text>
+      </View>
+    </View>
+  );
+});
+
+function getRelativeDateLabel(dateStr: string, t: (key: string) => string): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(dateStr + 'T00:00:00');
+  const diff = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  if (diff === 0) return t('student.dashboard.today');
+  if (diff === 1) return t('student.dashboard.tomorrow');
+  return target.toLocaleDateString(undefined, { weekday: 'long' });
+}
+
+interface SessionPreviewRowProps {
+  session: { id: string; class?: { name_localized?: unknown; name?: string }; start_time?: string; end_time?: string; teacher?: { full_name?: string } };
+  t: (key: string) => string;
+  resolveName: (localized: Record<string, string> | unknown, fallback: string | null | undefined) => string;
+  onPress: () => void;
+}
+
+const SessionPreviewRow = React.memo(function SessionPreviewRow({ session, t, resolveName, onPress }: SessionPreviewRowProps) {
+  return (
+    <Pressable onPress={onPress} style={styles.sessionPreviewRow}>
+      <View style={styles.sessionPreviewDot} />
+      <View style={styles.sessionPreviewInfo}>
+        <Text style={styles.sessionPreviewTitle} numberOfLines={1}>
+          {resolveName(session.class?.name_localized, session.class?.name) ?? t('scheduling.individualSession')}
+        </Text>
+        <Text style={styles.sessionPreviewMeta}>
+          {session.start_time?.slice(0, 5)} – {session.end_time?.slice(0, 5)}
+          {session.teacher?.full_name ? `  ·  ${session.teacher.full_name}` : ''}
+        </Text>
+      </View>
+    </Pressable>
+  );
+});
+
+// ─── Student Dashboard ────────────────────────────────────────────────────────
+
+export default function StudentDashboard() {
   const { t } = useTranslation();
-  const profile = useAuthStore((s) => s.profile);
+  const { profile } = useAuth();
+  const router = useRouter();
+  const isRTL = I18nManager.isRTL;
 
-  const displayName = profile?.display_name || profile?.full_name || '';
-  const studentId = profile?.id;
+  const { data, isLoading, error, refetch } = useStudentDashboard(profile?.id);
+  const { enriched } = useRubCertifications(profile?.id);
+  const { homeworkItems } = useRevisionHomework(profile?.id);
+  const { data: memStats } = useMemorizationStats(profile?.id);
+  const { resolveFirstName, resolveName } = useLocalizedName();
 
-  const { data: recentSessions = [], isLoading } = useSessionsByStudent(
-    studentId,
-    'completed',
+  const studentClassId = data?.student?.class_id;
+  const classIds = useMemo(() => studentClassId ? [studentClassId] : [], [studentClassId]);
+  const { data: upcomingSessions = [] } = useStudentUpcomingSessions(
+    profile?.id,
+    classIds,
+    profile?.school_id ?? undefined,
   );
 
   // Himam dashboard
@@ -89,17 +171,72 @@ export default function StudentHomeScreen() {
       }
     >
       <View style={styles.container}>
+        {/* 1. Header + Attendance Badge */}
         <View style={styles.header}>
-          <Text style={styles.welcome}>
-            {t('dashboard.welcome', { name: displayName })}
-          </Text>
+          <View style={styles.headerContent}>
+            <Text style={styles.greeting}>
+              {t('dashboard.welcome', { name: resolveFirstName(profile?.name_localized, profile?.full_name) })}
+            </Text>
+            <Text style={styles.subtitle}>{t('student.dashboard.readyToLearn')}</Text>
+          </View>
+          <Badge
+            label={attendance.label}
+            variant={attendance.variant}
+            size="md"
+          />
         </View>
 
-        <Card style={styles.card}>
-          <Text style={styles.cardTitle}>{t('programs.browsePrograms')}</Text>
-          <Text style={styles.cardDescription}>
-            {t('programs.allPrograms')}
-          </Text>
+        {/* 2. Streak + Progress Card */}
+        <Card variant="default" style={styles.heroCard}>
+          {/* Streak Banner */}
+          <View style={styles.streakBanner}>
+            <View style={styles.streakLeft}>
+              <Ionicons name="flame" size={normalize(28)} color={colors.accent.rose[500]} />
+              <View>
+                <Text style={styles.streakNumber}>{student?.current_streak ?? 0}</Text>
+                <Text style={styles.streakLabel}>{t('student.dashboard.dayStreak')}</Text>
+              </View>
+            </View>
+            {(student?.current_streak ?? 0) > 0 ? (
+              <Text style={styles.bestStreak}>
+                {t('student.dashboard.bestStreak', { count: student?.longest_streak ?? 0 })}
+              </Text>
+            ) : (
+              <Text style={styles.startStreak}>{t('student.dashboard.startStreak')}</Text>
+            )}
+          </View>
+
+          <View style={styles.heroDivider} />
+
+          {/* Stats Row */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statBlock, { backgroundColor: colors.accent.indigo[50] }]}>
+              <Text style={[styles.statValue, { color: colors.accent.indigo[600] }]}>
+                {memStats?.quran_percentage != null
+                  ? `${memStats.quran_percentage.toFixed(1)}%`
+                  : '0%'}
+              </Text>
+              <Text style={[styles.statLabel, { color: colors.accent.indigo[500] }]}>
+                {t('student.dashboard.quranMemorized')}
+              </Text>
+            </View>
+            <View style={[styles.statBlock, { backgroundColor: colors.secondary[50] }]}>
+              <Text style={[styles.statValue, { color: colors.secondary[600] }]}>
+                {data?.totalStickers ?? 0}
+              </Text>
+              <Text style={[styles.statLabel, { color: colors.secondary[500] }]}>
+                {t('student.dashboard.stickers')}
+              </Text>
+            </View>
+            <View style={[styles.statBlock, { backgroundColor: colors.primary[50] }]}>
+              <Text style={[styles.statValue, { color: colors.primary[600] }]}>
+                {data?.totalSessions ?? 0}
+              </Text>
+              <Text style={[styles.statLabel, { color: colors.primary[500] }]}>
+                {t('student.dashboard.sessions')}
+              </Text>
+            </View>
+          </View>
         </Card>
 
         {/* 3. Revision Health Summary */}
@@ -285,14 +422,12 @@ export default function StudentHomeScreen() {
           </Pressable>
         </View>
 
-        <SessionHistoryList
-          sessions={recentSessions.slice(0, 5)}
-          isLoading={isLoading}
-        />
       </View>
     </Screen>
   );
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   container: {
@@ -301,11 +436,18 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   header: {
-    paddingBlockEnd: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: spacing.xs,
   },
-  welcome: {
+  headerContent: {
+    flex: 1,
+  },
+  greeting: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
+    fontSize: normalize(22),
   },
   subtitle: {
     ...typography.textStyles.caption,
@@ -457,19 +599,82 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
+    gap: normalize(2),
   },
-  cardTitle: {
-    ...typography.textStyles.subheading,
-    color: lightTheme.text,
-    marginBlockEnd: spacing.xs,
+  statValue: {
+    fontFamily: typography.fontFamily.bold,
+    fontSize: normalize(16),
   },
-  cardDescription: {
-    ...typography.textStyles.body,
-    color: lightTheme.textSecondary,
+  statLabel: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: normalize(11),
   },
-  sectionTitle: {
-    ...typography.textStyles.subheading,
-    color: lightTheme.text,
-    marginBlockStart: spacing.sm,
+
+  // Homework Badge
+  homeworkBadge: {
+    backgroundColor: colors.secondary[100],
+    paddingHorizontal: spacing.sm,
+    paddingVertical: normalize(2),
+    borderRadius: radius.full,
+    minWidth: normalize(24),
+    alignItems: 'center',
+  },
+  homeworkBadgeText: {
+    fontFamily: typography.fontFamily.bold,
+    fontSize: normalize(11),
+    color: colors.secondary[600],
+  },
+
+  // Session Preview
+  sessionDateLabel: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: normalize(11),
+    color: colors.neutral[400],
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: normalize(2),
+  },
+  sessionPreviewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  sessionPreviewDot: {
+    width: normalize(6),
+    height: normalize(6),
+    borderRadius: normalize(3),
+    backgroundColor: colors.accent.sky[500],
+  },
+  sessionPreviewInfo: {
+    flex: 1,
+  },
+  sessionPreviewTitle: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: normalize(13),
+    color: colors.neutral[900],
+  },
+  sessionPreviewMeta: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: normalize(11),
+    color: colors.neutral[500],
+  },
+
+  // Explore Pills
+  exploreRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  explorePill: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: normalize(4),
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+  },
+  explorePillText: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: normalize(11),
   },
 });

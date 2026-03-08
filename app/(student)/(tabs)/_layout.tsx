@@ -1,5 +1,4 @@
 import React from 'react';
-import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,69 +10,59 @@ import { CustomTabBar } from '@/components/layout/CustomTabBar';
 
 export default function StudentTabsLayout() {
   const { t } = useTranslation();
-  const profile = useAuthStore((s) => s.profile);
-  const { showPrompt, activeSession, dismissPrompt } =
-    usePostSessionDetection(profile?.id);
 
   return (
-    <View style={{ flex: 1 }}>
-      {showPrompt && activeSession && profile?.id && (
-        <PostSessionPrompt
-          session={activeSession}
-          studentId={profile.id}
-          onDismiss={dismissPrompt}
-        />
-      )}
-      <Tabs
-        tabBar={(props) => <CustomTabBar {...props} />}
-        screenOptions={{ headerShown: false }}
-      >
+    <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: t('dashboard.student.home'),
+          title: t('student.tabs.dashboard'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
+            <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="memorization"
         options={{
-          title: t('dashboard.student.programs'),
+          title: t('student.tabs.memorization'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'library' : 'library-outline'} size={24} color={color} />
+            <Ionicons name={focused ? "book" : "book-outline"} size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="progress"
+        name="revision"
         options={{
-          title: t('dashboard.student.progress'),
+          title: t('student.tabs.revision'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'trending-up' : 'trending-up-outline'} size={24} color={color} />
+            <Ionicons name={focused ? "pulse" : "pulse-outline"} size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="certificates"
+        name="journey"
         options={{
-          title: t('dashboard.student.certificates'),
+          title: t('student.tabs.journey'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'ribbon' : 'ribbon-outline'} size={24} color={color} />
+            <Ionicons name={focused ? "compass" : "compass-outline"} size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: t('dashboard.student.profile'),
+          title: t('student.tabs.profile'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
+            <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
           ),
         }}
       />
-      </Tabs>
-    </View>
+    </Tabs>
   );
 }

@@ -1,20 +1,34 @@
 import { useMemo } from 'react';
+import { useRubReference } from '@/features/gamification/hooks/useRubReference';
+import { useRubCertifications } from '@/features/gamification/hooks/useRubCertifications';
 import { useMemorizationProgress } from './useMemorizationProgress';
 import { useAssignments } from './useAssignments';
-import { computeRubCoverage, type AyahRange } from '../utils/rub-coverage';
+import { computeRubCoverage, type RubCoverage, type AyahRange } from '../utils/rub-coverage';
 
 /**
- * Combines memorization progress and pending new_hifz assignments
- * to compute per-rub' coverage.
+ * Combines rub' reference data with memorization progress and pending
+ * self-assigned new_hifz to compute per-rub' coverage.
  *
- * Note: Rub certification was part of the gamification feature (removed).
- * This hook now shows uncertified coverage only.
+ * Returns:
+ * - `inProgress`: rub' with 0 < totalPercentage < 100% (actively being built)
+ * - `completed`: rub' with 100% totalPercentage but NOT yet certified
+ * - `allCoverage`: full sparse coverage map
  */
 export function useRubCoverage(studentId: string | undefined) {
+  const {
+    data: rubReference = [],
+    isLoading: refLoading,
+  } = useRubReference();
+
   const {
     data: progress = [],
     isLoading: progressLoading,
   } = useMemorizationProgress({ studentId: studentId ?? '' });
+
+  const {
+    certMap,
+    isLoading: certLoading,
+  } = useRubCertifications(studentId);
 
   // Fetch pending self-assigned new_hifz assignments
   const {
@@ -39,38 +53,49 @@ export function useRubCoverage(studentId: string | undefined) {
   );
 
   const allCoverage = useMemo(
-    () => computeRubCoverage([], progress, assignmentRanges),
-    [progress, assignmentRanges],
+    () => computeRubCoverage(rubReference, progress, assignmentRanges),
+    [rubReference, progress, assignmentRanges],
   );
 
-  // In progress: has some coverage, not 100%
+  // In progress: has some coverage, not 100%, and not yet certified
   const inProgress = useMemo(
-    () => allCoverage.filter((c) => c.totalPercentage > 0 && c.totalPercentage < 100),
-    [allCoverage],
+    () =>
+      allCoverage.filter(
+        (c) => c.totalPercentage > 0 && c.totalPercentage < 100 && !certMap.has(c.rubNumber),
+      ),
+    [allCoverage, certMap],
   );
 
-  // Completed: 100% total coverage
+  // Completed: 100% total coverage but not yet certified by teacher
   const completed = useMemo(
-    () => allCoverage.filter((c) => c.totalPercentage === 100),
-    [allCoverage],
+    () =>
+      allCoverage.filter(
+        (c) => c.totalPercentage === 100 && !certMap.has(c.rubNumber),
+      ),
+    [allCoverage, certMap],
   );
 
-  // Combined: all rub' with any coverage, sorted by rubNumber.
+  // Combined: all uncertified rub' with any coverage, sorted by rubNumber.
+  // Certified rub' are excluded — they belong on the Journey map.
   const uncertified = useMemo(
     () =>
       allCoverage
-        .filter((c) => c.totalPercentage > 0)
+        .filter((c) => c.totalPercentage > 0 && !certMap.has(c.rubNumber))
         .sort((a, b) => a.rubNumber - b.rubNumber),
-    [allCoverage],
+    [allCoverage, certMap],
   );
+
+  // Stats
+  const totalRubInProgress = inProgress.length;
+  const totalRubCompleted = completed.length;
 
   return {
     allCoverage,
     inProgress,
     completed,
     uncertified,
-    totalRubInProgress: inProgress.length,
-    totalRubCompleted: completed.length,
-    isLoading: progressLoading || assignmentsLoading,
+    totalRubInProgress,
+    totalRubCompleted,
+    isLoading: refLoading || progressLoading || certLoading || assignmentsLoading,
   };
 }

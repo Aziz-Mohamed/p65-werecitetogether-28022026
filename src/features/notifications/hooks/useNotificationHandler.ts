@@ -2,18 +2,16 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 
-import type { DeepLinkData, NotificationPayload, QueueOfferData } from '../types/notifications.types';
+import type { DeepLinkData, NotificationPayload } from '../types/notifications.types';
 
 interface UseNotificationHandlerOptions {
   isAuthenticated: boolean;
   onForegroundNotification?: (payload: NotificationPayload) => void;
-  onQueueOffer?: (offer: QueueOfferData) => void;
 }
 
 export function useNotificationHandler({
   isAuthenticated,
   onForegroundNotification,
-  onQueueOffer,
 }: UseNotificationHandlerOptions) {
   const router = useRouter();
   const responseListener = useRef<Notifications.Subscription | null>(null);
@@ -54,31 +52,12 @@ export function useNotificationHandler({
     // Handle foreground notification received
     receivedListener.current = Notifications.addNotificationReceivedListener(
       (notification) => {
-        const { title, body, data, categoryIdentifier } =
-          notification.request.content;
-        const deepLink = data as unknown as DeepLinkData | undefined;
+        const { title, body, data } = notification.request.content;
         const payload: NotificationPayload = {
           title: title ?? '',
           body: body ?? '',
-          data: deepLink,
-          categoryId: (categoryIdentifier as NotificationPayload['categoryId']) || undefined,
+          data: data as unknown as DeepLinkData | undefined,
         };
-
-        // Detect queue offer notifications and surface via callback
-        if (categoryIdentifier === 'queue_available' && deepLink?.params) {
-          const { queueEntryId, programId } = deepLink.params;
-          if (queueEntryId && programId) {
-            const offer: QueueOfferData = {
-              teacherName: (data as Record<string, string>)?.teacherName ?? '',
-              platform: (data as Record<string, string>)?.platform ?? '',
-              expiresAt: (data as Record<string, string>)?.expiresAt ?? '',
-              queueEntryId,
-              programId,
-            };
-            payload.queueOffer = offer;
-            onQueueOffer?.(offer);
-          }
-        }
 
         setLastNotification(payload);
         onForegroundNotification?.(payload);
@@ -89,7 +68,7 @@ export function useNotificationHandler({
       responseListener.current?.remove();
       receivedListener.current?.remove();
     };
-  }, [isAuthenticated, handleDeepLink, onForegroundNotification, onQueueOffer]);
+  }, [isAuthenticated, handleDeepLink, onForegroundNotification]);
 
   return {
     lastNotification,

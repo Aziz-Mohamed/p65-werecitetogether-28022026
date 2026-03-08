@@ -41,17 +41,7 @@ export const useRoleTheme = () => {
     };
   }
 
-  if (isMasterAdmin) {
-    return {
-      primary: colors.primary[500],
-      primaryLight: colors.primary[50],
-      primaryDark: colors.primary[600],
-      gradient: colors.gradients.primary,
-      tag: 'emerald' as const,
-    };
-  }
-
-  // Default fallback
+  // Default to Emerald
   return {
     primary: colors.primary[500],
     primaryLight: colors.primary[50],

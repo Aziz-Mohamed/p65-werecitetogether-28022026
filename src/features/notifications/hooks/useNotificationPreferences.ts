@@ -1,31 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { notificationsService } from '../services/notifications.service';
+import type { NotificationPreferencesForm } from '../types/notifications.types';
 
-export function useNotificationPreferences(profileId: string | undefined) {
+export function useNotificationPreferences(userId: string | undefined) {
   return useQuery({
-    queryKey: ['notification-preferences', profileId],
-    queryFn: async () => {
-      const result = await notificationsService.getPreferences(profileId!);
-      if (result.error) throw new Error(result.error.message);
-      return result.data!;
-    },
-    enabled: !!profileId,
+    queryKey: ['notification-preferences', userId],
+    queryFn: () => notificationsService.getPreferences(userId!),
+    enabled: !!userId,
   });
 }
 
-export function useUpdateNotificationPreference(profileId: string | undefined) {
+export function useUpdateNotificationPreferences(userId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ category, enabled }: { category: string; enabled: boolean }) => {
-      if (!profileId) throw new Error('Cannot update preferences: no profile ID');
-      const result = await notificationsService.updatePreference(profileId, category, enabled);
-      if (result.error) throw new Error(result.error.message);
+    mutationFn: (prefs: Partial<NotificationPreferencesForm>) => {
+      if (!userId) throw new Error('Cannot update preferences: no user ID');
+      return notificationsService.upsertPreferences(userId, prefs);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['notification-preferences', profileId],
+        queryKey: ['notification-preferences', userId],
       });
     },
   });

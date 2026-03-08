@@ -18,6 +18,7 @@ export type {
 export { useOAuthLogin } from './hooks/useOAuthLogin';
 export { useDevLogin } from './hooks/useDevLogin';
 export { useLogout } from './hooks/useLogout';
+export { useCurrentUser } from './hooks/useCurrentUser';
 
 // Components
 export { OAuthButtons } from './components/OAuthButtons';

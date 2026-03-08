@@ -2,6 +2,8 @@ import React from 'react';
 import { Stack } from 'expo-router';
 import { ErrorBoundary } from '@/components/feedback';
 
+// ─── Student Layout ───────────────────────────────────────────────────────────
+
 export default function StudentLayout() {
   return (
     <ErrorBoundary>

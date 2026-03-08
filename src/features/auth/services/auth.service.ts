@@ -13,29 +13,29 @@ const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL
   : '';
 
 class AuthService {
-  async signInWithGoogle(idToken: string): Promise<AuthResult<Session>> {
-    try {
-      const { data, error } = await supabase.auth.signInWithIdToken({
-        provider: 'google',
-        token: idToken,
-      });
+  /**
+   * Force-refresh the session and return a fresh access token.
+   * Needed because supabase.functions.invoke() may hold a stale token
+   * even when the REST client has auto-refreshed.
+   */
+  private async getFreshToken(): Promise<string> {
+    const { data, error } = await supabase.auth.refreshSession();
 
-      if (error) {
-        return { error: { message: error.message, code: error.code } };
+    if (error || !data.session) {
+      if (__DEV__) {
+        console.log('[AuthService] refreshSession failed:', error?.message);
       }
-
-      if (!data.session) {
-        return { error: { message: 'No session returned' } };
-      }
-
-      return { data: data.session };
-    } catch (error) {
-      return {
-        error: {
-          message: error instanceof Error ? error.message : 'An unexpected error occurred',
-        },
-      };
+      throw new Error(i18n.t('auth.sessionExpired'));
     }
+
+    if (__DEV__) {
+      const exp = data.session.expires_at
+        ? new Date(data.session.expires_at * 1000).toISOString()
+        : 'unknown';
+      console.log('[AuthService] Token refreshed, expires:', exp);
+    }
+
+    return data.session.access_token;
   }
 
   /**
@@ -187,6 +187,7 @@ class AuthService {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       callback(event, session);
     });
+
     return data.subscription;
   }
 }

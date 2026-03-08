@@ -1,18 +1,17 @@
 import 'react-native-reanimated';
 import 'react-native-gesture-handler';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { I18nManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { QueryClientProvider } from '@tanstack/react-query';
 import * as SplashScreen from 'expo-splash-screen';
 import { I18nextProvider } from 'react-i18next';
 
 import { useAuthStore, type Profile } from '@/stores/authStore';
 import { useLocaleStore } from '@/stores/localeStore';
+import { useWorkspaceDraftStore } from '@/stores/workspaceDraftStore';
 import { useAuth } from '@/hooks/useAuth';
 import i18n from '@/i18n/config';
 import { supabase } from '@/lib/supabase';
@@ -28,28 +27,22 @@ import type { UserRole as NotifUserRole, NotificationPayload } from '@/features/
 
 SplashScreen.preventAutoHideAsync();
 
-// ─── Role → Route Group Mapping ──────────────────────────────────────────────
-
-const ROLE_ROUTES: Record<UserRole, string> = {
-  student: '/(student)/',
-  teacher: '/(teacher)/',
-  supervisor: '/(supervisor)/',
-  program_admin: '/(program-admin)/',
-  master_admin: '/(master-admin)/',
-};
-
 // ─── Root Layout ──────────────────────────────────────────────────────────────
 
 export default function RootLayout() {
   const [storeHydrated, setStoreHydrated] = useState(false);
   const isRTL = useLocaleStore((s) => s.isRTL);
 
+  // Wait for Zustand locale store to hydrate from AsyncStorage,
+  // then sync i18n language and native RTL state with the persisted preference.
   useEffect(() => {
     const syncLocale = () => {
       const { locale, isRTL: storedRTL } = useLocaleStore.getState();
       if (i18n.language !== locale) {
         i18n.changeLanguage(locale);
       }
+      // Sync native I18nManager with persisted locale so that native
+      // components (tab bar, navigation) and future app launches are correct.
       if (I18nManager.isRTL !== storedRTL) {
         I18nManager.allowRTL(storedRTL);
         I18nManager.forceRTL(storedRTL);
@@ -68,6 +61,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (storeHydrated) {
       SplashScreen.hideAsync();
+      // Clean up workspace drafts older than 7 days
+      useWorkspaceDraftStore.getState().clearStaleDrafts();
     }
   }, [storeHydrated]);
 
@@ -75,9 +70,12 @@ export default function RootLayout() {
     return null;
   }
 
+  // `direction` on the root View controls layout for the entire React tree.
+  // `I18nManager.forceRTL()` (called above) handles native components outside
+  // this tree (tab bar, navigation transitions) and persists for next launch.
   return (
     <GestureHandlerRootView style={{ flex: 1, direction: isRTL ? 'rtl' : 'ltr' }}>
-      <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: asyncStoragePersister }}>
+      <QueryClientProvider client={queryClient}>
         <I18nextProvider i18n={i18n}>
           <AuthGuard>
             <Stack screenOptions={{ headerShown: false }}>
@@ -92,7 +90,7 @@ export default function RootLayout() {
             </Stack>
           </AuthGuard>
         </I18nextProvider>
-      </PersistQueryClientProvider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }
@@ -108,8 +106,50 @@ function toNotifRole(role: string | null): NotifUserRole {
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
   const router = useRouter();
-  const { isAuthenticated, isLoading, role, profile, onboardingCompleted } = useAuth();
+  const { isAuthenticated, isLoading, role, profile } = useAuth();
 
+  // ─── Realtime Subscriptions ─────────────────────────────────────────────────
+  useRealtimeReconnect();
+  useRealtimeManager();
+
+  // ─── Push Notifications ───────────────────────────────────────────────────
+  const {
+    showSoftAsk,
+    dismissSoftAsk,
+    requestPermissions,
+  } = useNotificationSetup({
+    userId: profile?.id,
+    isAuthenticated,
+  });
+
+  const handleEnableNotifications = async () => {
+    dismissSoftAsk();
+    await requestPermissions();
+  };
+
+  // ─── Notification Handler (tap + foreground) ──────────────────────────────
+  const [bannerNotification, setBannerNotification] = useState<NotificationPayload | null>(null);
+
+  const handleForegroundNotification = useCallback((payload: NotificationPayload) => {
+    setBannerNotification(payload);
+  }, []);
+
+  const { navigateToNotification } = useNotificationHandler({
+    isAuthenticated,
+    onForegroundNotification: handleForegroundNotification,
+  });
+
+  const handleBannerPress = useCallback(
+    (payload: NotificationPayload) => {
+      setBannerNotification(null);
+      navigateToNotification(payload.data);
+    },
+    [navigateToNotification],
+  );
+
+  const handleBannerDismiss = useCallback(() => {
+    setBannerNotification(null);
+  }, []);
   const initialize = useAuthStore((s) => s.initialize);
   const setSession = useAuthStore((s) => s.setSession);
   const setProfile = useAuthStore((s) => s.setProfile);
@@ -118,9 +158,11 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   // ─── Initialize Auth Listener ───────────────────────────────────────────────
 
   useEffect(() => {
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
+        // Fetch profile
         supabase
           .from('profiles')
           .select('*')
@@ -137,6 +179,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       }
     });
 
+    // Listen to auth changes (T116: handle token expiry)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
@@ -147,6 +190,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
         return;
       }
       if (session) {
+        // Fetch profile on sign in or token refresh
         supabase
           .from('profiles')
           .select('*')
@@ -170,16 +214,22 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   // ─── Auth Guard Logic ────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
 
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!isAuthenticated) {
+      // Not authenticated - redirect to login unless already in auth group
       if (!inAuthGroup) {
         router.replace('/(auth)/login');
       }
     } else {
-      if (!profile) return;
+      // Wait for profile to be fetched before routing by role
+      if (!profile) {
+        return;
+      }
 
       // Check onboarding status — redirect to onboarding if not completed
       const onboardingCompleted = (profile as Record<string, unknown>).onboarding_completed;
@@ -212,7 +262,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
         }
       }
     }
-  }, [isAuthenticated, isLoading, role, profile, onboardingCompleted, segments, router]);
+  }, [isAuthenticated, isLoading, role, profile, segments, router]);
 
   return (
     <>

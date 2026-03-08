@@ -67,6 +67,4 @@
 - Supabase PostgreSQL (remote) — 1 altered table (stickers), 2 new tables (milestone_badges, student_badges), ~5 new RPC functions, 2 triggers, 1 pg_cron job (010-gamification-ext)
 
 ## Recent Changes
-- 005-session-join-flow: Added TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, @gorhom/bottom-sheet 5, expo-linking, expo-notifications, react-native-reanimated 4, i18nex
-- 001-program-features: Added TypeScript 5.9 (strict mode) + React Native 0.83, Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next, FlashList 2, react-native-svg 15, expo-file-system ~19, react-native-view-shot (NEW), react-native-qrcode-svg (NEW)
 - 001-mvp-phase1: Added TypeScript 5.9 (strict mode) / React Native 0.83 / React 19 + Expo ~54, Expo Router v6, TanStack Query 5, Zustand 5, Supabase JS 2, react-hook-form 7 + zod 4, react-native-reanimated 4, i18next + react-i18next, FlashList 2, expo-image 3, react-native-calendars, victory-native, @gorhom/bottom-sheet 5

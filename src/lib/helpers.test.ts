@@ -3,7 +3,8 @@ import {
   formatDate,
   formatSessionDate,
   formatRelativeTime,
-  getScoreColor,
+  calculateLevel,
+  getAttendanceColor,
   clamp,
 } from './helpers';
 import { semantic } from '@/theme/colors';
@@ -120,22 +121,67 @@ describe('formatRelativeTime', () => {
   });
 });
 
-// ─── getScoreColor ──────────────────────────────────────────────────────────
+// ─── calculateLevel ─────────────────────────────────────────────────────────
 
-describe('getScoreColor', () => {
-  it('returns green for high scores (8+)', () => {
-    expect(getScoreColor(8)).toBe(semantic.success);
-    expect(getScoreColor(10)).toBe(semantic.success);
+describe('calculateLevel', () => {
+  it('returns level 1 for 0 points', () => {
+    const result = calculateLevel(0);
+    expect(result.level).toBe(1);
+    expect(result.title).toBe('Beginner');
+    expect(result.progress).toBe(0);
   });
 
-  it('returns yellow for medium scores (5-7)', () => {
-    expect(getScoreColor(5)).toBe(semantic.warning);
-    expect(getScoreColor(7)).toBe(semantic.warning);
+  it('returns level 2 at exactly 50 points', () => {
+    const result = calculateLevel(50);
+    expect(result.level).toBe(2);
+    expect(result.title).toBe('Seeker');
+    expect(result.progress).toBe(0);
   });
 
-  it('returns red for low scores (below 5)', () => {
-    expect(getScoreColor(4)).toBe(semantic.error);
-    expect(getScoreColor(1)).toBe(semantic.error);
+  it('computes mid-level progress', () => {
+    // Level 2 = 50-149 points, range = 100
+    // At 100 points: (100 - 50) / (150 - 50) = 0.5
+    const result = calculateLevel(100);
+    expect(result.level).toBe(2);
+    expect(result.progress).toBe(0.5);
+  });
+
+  it('returns max level for high points', () => {
+    const result = calculateLevel(3500);
+    expect(result.level).toBe(10);
+    expect(result.title).toBe('Quran Guardian');
+    expect(result.progress).toBe(1);
+  });
+
+  it('returns max level with progress 1 for very high points', () => {
+    const result = calculateLevel(99999);
+    expect(result.level).toBe(10);
+    expect(result.progress).toBe(1);
+  });
+
+  it('returns nextLevelPoints correctly', () => {
+    const result = calculateLevel(0);
+    expect(result.nextLevelPoints).toBe(50); // next level is 2 (50 points)
+  });
+});
+
+// ─── getAttendanceColor ─────────────────────────────────────────────────────
+
+describe('getAttendanceColor', () => {
+  it('returns green for present', () => {
+    expect(getAttendanceColor('present')).toBe(semantic.success);
+  });
+
+  it('returns red for absent', () => {
+    expect(getAttendanceColor('absent')).toBe(semantic.error);
+  });
+
+  it('returns yellow for late', () => {
+    expect(getAttendanceColor('late')).toBe(semantic.warning);
+  });
+
+  it('returns blue for excused', () => {
+    expect(getAttendanceColor('excused')).toBe(semantic.info);
   });
 });
 

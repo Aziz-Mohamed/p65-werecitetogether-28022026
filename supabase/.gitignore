@@ -6,6 +6,3 @@
 .env.keys
 .env.local
 .env.*.local
-
-# Generated types (canonical copy lives at src/types/database.types.ts)
-types/

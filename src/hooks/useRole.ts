@@ -8,6 +8,9 @@ interface UseRoleReturn {
   isMasterAdmin: boolean;
 }
 
+/**
+ * Returns the current user's role along with boolean convenience flags.
+ */
 export const useRole = (): UseRoleReturn => {
   const profile = useAuthStore((state) => state.profile);
   const role = (profile?.role as UserRole) ?? null;
@@ -19,8 +22,3 @@ export const useRole = (): UseRoleReturn => {
     isMasterAdmin: role === 'master_admin',
   };
 };
-
-export const useIsTeacher = () => useRole().isTeacher;
-export const useIsSupervisor = () => useRole().isSupervisor;
-export const useIsProgramAdmin = () => useRole().isProgramAdmin;
-export const useIsMasterAdmin = () => useRole().isMasterAdmin;

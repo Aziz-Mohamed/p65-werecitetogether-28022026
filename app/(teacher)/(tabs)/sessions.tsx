@@ -1,7 +1,10 @@
-import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
+import { I18nManager, StyleSheet, View, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
+import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
+import { BottomSheetModalProvider, type BottomSheetModal } from '@gorhom/bottom-sheet';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
@@ -20,14 +23,53 @@ import { DraftBadge } from '@/features/sessions/components/DraftBadge';
 import { ProgramChip } from '@/features/sessions/components/ProgramChip';
 import { MicIndicator } from '@/features/voice-memos';
 import { typography } from '@/theme/typography';
-import { lightTheme, neutral, primary, accent } from '@/theme/colors';
+import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import type { Session } from '@/features/sessions/types';
+import { normalize } from '@/theme/normalize';
+import { radius } from '@/theme/radius';
 
-export default function TeacherSessionsScreen() {
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+type ActiveTab = 'upcoming' | 'history';
+
+type SessionListItem =
+  | { type: 'header'; date: string }
+  | { type: 'session'; data: any };
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const STATUS_BADGE_VARIANT: Record<string, 'sky' | 'warning' | 'success' | 'default'> = {
+  scheduled: 'sky',
+  in_progress: 'warning',
+  completed: 'success',
+  cancelled: 'default',
+  missed: 'warning',
+};
+
+function groupByDate(sessions: any[]): SessionListItem[] {
+  const grouped = new Map<string, any[]>();
+  for (const session of sessions) {
+    const date = session.session_date;
+    if (!grouped.has(date)) grouped.set(date, []);
+    grouped.get(date)!.push(session);
+  }
+  const items: SessionListItem[] = [];
+  for (const [date, daySessions] of grouped.entries()) {
+    items.push({ type: 'header', date });
+    for (const session of daySessions) {
+      items.push({ type: 'session', data: session });
+    }
+  }
+  return items;
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export default function SessionsScreen() {
   const { t } = useTranslation();
-  const profile = useAuthStore((s) => s.profile);
-  const teacherId = profile?.id;
+  const router = useRouter();
+  const { profile, schoolId } = useAuth();
+  const { resolveName } = useLocalizedName();
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('upcoming');
   const createSheetRef = useRef<BottomSheetModal>(null);
@@ -226,23 +268,11 @@ function SessionList({
                 day: 'numeric',
               })}
             </Text>
-            {draftSessions.map((session: Session) => (
-              <Card key={session.id} variant="outlined" style={styles.draftCard}>
-                <View style={styles.draftRow}>
-                  <Badge label={t('sessions.draft')} variant="warning" size="sm" />
-                  <Text style={styles.draftDate}>
-                    {new Date(session.created_at).toLocaleDateString()}
-                  </Text>
-                </View>
-              </Card>
-            ))}
-          </View>
-        )}
+          );
+        }
 
-        {/* Completed Sessions */}
-        <Text style={styles.sectionTitle}>
-          {t('sessions.recentSessions')}
-        </Text>
+        const session = item.data;
+        const score = session.evaluation?.memorization_score ?? session.memorization_score;
 
         return (
           <Card
@@ -284,15 +314,24 @@ function SessionList({
   );
 }
 
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: spacing.lg,
-    gap: spacing.md,
+  },
+  header: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
   },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
+    fontSize: normalize(24),
   },
   addButton: {
     width: normalize(38),
@@ -300,22 +339,92 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sectionTitle: {
-    ...typography.textStyles.subheading,
-    color: lightTheme.text,
-    marginBlockStart: spacing.sm,
+
+  // ── Tabs ──
+  tabBar: {
+    flexDirection: 'row',
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.base,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral[200],
   },
-  draftCard: {
-    padding: spacing.md,
-  },
-  draftRow: {
+  tab: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
-  draftDate: {
+  tabActive: {
+    borderBottomColor: colors.primary[500],
+  },
+  tabText: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.neutral[400],
+    fontSize: normalize(15),
+  },
+  tabTextActive: {
+    color: colors.primary[600],
+  },
+  tabCount: {
+    minWidth: normalize(20),
+    height: normalize(20),
+    borderRadius: normalize(10),
+    backgroundColor: colors.neutral[100],
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xs,
+  },
+  tabCountActive: {
+    backgroundColor: colors.primary[50],
+  },
+  tabCountText: {
     ...typography.textStyles.caption,
-    color: neutral[500],
+    color: colors.neutral[400],
+    fontSize: normalize(11),
+    fontWeight: '600',
+  },
+  tabCountTextActive: {
+    color: colors.primary[600],
+  },
+
+  // ── Shared ──
+  listContent: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
+  dateHeader: {
+    ...typography.textStyles.label,
+    color: colors.neutral[500],
+    fontSize: normalize(13),
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  card: {
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  cardInfo: {
+    flex: 1,
+    gap: normalize(3),
+  },
+  cardTitle: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.neutral[900],
+  },
+  cardMeta: {
+    ...typography.textStyles.caption,
+    color: colors.neutral[400],
   },
   draftsSection: {
     marginHorizontal: spacing.lg,
