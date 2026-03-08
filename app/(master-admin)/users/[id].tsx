@@ -33,7 +33,7 @@ function getRoleBadgeVariant(role: string): BadgeVariant {
 
 export default function UserDetailScreen() {
   const { t } = useTranslation();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, email: emailParam } = useLocalSearchParams<{ id: string; email?: string }>();
   const { resolveName } = useLocalizedName();
   const [showRoleSheet, setShowRoleSheet] = useState(false);
 
@@ -45,11 +45,12 @@ export default function UserDetailScreen() {
 
   const displayName = resolveName(user.name_localized, user.full_name);
   const programRoles = user.program_roles_data ?? [];
+  const email = emailParam ?? '';
 
   const adminUser: AdminUser = {
     id: user.id,
     full_name: user.full_name,
-    email: '',
+    email,
     role: user.role,
     avatar_url: user.avatar_url,
     created_at: user.created_at,
@@ -72,6 +73,7 @@ export default function UserDetailScreen() {
           {user.username && (
             <Text style={styles.username}>@{user.username}</Text>
           )}
+          {email ? <Text style={styles.email}>{email}</Text> : null}
           <Badge label={user.role.replace('_', ' ')} variant={getRoleBadgeVariant(user.role)} size="md" />
         </Card>
 
@@ -99,10 +101,27 @@ export default function UserDetailScreen() {
               <Text style={styles.infoValue}>{user.phone}</Text>
             </View>
           )}
+          {email ? (
+            <>
+              {(user.phone || user.created_at) && <View style={styles.divider} />}
+              <View style={styles.infoRow}>
+                <View style={[styles.iconCircle, { backgroundColor: colors.accent.indigo[50] }]}>
+                  <Ionicons name="mail-outline" size={16} color={colors.accent.indigo[500]} />
+                </View>
+                <Text style={styles.infoLabel}>{t('admin.detail.email')}</Text>
+                <Text style={styles.infoValue} numberOfLines={1}>{email}</Text>
+              </View>
+            </>
+          ) : null}
         </Card>
 
         {/* Programs & Roles */}
-        <Text style={styles.sectionLabel}>{t('admin.detail.programRoles')}</Text>
+        <Text style={styles.sectionLabel}>
+          {t('admin.detail.programRoles')}
+          {programRoles.length > 0 && (
+            <Text style={styles.sectionCount}> ({programRoles.length})</Text>
+          )}
+        </Text>
         <Card variant="default" style={styles.infoCard}>
           {programRoles.length > 0 ? (
             programRoles.map((pr, i) => (
@@ -169,11 +188,20 @@ const styles = StyleSheet.create({
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
   },
+  email: {
+    ...typography.textStyles.caption,
+    color: lightTheme.textSecondary,
+  },
   sectionLabel: {
     ...typography.textStyles.label,
     color: lightTheme.textSecondary,
     marginTop: spacing.xs,
     textTransform: 'uppercase',
+  },
+  sectionCount: {
+    ...typography.textStyles.label,
+    color: colors.neutral[400],
+    textTransform: 'none',
   },
   infoCard: {
     gap: spacing.xs,
@@ -200,6 +228,7 @@ const styles = StyleSheet.create({
     ...typography.textStyles.body,
     color: lightTheme.text,
     fontFamily: typography.fontFamily.medium,
+    flexShrink: 1,
   },
   divider: {
     height: StyleSheet.hairlineWidth,

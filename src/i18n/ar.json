@@ -908,7 +908,14 @@
           "assignError": "فشل تعيين دور البرنامج",
           "removeConfirm": "إزالة دور {{role}} من {{program}}؟",
           "removeSuccess": "تمت إزالة دور البرنامج",
-          "removeError": "فشل إزالة دور البرنامج"
+          "removeError": "فشل إزالة دور البرنامج",
+          "changeRole": "تغيير الدور",
+          "changeRoleConfirm": "تغيير دور {{name}} إلى {{role}}؟",
+          "changeRoleSuccess": "تم تحديث الدور بنجاح",
+          "changeRoleError": "فشل تغيير الدور",
+          "currentRole": "الدور الحالي",
+          "programCount_one": "برنامج {{count}}",
+          "programCount_other": "{{count}} برامج"
         }
       },
       "reports": {

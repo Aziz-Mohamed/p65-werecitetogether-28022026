@@ -908,7 +908,14 @@
           "assignError": "Failed to assign program role",
           "removeConfirm": "Remove {{role}} role from {{program}}?",
           "removeSuccess": "Program role removed",
-          "removeError": "Failed to remove program role"
+          "removeError": "Failed to remove program role",
+          "changeRole": "Change Role",
+          "changeRoleConfirm": "Change {{name}}'s role to {{role}}?",
+          "changeRoleSuccess": "Role updated successfully",
+          "changeRoleError": "Failed to change role",
+          "currentRole": "Current Role",
+          "programCount_one": "{{count}} program",
+          "programCount_other": "{{count}} programs"
         }
       },
       "reports": {

@@ -43,5 +43,14 @@ export function useManageRoles() {
     },
   });
 
-  return { assignProgramRole, removeProgramRole, assignMasterAdmin, revokeMasterAdmin };
+  const changeRole = useMutation({
+    mutationFn: ({ userId, newRole }: { userId: string; newRole: string }) =>
+      adminService.changeUserRole(userId, newRole),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['user-detail'] });
+    },
+  });
+
+  return { assignProgramRole, removeProgramRole, assignMasterAdmin, revokeMasterAdmin, changeRole };
 }

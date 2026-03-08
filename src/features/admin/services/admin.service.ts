@@ -198,6 +198,13 @@ class AdminService {
     return supabase.rpc('revoke_master_admin_role', params);
   }
 
+  async changeUserRole(userId: string, newRole: string) {
+    return supabase.rpc('change_user_role', {
+      p_user_id: userId,
+      p_new_role: newRole,
+    } as any);
+  }
+
   async getPlatformConfig() {
     return supabase
       .from('platform_config')
