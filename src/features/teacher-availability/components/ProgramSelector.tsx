@@ -1,5 +1,5 @@
 import React, { forwardRef, useCallback, useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Switch } from 'react-native';
+import { StyleSheet, View, Text, Switch, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   BottomSheetModal,
@@ -38,16 +38,18 @@ export const ProgramSelector = forwardRef<BottomSheetModal, ProgramSelectorProps
     const toggle = useToggleAvailability();
 
     const [maxStudentsMap, setMaxStudentsMap] = useState<Record<string, number>>({});
+    const [localAvailability, setLocalAvailability] = useState<Record<string, boolean>>({});
 
-    // Sync max_students from props when programs data changes
+    // Sync from props when programs data changes
     useEffect(() => {
-      setMaxStudentsMap((prev) => {
-        const next: Record<string, number> = {};
-        for (const p of programs) {
-          next[p.program_id] = prev[p.program_id] ?? p.max_students;
-        }
-        return next;
-      });
+      const nextMax: Record<string, number> = {};
+      const nextAvail: Record<string, boolean> = {};
+      for (const p of programs) {
+        nextMax[p.program_id] = maxStudentsMap[p.program_id] ?? p.max_students;
+        nextAvail[p.program_id] = p.is_available;
+      }
+      setMaxStudentsMap(nextMax);
+      setLocalAvailability(nextAvail);
     }, [programs]);
 
     const renderBackdrop = useCallback(
@@ -58,11 +60,32 @@ export const ProgramSelector = forwardRef<BottomSheetModal, ProgramSelectorProps
     );
 
     const handleToggle = (programId: string, isAvailable: boolean) => {
-      toggle.mutate({
-        programId,
-        isAvailable,
-        maxStudents: maxStudentsMap[programId] ?? 1,
-      });
+      // Optimistic local update for immediate Switch feedback
+      setLocalAvailability((prev) => ({ ...prev, [programId]: isAvailable }));
+
+      toggle.mutate(
+        {
+          programId,
+          isAvailable,
+          maxStudents: maxStudentsMap[programId] ?? 1,
+        },
+        {
+          onError: (err) => {
+            // Revert on failure
+            setLocalAvailability((prev) => ({ ...prev, [programId]: !isAvailable }));
+            const msg = (err as Error).message ?? '';
+            if (msg.includes('AVAILABILITY_NO_MEETING_LINK') || msg.includes('meeting_link')) {
+              Alert.alert(t('availability.meetingLink'), t('availability.configureMeetingLink'));
+            } else if (msg.includes('http_request_queue') || msg.includes('app.settings')) {
+              // DB webhook config missing — toggle likely succeeded but notification trigger failed
+              // Refetch to check actual state
+              Alert.alert(t('common.error'), t('availability.connectionLost'));
+            } else {
+              Alert.alert(t('common.error'), msg);
+            }
+          },
+        },
+      );
     };
 
     return (
@@ -90,7 +113,7 @@ export const ProgramSelector = forwardRef<BottomSheetModal, ProgramSelectorProps
                   </Text>
                 </View>
                 <Switch
-                  value={program.is_available}
+                  value={localAvailability[program.program_id] ?? program.is_available}
                   onValueChange={(val) => handleToggle(program.program_id, val)}
                   trackColor={{ false: colors.neutral[200], true: colors.primary[500] }}
                   thumbColor={colors.white}
@@ -113,12 +136,26 @@ export const ProgramSelector = forwardRef<BottomSheetModal, ProgramSelectorProps
                       }
                       onPress={() => {
                         setMaxStudentsMap((prev) => ({ ...prev, [program.program_id]: n }));
-                        if (program.is_available) {
-                          toggle.mutate({
-                            programId: program.program_id,
-                            isAvailable: true,
-                            maxStudents: n,
-                          });
+                        if (localAvailability[program.program_id]) {
+                          toggle.mutate(
+                            {
+                              programId: program.program_id,
+                              isAvailable: true,
+                              maxStudents: n,
+                            },
+                            {
+                              onError: (err) => {
+                                const msg = (err as Error).message ?? '';
+                                const needsMeetingLink = msg.includes('meeting_link') || msg.includes('http_request_queue') || msg.includes('url');
+                                Alert.alert(
+                                  t('availability.meetingLink'),
+                                  needsMeetingLink
+                                    ? t('availability.configureMeetingLink')
+                                    : msg,
+                                );
+                              },
+                            },
+                          );
                         }
                       }}
                       style={styles.maxStudentsButton}

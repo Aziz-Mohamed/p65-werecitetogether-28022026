@@ -6,8 +6,11 @@ export function useToggleAvailability() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: ToggleAvailabilityInput) =>
-      availabilityService.toggleAvailability(input),
+    mutationFn: async (input: ToggleAvailabilityInput) => {
+      const { data, error } = await availabilityService.toggleAvailability(input);
+      if (error) throw error;
+      return data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-availability'] });
       queryClient.invalidateQueries({ queryKey: ['available-teachers'] });
