@@ -27,7 +27,7 @@ export function getPreviousDateRange(dateRange: DateRange): { start: string; end
   const currentEnd = new Date(dateRange.endDate);
   const durationMs = currentEnd.getTime() - currentStart.getTime();
 
-  const previousEnd = new Date(currentStart.getTime() - 1); // day before current start
+  const previousEnd = new Date(currentStart.getTime() - 86_400_000); // day before current start
   const previousStart = new Date(previousEnd.getTime() - durationMs);
 
   return {
@@ -37,9 +37,9 @@ export function getPreviousDateRange(dateRange: DateRange): { start: string; end
 }
 
 function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
