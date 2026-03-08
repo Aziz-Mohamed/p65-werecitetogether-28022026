@@ -59,6 +59,16 @@ class GamificationService {
   }
 
   /**
+   * GS-003a: Remove an awarded sticker (undo within grace period).
+   */
+  async removeSticker(studentStickerId: string) {
+    return supabase
+      .from('student_stickers')
+      .delete()
+      .eq('id', studentStickerId);
+  }
+
+  /**
    * GS-003b: Mark stickers as seen (clear is_new flag).
    */
   async markStickersAsSeen(studentStickerId: string) {
@@ -81,8 +91,6 @@ class GamificationService {
 
   /**
    * GS-004: Get class leaderboard ranked by current_level (rubʿ-based).
-   *
-   * @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5.
    */
   async getLeaderboard(classId: string) {
     return supabase

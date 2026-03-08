@@ -9,31 +9,31 @@ import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Button, Badge } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { useCohortEnrollments, useUpdateEnrollmentStatus } from '@/features/programs/hooks/useAdminEnrollments';
-import { useUpdateCohortStatus, useBulkApproveEnrollments } from '@/features/programs/hooks/useAdminCohorts';
-import { useCohorts } from '@/features/programs/hooks/useCohorts';
-import { getNextCohortStatus } from '@/features/programs/utils/enrollment-helpers';
+import { useClassEnrollments, useUpdateEnrollmentStatus } from '@/features/programs/hooks/useAdminEnrollments';
+import { useUpdateClassStatus, useBulkApproveEnrollments } from '@/features/programs/hooks/useAdminClasses';
+import { useProgramClasses } from '@/features/programs/hooks/useClasses';
+import { getNextClassStatus } from '@/features/programs/utils/enrollment-helpers';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
 
-export default function MasterAdminCohortDetailScreen() {
-  const { id, cohortId } = useLocalSearchParams<{ id: string; cohortId: string }>();
+export default function MasterAdminClassDetailScreen() {
+  const { id, classId } = useLocalSearchParams<{ id: string; classId: string }>();
   const { t } = useTranslation();
   const router = useRouter();
 
-  const { data: cohorts } = useCohorts({ programId: id! });
-  const cohort = cohorts?.find((c) => c.id === cohortId);
+  const { data: classes } = useProgramClasses({ programId: id! });
+  const programClass = classes?.find((c) => c.id === classId);
 
-  const { data: enrollments = [], isLoading, error, refetch } = useCohortEnrollments(cohortId);
-  const updateCohortStatus = useUpdateCohortStatus(id!);
+  const { data: enrollments = [], isLoading, error, refetch } = useClassEnrollments(classId);
+  const updateClassStatus = useUpdateClassStatus(id!);
   const updateEnrollment = useUpdateEnrollmentStatus();
   const bulkApprove = useBulkApproveEnrollments(id!);
 
   const handleStatusTransition = () => {
-    if (!cohort) return;
-    const next = getNextCohortStatus(cohort.status);
+    if (!programClass) return;
+    const next = getNextClassStatus(programClass.status);
     if (!next) return;
 
     const pendingCount = enrollments.filter((e: any) => e.status === 'pending').length;
@@ -43,7 +43,7 @@ export default function MasterAdminCohortDetailScreen() {
         : '';
 
     Alert.alert(
-      t(`programs.cohortStatus.${next}`),
+      t(`programs.classStatus.${next}`),
       confirmMsg,
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -51,16 +51,16 @@ export default function MasterAdminCohortDetailScreen() {
           text: t('common.confirm'),
           onPress: async () => {
             if (next === 'in_progress') {
-              await bulkApprove.mutateAsync(cohortId!);
+              await bulkApprove.mutateAsync(classId!);
             }
-            updateCohortStatus.mutate({ cohortId: cohortId!, status: next });
+            updateClassStatus.mutate({ classId: classId!, status: next });
           },
         },
       ],
     );
   };
 
-  const nextStatus = cohort ? getNextCohortStatus(cohort.status) : null;
+  const nextStatus = programClass ? getNextClassStatus(programClass.status) : null;
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState onRetry={refetch} />;
@@ -68,28 +68,28 @@ export default function MasterAdminCohortDetailScreen() {
   return (
     <Screen scroll={false}>
       <View style={styles.container}>
-        <PageHeader title={cohort?.name ?? '—'} />
+        <PageHeader title={programClass?.name ?? '—'} />
 
-        {cohort && (
+        {programClass && (
           <View style={styles.statusRow}>
             <Text style={styles.statusText}>
-              {t(`programs.cohortStatus.${cohort.status}`)}
+              {t(`programs.classStatus.${programClass.status}`)}
             </Text>
-            {cohort.profiles?.full_name && (
+            {programClass.profiles?.full_name && (
               <>
                 <View style={styles.dot} />
                 <Ionicons name="person-outline" size={normalize(13)} color={colors.neutral[400]} />
-                <Text style={styles.metaText}>{cohort.profiles.full_name}</Text>
+                <Text style={styles.metaText}>{programClass.profiles.full_name}</Text>
               </>
             )}
             <View style={{ flex: 1 }} />
             {nextStatus && (
               <Button
-                title={t(`programs.cohortAction.${nextStatus}`)}
+                title={t(`programs.classAction.${nextStatus}`)}
                 onPress={handleStatusTransition}
                 variant="ghost"
                 size="sm"
-                loading={updateCohortStatus.isPending || bulkApprove.isPending}
+                loading={updateClassStatus.isPending || bulkApprove.isPending}
               />
             )}
           </View>

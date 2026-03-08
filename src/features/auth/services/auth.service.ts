@@ -3,8 +3,6 @@ import type { Session } from '@supabase/supabase-js';
 import type {
   UpdateRoleInput,
   UpdateRoleResponse,
-  CreateMemberInput,
-  CreateMemberResponse,
   AuthResult,
   Profile,
 } from '../types/auth.types';
@@ -84,31 +82,6 @@ class AuthService {
         },
       };
     }
-  }
-
-  /**
-   * @deprecated Member creation via password is removed (FR-022).
-   * Existing admin screens still reference this method — returns an error.
-   */
-  async createMember(_input: CreateMemberInput): Promise<AuthResult<CreateMemberResponse>> {
-    return {
-      error: {
-        message: 'Password-based member creation has been removed. Use OAuth sign-up instead.',
-        code: 'DEPRECATED',
-      },
-    };
-  }
-
-  /**
-   * @deprecated Password reset is removed (FR-022).
-   */
-  async resetMemberPassword(_input: { userId: string; newPassword: string }): Promise<AuthResult> {
-    return {
-      error: {
-        message: 'Password reset has been removed. Users sign in via OAuth.',
-        code: 'DEPRECATED',
-      },
-    };
   }
 
   /**

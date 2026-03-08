@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, I18nManager, Pressable, SectionList, View, Text } from 'react-native';
+import { Alert, I18nManager, Pressable, RefreshControl, SectionList, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -382,6 +382,7 @@ export default function RevisionHealthScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContent}
             stickySectionHeadersEnabled={false}
+            refreshControl={<RefreshControl refreshing={false} onRefresh={health.refetch} />}
             ListHeaderComponent={
               <>
                 {/* Health Summary Card */}

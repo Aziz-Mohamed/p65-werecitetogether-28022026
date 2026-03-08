@@ -6,7 +6,8 @@ export type TrackType = 'free' | 'structured';
 
 export type EnrollmentStatus = 'pending' | 'active' | 'completed' | 'dropped' | 'waitlisted';
 
-export type CohortStatus =
+export type ClassStatus =
+  | 'active'
   | 'enrollment_open'
   | 'enrollment_closed'
   | 'in_progress'
@@ -34,7 +35,7 @@ export interface TrackCurriculum {
   reference_text_ar?: string;
 }
 
-export interface CohortScheduleEntry {
+export interface ClassScheduleEntry {
   day: number;   // 0=Sunday … 6=Saturday
   start: string; // "HH:mm"
   end: string;   // "HH:mm"
@@ -71,29 +72,12 @@ export interface ProgramTrack {
   updated_at: string;
 }
 
-export interface Cohort {
-  id: string;
-  program_id: string;
-  track_id: string | null;
-  name: string;
-  status: CohortStatus;
-  max_students: number;
-  teacher_id: string;
-  supervisor_id: string | null;
-  meeting_link: string | null;
-  schedule: CohortScheduleEntry[] | null;
-  start_date: string | null;
-  end_date: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface Enrollment {
   id: string;
   student_id: string;
   program_id: string;
   track_id: string | null;
-  cohort_id: string | null;
+  class_id: string | null;
   teacher_id: string | null;
   status: EnrollmentStatus;
   enrolled_at: string;
@@ -117,7 +101,23 @@ export interface ProgramWithTracks extends Program {
   program_tracks: ProgramTrack[];
 }
 
-export interface CohortWithTeacher extends Cohort {
+export interface ProgramClassWithTeacher {
+  id: string;
+  program_id: string;
+  track_id: string | null;
+  name: string;
+  status: ClassStatus;
+  max_students: number;
+  teacher_id: string;
+  supervisor_id: string | null;
+  meeting_link: string | null;
+  schedule: ClassScheduleEntry[] | null;
+  start_date: string | null;
+  end_date: string | null;
+  is_active: boolean;
+  school_id: string;
+  created_at: string;
+  updated_at: string;
   profiles: {
     id: string;
     full_name: string;
@@ -129,10 +129,10 @@ export interface CohortWithTeacher extends Cohort {
 export interface EnrollmentWithDetails extends Enrollment {
   programs: Pick<Program, 'id' | 'name' | 'name_ar' | 'category'> | null;
   program_tracks: Pick<ProgramTrack, 'id' | 'name' | 'name_ar'> | null;
-  cohorts: {
+  classes: {
     id: string;
     name: string;
-    status: CohortStatus;
+    status: ClassStatus;
     teacher_id: string;
     profiles: { full_name: string } | null;
   } | null;
@@ -148,7 +148,7 @@ export interface ProgramRoleWithProfile extends ProgramRole {
 
 // ─── Input / Filter Types ────────────────────────────────────────────────────
 
-export interface CohortFilters {
+export interface ProgramClassFilters {
   programId: string;
   trackId?: string;
 }
@@ -156,10 +156,11 @@ export interface CohortFilters {
 export interface EnrollInput {
   programId: string;
   trackId?: string;
-  cohortId?: string;
+  classId?: string;
 }
 
-export interface CreateCohortInput {
+export interface CreateProgramClassInput {
+  schoolId: string;
   programId: string;
   trackId?: string;
   name: string;
@@ -167,7 +168,7 @@ export interface CreateCohortInput {
   teacherId: string;
   supervisorId?: string;
   meetingLink?: string;
-  schedule?: CohortScheduleEntry[];
+  schedule?: ClassScheduleEntry[];
   startDate?: string;
   endDate?: string;
 }
@@ -207,7 +208,7 @@ export interface WaitlistEntry {
   id: string;
   student_id: string;
   program_id: string;
-  cohort_id: string;
+  class_id: string;
   track_id: string | null;
   position: number;
   status: WaitlistStatus;

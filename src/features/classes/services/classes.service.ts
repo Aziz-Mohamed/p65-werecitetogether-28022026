@@ -59,8 +59,6 @@ class ClassesService {
   /**
    * CM-004: Assign a student to a class.
    * Updates the student's class_id foreign key.
-   *
-   * @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5.
    */
   async assignStudentToClass(studentId: string, classId: string) {
     return supabase
@@ -72,8 +70,6 @@ class ClassesService {
   /**
    * CM-005: Remove a student from their class.
    * Sets the student's class_id to null.
-   *
-   * @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5.
    */
   async removeStudentFromClass(studentId: string) {
     return supabase

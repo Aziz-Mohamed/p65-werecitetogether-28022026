@@ -27,7 +27,7 @@ export interface SupervisedTeacher {
 
 export interface ProgramAdminDashboardStats {
   total_enrolled: number;
-  active_cohorts: number;
+  active_classes: number;
   total_teachers: number;
   sessions_this_week: number;
   pending_enrollments: number;
@@ -62,7 +62,7 @@ export interface MasterAdminProgramEnriched {
   updated_at: string;
   enrolled_count: number;
   team_count: number;
-  active_cohort_count: number;
+  active_class_count: number;
   track_count: number;
   session_count_7d: number;
 }

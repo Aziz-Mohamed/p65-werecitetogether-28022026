@@ -20,11 +20,7 @@ export interface StudentWithProfile extends Student {
   class: Tables<'classes'> | null;
 }
 
-/**
- * Filters for querying students
- *
- * @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5.
- */
+/** Filters for querying students */
 export interface StudentFilters {
   classId?: string;
   isActive?: boolean;
@@ -34,11 +30,7 @@ export interface StudentFilters {
   pageSize?: number;
 }
 
-/**
- * Input for creating a new student (profile + student record)
- *
- * @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5.
- */
+/** Input for creating a new student (profile + student record) */
 export interface CreateStudentInput {
   full_name: string;
   email: string;
@@ -49,11 +41,7 @@ export interface CreateStudentInput {
   preferred_language?: string;
 }
 
-/**
- * Input for updating an existing student record
- *
- * @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5.
- */
+/** Input for updating an existing student record */
 export interface UpdateStudentInput {
   classId?: string | null;
   isActive?: boolean;

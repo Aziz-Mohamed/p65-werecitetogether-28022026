@@ -9,10 +9,10 @@ import { Screen } from '@/components/layout/Screen';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { ProgramDetailHeader } from '@/features/programs/components/ProgramDetailHeader';
 import { TrackList } from '@/features/programs/components/TrackList';
-import { CohortCard } from '@/features/programs/components/CohortCard';
+import { ProgramClassCard } from '@/features/programs/components/ProgramClassCard';
 import { EnrollmentStatusBadge } from '@/features/programs/components/EnrollmentStatusBadge';
 import { useProgram } from '@/features/programs/hooks/useProgram';
-import { useCohorts } from '@/features/programs/hooks/useCohorts';
+import { useProgramClasses } from '@/features/programs/hooks/useClasses';
 import { useEnroll, useJoinFreeProgram } from '@/features/programs/hooks/useEnroll';
 import { useEnrollments } from '@/features/programs/hooks/useEnrollments';
 import { useLeaveProgram } from '@/features/programs/hooks/useLeaveProgram';
@@ -27,7 +27,7 @@ import { spacing } from '@/theme/spacing';
 import { lightTheme } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { normalize } from '@/theme/normalize';
-import type { CohortWithTeacher, ProgramTrack } from '@/features/programs/types/programs.types';
+import type { ProgramClassWithTeacher, ProgramTrack } from '@/features/programs/types/programs.types';
 
 export default function ProgramDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -38,7 +38,7 @@ export default function ProgramDetailScreen() {
   const userId = session?.user?.id;
 
   const { data: program, isLoading, error, refetch } = useProgram(id);
-  const { data: cohorts } = useCohorts({ programId: id! });
+  const { data: programClasses } = useProgramClasses({ programId: id! });
   const { data: enrollments } = useEnrollments(userId);
   const enroll = useEnroll(id!);
   const joinFree = useJoinFreeProgram(id!);
@@ -70,7 +70,7 @@ export default function ProgramDetailScreen() {
         (e.status === 'active' || e.status === 'pending' || e.status === 'waitlisted'),
     );
 
-  const handleEnroll = (cohortId: string, trackId: string | null) => {
+  const handleEnroll = (classId: string, trackId: string | null) => {
     Alert.alert(
       t('programs.confirm.enroll'),
       t('programs.confirm.enrollBody'),
@@ -80,7 +80,7 @@ export default function ProgramDetailScreen() {
           text: t('programs.actions.enroll'),
           onPress: () =>
             enroll.mutate(
-              { programId: id!, trackId: trackId ?? undefined, cohortId },
+              { programId: id!, trackId: trackId ?? undefined, classId },
               {
                 onError: (err: { message?: string }) => {
                   const key = getEnrollErrorKey(err.message);
@@ -143,8 +143,8 @@ export default function ProgramDetailScreen() {
     return false;
   };
 
-  const cohortsForTrack = (trackId: string) =>
-    cohorts?.filter((c) => c.track_id === trackId) ?? [];
+  const classesForTrack = (trackId: string) =>
+    programClasses?.filter((c) => c.track_id === trackId) ?? [];
 
   return (
     <Screen>
@@ -244,11 +244,11 @@ export default function ProgramDetailScreen() {
           </View>
         )}
 
-        {/* Tracks with cohort/join actions */}
+        {/* Tracks with class/join actions */}
         {program.program_tracks.map((track) => {
           const enrolled = isEnrolledInTrack(track.id);
           const trackEnrollment = getTrackEnrollment(track.id);
-          const trackCohorts = cohortsForTrack(track.id);
+          const trackClasses = classesForTrack(track.id);
           const isFree = isFreeProgramOrTrack(track);
 
           return (
@@ -269,9 +269,9 @@ export default function ProgramDetailScreen() {
               )}
 
               {enrolled && trackEnrollment ? (
-                trackEnrollment.status === 'waitlisted' && trackEnrollment.cohort_id ? (
+                trackEnrollment.status === 'waitlisted' && trackEnrollment.class_id ? (
                   <WaitlistPositionCard
-                    cohortId={trackEnrollment.cohort_id}
+                    classId={trackEnrollment.class_id}
                     userId={userId}
                     enrollmentId={trackEnrollment.id}
                     onLeave={() => handleLeave(trackEnrollment.id)}
@@ -293,18 +293,18 @@ export default function ProgramDetailScreen() {
                   loading={joinFree.isPending}
                   variant="default"
                 />
-              ) : trackCohorts.length > 0 ? (
-                trackCohorts.map((cohort: CohortWithTeacher) => (
-                  <CohortCard
-                    key={cohort.id}
-                    cohort={cohort}
-                    onEnroll={() => handleEnroll(cohort.id, track.id)}
+              ) : trackClasses.length > 0 ? (
+                trackClasses.map((pc: ProgramClassWithTeacher) => (
+                  <ProgramClassCard
+                    key={pc.id}
+                    programClass={pc}
+                    onEnroll={() => handleEnroll(pc.id, track.id)}
                     disabled={enroll.isPending}
                   />
                 ))
               ) : (
-                <Text style={styles.noCohorts}>
-                  {t('programs.labels.noCohorts')}
+                <Text style={styles.noClasses}>
+                  {t('programs.labels.noClasses')}
                 </Text>
               )}
             </View>
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
   },
-  noCohorts: {
+  noClasses: {
     ...typography.textStyles.caption,
     color: lightTheme.textTertiary,
     fontStyle: 'italic',

@@ -3,7 +3,6 @@ import type { ScheduleSessionInput, ScheduleFilters, SessionStatus } from '../ty
 
 class ScheduledSessionService {
   /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * Get scheduled sessions with filters.
    */
@@ -43,7 +42,6 @@ class ScheduledSessionService {
   }
 
   /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * Get upcoming sessions for a teacher.
    */
@@ -68,7 +66,6 @@ class ScheduledSessionService {
   }
 
   /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * Get upcoming sessions for a student (via class membership or individual).
    */
@@ -101,7 +98,6 @@ class ScheduledSessionService {
   }
 
   /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * Get completed/cancelled/missed sessions for a teacher (history).
    */
@@ -125,7 +121,6 @@ class ScheduledSessionService {
   }
 
   /** @deprecated school_id is deprecated. New features MUST use program_id instead. See PRD Section 0.5. */
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * Create a scheduled session (manual/individual).
    */
@@ -179,7 +174,6 @@ class ScheduledSessionService {
     return this.updateStatus(sessionId, 'cancelled');
   }
 
-  /** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
   /**
    * Fetch the full completion summary for a scheduled session:
    * attendance records + evaluation sessions with nested recitations.

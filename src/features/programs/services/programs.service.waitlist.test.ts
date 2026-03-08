@@ -9,12 +9,12 @@ beforeEach(() => {
 });
 
 describe('programsService – waitlist', () => {
-  describe('getCohortWaitlist', () => {
+  describe('getClassWaitlist', () => {
     it('queries program_waitlist table', async () => {
       const builder = createQueryMock({ data: [], error: null });
       mockSupabase.from.mockReturnValue(builder);
 
-      await programsService.getCohortWaitlist('cohort-1');
+      await programsService.getClassWaitlist('class-1');
 
       expect(mockSupabase.from).toHaveBeenCalledWith('program_waitlist');
     });
@@ -23,20 +23,20 @@ describe('programsService – waitlist', () => {
       const builder = createQueryMock({ data: [], error: null });
       mockSupabase.from.mockReturnValue(builder);
 
-      await programsService.getCohortWaitlist('cohort-1');
+      await programsService.getClassWaitlist('class-1');
 
       expect(builder.select).toHaveBeenCalledWith(
         expect.stringContaining('profiles!program_waitlist_student_id_fkey'),
       );
     });
 
-    it('filters by cohort_id and active statuses', async () => {
+    it('filters by class_id and active statuses', async () => {
       const builder = createQueryMock({ data: [], error: null });
       mockSupabase.from.mockReturnValue(builder);
 
-      await programsService.getCohortWaitlist('cohort-1');
+      await programsService.getClassWaitlist('class-1');
 
-      expect(builder.eq).toHaveBeenCalledWith('cohort_id', 'cohort-1');
+      expect(builder.eq).toHaveBeenCalledWith('class_id', 'class-1');
       expect(builder.in).toHaveBeenCalledWith('status', ['waiting', 'offered']);
     });
 
@@ -44,7 +44,7 @@ describe('programsService – waitlist', () => {
       const builder = createQueryMock({ data: [], error: null });
       mockSupabase.from.mockReturnValue(builder);
 
-      await programsService.getCohortWaitlist('cohort-1');
+      await programsService.getClassWaitlist('class-1');
 
       expect(builder.order).toHaveBeenCalledWith('position', { ascending: true });
     });
@@ -55,18 +55,18 @@ describe('programsService – waitlist', () => {
       const builder = createQueryMock({ data: null, error: null });
       mockSupabase.from.mockReturnValue(builder);
 
-      await programsService.getMyWaitlistEntry('cohort-1', 'user-1');
+      await programsService.getMyWaitlistEntry('class-1', 'user-1');
 
       expect(mockSupabase.from).toHaveBeenCalledWith('program_waitlist');
     });
 
-    it('filters by cohort_id and student_id', async () => {
+    it('filters by class_id and student_id', async () => {
       const builder = createQueryMock({ data: null, error: null });
       mockSupabase.from.mockReturnValue(builder);
 
-      await programsService.getMyWaitlistEntry('cohort-1', 'user-1');
+      await programsService.getMyWaitlistEntry('class-1', 'user-1');
 
-      expect(builder.eq).toHaveBeenCalledWith('cohort_id', 'cohort-1');
+      expect(builder.eq).toHaveBeenCalledWith('class_id', 'class-1');
       expect(builder.eq).toHaveBeenCalledWith('student_id', 'user-1');
     });
 
@@ -74,7 +74,7 @@ describe('programsService – waitlist', () => {
       const builder = createQueryMock({ data: null, error: null });
       mockSupabase.from.mockReturnValue(builder);
 
-      await programsService.getMyWaitlistEntry('cohort-1', 'user-1');
+      await programsService.getMyWaitlistEntry('class-1', 'user-1');
 
       expect(builder.in).toHaveBeenCalledWith('status', ['waiting', 'offered']);
     });
@@ -83,7 +83,7 @@ describe('programsService – waitlist', () => {
       const builder = createQueryMock({ data: null, error: null });
       mockSupabase.from.mockReturnValue(builder);
 
-      await programsService.getMyWaitlistEntry('cohort-1', 'user-1');
+      await programsService.getMyWaitlistEntry('class-1', 'user-1');
 
       expect(builder.maybeSingle).toHaveBeenCalled();
     });
@@ -129,13 +129,13 @@ describe('programsService – waitlist', () => {
   });
 
   describe('promoteFromWaitlist', () => {
-    it('calls promote_from_waitlist RPC with cohort id', async () => {
+    it('calls promote_from_waitlist RPC with class id', async () => {
       mockSupabase.rpc.mockResolvedValue({ data: null, error: null });
 
-      await programsService.promoteFromWaitlist('cohort-1');
+      await programsService.promoteFromWaitlist('class-1');
 
       expect(mockSupabase.rpc).toHaveBeenCalledWith('promote_from_waitlist', {
-        p_cohort_id: 'cohort-1',
+        p_class_id: 'class-1',
       });
     });
   });

@@ -6,8 +6,6 @@ class StudentsService {
    * SM-001: Get a paginated, filtered list of students.
    * Joins profile data, class, and level information.
    * Uses !inner join on profiles so the search filter on full_name works.
-   *
-   * @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5.
    */
   async getStudents(filters?: StudentFilters) {
     let query = supabase
@@ -61,8 +59,6 @@ class StudentsService {
    * SM-003: Update an existing student record.
    * Maps camelCase input fields to snake_case database columns.
    * Only includes fields that are explicitly provided (not undefined).
-   *
-   * @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5.
    */
   async updateStudent(id: string, input: UpdateStudentInput) {
     const updates: Record<string, unknown> = {};

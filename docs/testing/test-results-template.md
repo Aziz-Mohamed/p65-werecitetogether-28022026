@@ -13,8 +13,6 @@
 | Critical Paths | | | | | |
 | Student | | | | | |
 | Teacher | | | | | |
-| Parent | | | | | |
-| Admin | | | | | |
 | Supervisor | | | | | |
 | Program Admin | | | | | |
 | Master Admin | | | | | |

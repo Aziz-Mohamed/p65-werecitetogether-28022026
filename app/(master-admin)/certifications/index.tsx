@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Screen, PageHeader } from '@/components/layout';
 import { ErrorState } from '@/components/feedback/ErrorState';
-import { FilterChips } from '@/components/lists/FilterChips';
+import { FilterDropdownBar, type FilterGroup } from '@/components/lists/FilterDropdownBar';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -32,46 +32,48 @@ export default function MasterAdminCertificationsScreen() {
   const programs = usePrograms();
   const certs = useAllCertifications(filters);
 
-  const programChips = useMemo(() => [
-    { label: t('certifications.masterAdmin.allPrograms'), value: 'all' },
-    ...(programs.data ?? []).map((p) => ({
-      label: (p as { name: string }).name,
-      value: (p as { id: string }).id,
-    })),
-  ], [programs.data, t]);
-
-  const typeChips = useMemo(() => [
-    { label: t('certifications.masterAdmin.allTypes'), value: 'all' },
-    ...TYPES.map((type) => ({ label: t(`certifications.types.${type}`), value: type })),
-  ], [t]);
-
-  const statusChips = useMemo(() => [
-    { label: t('certifications.masterAdmin.allStatuses'), value: 'all' },
-    ...STATUSES.map((s) => ({ label: t(`certifications.statuses.${s}`), value: s })),
-  ], [t]);
+  const filterGroups: FilterGroup[] = useMemo(() => [
+    {
+      key: 'program',
+      label: t('certifications.masterAdmin.filterProgram'),
+      options: [
+        { label: t('certifications.masterAdmin.allPrograms'), value: 'all' },
+        ...(programs.data ?? []).map((p) => ({
+          label: (p as { name: string }).name,
+          value: (p as { id: string }).id,
+        })),
+      ],
+      selected: filters.programId ?? 'all',
+      onSelect: (v) => setFilters((prev) => ({ ...prev, programId: v === 'all' ? undefined : v })),
+    },
+    {
+      key: 'type',
+      label: t('certifications.masterAdmin.filterType'),
+      options: [
+        { label: t('certifications.masterAdmin.allTypes'), value: 'all' },
+        ...TYPES.map((type) => ({ label: t(`certifications.types.${type}`), value: type })),
+      ],
+      selected: filters.type ?? 'all',
+      onSelect: (v) => setFilters((prev) => ({ ...prev, type: v === 'all' ? undefined : v as CertificationType })),
+    },
+    {
+      key: 'status',
+      label: t('certifications.masterAdmin.filterStatus'),
+      options: [
+        { label: t('certifications.masterAdmin.allStatuses'), value: 'all' },
+        ...STATUSES.map((s) => ({ label: t(`certifications.statuses.${s}`), value: s })),
+      ],
+      selected: filters.status ?? 'all',
+      onSelect: (v) => setFilters((prev) => ({ ...prev, status: v === 'all' ? undefined : v as CertificationStatus })),
+    },
+  ], [programs.data, filters, t]);
 
   return (
     <Screen>
       <View style={styles.container}>
         <PageHeader title={t('certifications.masterAdmin.title')} />
 
-        <View style={styles.filterSection}>
-          <FilterChips
-            chips={programChips}
-            selected={filters.programId ?? 'all'}
-            onSelect={(v) => setFilters((prev) => ({ ...prev, programId: v === 'all' ? undefined : v }))}
-          />
-          <FilterChips
-            chips={typeChips}
-            selected={filters.type ?? 'all'}
-            onSelect={(v) => setFilters((prev) => ({ ...prev, type: v === 'all' ? undefined : v as CertificationType }))}
-          />
-          <FilterChips
-            chips={statusChips}
-            selected={filters.status ?? 'all'}
-            onSelect={(v) => setFilters((prev) => ({ ...prev, status: v === 'all' ? undefined : v as CertificationStatus }))}
-          />
-        </View>
+        <FilterDropdownBar filters={filterGroups} />
 
         <FlashList
           data={certs.data ?? []}
@@ -125,9 +127,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: spacing.xl,
-  },
-  filterSection: {
-    marginBottom: spacing.sm,
   },
   listContent: {
     paddingHorizontal: spacing.base,

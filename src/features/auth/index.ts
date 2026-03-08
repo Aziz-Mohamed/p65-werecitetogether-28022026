@@ -12,8 +12,6 @@ export type {
   AuthError,
   AuthResult,
   Profile,
-  CreateMemberInput,
-  CreateMemberResponse,
 } from './types/auth.types';
 
 // Hooks

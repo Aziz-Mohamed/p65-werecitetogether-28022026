@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +11,7 @@ import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { radius } from '@/theme/radius';
 import { typography } from '@/theme/typography';
+import { normalize } from '@/theme/normalize';
 import { useManageRoles } from '../hooks/useManageRoles';
 import { useAllPrograms } from '@/features/programs/hooks/useAdminPrograms';
 import type { AdminUser } from '../types/admin.types';
@@ -22,6 +24,19 @@ interface RoleAssignmentSheetProps {
 }
 
 const PROGRAM_ROLES: ProgramRoleType[] = ['program_admin', 'supervisor', 'teacher'];
+const GLOBAL_ROLES = ['student', 'teacher', 'supervisor', 'program_admin', 'master_admin'] as const;
+
+type BadgeVariant = 'info' | 'violet' | 'indigo' | 'rose' | 'default';
+
+function getRoleBadgeVariant(role: string): BadgeVariant {
+  switch (role) {
+    case 'teacher': return 'info';
+    case 'supervisor': return 'violet';
+    case 'program_admin': return 'indigo';
+    case 'master_admin': return 'rose';
+    default: return 'default';
+  }
+}
 
 export function RoleAssignmentSheet({ isOpen, onClose, user }: RoleAssignmentSheetProps) {
   const { t } = useTranslation();
@@ -35,64 +50,38 @@ export function RoleAssignmentSheet({ isOpen, onClose, user }: RoleAssignmentShe
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<ProgramRoleType>('teacher');
 
-  // ─── Master Admin Promote / Demote ──────────────────────────────────────────
+  // ─── Change Global Role ───────────────────────────────────────────────────
 
-  const handlePromote = () => {
+  const handleChangeRole = (newRole: string) => {
+    if (newRole === user.role) return;
+
+    const roleLabel = t(`roles.${newRole}` as any);
     Alert.alert(
-      t('admin.masterAdmin.users.roles.promoteConfirm', { name: user.full_name }),
+      t('admin.masterAdmin.users.roles.changeRoleConfirm', { name: user.full_name, role: roleLabel }),
       undefined,
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('common.confirm'),
+          style: newRole === 'master_admin' ? 'default' : (GLOBAL_ROLES.indexOf(newRole as any) < GLOBAL_ROLES.indexOf(user.role as any) ? 'destructive' : 'default'),
           onPress: () => {
-            roles.assignMasterAdmin.mutate(
-              { userId: user.id, assignedBy: session?.user?.id ?? '' },
+            roles.changeRole.mutate(
+              { userId: user.id, newRole },
               {
                 onSuccess: () => {
-                  Alert.alert(t('common.success'), t('admin.masterAdmin.users.roles.promoteSuccess'));
+                  Alert.alert(t('common.success'), t('admin.masterAdmin.users.roles.changeRoleSuccess'));
                   onClose();
                 },
                 onError: (err) => {
                   const msg = (err as { message?: string })?.message ?? '';
-                  if (msg.includes('already')) {
-                    Alert.alert(t('common.error'), t('admin.masterAdmin.users.roles.alreadyAdmin'));
+                  if (msg.includes('last')) {
+                    Alert.alert(t('common.error'), t('admin.masterAdmin.users.roles.lastAdminError'));
                   } else {
-                    Alert.alert(t('common.error'), t('admin.masterAdmin.users.roles.promoteError'));
+                    Alert.alert(t('common.error'), t('admin.masterAdmin.users.roles.changeRoleError'));
                   }
                 },
               },
             );
-          },
-        },
-      ],
-    );
-  };
-
-  const handleDemote = () => {
-    Alert.alert(
-      t('admin.masterAdmin.users.roles.demoteConfirm', { name: user.full_name }),
-      undefined,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.confirm'),
-          style: 'destructive',
-          onPress: () => {
-            roles.revokeMasterAdmin.mutate(user.id, {
-              onSuccess: () => {
-                Alert.alert(t('common.success'), t('admin.masterAdmin.users.roles.demoteSuccess'));
-                onClose();
-              },
-              onError: (err) => {
-                const msg = (err as { message?: string })?.message ?? '';
-                if (msg.includes('last')) {
-                  Alert.alert(t('common.error'), t('admin.masterAdmin.users.roles.lastAdminError'));
-                } else {
-                  Alert.alert(t('common.error'), t('admin.masterAdmin.users.roles.demoteError'));
-                }
-              },
-            });
           },
         },
       ],
@@ -165,23 +154,45 @@ export function RoleAssignmentSheet({ isOpen, onClose, user }: RoleAssignmentShe
 
         {/* ── Global Role ── */}
         <Text style={styles.sectionLabel}>{t('admin.masterAdmin.users.detail.globalRole')}</Text>
-        <Badge label={user.role} variant="info" />
+        <View style={styles.globalRoleGrid}>
+          {GLOBAL_ROLES.map((role) => {
+            const isActive = user.role === role;
+            return (
+              <Pressable
+                key={role}
+                style={[styles.roleChip, isActive && styles.roleChipActive]}
+                onPress={() => handleChangeRole(role)}
+                disabled={roles.changeRole.isPending}
+              >
+                <Text style={[styles.roleChipText, isActive && styles.roleChipTextActive]}>
+                  {t(`roles.${role}` as any)}
+                </Text>
+                {isActive && (
+                  <Ionicons name="checkmark-circle" size={14} color={colors.primary[600]} />
+                )}
+              </Pressable>
+            );
+          })}
+        </View>
 
         {/* ── Existing Program Roles ── */}
         <Text style={styles.sectionLabel}>{t('admin.masterAdmin.users.detail.programRoles')}</Text>
         {user.program_roles_data.length > 0 ? (
-          user.program_roles_data.map((pr, i) => (
-            <View key={i} style={styles.roleRow}>
-              <Text style={styles.roleProgram}>{pr.program_name}</Text>
-              <Badge label={pr.role.replace('_', ' ')} variant="default" size="sm" />
-              <Pressable
-                onPress={() => handleRemoveProgramRole(pr.role_id, pr.program_name, pr.role)}
-                hitSlop={8}
-              >
-                <Text style={styles.removeText}>{t('common.remove')}</Text>
-              </Pressable>
-            </View>
-          ))
+          <View style={styles.programRolesList}>
+            {user.program_roles_data.map((pr, i) => (
+              <View key={i} style={styles.roleRow}>
+                <Text style={styles.roleProgram} numberOfLines={1}>{pr.program_name}</Text>
+                <Badge label={pr.role.replace('_', ' ')} variant={getRoleBadgeVariant(pr.role)} size="sm" />
+                <Pressable
+                  onPress={() => handleRemoveProgramRole(pr.role_id, pr.program_name, pr.role)}
+                  hitSlop={8}
+                  style={styles.removeButton}
+                >
+                  <Ionicons name="close-circle" size={18} color={lightTheme.error} />
+                </Pressable>
+              </View>
+            ))}
+          </View>
         ) : (
           <Text style={styles.noRoles}>{t('admin.masterAdmin.users.detail.noRoles')}</Text>
         )}
@@ -192,6 +203,8 @@ export function RoleAssignmentSheet({ isOpen, onClose, user }: RoleAssignmentShe
             title={t('admin.masterAdmin.users.roles.assignProgram')}
             onPress={() => setIsAssigning(true)}
             variant="secondary"
+            size="sm"
+            icon={<Ionicons name="add-circle-outline" size={16} color={colors.secondary[700]} />}
             style={styles.assignButton}
           />
         ) : (
@@ -245,24 +258,6 @@ export function RoleAssignmentSheet({ isOpen, onClose, user }: RoleAssignmentShe
             </View>
           </View>
         )}
-
-        {/* ── Master Admin Promote / Demote ── */}
-        <View style={styles.masterAdminSection}>
-          {user.role !== 'master_admin' ? (
-            <Button
-              title={t('admin.masterAdmin.users.roles.promoteMasterAdmin')}
-              onPress={handlePromote}
-              loading={roles.assignMasterAdmin.isPending}
-            />
-          ) : (
-            <Button
-              title={t('admin.masterAdmin.users.roles.demoteMasterAdmin')}
-              onPress={handleDemote}
-              variant="danger"
-              loading={roles.revokeMasterAdmin.isPending}
-            />
-          )}
-        </View>
       </BottomSheetScrollView>
     </BottomSheet>
   );
@@ -290,6 +285,38 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     textTransform: 'uppercase',
   },
+  globalRoleGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  roleChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: normalize(4),
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: lightTheme.border,
+    backgroundColor: lightTheme.surface,
+  },
+  roleChipActive: {
+    backgroundColor: colors.primary[50],
+    borderColor: colors.primary[500],
+  },
+  roleChipText: {
+    ...typography.textStyles.caption,
+    color: lightTheme.textSecondary,
+    fontFamily: typography.fontFamily.medium,
+    textTransform: 'capitalize',
+  },
+  roleChipTextActive: {
+    color: colors.primary[700],
+  },
+  programRolesList: {
+    gap: spacing.xs,
+  },
   roleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -303,9 +330,8 @@ const styles = StyleSheet.create({
     color: lightTheme.text,
     flex: 1,
   },
-  removeText: {
-    ...typography.textStyles.caption,
-    color: lightTheme.error,
+  removeButton: {
+    padding: spacing.xs,
   },
   noRoles: {
     ...typography.textStyles.body,
@@ -313,6 +339,7 @@ const styles = StyleSheet.create({
   },
   assignButton: {
     marginTop: spacing.base,
+    alignSelf: 'flex-start',
   },
   assignSection: {
     marginTop: spacing.base,
@@ -360,9 +387,5 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     gap: spacing.sm,
     marginTop: spacing.sm,
-  },
-  masterAdminSection: {
-    marginTop: spacing.xl,
-    gap: spacing.sm,
   },
 });

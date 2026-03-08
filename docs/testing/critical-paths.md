@@ -14,13 +14,11 @@ Verifies each role lands on the correct dashboard after login.
 |------|--------|----------|
 | 1 | Log in as **student** | Lands on `/(student)/` with 6 tabs: Dashboard, Programs, Memorization, Revision, Journey, Profile |
 | 2 | Log out, log in as **teacher** | Lands on `/(teacher)/` with 5 tabs: Dashboard, Students, Sessions, Class Progress, Profile |
-| 3 | Log out, log in as **parent** | Lands on `/(parent)/` with 3 tabs: Dashboard, Children, Settings |
-| 4 | Log out, log in as **admin** | Lands on `/(admin)/` scroll dashboard with nav cards |
-| 5 | Log out, log in as **supervisor** | Lands on `/(supervisor)/` with 4 tabs: Home, Teachers, Reports, Profile |
-| 6 | Log out, log in as **program_admin** | Lands on `/(program-admin)/` program selector, then 5 tabs: Home, Cohorts, Team, Reports, Settings |
-| 7 | Log out, log in as **master_admin** | Lands on `/(master-admin)/` scroll dashboard with stat cards + nav buttons |
-| 8 | Verify unauthenticated user → redirected to `/(auth)/login` | Login screen shown |
-| - | **Pass criteria** | All 7 roles route correctly, no cross-role leakage |
+| 3 | Log out, log in as **supervisor** | Lands on `/(supervisor)/` with 4 tabs: Home, Teachers, Reports, Profile |
+| 4 | Log out, log in as **program_admin** | Lands on `/(program-admin)/` program selector, then 6 tabs: Home, Classes, Team, Reports, Settings, Profile |
+| 5 | Log out, log in as **master_admin** | Lands on `/(master-admin)/` scroll dashboard with stat cards + nav buttons |
+| 6 | Verify unauthenticated user → redirected to `/(auth)/login` | Login screen shown |
+| - | **Pass criteria** | All 5 roles route correctly, no cross-role leakage |
 
 ---
 
@@ -34,8 +32,8 @@ Tests the complete student enrollment lifecycle.
 |------|------|--------|----------|
 | 1 | Student | Navigate to Programs tab | List of available programs shown |
 | 2 | Student | Tap a program with open enrollment | Program details screen with "Enroll" button |
-| 3 | Student | Tap "Enroll" on a cohort with capacity | Status changes to "active" (auto-approve) or "pending" (approval required) |
-| 4 | Teacher | Navigate to Students tab | Newly enrolled student appears in the teacher's student list (if assigned to same cohort) |
+| 3 | Student | Tap "Enroll" on a class with capacity | Status changes to "active" (auto-approve) or "pending" (approval required) |
+| 4 | Teacher | Navigate to Students tab | Newly enrolled student appears in the teacher's student list (if assigned to same class) |
 | 5 | Program Admin | Navigate to Home tab | Enrollment count updated in dashboard stats |
 | 6 | Student | Navigate to "My Programs" | Enrolled program appears with status |
 | 7 | Student | Tap "Drop" on the enrollment | Status changes to "dropped", program disappears from active list |
@@ -83,19 +81,19 @@ Tests the gamification sticker award lifecycle.
 
 ### CP-05: Waitlist Flow
 
-Tests enrollment into a full cohort.
+Tests enrollment into a full class.
 
 **Roles involved:** Student, Program Admin
 
 | Step | Role | Action | Expected |
 |------|------|--------|----------|
-| 1 | Setup | Ensure a cohort is at max capacity | - |
-| 2 | Student | Enroll in the full cohort | Placed on waitlist (not active enrollment) |
+| 1 | Setup | Ensure a class is at max capacity | - |
+| 2 | Student | Enroll in the full class | Placed on waitlist (not active enrollment) |
 | 3 | Student | View waitlist status | Position number visible |
-| 4 | Program Admin | Navigate to Waitlist screen for that cohort | Student appears in waitlist |
+| 4 | Program Admin | Navigate to Waitlist screen for that class | Student appears in waitlist |
 | 5 | Program Admin | Promote student from waitlist | Student status changes to "active" |
 | 6 | Student | Refresh My Programs | Status now shows "active" enrollment |
-| - | **Pass criteria** | Full cohort → waitlist → admin promotes → student enrolled |
+| - | **Pass criteria** | Full class → waitlist → admin promotes → student enrolled |
 
 ---
 

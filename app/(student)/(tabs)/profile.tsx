@@ -78,8 +78,42 @@ export default function StudentProfile() {
           </View>
         </Card>
 
+        {/* Help Guide */}
+        <Card
+          variant="default"
+          style={styles.settingCard}
+          onPress={() => router.push('/(student)/wiki')}
+        >
+          <View style={styles.settingRow}>
+            <View style={styles.settingLabelContainer}>
+              <View style={[styles.settingIcon, { backgroundColor: colors.primary[50] }]}>
+                <Ionicons name="help-circle" size={20} color={colors.primary[500]} />
+              </View>
+              <Text style={styles.settingLabel}>{t('wiki.profileLink')}</Text>
+            </View>
+            <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={20} color={colors.neutral[300]} />
+          </View>
+        </Card>
+
         {/* Settings Group */}
         <Text style={styles.sectionTitle}>{t('common.settings')}</Text>
+
+        {/* Notification Preferences */}
+        <Card
+          variant="default"
+          style={styles.settingCard}
+          onPress={() => router.push('/notification-preferences')}
+        >
+          <View style={styles.settingRow}>
+            <View style={styles.settingLabelContainer}>
+              <View style={[styles.settingIcon, { backgroundColor: colors.accent.sky[50] }]}>
+                <Ionicons name="notifications" size={20} color={colors.accent.sky[500]} />
+              </View>
+              <Text style={styles.settingLabel}>{t('notifications.preferences.title')}</Text>
+            </View>
+            <Ionicons name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"} size={20} color={colors.neutral[300]} />
+          </View>
+        </Card>
 
         <Card variant="default" style={styles.settingCard} onPress={toggleLanguage}>
           <View style={styles.settingRow}>

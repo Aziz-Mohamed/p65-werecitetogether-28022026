@@ -17,8 +17,8 @@ export default function MasterAdminLayout() {
         <Stack.Screen name="programs/[id]/edit" />
         <Stack.Screen name="programs/[id]/team" />
         <Stack.Screen name="programs/[id]/tracks" />
-        <Stack.Screen name="programs/[id]/cohorts/index" />
-        <Stack.Screen name="programs/[id]/cohorts/[cohortId]" />
+        <Stack.Screen name="programs/[id]/classes/index" />
+        <Stack.Screen name="programs/[id]/classes/[classId]" />
         {/* Certifications */}
         <Stack.Screen name="certifications/index" />
         <Stack.Screen name="certifications/[id]" />
@@ -34,12 +34,10 @@ export default function MasterAdminLayout() {
         <Stack.Screen name="settings/permissions" />
         {/* Students */}
         <Stack.Screen name="students/index" />
-        <Stack.Screen name="students/create" />
         <Stack.Screen name="students/[id]/index" />
         <Stack.Screen name="students/[id]/edit" />
         {/* Teachers */}
         <Stack.Screen name="teachers/index" />
-        <Stack.Screen name="teachers/create" />
         <Stack.Screen name="teachers/[id]/index" />
         <Stack.Screen name="teachers/[id]/edit" />
         {/* Classes */}
@@ -51,12 +49,13 @@ export default function MasterAdminLayout() {
         {/* Attendance */}
         <Stack.Screen name="attendance/index" />
         {/* Members */}
-        <Stack.Screen name="members/reset-password" />
         <Stack.Screen name="members/edit-role" />
         {/* Stickers */}
         <Stack.Screen name="stickers/index" />
         <Stack.Screen name="stickers/create" />
         <Stack.Screen name="stickers/[id]/edit" />
+        {/* Wiki / Help Guide */}
+        <Stack.Screen name="wiki" />
       </Stack>
     </ErrorBoundary>
   );

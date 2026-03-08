@@ -129,6 +129,27 @@ export const useAwardSticker = () => {
 };
 
 /**
+ * Remove an awarded sticker (undo within grace period).
+ */
+export const useRemoveSticker = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['remove-sticker'],
+    mutationFn: (input: { studentStickerId: string; studentId: string }) =>
+      gamificationService.removeSticker(input.studentStickerId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['student-stickers', variables.studentId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['student-dashboard', variables.studentId],
+      });
+    },
+  });
+};
+
+/**
  * Mark a single sticker as seen (dismiss reveal animation).
  */
 export const useMarkStickerSeen = () => {

@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import React, { useMemo } from 'react';
+import { I18nManager, Pressable, RefreshControl, StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Screen } from '@/components/layout';
@@ -81,7 +81,13 @@ export default function StudentHomeScreen() {
   const hasCertifications = enriched.length > 0;
 
   return (
-    <Screen scroll hasTabBar>
+    <Screen
+      scroll
+      hasTabBar
+      refreshControl={
+        <RefreshControl refreshing={false} onRefresh={refetch} />
+      }
+    >
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.welcome}>
@@ -252,15 +258,20 @@ export default function StudentHomeScreen() {
               {t('student.dashboard.mySchedule')}
             </Text>
           </Pressable>
-          <Pressable
-            style={[styles.explorePill, { backgroundColor: colors.secondary[50] }]}
-            onPress={() => router.push('/(student)/leaderboard')}
-          >
-            <Ionicons name="podium" size={14} color={colors.secondary[500]} />
-            <Text style={[styles.explorePillText, { color: colors.secondary[600] }]}>
-              {t('student.dashboard.viewLeaderboard')}
-            </Text>
-          </Pressable>
+          {enrollments?.[0]?.program_id && (
+            <Pressable
+              style={[styles.explorePill, { backgroundColor: colors.secondary[50] }]}
+              onPress={() => router.push({
+                pathname: '/(student)/program/[programId]/leaderboard',
+                params: { programId: enrollments[0].program_id },
+              })}
+            >
+              <Ionicons name="podium" size={14} color={colors.secondary[500]} />
+              <Text style={[styles.explorePillText, { color: colors.secondary[600] }]}>
+                {t('student.dashboard.viewLeaderboard')}
+              </Text>
+            </Pressable>
+          )}
         </View>
 
         <SessionHistoryList

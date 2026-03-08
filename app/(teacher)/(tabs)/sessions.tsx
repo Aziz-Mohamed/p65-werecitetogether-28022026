@@ -53,9 +53,22 @@ export default function TeacherSessionsScreen() {
   if (error) return <ErrorState description={(error as Error).message} onRetry={refetch} />;
 
   return (
-    <Screen scroll hasTabBar>
-      <View style={styles.container}>
-        <Text style={styles.title}>{t('sessions.title')}</Text>
+    <BottomSheetModalProvider>
+      <Screen scroll={false} hasTabBar>
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('teacher.sessions.title')}</Text>
+            {canCreate && (
+              <Pressable
+                style={styles.addButton}
+                onPress={handleOpenCreateSheet}
+                accessibilityLabel={t('scheduling.createSession')}
+              >
+                <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
+              </Pressable>
+            )}
+          </View>
 
           {/* Drafts Section */}
           {drafts.length > 0 && (
@@ -281,8 +294,11 @@ const styles = StyleSheet.create({
     ...typography.textStyles.heading,
     color: lightTheme.text,
   },
-  section: {
-    gap: spacing.sm,
+  addButton: {
+    width: normalize(38),
+    height: normalize(38),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionTitle: {
     ...typography.textStyles.subheading,

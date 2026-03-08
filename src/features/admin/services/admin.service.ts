@@ -95,12 +95,17 @@ class AdminService {
       .single();
   }
 
-  async searchUsersForAssignment(query: string, limit = 20) {
-    return supabase
+  async searchUsersForAssignment(query: string, limit = 50) {
+    let qb = supabase
       .from('profiles')
       .select('id, full_name, avatar_url, role')
-      .or(`full_name.ilike.%${query}%,username.ilike.%${query}%`)
-      .limit(limit);
+      .order('full_name');
+
+    if (query.length > 0) {
+      qb = qb.or(`full_name.ilike.%${query}%,username.ilike.%${query}%`);
+    }
+
+    return qb.limit(limit);
   }
 
   async getProgramSessionTrend(programId: string, startDate: string) {
@@ -170,6 +175,13 @@ class AdminService {
       .single();
   }
 
+  async getUserProgramRoles(userId: string) {
+    return supabase
+      .from('program_roles')
+      .select('id, program_id, role, programs!inner(name)')
+      .eq('profile_id', userId);
+  }
+
   // ─── Master Admin ──────────────────────────────────────────────────────────
 
   async getMasterAdminDashboardStats() {
@@ -189,6 +201,13 @@ class AdminService {
 
   async revokeMasterAdminRole(params: RevokeMasterAdminParams) {
     return supabase.rpc('revoke_master_admin_role', params);
+  }
+
+  async changeUserRole(userId: string, newRole: string) {
+    return supabase.rpc('change_user_role', {
+      p_user_id: userId,
+      p_new_role: newRole,
+    } as any);
   }
 
   async getPlatformConfig() {

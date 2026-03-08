@@ -12,6 +12,7 @@ export function useManageRoles() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       queryClient.invalidateQueries({ queryKey: ['program-team'] });
+      queryClient.invalidateQueries({ queryKey: ['user-detail'] });
     },
   });
 
@@ -20,6 +21,7 @@ export function useManageRoles() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       queryClient.invalidateQueries({ queryKey: ['program-team'] });
+      queryClient.invalidateQueries({ queryKey: ['user-detail'] });
     },
   });
 
@@ -28,6 +30,7 @@ export function useManageRoles() {
       adminService.assignMasterAdminRole({ p_user_id: userId, p_assigned_by: assignedBy }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['user-detail'] });
     },
   });
 
@@ -36,8 +39,18 @@ export function useManageRoles() {
       adminService.revokeMasterAdminRole({ p_user_id: userId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['user-detail'] });
     },
   });
 
-  return { assignProgramRole, removeProgramRole, assignMasterAdmin, revokeMasterAdmin };
+  const changeRole = useMutation({
+    mutationFn: ({ userId, newRole }: { userId: string; newRole: string }) =>
+      adminService.changeUserRole(userId, newRole),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['user-detail'] });
+    },
+  });
+
+  return { assignProgramRole, removeProgramRole, assignMasterAdmin, revokeMasterAdmin, changeRole };
 }

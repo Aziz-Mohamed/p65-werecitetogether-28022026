@@ -8,12 +8,12 @@ import { z } from 'zod';
 
 import { Screen } from '@/components/layout';
 import { TextField, Button } from '@/components/ui';
-import { useCreateCohort } from '@/features/programs/hooks/useAdminCohorts';
+import { useCreateProgramClass } from '@/features/programs/hooks/useAdminClasses';
 import { typography } from '@/theme/typography';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
-const cohortSchema = z.object({
+const classSchema = z.object({
   name: z.string().min(1),
   maxStudents: z.number().min(1).max(100),
   teacherId: z.string().uuid(),
@@ -22,20 +22,20 @@ const cohortSchema = z.object({
   endDate: z.string().optional(),
 });
 
-type CohortFormData = z.infer<typeof cohortSchema>;
+type ClassFormData = z.infer<typeof classSchema>;
 
-export default function CreateCohortScreen() {
+export default function CreateClassScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
-  const createCohort = useCreateCohort(id!);
+  const createClass = useCreateProgramClass(id!);
 
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<CohortFormData>({
-    resolver: zodResolver(cohortSchema),
+  } = useForm<ClassFormData>({
+    resolver: zodResolver(classSchema),
     defaultValues: {
       name: '',
       maxStudents: 10,
@@ -46,9 +46,10 @@ export default function CreateCohortScreen() {
     },
   });
 
-  const onSubmit = async (data: CohortFormData) => {
+  const onSubmit = async (data: ClassFormData) => {
     if (!id) return;
-    const { error } = await createCohort.mutateAsync({
+    const { error } = await createClass.mutateAsync({
+      schoolId: '', // TODO: derive from teacher profile or program context
       programId: id,
       name: data.name,
       maxStudents: data.maxStudents,
@@ -71,7 +72,7 @@ export default function CreateCohortScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title}>{t('programs.admin.createCohort')}</Text>
+          <Text style={styles.title}>{t('programs.admin.createClass')}</Text>
           <View style={{ width: 60 }} />
         </View>
 
@@ -80,7 +81,7 @@ export default function CreateCohortScreen() {
           name="name"
           render={({ field: { onChange, value } }) => (
             <TextField
-              label={t('programs.labels.cohortName')}
+              label={t('programs.labels.className')}
               value={value}
               onChangeText={onChange}
               error={errors.name?.message}
@@ -158,7 +159,7 @@ export default function CreateCohortScreen() {
           title={t('common.create')}
           onPress={handleSubmit(onSubmit)}
           variant="primary"
-          loading={isSubmitting || createCohort.isPending}
+          loading={isSubmitting || createClass.isPending}
         />
       </View>
     </Screen>

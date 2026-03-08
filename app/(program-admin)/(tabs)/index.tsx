@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/feedback/EmptyState';
+import { ErrorState } from '@/components/feedback';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -77,6 +78,14 @@ function DashboardView({ programId, programName }: { programId: string; programN
   const router = useRouter();
   const dashboard = useProgramAdminDashboard(programId);
 
+  if (dashboard.isError) {
+    return (
+      <Screen>
+        <ErrorState onRetry={() => dashboard.refetch()} />
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
       <ScrollView
@@ -107,8 +116,8 @@ function DashboardView({ programId, programName }: { programId: string; programN
             isLoading={dashboard.isLoading}
           />
           <StatCard
-            label={t('admin.programAdmin.dashboard.activeCohorts')}
-            value={dashboard.data?.active_cohorts ?? 0}
+            label={t('admin.programAdmin.dashboard.activeClasses')}
+            value={dashboard.data?.active_classes ?? 0}
             icon="people-circle-outline"
             iconColor={colors.accent.indigo[500]}
             isLoading={dashboard.isLoading}

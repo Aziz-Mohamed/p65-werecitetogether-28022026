@@ -10,7 +10,7 @@
 ## Prerequisites
 
 - [ ] Test account with role `student` (credentials documented separately)
-- [ ] Enrolled in at least 1 program/cohort
+- [ ] Enrolled in at least 1 program/class
 - [ ] At least 1 completed session exists for the student
 - [ ] At least 1 sticker has been awarded to the student
 - [ ] At least 1 badge has been earned (or is close to threshold)
@@ -19,6 +19,22 @@
 - [ ] At least 1 teacher is currently marked as available
 - [ ] Push notifications are supported on the test device
 - [ ] Network connectivity is stable (for initial pass; disable later for edge-case tests)
+
+---
+
+## Quick Smoke Test
+
+> Run these first. If any fail, stop and investigate before continuing with the full script.
+
+- [ ] **QS-01** Login → student dashboard with 6 tabs: Dashboard, Programs, Memorization, Revision, Journey, Profile
+- [ ] **QS-02** Dashboard loads with level and points displayed
+- [ ] **QS-03** Programs tab loads with available programs
+- [ ] **QS-04** Memorization tab shows progress data
+- [ ] **QS-05** Revision tab loads with revision schedule
+- [ ] **QS-06** Journey tab shows gamification overview (stickers, badges, level)
+- [ ] **QS-07** Profile tab loads with name, email, and role
+- [ ] **QS-08** Can view a session detail (read-only)
+- [ ] **QS-09** Cannot access `/(teacher)/` or `/(master-admin)/` routes
 
 ---
 
@@ -219,23 +235,16 @@
 - [ ] Locked/unearned badges are shown as greyed out or with progress toward them
 - [ ] Tapping a badge shows details or earning criteria
 
-### F3. Global Leaderboard
+### F3. Program Leaderboard
 
-1. Navigate to the **Leaderboard** (`leaderboard.tsx`).
-
-- [ ] Leaderboard loads with ranked list of students
-- [ ] Current student's position is highlighted
-- [ ] Leaderboard shows rank, name, and points/level
-- [ ] Student cannot see other students' private data (only public leaderboard info)
-
-### F4. Program Leaderboard
-
-1. Navigate to a **Program Leaderboard** (`program/[programId]/leaderboard.tsx`).
+1. From the dashboard, tap "View Leaderboard" (navigates to `program/[programId]/leaderboard.tsx` using the student's first enrolled program).
 
 - [ ] Program-specific leaderboard loads
 - [ ] Only students enrolled in the same program are shown
 - [ ] Current student's rank within the program is highlighted
-- [ ] If student is not enrolled in the program, access is restricted
+- [ ] Leaderboard shows rank, name, and level
+- [ ] Student cannot see other students' private data (only public leaderboard info)
+- [ ] If the student has no enrollments, the leaderboard button is hidden on the dashboard
 
 ---
 

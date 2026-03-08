@@ -1,27 +1,27 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { Pressable, StyleSheet, View, Text } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
-import { Button, Badge } from '@/components/ui';
+import { Badge } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { useCohorts } from '@/features/programs/hooks/useCohorts';
+import { useProgramClasses } from '@/features/programs/hooks/useClasses';
 import { colors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
-import type { CohortWithTeacher } from '@/features/programs/types/programs.types';
+import type { ProgramClassWithTeacher } from '@/features/programs/types/programs.types';
 
-export default function CohortListScreen() {
+export default function ClassListScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
-  const { data: cohorts = [], isLoading, error, refetch } = useCohorts({ programId: id! });
+  const { data: classes = [], isLoading, error, refetch } = useProgramClasses({ programId: id! });
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState onRetry={refetch} />;
@@ -29,45 +29,46 @@ export default function CohortListScreen() {
   return (
     <Screen scroll={false}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title}>{t('programs.labels.cohorts')}</Text>
-          <Button
-            title={t('common.create')}
-            onPress={() => router.push(`/(program-admin)/programs/${id}/cohorts/create`)}
-            variant="primary"
-            size="sm"
-            icon={<Ionicons name="add" size={18} color={colors.white} />}
-          />
-        </View>
+        <PageHeader
+          title={t('programs.labels.classes')}
+          rightAction={
+            <Pressable
+              onPress={() => router.push(`/(program-admin)/programs/${id}/classes/create`)}
+              hitSlop={8}
+              style={styles.addButton}
+            >
+              <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
+            </Pressable>
+          }
+        />
 
-        {cohorts.length === 0 ? (
+        {classes.length === 0 ? (
           <EmptyState
             icon="people-outline"
-            title={t('programs.empty.cohorts')}
-            description={t('programs.empty.cohortsDesc')}
+            title={t('programs.empty.classes')}
+            description={t('programs.empty.classesDesc')}
           />
         ) : (
           <FlashList
-            data={cohorts}
+            data={classes}
             keyExtractor={(item) => item.id}
             estimatedItemSize={90}
-            renderItem={({ item }: { item: CohortWithTeacher }) => {
+            renderItem={({ item }: { item: ProgramClassWithTeacher }) => {
               const enrolledCount = item.enrollments?.[0]?.count ?? 0;
               return (
                 <Card
                   variant="outlined"
                   style={styles.card}
                   onPress={() =>
-                    router.push(`/(program-admin)/programs/${id}/cohorts/${item.id}`)
+                    router.push(`/(program-admin)/programs/${id}/classes/${item.id}`)
                   }
                 >
                   <View style={styles.cardRow}>
-                    <Text style={styles.cohortName} numberOfLines={1}>
+                    <Text style={styles.className} numberOfLines={1}>
                       {item.name}
                     </Text>
                     <Badge
-                      label={t(`programs.cohortStatus.${item.status}`)}
+                      label={t(`programs.classStatus.${item.status}`)}
                       variant={item.status === 'enrollment_open' ? 'success' : 'info'}
                       size="sm"
                     />
@@ -102,16 +103,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
+  addButton: {
+    width: normalize(38),
+    height: normalize(38),
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
+    justifyContent: 'center',
   },
   card: {
     marginBottom: spacing.sm,
@@ -122,7 +118,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  cohortName: {
+  className: {
     ...typography.textStyles.body,
     fontFamily: typography.fontFamily.semiBold,
     color: lightTheme.text,

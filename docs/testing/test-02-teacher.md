@@ -12,11 +12,28 @@ Manual test script for the **Teacher** role in WeReciteTogether.
 
 - [ ] Test account with role `teacher` in the `profiles` table
 - [ ] Teacher assigned to at least 1 program via `program_roles` (role = `teacher`)
-- [ ] At least 2 students enrolled in the teacher's cohort
+- [ ] At least 2 students enrolled in the teacher's class
 - [ ] Sticker catalog has entries (at least 3 stickers)
 - [ ] At least 1 completed session and 1 draft session exist for the teacher-student pair
 - [ ] At least 1 track exists in the assigned program (for mutoon testing)
 - [ ] Device has microphone access enabled (for voice memo testing)
+
+---
+
+## Quick Smoke Test
+
+> Run these first. If any fail, stop and investigate before continuing with the full script.
+
+- [ ] **QS-01** Login → teacher dashboard with 5 tabs: Dashboard, Students, Sessions, Class Progress, Profile
+- [ ] **QS-02** Dashboard loads with stats cards (student count, session count)
+- [ ] **QS-03** Students tab loads with enrolled students in teacher's class
+- [ ] **QS-04** Sessions tab loads with teacher's sessions
+- [ ] **QS-05** Can open session workspace and see recitation logging fields
+- [ ] **QS-06** Awards screen loads with student list and sticker catalog
+- [ ] **QS-07** Class Progress tab loads with charts/analytics
+- [ ] **QS-08** Profile tab loads with name, email, role
+- [ ] **QS-09** Cannot access `/(student)/` or `/(master-admin)/` routes
+- [ ] **QS-10** Can toggle teacher availability on/off
 
 ---
 
@@ -48,9 +65,9 @@ Manual test script for the **Teacher** role in WeReciteTogether.
 
 | # | Action | Expected | Pass |
 |---|--------|----------|------|
-| 1 | Tap **Students** tab | `(tabs)/students.tsx` loads with list of enrolled students in teacher's cohort | [ ] |
-| 2 | Verify student count | Matches the number of students enrolled in teacher's cohort | [ ] |
-| 3 | Verify roster scope | Only students from teacher's own cohort appear (no students from other teachers) | [ ] |
+| 1 | Tap **Students** tab | `(tabs)/students.tsx` loads with list of enrolled students in teacher's class | [ ] |
+| 2 | Verify student count | Matches the number of students enrolled in teacher's class | [ ] |
+| 3 | Verify roster scope | Only students from teacher's own class appear (no students from other teachers) | [ ] |
 | 4 | Check student list items | Each item shows student name and basic info | [ ] |
 
 ### B2. Student Details
@@ -67,7 +84,7 @@ Manual test script for the **Teacher** role in WeReciteTogether.
 | # | Action | Expected | Pass |
 |---|--------|----------|------|
 | 1 | Navigate to memorization tracking | `students/memorization.tsx` loads | [ ] |
-| 2 | Verify student progress | Memorization progress data shown for students in cohort | [ ] |
+| 2 | Verify student progress | Memorization progress data shown for students in class | [ ] |
 | 3 | Check progress details | Surah/ayah completion data visible | [ ] |
 
 ### B4. Top Performers
@@ -76,7 +93,7 @@ Manual test script for the **Teacher** role in WeReciteTogether.
 |---|--------|----------|------|
 | 1 | Navigate to top performers | `students/top-performers.tsx` loads | [ ] |
 | 2 | Verify list | Shows students ranked by performance metrics | [ ] |
-| 3 | Verify scope | Only students from teacher's own cohort appear | [ ] |
+| 3 | Verify scope | Only students from teacher's own class appear | [ ] |
 
 ### B5. Students Needing Support
 
@@ -84,7 +101,7 @@ Manual test script for the **Teacher** role in WeReciteTogether.
 |---|--------|----------|------|
 | 1 | Navigate to needs support | `students/needs-support.tsx` loads | [ ] |
 | 2 | Verify list | Shows students flagged for low performance or inactivity | [ ] |
-| 3 | Verify scope | Only students from teacher's own cohort appear | [ ] |
+| 3 | Verify scope | Only students from teacher's own class appear | [ ] |
 
 ### B6. Student Recommendations
 
@@ -186,9 +203,9 @@ Manual test script for the **Teacher** role in WeReciteTogether.
 
 | # | Action | Expected | Pass |
 |---|--------|----------|------|
-| 1 | Immediately after awarding (within 30s) | Undo option/button visible | [ ] |
-| 2 | Tap undo | Sticker award reverted, row removed from `student_stickers` | [ ] |
-| 3 | Award another sticker, wait 30+ seconds | Undo option disappears after grace period | [ ] |
+| 1 | Immediately after awarding | Green undo banner appears at the top with "Undo" tap target | [ ] |
+| 2 | Tap "Undo" on the banner | Sticker award reverted, row removed from `student_stickers`, banner disappears | [ ] |
+| 3 | Award another sticker, wait 30+ seconds | Undo banner disappears automatically after grace period | [ ] |
 
 ### E3. View Sticker Catalog
 
@@ -312,7 +329,7 @@ Manual test script for the **Teacher** role in WeReciteTogether.
 |---|--------|----------|------|
 | 1 | Tap **Class Progress** tab | `(tabs)/class-progress.tsx` loads | [ ] |
 | 2 | Verify charts/graphs | Visual analytics displayed (progress trends, completion rates) | [ ] |
-| 3 | Verify scope | Data reflects only the teacher's own class/cohort | [ ] |
+| 3 | Verify scope | Data reflects only the teacher's own class/class | [ ] |
 
 ### J2. Trends and Insights
 
@@ -379,7 +396,7 @@ These verify that the teacher role is properly restricted from unauthorized acti
 | # | Action | Expected | Pass |
 |---|--------|----------|------|
 | 1 | Query `sessions` table via Supabase SQL (impersonating teacher) | Only own sessions returned (RLS filters) | [ ] |
-| 2 | Query enrollments for other cohorts | No results or permission denied | [ ] |
+| 2 | Query enrollments for other classs | No results or permission denied | [ ] |
 
 ### L4. Cannot Manage Team or Programs
 
@@ -411,7 +428,7 @@ These verify that the teacher role is properly restricted from unauthorized acti
 
 | # | Action | Expected | Pass |
 |---|--------|----------|------|
-| 1 | Remove all students from teacher's cohort (via Supabase) | - |
+| 1 | Remove all students from teacher's class (via Supabase) | - |
 | 2 | Navigate to Students tab | Empty state shown (e.g., "No students enrolled yet") | [ ] |
 | 3 | Navigate to top performers | Empty state or "No data" message | [ ] |
 | 4 | Navigate to needs support | Empty state or "No data" message | [ ] |
@@ -439,11 +456,11 @@ These verify that the teacher role is properly restricted from unauthorized acti
 | 4 | Assign teacher to a program (via Supabase) | - |
 | 5 | Refresh or re-login | Dashboard populates with program data | [ ] |
 
-### M4. Single Student in Cohort
+### M4. Single Student in Class
 
 | # | Action | Expected | Pass |
 |---|--------|----------|------|
-| 1 | Ensure only 1 student in teacher's cohort | - |
+| 1 | Ensure only 1 student in teacher's class | - |
 | 2 | Navigate to Students tab | Single student listed | [ ] |
 | 3 | Navigate to top performers | Single student listed (or appropriate message) | [ ] |
 | 4 | Award a sticker to the single student | Sticker awarded successfully | [ ] |

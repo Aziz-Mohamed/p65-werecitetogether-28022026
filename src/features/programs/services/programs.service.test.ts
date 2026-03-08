@@ -29,17 +29,17 @@ describe('programsService', () => {
       await programsService.enrollStructured({
         programId: 'p1',
         trackId: 't1',
-        cohortId: 'c1',
+        classId: 'c1',
       });
 
       expect(mockSupabase.rpc).toHaveBeenCalledWith('enroll_student', {
         p_program_id: 'p1',
         p_track_id: 't1',
-        p_cohort_id: 'c1',
+        p_class_id: 'c1',
       });
     });
 
-    it('passes null for optional trackId/cohortId', async () => {
+    it('passes null for optional trackId/classId', async () => {
       mockSupabase.rpc.mockResolvedValue({ data: null, error: null });
 
       await programsService.enrollStructured({ programId: 'p1' });
@@ -47,7 +47,7 @@ describe('programsService', () => {
       expect(mockSupabase.rpc).toHaveBeenCalledWith('enroll_student', {
         p_program_id: 'p1',
         p_track_id: null,
-        p_cohort_id: null,
+        p_class_id: null,
       });
     });
   });
@@ -84,14 +84,14 @@ describe('programsService', () => {
     });
   });
 
-  describe('getCohorts', () => {
+  describe('getProgramClasses', () => {
     it('filters by programId and active statuses', async () => {
       const builder = createQueryMock({ data: [], error: null });
       mockSupabase.from.mockReturnValue(builder);
 
-      await programsService.getCohorts({ programId: 'p1' });
+      await programsService.getProgramClasses({ programId: 'p1' });
 
-      expect(mockSupabase.from).toHaveBeenCalledWith('cohorts');
+      expect(mockSupabase.from).toHaveBeenCalledWith('classes');
       expect(builder.eq).toHaveBeenCalledWith('program_id', 'p1');
       expect(builder.in).toHaveBeenCalledWith('status', [
         'enrollment_open', 'enrollment_closed', 'in_progress',
@@ -102,7 +102,7 @@ describe('programsService', () => {
       const builder = createQueryMock({ data: [], error: null });
       mockSupabase.from.mockReturnValue(builder);
 
-      await programsService.getCohorts({ programId: 'p1', trackId: 't1' });
+      await programsService.getProgramClasses({ programId: 'p1', trackId: 't1' });
 
       expect(builder.eq).toHaveBeenCalledWith('track_id', 't1');
     });

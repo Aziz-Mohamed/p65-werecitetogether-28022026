@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Pressable, I18nManager } from 'react-native';
+import { StyleSheet, View, Text, I18nManager } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
@@ -38,15 +38,6 @@ export default function AdminStudentsScreen() {
       <View style={styles.container}>
         <PageHeader
           title={t('admin.students.title')}
-          rightAction={
-            <Pressable
-              style={styles.addButton}
-              onPress={() => router.push('/(master-admin)/students/create')}
-              hitSlop={8}
-            >
-              <Ionicons name="add" size={24} color={lightTheme.text} />
-            </Pressable>
-          }
         />
 
         <SearchBar
@@ -119,12 +110,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.md,
-  },
-  addButton: {
-    width: normalize(38),
-    height: normalize(38),
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   searchBar: {
     marginBottom: spacing.xs,

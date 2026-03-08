@@ -23,9 +23,9 @@ export default function ProgramAdminTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="cohorts"
+        name="classes"
         options={{
-          title: t('admin.programAdmin.tabs.cohorts'),
+          title: t('admin.programAdmin.tabs.classes'),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'school' : 'school-outline'} size={24} color={color} />
           ),

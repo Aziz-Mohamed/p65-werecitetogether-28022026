@@ -49,7 +49,7 @@ export default function AdminClassesScreen() {
             onPress={() => router.push('/(master-admin)/classes/create')}
             hitSlop={8}
           >
-            <Ionicons name="add" size={24} color={lightTheme.text} />
+            <Ionicons name="add-circle-outline" size={24} color={colors.primary[500]} />
           </Pressable>
         </View>
 

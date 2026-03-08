@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, Switch } from 'react-native';
+import React from 'react';
+import { I18nManager, RefreshControl, StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -91,7 +91,13 @@ export default function TeacherDashboard() {
   );
 
   return (
-    <Screen scroll hasTabBar>
+    <Screen
+      scroll
+      hasTabBar
+      refreshControl={
+        <RefreshControl refreshing={false} onRefresh={refetch} />
+      }
+    >
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -154,8 +160,8 @@ export default function TeacherDashboard() {
           style={styles.scheduleCard}
         >
           <View style={styles.scheduleRow}>
-            <View style={[styles.insightIcon, { backgroundColor: availableCount > 0 ? '#DCFCE7' : colors.neutral[100] }]}>
-              <Ionicons name="radio-button-on" size={22} color={availableCount > 0 ? '#22C55E' : colors.neutral[400]} />
+            <View style={[styles.insightIcon, { backgroundColor: availableCount > 0 ? colors.accent.emerald[50] : colors.neutral[100] }]}>
+              <Ionicons name="radio-button-on" size={22} color={availableCount > 0 ? colors.accent.emerald[500] : colors.neutral[400]} />
             </View>
             <View style={styles.scheduleInfo}>
               <Text style={styles.scheduleLabel}>{t('availability.title')}</Text>

@@ -15,6 +15,7 @@ export default function SupervisorLayout() {
       <Stack.Screen name="himam/[eventId]/pairings" />
       <Stack.Screen name="rewards/index" />
       <Stack.Screen name="notification-preferences" />
+      <Stack.Screen name="wiki" />
     </Stack>
   );
 }

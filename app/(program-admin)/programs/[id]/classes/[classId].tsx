@@ -8,33 +8,33 @@ import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Button, Badge } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { useCohortEnrollments, useUpdateEnrollmentStatus } from '@/features/programs/hooks/useAdminEnrollments';
-import { useUpdateCohortStatus, useBulkApproveEnrollments } from '@/features/programs/hooks/useAdminCohorts';
-import { useCohorts } from '@/features/programs/hooks/useCohorts';
-import { useCohortWaitlist } from '@/features/programs/hooks/useWaitlist';
-import { getNextCohortStatus } from '@/features/programs/utils/enrollment-helpers';
+import { useClassEnrollments, useUpdateEnrollmentStatus } from '@/features/programs/hooks/useAdminEnrollments';
+import { useUpdateClassStatus, useBulkApproveEnrollments } from '@/features/programs/hooks/useAdminClasses';
+import { useProgramClasses } from '@/features/programs/hooks/useClasses';
+import { useClassWaitlist } from '@/features/programs/hooks/useWaitlist';
+import { getNextClassStatus } from '@/features/programs/utils/enrollment-helpers';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import type { CohortStatus } from '@/features/programs/types/programs.types';
+import type { ClassStatus } from '@/features/programs/types/programs.types';
 
-export default function CohortDetailScreen() {
-  const { id, cohortId } = useLocalSearchParams<{ id: string; cohortId: string }>();
+export default function ClassDetailScreen() {
+  const { id, classId } = useLocalSearchParams<{ id: string; classId: string }>();
   const { t } = useTranslation();
   const router = useRouter();
 
-  const { data: cohorts } = useCohorts({ programId: id! });
-  const cohort = cohorts?.find((c) => c.id === cohortId);
+  const { data: classes } = useProgramClasses({ programId: id! });
+  const programClass = classes?.find((c) => c.id === classId);
 
-  const { data: enrollments = [], isLoading, error, refetch } = useCohortEnrollments(cohortId);
-  const { data: waitlist = [] } = useCohortWaitlist(cohortId);
-  const updateCohortStatus = useUpdateCohortStatus(id!);
+  const { data: enrollments = [], isLoading, error, refetch } = useClassEnrollments(classId);
+  const { data: waitlist = [] } = useClassWaitlist(classId);
+  const updateClassStatus = useUpdateClassStatus(id!);
   const updateEnrollment = useUpdateEnrollmentStatus();
   const bulkApprove = useBulkApproveEnrollments(id!);
 
   const handleStatusTransition = () => {
-    if (!cohort) return;
-    const next = getNextCohortStatus(cohort.status);
+    if (!programClass) return;
+    const next = getNextClassStatus(programClass.status);
     if (!next) return;
 
     const confirmMsg =
@@ -43,7 +43,7 @@ export default function CohortDetailScreen() {
         : '';
 
     Alert.alert(
-      t(`programs.cohortStatus.${next}`),
+      t(`programs.classStatus.${next}`),
       confirmMsg,
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -51,16 +51,16 @@ export default function CohortDetailScreen() {
           text: t('common.confirm'),
           onPress: async () => {
             if (next === 'in_progress') {
-              await bulkApprove.mutateAsync(cohortId!);
+              await bulkApprove.mutateAsync(classId!);
             }
-            updateCohortStatus.mutate({ cohortId: cohortId!, status: next });
+            updateClassStatus.mutate({ classId: classId!, status: next });
           },
         },
       ],
     );
   };
 
-  const nextStatus = cohort ? getNextCohortStatus(cohort.status) : null;
+  const nextStatus = programClass ? getNextClassStatus(programClass.status) : null;
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState onRetry={refetch} />;
@@ -70,24 +70,24 @@ export default function CohortDetailScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title}>{cohort?.name ?? '—'}</Text>
+          <Text style={styles.title}>{programClass?.name ?? '—'}</Text>
           <View style={{ width: 60 }} />
         </View>
 
-        {cohort && (
+        {programClass && (
           <View style={styles.statusRow}>
             <Badge
-              label={t(`programs.cohortStatus.${cohort.status}`)}
-              variant={cohort.status === 'enrollment_open' ? 'success' : 'info'}
+              label={t(`programs.classStatus.${programClass.status}`)}
+              variant={programClass.status === 'enrollment_open' ? 'success' : 'info'}
               size="sm"
             />
             {nextStatus && (
               <Button
-                title={t(`programs.cohortAction.${nextStatus}`)}
+                title={t(`programs.classAction.${nextStatus}`)}
                 onPress={handleStatusTransition}
                 variant="primary"
                 size="sm"
-                loading={updateCohortStatus.isPending || bulkApprove.isPending}
+                loading={updateClassStatus.isPending || bulkApprove.isPending}
               />
             )}
           </View>
@@ -98,8 +98,8 @@ export default function CohortDetailScreen() {
             title={`${t('programs.labels.waitlist')} (${waitlist.length})`}
             onPress={() =>
               router.push({
-                pathname: '/(program-admin)/waitlist/[cohortId]',
-                params: { cohortId: cohortId! },
+                pathname: '/(program-admin)/waitlist/[classId]',
+                params: { classId: classId! },
               })
             }
             variant="secondary"

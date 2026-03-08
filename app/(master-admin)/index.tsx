@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { StyleSheet, View, Text, Pressable, I18nManager } from 'react-native';
+import { StyleSheet, View, Text, Pressable, I18nManager, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui';
+import { LoadingState, ErrorState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
 import { useLogout } from '@/features/auth/hooks/useLogout';
 import { useChangeLanguage } from '@/hooks/useChangeLanguage';
@@ -37,8 +38,16 @@ export default function MasterAdminDashboard() {
     logout();
   }, [logout]);
 
+  if (dashboard.isLoading) return <LoadingState />;
+  if (dashboard.isError) return <ErrorState onRetry={() => dashboard.refetch()} />;
+
   return (
-    <Screen scroll>
+    <Screen
+      scroll
+      refreshControl={
+        <RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()} />
+      }
+    >
       <View style={styles.container}>
         <View style={styles.header}>
           <View>
@@ -82,22 +91,22 @@ export default function MasterAdminDashboard() {
         <Text style={styles.sectionTitle}>{t('dashboard.quickActions')}</Text>
         <View style={styles.actionsRow}>
           <ActionButton
-            title={t('admin.addStudent')}
-            onPress={() => router.push('/(master-admin)/students/create')}
-            icon="person-add"
-            color={theme.primary}
-          />
-          <ActionButton
-            title={t('admin.addTeacher')}
-            onPress={() => router.push('/(master-admin)/teachers/create')}
-            icon="school"
-            color={colors.accent.indigo[500]}
-          />
-          <ActionButton
             title={t('admin.addClass')}
             onPress={() => router.push('/(master-admin)/classes/create')}
             icon="add-circle"
             color={colors.accent.violet[500]}
+          />
+          <ActionButton
+            title={t('admin.masterAdmin.nav.programs')}
+            onPress={() => router.push('/(master-admin)/programs/create')}
+            icon="library"
+            color={colors.primary[500]}
+          />
+          <ActionButton
+            title={t('admin.masterAdmin.nav.users')}
+            onPress={() => router.push('/(master-admin)/users')}
+            icon="people"
+            color={theme.primary}
           />
         </View>
 
@@ -177,10 +186,10 @@ export default function MasterAdminDashboard() {
             color={colors.accent.sky[500]}
           />
           <NavCard
-            title={t('admin.dashboard.resetPassword')}
-            icon="key"
-            onPress={() => router.push('/(master-admin)/members/reset-password')}
-            color={colors.neutral[500]}
+            title={t('wiki.profileLink')}
+            icon="help-circle"
+            onPress={() => router.push('/(master-admin)/wiki')}
+            color={colors.primary[500]}
           />
           <Card variant="default" style={styles.navCard} onPress={toggleLanguage}>
             <View style={styles.navContent}>

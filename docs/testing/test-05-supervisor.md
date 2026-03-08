@@ -17,6 +17,21 @@
 
 ---
 
+## Quick Smoke Test
+
+> Run these first. If any fail, stop and investigate before continuing with the full script.
+
+- [ ] **QS-01** Login → supervisor dashboard with 4 tabs: Home, Teachers, Reports, Profile
+- [ ] **QS-02** Dashboard stats load via `get_supervisor_dashboard_stats()` RPC
+- [ ] **QS-03** Teachers tab shows only supervised teachers (not all teachers)
+- [ ] **QS-04** Can tap a teacher → details screen loads with students and session stats
+- [ ] **QS-05** Reports tab loads with program-scoped data
+- [ ] **QS-06** Profile tab loads with profile info
+- [ ] **QS-07** Notification preferences accessible from Profile
+- [ ] **QS-08** Cannot navigate to `/(teacher)/` or `/(master-admin)/` (RLS blocks data)
+
+---
+
 ## 1. Dashboard Verification
 
 ### 1.1 Dashboard Home (`(tabs)/index.tsx`)
@@ -183,6 +198,13 @@
 - [ ] Cancel/discard reverts changes without saving
 - [ ] Logout action is available and functional
 
+### 8.2 Notification Preferences (`notification-preferences.tsx`)
+- [ ] Navigate to notification preferences from Profile screen
+- [ ] Notification categories listed with on/off toggles
+- [ ] Toggle a category off — preference saved
+- [ ] Toggle it back on — preference restored
+- [ ] Verify in `notification_preferences` table that changes persist
+
 ---
 
 ## 9. Negative Tests
@@ -190,7 +212,6 @@
 ### 9.1 Route Restrictions
 - [ ] Navigating to `/(teacher)/` URL directly does not show teacher dashboard (RLS blocks)
 - [ ] Navigating to `/(student)/` URL directly does not show student dashboard (RLS blocks)
-- [ ] Navigating to `/(admin)/` URL directly does not show admin dashboard (RLS blocks)
 - [ ] Navigating to `/(program-admin)/` URL directly does not show program admin data (RLS blocks)
 - [ ] Navigating to `/(master-admin)/` URL directly does not show master admin data (RLS blocks)
 
@@ -201,7 +222,7 @@
 - [ ] Supervisor CANNOT manage team assignments (program_admin scope only)
 - [ ] Supervisor CANNOT access master admin features (platform config, global user management)
 - [ ] Supervisor CANNOT create or manage programs (program_admin/master_admin scope only)
-- [ ] Supervisor CANNOT create or manage cohorts/tracks
+- [ ] Supervisor CANNOT create or manage classes/tracks
 - [ ] Supervisor CANNOT approve/reject enrollment applications
 
 ### 9.3 Data Scoping

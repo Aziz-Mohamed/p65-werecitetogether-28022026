@@ -1,7 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { Tables } from '@/types/database.types';
 
-/** @deprecated class_id is deprecated. New features MUST use cohort_id instead. See PRD Section 0.5. */
 interface TeacherRecentSession extends Tables<'scheduled_sessions'> {
   class: Pick<Tables<'classes'>, 'name' | 'name_localized'> | null;
   student: {

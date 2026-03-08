@@ -1,22 +1,35 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Alert, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import {
+  BottomSheetModal,
+  BottomSheetModalProvider,
+  BottomSheetBackdrop,
+  type BottomSheetBackdropProps,
+} from '@gorhom/bottom-sheet';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Avatar } from '@/components/ui/Avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
+import { normalize } from '@/theme/normalize';
 import { radius } from '@/theme/radius';
 
-import { UserSearchSheet } from '@/features/admin/components/UserSearchSheet';
+import { UserSearchSheet, type UserSearchResult } from '@/features/admin/components/UserSearchSheet';
 import { useProgramTeam } from '@/features/admin/hooks/useProgramTeam';
 import type { ProgramRoleType } from '@/features/programs/types/programs.types';
 
 const ROLES: ProgramRoleType[] = ['teacher', 'supervisor'];
+
+const ROLE_ICONS: Record<string, string> = {
+  teacher: 'school-outline',
+  supervisor: 'eye-outline',
+};
 
 export default function AddTeamMember() {
   const { t } = useTranslation();
@@ -25,11 +38,24 @@ export default function AddTeamMember() {
   const router = useRouter();
   const team = useProgramTeam(programId);
 
-  const [selectedUser, setSelectedUser] = useState<{ id: string; full_name: string } | null>(null);
+  const searchSheetRef = useRef<BottomSheetModal>(null);
+  const roleSheetRef = useRef<BottomSheetModal>(null);
+  const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(null);
   const [selectedRole, setSelectedRole] = useState<ProgramRoleType>('teacher');
-  const [showSearch, setShowSearch] = useState(true);
 
-  const handleAssign = () => {
+  const roleSnapPoints = useMemo(() => ['45%'], []);
+
+  const handleOpenSearch = useCallback(() => {
+    searchSheetRef.current?.present();
+  }, []);
+
+  const handleUserSelected = useCallback((user: UserSearchResult) => {
+    setSelectedUser(user);
+    setSelectedRole('teacher');
+    setTimeout(() => roleSheetRef.current?.present(), 300);
+  }, []);
+
+  const handleAssign = useCallback(() => {
     if (!selectedUser || !programId || !session?.user?.id) return;
 
     team.assign.mutate(
@@ -39,6 +65,7 @@ export default function AddTeamMember() {
       },
       {
         onSuccess: () => {
+          roleSheetRef.current?.dismiss();
           Alert.alert(t('common.success'), t('admin.programAdmin.team.assignSuccess'));
           router.back();
         },
@@ -47,67 +74,100 @@ export default function AddTeamMember() {
         },
       },
     );
-  };
+  }, [selectedUser, programId, session?.user?.id, selectedRole, team.assign, t, router]);
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
+    ),
+    [],
+  );
 
   return (
-    <Screen>
-      <View style={styles.container}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backText}>{t('common.back')}</Text>
-        </Pressable>
+    <BottomSheetModalProvider>
+      <Screen>
+        <View style={styles.container}>
+          <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Text style={styles.backText}>{t('common.back')}</Text>
+          </Pressable>
 
-        <Text style={styles.title}>{t('admin.programAdmin.team.addMember')}</Text>
+          <Text style={styles.title}>{t('admin.programAdmin.team.addMember')}</Text>
 
-        {selectedUser ? (
-          <View style={styles.selectedUser}>
-            <Text style={styles.selectedName}>{selectedUser.full_name}</Text>
-            <Pressable onPress={() => { setSelectedUser(null); setShowSearch(true); }}>
-              <Text style={styles.changeText}>{t('common.edit')}</Text>
-            </Pressable>
-          </View>
-        ) : (
           <Button
-            title={t('common.search')}
+            title={t('admin.programAdmin.team.searchUsers')}
             variant="secondary"
-            onPress={() => setShowSearch(true)}
+            onPress={handleOpenSearch}
+            icon={<Ionicons name="search-outline" size={18} color={colors.secondary[700]} />}
             style={styles.searchButton}
           />
-        )}
-
-        <Text style={styles.sectionLabel}>{t('admin.programAdmin.team.rolePicker')}</Text>
-        <View style={styles.roleRow}>
-          {ROLES.map((role) => (
-            <Pressable
-              key={role}
-              style={[styles.roleChip, selectedRole === role && styles.roleChipActive]}
-              onPress={() => setSelectedRole(role)}
-              accessibilityRole="button"
-            >
-              <Text style={[styles.roleChipText, selectedRole === role && styles.roleChipTextActive]}>
-                {role.replace('_', ' ')}
-              </Text>
-            </Pressable>
-          ))}
         </View>
+      </Screen>
 
-        <Button
-          title={t('admin.programAdmin.team.addMember')}
-          onPress={handleAssign}
-          disabled={!selectedUser || team.assign.isPending}
-          loading={team.assign.isPending}
-          style={styles.assignButton}
-        />
+      <UserSearchSheet
+        ref={searchSheetRef}
+        onSelect={handleUserSelected}
+      />
 
-        <UserSearchSheet
-          isOpen={showSearch && !selectedUser}
-          onClose={() => setShowSearch(false)}
-          onSelect={(user) => {
-            setSelectedUser({ id: user.id, full_name: user.full_name });
-            setShowSearch(false);
-          }}
-        />
-      </View>
-    </Screen>
+      {/* ── Role Picker Sheet ── */}
+      <BottomSheetModal
+        ref={roleSheetRef}
+        snapPoints={roleSnapPoints}
+        backdropComponent={renderBackdrop}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        handleIndicatorStyle={styles.handleIndicator}
+        backgroundStyle={styles.sheetBackground}
+        onDismiss={() => setSelectedUser(null)}
+      >
+        {selectedUser && (
+          <View style={styles.roleSheetContent}>
+            <View style={styles.userInfo}>
+              <Avatar
+                name={selectedUser.full_name}
+                source={selectedUser.avatar_url ?? undefined}
+                size="lg"
+              />
+              <Text style={styles.userName}>{selectedUser.full_name}</Text>
+              <Text style={styles.userRole}>{selectedUser.role.replace('_', ' ')}</Text>
+            </View>
+
+            <Text style={styles.sectionLabel}>
+              {t('admin.programAdmin.team.rolePicker')}
+            </Text>
+            <View style={styles.roleGrid}>
+              {ROLES.map((role) => {
+                const isActive = selectedRole === role;
+                return (
+                  <Pressable
+                    key={role}
+                    style={[styles.roleCard, isActive && styles.roleCardActive]}
+                    onPress={() => setSelectedRole(role)}
+                  >
+                    <Ionicons
+                      name={ROLE_ICONS[role] as any}
+                      size={20}
+                      color={isActive ? colors.primary[600] : colors.neutral[400]}
+                    />
+                    <Text style={[styles.roleCardText, isActive && styles.roleCardTextActive]}>
+                      {role.replace('_', ' ')}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <Button
+              title={t('admin.programAdmin.team.addMember')}
+              onPress={handleAssign}
+              loading={team.assign.isPending}
+              disabled={team.assign.isPending}
+              variant="primary"
+              size="lg"
+            />
+          </View>
+        )}
+      </BottomSheetModal>
+    </BottomSheetModalProvider>
   );
 }
 
@@ -130,64 +190,74 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.base,
     marginBottom: spacing.xl,
   },
-  selectedUser: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
-    marginHorizontal: spacing.base,
-    backgroundColor: lightTheme.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: lightTheme.border,
-    marginBottom: spacing.base,
-  },
-  selectedName: {
-    ...typography.textStyles.bodyMedium,
-    color: lightTheme.text,
-  },
-  changeText: {
-    ...typography.textStyles.body,
-    color: colors.primary[500],
-  },
   searchButton: {
     marginHorizontal: spacing.base,
-    marginBottom: spacing.base,
   },
-  sectionLabel: {
-    ...typography.textStyles.label,
-    color: lightTheme.textSecondary,
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.sm,
-    textTransform: 'uppercase',
+
+  // ── Role Picker Sheet ──
+  sheetBackground: {
+    borderTopLeftRadius: normalize(20),
+    borderTopRightRadius: normalize(20),
   },
-  roleRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.xl,
+  handleIndicator: {
+    backgroundColor: colors.neutral[300],
+    width: normalize(36),
+    height: normalize(4),
   },
-  roleChip: {
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: lightTheme.border,
+  roleSheetContent: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing['2xl'],
+    gap: spacing.lg,
   },
-  roleChipActive: {
-    backgroundColor: colors.primary[50],
-    borderColor: colors.primary[500],
+  userInfo: {
+    alignItems: 'center',
+    gap: spacing.xs,
   },
-  roleChipText: {
-    ...typography.textStyles.body,
+  userName: {
+    ...typography.textStyles.subheading,
+    color: lightTheme.text,
+    marginTop: spacing.xs,
+  },
+  userRole: {
+    ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
     textTransform: 'capitalize',
   },
-  roleChipTextActive: {
-    color: colors.primary[700],
+  sectionLabel: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: normalize(13),
+    lineHeight: normalize(18),
+    color: colors.neutral[500],
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  assignButton: {
-    marginHorizontal: spacing.base,
+  roleGrid: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  roleCard: {
+    flex: 1,
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.neutral[200],
+    backgroundColor: colors.white,
+  },
+  roleCardActive: {
+    backgroundColor: colors.primary[50],
+    borderColor: colors.primary[400],
+  },
+  roleCardText: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: normalize(12),
+    lineHeight: normalize(16),
+    color: colors.neutral[500],
+    textTransform: 'capitalize',
+  },
+  roleCardTextActive: {
+    color: colors.primary[700],
   },
 });
