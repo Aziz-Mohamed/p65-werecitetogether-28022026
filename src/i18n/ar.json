@@ -21,6 +21,7 @@
     "remove": "إزالة",
     "success": "نجاح",
     "signOut": "تسجيل الخروج",
+    "viewAll": "عرض الكل",
     "language": "اللغة",
     "english": "English",
     "arabic": "العربية",
@@ -111,7 +112,6 @@
       "student": "طالب",
       "teacher": "معلّم",
       "parent": "ولي أمر",
-      "admin": "مدير",
       "supervisor": "مشرف",
       "program_admin": "مدير البرنامج",
       "master_admin": "المدير العام"
@@ -138,7 +138,6 @@
     "student": "طالب",
     "teacher": "معلّم",
     "parent": "وليّ أمر",
-    "admin": "مدير",
     "supervisor": "مشرف",
     "program_admin": "مدير البرنامج",
     "master_admin": "المدير العام"
@@ -372,6 +371,14 @@
     "addClass": "إضافة فصل",
     "bulkAttendance": "حضور جماعي",
     "schoolHealth": "صحّة المدرسة",
+    "detail": {
+      "personalInfo": "المعلومات الشخصية",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "joined": "تاريخ الانضمام",
+      "programRoles": "البرامج والأدوار",
+      "noPrograms": "غير مسجل في أي برنامج"
+    },
     "students": {
       "title": "الطلاب",
       "subtitle": "إدارة طلاب مدرستك",
@@ -390,6 +397,8 @@
       "class": "الفصل",
       "classPlaceholder": "اختر فصلاً (اختياري)",
       "dateOfBirth": "تاريخ الميلاد",
+      "enrollmentDate": "تاريخ التسجيل",
+      "longestStreak": "أطول سلسلة",
       "level": "المستوى",
       "noClass": "بدون فصل",
       "createButton": "إنشاء الطالب",
@@ -424,6 +433,7 @@
       "notFound": "المعلّم غير موجود",
       "classes": "فصول",
       "assignedClasses": "الفصول المُعيَّنة",
+      "noClasses": "لا فصول",
       "deactivate": "تعطيل",
       "activate": "تفعيل",
       "deactivateTitle": "تعطيل المعلّم؟",
@@ -455,6 +465,20 @@
       "selectChildrenPlaceholder": "اختر طالبًا واحدًا على الأقل...",
       "selectChildrenRequired": "يجب ربط طفل واحد على الأقل",
       "manageChildren": "إدارة الأبناء المرتبطين"
+    },
+    "supervisors": {
+      "title": "المشرفون",
+      "searchPlaceholder": "البحث عن المشرفين...",
+      "emptyTitle": "لا يوجد مشرفون",
+      "emptyDescription": "لم يتم تعيين مشرفين بعد.",
+      "programs": "{{count}} برامج"
+    },
+    "programAdmins": {
+      "title": "مديرو البرامج",
+      "searchPlaceholder": "البحث عن مديري البرامج...",
+      "emptyTitle": "لا يوجد مديرو برامج",
+      "emptyDescription": "لم يتم تعيين مديري برامج بعد.",
+      "programs": "{{count}} برامج"
     },
     "classes": {
       "title": "الفصول",
@@ -760,6 +784,7 @@
         "totalStudents": "إجمالي الطلاب",
         "totalTeachers": "إجمالي المعلمين",
         "activeSessions": "الجلسات النشطة",
+        "programsCount": "البرامج",
         "programsOverview": "نظرة عامة على البرامج",
         "enrolled": "{{count}} مسجلين",
         "sessions": "{{count}} جلسات"
@@ -831,7 +856,19 @@
       },
       "programs": {
         "team": "فريق البرنامج",
-        "noTeam": "لم يتم تعيين أعضاء للفريق"
+        "noTeam": "لم يتم تعيين أعضاء للفريق",
+        "overview": "نظرة عامة على البرنامج",
+        "settings": "إعدادات البرنامج",
+        "editSettings": "تعديل تفاصيل وإعدادات البرنامج",
+        "enrolledStudents": "المسجلين",
+        "teamMembers": "الفريق",
+        "activeCohorts": "{{count}} مجموعات",
+        "activeTracks": "{{count}} مسارات",
+        "sessionsThisWeek": "الجلسات (٧ أيام)",
+        "viewTeam": "الفريق",
+        "viewTracks": "المسارات",
+        "viewCohorts": "المجموعات",
+        "teamSummary": "{{admins}} مشرفين, {{teachers}} معلمين, {{supervisors}} موجهين"
       }
     }
   },
@@ -1128,6 +1165,12 @@
       "completed": "مكتمل",
       "archived": "مؤرشف"
     },
+    "cohortAction": {
+      "enrollment_closed": "إغلاق التسجيل",
+      "in_progress": "بدء البرنامج",
+      "completed": "تحديد كمكتمل",
+      "archived": "أرشفة"
+    },
     "actions": {
       "enroll": "تسجيل",
       "join": "انضمام",
@@ -1178,7 +1221,9 @@
       "cohortName": "اسم الدفعة",
       "selectTrack": "اختر المسار",
       "selectTeacher": "اختر المعلّم",
-      "selectCategory": "اختر الفئة"
+      "selectCategory": "اختر الفئة",
+      "enrolled": "مسجّل",
+      "sessions": "جلسات"
     },
     "empty": {
       "programs": "لا توجد برامج متاحة",

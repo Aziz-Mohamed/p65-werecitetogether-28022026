@@ -83,7 +83,7 @@ export default function CohortDetailScreen() {
             />
             {nextStatus && (
               <Button
-                title={t(`programs.cohortStatus.${nextStatus}`)}
+                title={t(`programs.cohortAction.${nextStatus}`)}
                 onPress={handleStatusTransition}
                 variant="primary"
                 size="sm"

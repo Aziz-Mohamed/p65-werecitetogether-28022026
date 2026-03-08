@@ -5,10 +5,8 @@ interface UseRoleReturn {
   role: UserRole | null;
   isStudent: boolean;
   isTeacher: boolean;
-  isSupervisor: boolean;
-  isProgramAdmin: boolean;
+  isParent: boolean;
   isMasterAdmin: boolean;
-  onboardingCompleted: boolean;
 }
 
 export const useRole = (): UseRoleReturn => {
@@ -19,10 +17,8 @@ export const useRole = (): UseRoleReturn => {
     role,
     isStudent: role === 'student',
     isTeacher: role === 'teacher',
-    isSupervisor: role === 'supervisor',
-    isProgramAdmin: role === 'program_admin',
+    isParent: role === 'parent',
     isMasterAdmin: role === 'master_admin',
-    onboardingCompleted: profile?.onboarding_completed ?? false,
   };
 };
 

@@ -1,0 +1,16 @@
+import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
+
+/**
+ * Heritage stickers are globally seeded — custom creation is no longer supported.
+ * This route redirects back to the catalog.
+ */
+export default function CreateStickerScreen() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.back();
+  }, [router]);
+
+  return null;
+}

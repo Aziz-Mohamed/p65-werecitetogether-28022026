@@ -1,72 +1,89 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Alert } from 'react-native';
+import { StyleSheet, View, Text, Alert, Pressable, Switch, I18nManager } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { FlashList } from '@shopify/flash-list';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
-import { TextField, Button, Badge } from '@/components/ui';
+import { TextField, Button } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useProgram } from '@/features/programs/hooks/useProgram';
-import { useCreateTrack } from '@/features/programs/hooks/useAdminPrograms';
+import { useCreateTrack, useUpdateTrack } from '@/features/programs/hooks/useAdminPrograms';
 import { useLocalizedField } from '@/features/programs/utils/enrollment-helpers';
 import { typography } from '@/theme/typography';
-import { lightTheme } from '@/theme/colors';
+import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { normalize } from '@/theme/normalize';
 import type { ProgramTrack } from '@/features/programs/types/programs.types';
-
-const trackSchema = z.object({
-  name: z.string().min(1),
-  name_ar: z.string().min(1),
-  description: z.string().optional(),
-  description_ar: z.string().optional(),
-  sortOrder: z.number().min(0),
-});
-
-type TrackFormData = z.infer<typeof trackSchema>;
 
 export default function TrackManagementScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
   const localize = useLocalizedField();
-  const [showForm, setShowForm] = useState(false);
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Create form state
+  const [createName, setCreateName] = useState('');
+  const [createNameAr, setCreateNameAr] = useState('');
+  const [createSort, setCreateSort] = useState('0');
+
+  // Edit form state
+  const [editName, setEditName] = useState('');
+  const [editNameAr, setEditNameAr] = useState('');
+  const [editSort, setEditSort] = useState('0');
+  const [editActive, setEditActive] = useState(true);
 
   const { data: program, isLoading, error, refetch } = useProgram(id);
   const createTrack = useCreateTrack();
+  const updateTrack = useUpdateTrack();
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<TrackFormData>({
-    resolver: zodResolver(trackSchema),
-    defaultValues: { name: '', name_ar: '', description: '', description_ar: '', sortOrder: 0 },
-  });
-
-  const onSubmit = async (data: TrackFormData) => {
-    if (!id) return;
+  const handleCreate = async () => {
+    if (!id || !createName.trim() || !createNameAr.trim()) return;
     const { error: err } = await createTrack.mutateAsync({
       programId: id,
-      name: data.name,
-      name_ar: data.name_ar,
-      description: data.description || undefined,
-      description_ar: data.description_ar || undefined,
-      sortOrder: data.sortOrder,
+      name: createName.trim(),
+      name_ar: createNameAr.trim(),
+      sortOrder: Number(createSort) || 0,
     });
-
     if (err) {
       Alert.alert(t('common.error'), err.message);
       return;
     }
+    setCreateName('');
+    setCreateNameAr('');
+    setCreateSort('0');
+    setShowCreate(false);
+  };
 
-    reset();
-    setShowForm(false);
+  const startEdit = (track: ProgramTrack) => {
+    setEditingId(track.id);
+    setEditName(track.name);
+    setEditNameAr(track.name_ar);
+    setEditSort(String(track.sort_order));
+    setEditActive(track.is_active);
+    setShowCreate(false);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingId || !editName.trim() || !editNameAr.trim()) return;
+    const { error: err } = await updateTrack.mutateAsync({
+      trackId: editingId,
+      input: {
+        name: editName.trim(),
+        name_ar: editNameAr.trim(),
+        sort_order: Number(editSort) || 0,
+        is_active: editActive,
+      },
+    });
+    if (err) {
+      Alert.alert(t('common.error'), err.message);
+      return;
+    }
+    setEditingId(null);
   };
 
   if (isLoading) return <LoadingState />;
@@ -82,56 +99,45 @@ export default function TrackManagementScreen() {
           <Text style={styles.title}>{t('programs.labels.tracks')}</Text>
           <Button
             title={t('common.add')}
-            onPress={() => setShowForm(!showForm)}
-            variant="primary"
+            onPress={() => { setShowCreate(!showCreate); setEditingId(null); }}
+            variant="ghost"
             size="sm"
           />
         </View>
 
-        {showForm && (
+        {showCreate && (
           <Card variant="outlined" style={styles.form}>
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, value } }) => (
-                <TextField
-                  label={t('programs.labels.trackName')}
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.name?.message}
-                />
-              )}
+            <TextField
+              label={t('programs.labels.trackName')}
+              value={createName}
+              onChangeText={setCreateName}
             />
-            <Controller
-              control={control}
-              name="name_ar"
-              render={({ field: { onChange, value } }) => (
-                <TextField
-                  label={t('programs.labels.trackNameAr')}
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.name_ar?.message}
-                />
-              )}
+            <TextField
+              label={t('programs.labels.trackNameAr')}
+              value={createNameAr}
+              onChangeText={setCreateNameAr}
             />
-            <Controller
-              control={control}
-              name="sortOrder"
-              render={({ field: { onChange, value } }) => (
-                <TextField
-                  label={t('programs.labels.sortOrder')}
-                  value={String(value)}
-                  onChangeText={(v) => onChange(Number(v) || 0)}
-                  keyboardType="numeric"
-                />
-              )}
+            <TextField
+              label={t('programs.labels.sortOrder')}
+              value={createSort}
+              onChangeText={setCreateSort}
+              keyboardType="numeric"
             />
-            <Button
-              title={t('common.save')}
-              onPress={handleSubmit(onSubmit)}
-              variant="primary"
-              loading={createTrack.isPending}
-            />
+            <View style={styles.formActions}>
+              <Button
+                title={t('common.cancel')}
+                onPress={() => setShowCreate(false)}
+                variant="ghost"
+                size="sm"
+              />
+              <Button
+                title={t('common.save')}
+                onPress={handleCreate}
+                variant="primary"
+                size="sm"
+                loading={createTrack.isPending}
+              />
+            </View>
           </Card>
         )}
 
@@ -141,33 +147,76 @@ export default function TrackManagementScreen() {
             title={t('programs.labels.noTracks')}
           />
         ) : (
-          <FlashList
-            data={tracks}
-            keyExtractor={(item) => item.id}
-            estimatedItemSize={70}
-            scrollEnabled={false}
-            renderItem={({ item }: { item: ProgramTrack }) => (
-              <Card variant="outlined" style={styles.card}>
-                <View style={styles.cardRow}>
-                  <Text style={styles.trackName} numberOfLines={1}>
-                    {localize(item.name, item.name_ar)}
-                  </Text>
-                  {item.track_type && (
-                    <Badge
-                      label={t(`programs.category.${item.track_type}`)}
-                      variant={item.track_type === 'free' ? 'success' : 'info'}
+          tracks.map((item) => {
+            const isEditing = editingId === item.id;
+
+            if (isEditing) {
+              return (
+                <Card key={item.id} variant="outlined" style={styles.form}>
+                  <TextField
+                    label={t('programs.labels.trackName')}
+                    value={editName}
+                    onChangeText={setEditName}
+                  />
+                  <TextField
+                    label={t('programs.labels.trackNameAr')}
+                    value={editNameAr}
+                    onChangeText={setEditNameAr}
+                  />
+                  <TextField
+                    label={t('programs.labels.sortOrder')}
+                    value={editSort}
+                    onChangeText={setEditSort}
+                    keyboardType="numeric"
+                  />
+                  <View style={styles.switchRow}>
+                    <Text style={styles.switchLabel}>{t('common.active')}</Text>
+                    <Switch value={editActive} onValueChange={setEditActive} />
+                  </View>
+                  <View style={styles.formActions}>
+                    <Button
+                      title={t('common.cancel')}
+                      onPress={() => setEditingId(null)}
+                      variant="ghost"
                       size="sm"
                     />
-                  )}
-                  <Badge
-                    label={item.is_active ? t('common.active') : t('common.inactive')}
-                    variant={item.is_active ? 'success' : 'warning'}
-                    size="sm"
+                    <Button
+                      title={t('common.save')}
+                      onPress={handleUpdate}
+                      variant="primary"
+                      size="sm"
+                      loading={updateTrack.isPending}
+                    />
+                  </View>
+                </Card>
+              );
+            }
+
+            const metaParts = [
+              item.track_type ? t(`programs.category.${item.track_type}`) : null,
+              !item.is_active ? t('common.inactive') : null,
+            ].filter(Boolean);
+
+            return (
+              <Card key={item.id} variant="default" style={styles.card} onPress={() => startEdit(item)}>
+                <View style={styles.cardRow}>
+                  <View style={styles.cardContent}>
+                    <Text style={[styles.trackName, !item.is_active && styles.inactive]} numberOfLines={1}>
+                      {localize(item.name, item.name_ar)}
+                    </Text>
+                    {metaParts.length > 0 && (
+                      <Text style={styles.metaText}>{metaParts.join('  ·  ')}</Text>
+                    )}
+                  </View>
+                  <Ionicons
+                    name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
+                    size={16}
+                    color={colors.neutral[300]}
                   />
                 </View>
               </Card>
-            )}
-          />
+            );
+          })
         )}
       </View>
     </Screen>
@@ -194,18 +243,45 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.base,
   },
+  formActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: spacing.sm,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.xs,
+  },
+  switchLabel: {
+    ...typography.textStyles.body,
+    color: lightTheme.text,
+  },
   card: {
-    marginBottom: spacing.sm,
+    padding: spacing.md,
   },
   cardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.md,
+  },
+  cardContent: {
+    flex: 1,
+    gap: normalize(3),
   },
   trackName: {
-    ...typography.textStyles.body,
-    fontFamily: typography.fontFamily.semiBold,
+    ...typography.textStyles.bodyMedium,
     color: lightTheme.text,
-    flex: 1,
+    fontSize: normalize(15),
+  },
+  inactive: {
+    color: colors.neutral[400],
+  },
+  metaText: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: normalize(12),
+    color: colors.neutral[400],
+    textTransform: 'capitalize',
   },
 });

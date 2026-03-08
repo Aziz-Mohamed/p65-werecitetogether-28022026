@@ -21,6 +21,7 @@
     "remove": "Remove",
     "success": "Success",
     "signOut": "Sign Out",
+    "viewAll": "View All",
     "language": "Language",
     "english": "English",
     "arabic": "العربية",
@@ -111,7 +112,6 @@
       "student": "Student",
       "teacher": "Teacher",
       "parent": "Parent",
-      "admin": "Admin",
       "supervisor": "Supervisor",
       "program_admin": "Program Admin",
       "master_admin": "Master Admin"
@@ -138,7 +138,6 @@
     "student": "Student",
     "teacher": "Teacher",
     "parent": "Parent",
-    "admin": "Admin",
     "supervisor": "Supervisor",
     "program_admin": "Program Admin",
     "master_admin": "Master Admin"
@@ -483,6 +482,14 @@
     "addClass": "Add Class",
     "bulkAttendance": "Bulk Attendance",
     "schoolHealth": "School Health",
+    "detail": {
+      "personalInfo": "Personal Information",
+      "email": "Email",
+      "phone": "Phone",
+      "joined": "Joined",
+      "programRoles": "Programs & Roles",
+      "noPrograms": "Not assigned to any programs"
+    },
     "students": {
       "title": "Students",
       "subtitle": "Manage students in your school",
@@ -501,6 +508,8 @@
       "class": "Class",
       "classPlaceholder": "Select a class (optional)",
       "dateOfBirth": "Date of Birth",
+      "enrollmentDate": "Enrollment Date",
+      "longestStreak": "Longest Streak",
       "level": "Level",
       "noClass": "No Class",
       "createButton": "Create Student",
@@ -535,6 +544,7 @@
       "notFound": "Teacher not found",
       "classes": "classes",
       "assignedClasses": "Assigned Classes",
+      "noClasses": "No classes",
       "deactivate": "Deactivate",
       "activate": "Activate",
       "deactivateTitle": "Deactivate Teacher?",
@@ -566,6 +576,20 @@
       "selectChildrenPlaceholder": "Select at least one student...",
       "selectChildrenRequired": "At least one child must be linked",
       "manageChildren": "Manage Linked Children"
+    },
+    "supervisors": {
+      "title": "Supervisors",
+      "searchPlaceholder": "Search supervisors...",
+      "emptyTitle": "No Supervisors",
+      "emptyDescription": "No supervisors have been assigned yet.",
+      "programs": "{{count}} programs"
+    },
+    "programAdmins": {
+      "title": "Program Admins",
+      "searchPlaceholder": "Search program admins...",
+      "emptyTitle": "No Program Admins",
+      "emptyDescription": "No program admins have been assigned yet.",
+      "programs": "{{count}} programs"
     },
     "classes": {
       "title": "Classes",
@@ -871,6 +895,7 @@
         "totalStudents": "Total Students",
         "totalTeachers": "Total Teachers",
         "activeSessions": "Active Sessions",
+        "programsCount": "Programs",
         "programsOverview": "Programs Overview",
         "enrolled": "{{count}} enrolled",
         "sessions": "{{count}} sessions"
@@ -942,7 +967,19 @@
       },
       "programs": {
         "team": "Program Team",
-        "noTeam": "No team members assigned"
+        "noTeam": "No team members assigned",
+        "overview": "Program Overview",
+        "settings": "Program Settings",
+        "editSettings": "Edit program details & configuration",
+        "enrolledStudents": "Enrolled",
+        "teamMembers": "Team",
+        "activeCohorts": "{{count}} cohorts",
+        "activeTracks": "{{count}} tracks",
+        "sessionsThisWeek": "Sessions (7d)",
+        "viewTeam": "Team",
+        "viewTracks": "Tracks",
+        "viewCohorts": "Cohorts",
+        "teamSummary": "{{admins}} admins, {{teachers}} teachers, {{supervisors}} supervisors"
       }
     }
   },
@@ -1510,6 +1547,12 @@
       "completed": "Completed",
       "archived": "Archived"
     },
+    "cohortAction": {
+      "enrollment_closed": "Close Enrollment",
+      "in_progress": "Start Program",
+      "completed": "Mark Complete",
+      "archived": "Archive"
+    },
     "actions": {
       "enroll": "Enroll",
       "join": "Join",
@@ -1560,7 +1603,9 @@
       "cohortName": "Cohort Name",
       "selectTrack": "Select Track",
       "selectTeacher": "Select Teacher",
-      "selectCategory": "Select Category"
+      "selectCategory": "Select Category",
+      "enrolled": "enrolled",
+      "sessions": "sessions"
     },
     "empty": {
       "programs": "No programs available",

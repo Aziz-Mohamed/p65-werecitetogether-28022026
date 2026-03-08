@@ -4,14 +4,13 @@ import { colors } from '@/theme/colors';
 /**
  * Provides a semantic theme color set based on the current user's role.
  *
- * Student       -> Indigo  (Learning & Growth)
- * Teacher       -> Violet  (Spirituality & Wisdom)
- * Supervisor    -> Rose    (Care & Oversight)
- * Program Admin -> Sky     (Management & Clarity)
- * Master Admin  -> Emerald (Platform & Trust)
+ * Student      -> Indigo (Learning & Growth)
+ * Parent       -> Rose   (Care & Community)
+ * Teacher      -> Violet (Spirituality & Wisdom)
+ * Master Admin -> Sky    (Management & Clarity)
  */
 export const useRoleTheme = () => {
-  const { isStudent, isTeacher, isSupervisor, isProgramAdmin, isMasterAdmin } = useRole();
+  const { isStudent, isParent, isTeacher, isMasterAdmin } = useRole();
 
   if (isStudent) {
     return {
@@ -33,17 +32,7 @@ export const useRoleTheme = () => {
     };
   }
 
-  if (isSupervisor) {
-    return {
-      primary: colors.accent.rose[500],
-      primaryLight: colors.accent.rose[50],
-      primaryDark: colors.accent.rose[600],
-      gradient: colors.gradients.rose,
-      tag: 'rose' as const,
-    };
-  }
-
-  if (isProgramAdmin) {
+  if (isMasterAdmin) {
     return {
       primary: colors.accent.sky[500],
       primaryLight: colors.accent.sky[50],

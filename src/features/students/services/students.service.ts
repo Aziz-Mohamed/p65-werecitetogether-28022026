@@ -54,7 +54,7 @@ class StudentsService {
     return supabase
       .from('students')
       .select(
-        '*, profiles!students_id_fkey!inner(full_name, name_localized, username, avatar_url, phone), classes(name, name_localized, id), parent:profiles!students_parent_id_fkey(full_name, name_localized)',
+        '*, profiles!students_id_fkey!inner(full_name, name_localized, username, avatar_url, phone, created_at), classes(name, name_localized, id), parent:profiles!students_parent_id_fkey(full_name, name_localized)',
       )
       .eq('id', id)
       .single();

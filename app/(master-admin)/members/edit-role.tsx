@@ -14,8 +14,7 @@ import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import type { UserRole } from '@/types/common.types';
 
-const ADMIN_ASSIGNABLE_ROLES: UserRole[] = ['student', 'teacher', 'parent'];
-const ALL_ROLES: UserRole[] = ['student', 'teacher', 'parent', 'admin', 'supervisor', 'program_admin', 'master_admin'];
+const ALL_ROLES: UserRole[] = ['student', 'teacher', 'parent', 'supervisor', 'program_admin', 'master_admin'];
 
 export default function EditRoleScreen() {
   const { t } = useTranslation();
@@ -26,8 +25,7 @@ export default function EditRoleScreen() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Determine allowed roles based on caller's role
-  const allowedRoles = callerRole === 'master_admin' ? ALL_ROLES : ADMIN_ASSIGNABLE_ROLES;
+  const allowedRoles = ALL_ROLES;
 
   // Fetch target user's profile
   const { data: targetProfile, isLoading } = useQuery({

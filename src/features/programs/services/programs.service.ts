@@ -198,6 +198,26 @@ class ProgramsService {
       .single();
   }
 
+  async updateTrack(
+    trackId: string,
+    input: {
+      name?: string;
+      name_ar?: string;
+      description?: string | null;
+      description_ar?: string | null;
+      track_type?: string | null;
+      sort_order?: number;
+      is_active?: boolean;
+    },
+  ) {
+    return supabase
+      .from('program_tracks')
+      .update(input)
+      .eq('id', trackId)
+      .select()
+      .single();
+  }
+
   /** PR-012: Assign program role */
   async assignProgramRole(input: AssignRoleInput, assignedBy: string) {
     return supabase

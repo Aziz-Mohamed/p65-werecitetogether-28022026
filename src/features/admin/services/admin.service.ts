@@ -65,6 +65,10 @@ class AdminService {
       .eq('role', 'program_admin');
   }
 
+  async getMasterAdminProgramsEnriched() {
+    return supabase.rpc('get_master_admin_programs_enriched');
+  }
+
   async getProgramAdminDashboardStats(programId: string) {
     return supabase.rpc('get_program_admin_dashboard_stats', {
       p_program_id: programId,
@@ -94,8 +98,8 @@ class AdminService {
   async searchUsersForAssignment(query: string, limit = 20) {
     return supabase
       .from('profiles')
-      .select('id, full_name, avatar_url, email, role')
-      .or(`full_name.ilike.%${query}%,email.ilike.%${query}%`)
+      .select('id, full_name, avatar_url, role')
+      .or(`full_name.ilike.%${query}%,username.ilike.%${query}%`)
       .limit(limit);
   }
 
@@ -124,6 +128,46 @@ class AdminService {
       .select('teacher_id')
       .in('teacher_id', teacherIds)
       .gte('created_at', startDate);
+  }
+
+  // ─── Role-Specific Lists ──────────────────────────────────────────────────
+
+  async getSupervisors(filters?: { searchQuery?: string }) {
+    let query = supabase
+      .from('profiles')
+      .select('id, full_name, name_localized, username, avatar_url')
+      .eq('role', 'supervisor');
+
+    if (filters?.searchQuery) {
+      query = query.or(
+        `full_name.ilike.%${filters.searchQuery}%,name_localized::text.ilike.%${filters.searchQuery}%`,
+      );
+    }
+
+    return query.order('full_name');
+  }
+
+  async getProgramAdmins(filters?: { searchQuery?: string }) {
+    let query = supabase
+      .from('profiles')
+      .select('id, full_name, name_localized, username, avatar_url')
+      .eq('role', 'program_admin');
+
+    if (filters?.searchQuery) {
+      query = query.or(
+        `full_name.ilike.%${filters.searchQuery}%,name_localized::text.ilike.%${filters.searchQuery}%`,
+      );
+    }
+
+    return query.order('full_name');
+  }
+
+  async getUserDetail(id: string) {
+    return supabase
+      .from('profiles')
+      .select('id, full_name, name_localized, username, avatar_url, phone, role, created_at')
+      .eq('id', id)
+      .single();
   }
 
   // ─── Master Admin ──────────────────────────────────────────────────────────
