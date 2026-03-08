@@ -822,90 +822,71 @@
     "dashboard": {
       "noRecentSessions": "لا توجد جلسات حديثة"
     },
-    "insights": {
-      "emptyDescription": "ستظهر التحليلات مع إجراء المزيد من الجلسات",
-      "emptyTitle": "لا توجد تحليلات بعد",
-      "noStreak": "لا توجد سلسلة بعد",
-      "noSupportDescription": "جميع طلابك يؤدون بشكل جيد",
-      "noSupportTitle": "لا حاجة للدعم",
-      "recentSessions": "الجلسات الأخيرة"
+    "revision": {
+      "good": "جيد",
+      "poor": "ضعيف",
+      "goodDesc": "الطالب تلا بشكل صحيح — تُعاد النضارة إلى 100%",
+      "poorDesc": "الطالب يحتاج مزيداً من التمرين — تُعاد النضارة إلى 50%",
+      "recertify": "إعادة إجازة",
+      "recertifyDesc": "خامل لأكثر من 90 يوماً — يتطلب إعادة إجازة كاملة",
+      "markJuzGood": "تقييم الجزء جيد",
+      "markJuzPoor": "تقييم الجزء ضعيف",
+      "batchConfirm": "تقييم كل {{count}} ربع في الجزء {{juz}} كـ{{action}}؟",
+      "batchSuccess": "تم تقييم {{count}} ربع بنجاح",
+      "certifiedOn": "تاريخ الإجازة",
+      "certifiedBy": "المعلّم",
+      "timesReviewed": "المراجعات",
+      "lastReviewed": "آخر مراجعة",
+      "daysAgo": "منذ {{count}} يوم",
+      "neverReviewed": "لم تتم المراجعة",
+      "addToPlan": "أضف لواجبات المراجعة",
+      "addToPlanDesc": "يُضاف إلى واجبات المراجعة",
+      "alreadyInPlan": "موجود في واجباتك",
+      "addedToPlan": "تمت الإضافة للواجبات!",
+      "askTeacher": "اطلب من معلّمك",
+      "askTeacherDesc": "اطلب من معلّمك إضافة هذا إلى مراجعتك",
+      "needsRecertNote": "هذا الربع يحتاج إعادة إجازة من معلّمك",
+      "mushafPage": "صفحة المصحف"
     },
-    "needsSupport": "يحتاج دعم",
-    "needsSupportDesc": "طلاب قد يحتاجون اهتماماً إضافياً",
-    "profile": {
-      "title": "ملف المعلم"
+    "badges": {
+      "title": "الشارات",
+      "earned": "مُحصّلة",
+      "locked": "مقفلة",
+      "earnedOn": "حُصلت في {{date}}",
+      "categories": {
+        "enrollment": "الاشتراك",
+        "sessions": "الجلسات",
+        "streak": "السلاسل"
+      },
+      "empty": "لم تحصل على شارات بعد. استمر!"
     },
-    "sessions": {
-      "detailTitle": "تفاصيل الجلسة",
-      "memorization": "الحفظ",
-      "notes": "ملاحظات",
-      "notesPlaceholder": "أضف ملاحظات الجلسة...",
-      "recitation": "التلاوة",
-      "scores": "الدرجات",
-      "student": "الطالب",
-      "tajweed": "التجويد"
+    "programLeaderboard": {
+      "title": "لوحة متصدري البرنامج",
+      "rank": "#{{rank}}",
+      "you": "أنت",
+      "level": "المستوى {{level}}",
+      "streak": "سلسلة {{count}} يوم",
+      "empty": "لا يوجد طلاب مسجلون بعد.",
+      "notEnrolled": "أنت غير مسجل في هذا البرنامج."
     },
-    "students": {
-      "emptyDescription": "سيظهر الطلاب عند تسجيلهم في حلقاتك",
-      "emptyTitle": "لا يوجد طلاب بعد",
-      "searchPlaceholder": "ابحث عن طلاب...",
-      "title": "طلابي"
+    "rewardsDashboard": {
+      "title": "لوحة المكافآت",
+      "stickersThisWeek": "ملصقات هذا الأسبوع",
+      "stickersThisMonth": "ملصقات هذا الشهر",
+      "topTeachers": "أفضل المعلمين",
+      "popularStickers": "الملصقات الأكثر شعبية",
+      "milestones": "شارات الإنجاز",
+      "awards": "{{count}} مكافأة",
+      "earned": "{{count}} محصّلة",
+      "noData": "لا توجد مكافآت ملصقات بعد."
     },
-    "topPerformers": "الأكثر تميّزاً",
-    "topPerformersDesc": "الطلاب ذوو أعلى الدرجات"
-  },
-  "certifications": {
-    "title": "الشهادات",
-    "myCertificates": "شهاداتي",
-    "noCertificates": "لا توجد شهادات",
-    "noCertificatesDesc": "ستظهر شهاداتك هنا بعد إصدارها",
-    "certificateNumber": "رقم الشهادة",
-    "issueDate": "تاريخ الإصدار",
-    "issuedBy": "صادرة من",
-    "chainOfNarration": "سلسلة السند",
-    "chainOfNarrationAr": "السند",
-    "recommend": "ترشيح للإجازة",
-    "recommendDesc": "تقديم هذا الطالب لمراجعة الإجازة",
-    "review": "مراجعة الإجازة",
-    "approve": "قبول",
-    "reject": "رفض",
-    "issue": "إصدار الشهادة",
-    "revoke": "سحب الشهادة",
-    "rejectionReason": "سبب الرفض",
-    "rejectionReasonRequired": "سبب الرفض مطلوب",
-    "revocationReason": "سبب السحب",
-    "revocationReasonRequired": "سبب السحب مطلوب",
-    "share": "مشاركة الشهادة",
-    "verify": "التحقق من الشهادة",
-    "download": "تحميل الشهادة",
-    "status": {
-      "recommended": "مرشّح",
-      "supervisor_approved": "موافق عليه",
-      "issued": "صادرة",
-      "rejected": "مرفوض",
-      "revoked": "مسحوبة"
+    "stickerSections": {
+      "global": "عامة",
+      "program": "{{programName}}"
     },
-    "type": {
-      "ijazah": "إجازة",
-      "completion": "إتمام",
-      "attendance": "حضور"
-    },
-    "eligibility": {
-      "title": "أهلية الإجازة",
-      "eligible": "مؤهل للإجازة",
-      "notEligible": "غير مؤهل بعد",
-      "progress": "{{completed}} من {{total}} أقسام مكتملة"
-    },
-    "requests": {
-      "title": "طلبات الإجازة",
-      "empty": "لا توجد طلبات معلّقة",
-      "emptyDesc": "ستظهر طلبات الإجازة هنا"
-    },
-    "verification": {
-      "title": "التحقق من الشهادة",
-      "valid": "شهادة صالحة",
-      "revoked": "تم سحب هذه الشهادة",
-      "notFound": "الشهادة غير موجودة"
+    "notifications": {
+      "badgeEarnedTitle": "حصلت على شارة!",
+      "badgeEarnedBody": "حصلت على شارة \"{{badgeName}}\" في {{programName}}!"
     }
   },
   "programs": {

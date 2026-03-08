@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sessionsService } from '../services/sessions.service';
-import type { CompleteSessionInput } from '../types';
+import { mutationTracker } from '@/features/realtime';
+import { gamificationService } from '@/features/gamification/services/gamification.service';
+import type { CreateSessionInput, SessionFilters } from '../types/sessions.types';
 
 export const useSessionsByStudent = (studentId: string | undefined, status?: string) =>
   useQuery({
@@ -51,6 +53,23 @@ export const useCompleteSession = () => {
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
       queryClient.invalidateQueries({ queryKey: ['session', data.id] });
       queryClient.invalidateQueries({ queryKey: ['teacher-dashboard'] });
+      queryClient.invalidateQueries({
+        queryKey: ['student-dashboard', variables.student_id],
+      });
+
+      // Check session milestones for badge awarding (fire-and-forget)
+      if (variables.program_id) {
+        gamificationService
+          .checkSessionMilestones(variables.student_id, variables.program_id)
+          .then(() => {
+            queryClient.invalidateQueries({
+              queryKey: ['gamification', 'badges', 'earned', variables.student_id],
+            });
+          })
+          .catch(() => {
+            // Non-critical: milestone check failure should not block session save
+          });
+      }
     },
   });
 };

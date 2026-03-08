@@ -2,16 +2,25 @@ import { supabase } from '@/lib/supabase';
 
 class GamificationService {
   /**
-   * GS-001: Get the global heritage sticker catalog.
-   * Returns all active stickers ordered by tier then name.
+   * GS-001: Get sticker catalog, optionally filtered by program IDs.
+   * When programIds provided: returns global stickers + stickers for those programs.
+   * When omitted: returns only global stickers (backward-compatible).
    */
-  async getStickers() {
-    return supabase
+  async getStickers(programIds?: string[]) {
+    let query = supabase
       .from('stickers')
-      .select('*')
+      .select('*, programs(name, name_ar)')
       .eq('is_active', true)
       .order('tier')
       .order('name_en');
+
+    if (programIds && programIds.length > 0) {
+      query = query.or(`program_id.is.null,program_id.in.(${programIds.join(',')})`);
+    } else {
+      query = query.is('program_id', null);
+    }
+
+    return query;
   }
 
   /**
@@ -216,6 +225,52 @@ class GamificationService {
       .from('students')
       .update({ current_level: level })
       .eq('id', studentId);
+  }
+
+  /**
+   * GS-017: Get all milestone badge types.
+   */
+  async getMilestoneBadges() {
+    return supabase
+      .from('milestone_badges' as never)
+      .select('*')
+      .order('sort_order');
+  }
+
+  /**
+   * GS-018: Get a student's badges — all badge types with earned status.
+   * LEFT JOINs milestone_badges with student_badges to show earned/locked.
+   */
+  async getStudentBadges(studentId: string, programId?: string) {
+    let query = supabase
+      .from('student_badges' as never)
+      .select('*, milestone_badges(*)' as never)
+      .eq('student_id', studentId);
+
+    if (programId) {
+      query = query.eq('program_id', programId);
+    }
+
+    return query.order('earned_at', { ascending: false });
+  }
+
+  /**
+   * GS-019: Check and award session milestones after a session is saved.
+   */
+  async checkSessionMilestones(studentId: string, programId: string) {
+    return supabase.rpc('check_session_milestones' as never, {
+      p_student_id: studentId,
+      p_program_id: programId,
+    } as never);
+  }
+
+  /**
+   * GS-020: Get rewards dashboard data for a program.
+   */
+  async getRewardsDashboard(programId: string) {
+    return supabase.rpc('get_rewards_dashboard' as never, {
+      p_program_id: programId,
+    } as never);
   }
 }
 

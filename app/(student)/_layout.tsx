@@ -22,6 +22,8 @@ export default function StudentLayout() {
         <Stack.Screen name="himam/index" />
         <Stack.Screen name="himam/[eventId]/progress" />
         <Stack.Screen name="himam/history" />
+        <Stack.Screen name="program/[programId]/leaderboard" />
+        <Stack.Screen name="profile/badges" />
       </Stack>
     </ErrorBoundary>
   );
