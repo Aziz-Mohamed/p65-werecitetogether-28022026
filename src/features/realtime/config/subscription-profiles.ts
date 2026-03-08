@@ -72,6 +72,15 @@ export function buildStudentProfile(
     },
   ];
 
+  // Teacher availability — students see available teachers for enrolled programs
+  subscriptions.push({
+    table: 'teacher_availability',
+    event: '*',
+    queryKeys: [
+      ['available-teachers'],
+    ],
+  });
+
   // Scheduled sessions for the student's classes
   if (classId) {
     subscriptions.push({
@@ -161,6 +170,16 @@ export function buildTeacherProfile(
       ],
     },
   ];
+
+  // Teacher availability — own status changes
+  subscriptions.push({
+    table: 'teacher_availability',
+    event: '*',
+    filter: `teacher_id=eq.${teacherId}`,
+    queryKeys: [
+      ['my-availability'],
+    ],
+  });
 
   // Teacher check-ins (own)
   subscriptions.push({

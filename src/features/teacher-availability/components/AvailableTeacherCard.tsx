@@ -1,141 +1,176 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '@/components/ui/Card';
-import { Avatar } from '@/components/ui/Avatar';
-import { Button } from '@/components/ui/Button';
-import { RatingBadge } from '@/components/RatingBadge';
+import { Avatar, Badge, Button } from '@/components/ui';
+import { GreenDotIndicator } from '@/components/ui/GreenDotIndicator';
+import type { AvailableTeacher } from '../types/availability.types';
 import { typography } from '@/theme/typography';
-import { lightTheme, neutral, primary } from '@/theme/colors';
+import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import type { AvailableTeacher } from '../types';
+import { normalize } from '@/theme/normalize';
+
+// Map ISO 639-1 codes to display names
+const LANGUAGE_NAMES: Record<string, Record<string, string>> = {
+  en: {
+    ar: 'Arabic', en: 'English', ur: 'Urdu', fr: 'French',
+    tr: 'Turkish', ms: 'Malay', id: 'Indonesian', bn: 'Bengali',
+  },
+  ar: {
+    ar: 'العربية', en: 'الإنجليزية', ur: 'الأردية', fr: 'الفرنسية',
+    tr: 'التركية', ms: 'الملايوية', id: 'الإندونيسية', bn: 'البنغالية',
+  },
+};
 
 interface AvailableTeacherCardProps {
   teacher: AvailableTeacher;
-  onJoinSession: (teacher: AvailableTeacher) => void;
+  onJoin: (teacher: AvailableTeacher) => void;
+  isJoining?: boolean;
 }
 
-const PLATFORM_ICONS: Record<string, string> = {
-  zoom: 'videocam',
-  google_meet: 'logo-google',
-  teams: 'people',
-  jitsi: 'globe',
-};
+export function AvailableTeacherCard({ teacher, onJoin, isJoining }: AvailableTeacherCardProps) {
+  const { t, i18n } = useTranslation();
+  const isFull = teacher.active_student_count >= teacher.max_students;
+  const hasNoLink = !teacher.profiles?.meeting_link;
 
-const MIN_REVIEWS_FOR_RATING = 5;
-
-export const AvailableTeacherCard: React.FC<AvailableTeacherCardProps> = ({
-  teacher,
-  onJoinSession,
-}) => {
-  const { t } = useTranslation();
-
-  const { profile, availability, ratingStats } = teacher;
-  const displayName = profile.display_name ?? profile.full_name;
-  const isAtCapacity =
-    availability.current_session_count >= availability.max_concurrent_students;
-
-  const platformIcon =
-    PLATFORM_ICONS[profile.meeting_platform ?? ''] ?? 'link';
+  const languageNames = teacher.profiles?.languages
+    ?.map((code) => LANGUAGE_NAMES[i18n.language]?.[code] ?? code)
+    .join(', ');
 
   return (
-    <Card style={styles.card}>
+    <Card variant="outlined" style={styles.card}>
       <View style={styles.row}>
-        <Avatar
-          source={profile.avatar_url ?? undefined}
-          name={displayName}
-          size="lg"
-        />
+        {/* Avatar with green dot */}
+        <View style={styles.avatarContainer}>
+          <Avatar name={teacher.profiles?.full_name ?? '?'} size="lg" />
+          <GreenDotIndicator isAvailable overlay />
+        </View>
 
+        {/* Info */}
         <View style={styles.info}>
-          <Text style={styles.name} numberOfLines={1}>
-            {displayName}
-          </Text>
-
-          <RatingBadge
-            averageRating={ratingStats?.average_rating ?? null}
-            totalReviews={ratingStats?.total_reviews ?? 0}
-          />
-
-          {profile.languages && profile.languages.length > 0 && (
-            <View style={styles.languagesRow}>
-              <Ionicons name="language" size={14} color={neutral[400]} />
-              <Text style={styles.languagesText} numberOfLines={1}>
-                {profile.languages.join(', ')}
-              </Text>
-            </View>
-          )}
-
-          <View style={styles.metaRow}>
-            <Ionicons
-              name={platformIcon as any}
-              size={14}
-              color={primary[500]}
-            />
-            <Text style={styles.concurrentText}>
-              {t('teacherAvailability.concurrentStudents', {
-                current: availability.current_session_count,
-                max: availability.max_concurrent_students,
-              })}
+          <View style={styles.nameRow}>
+            <Text style={styles.name} numberOfLines={1}>
+              {teacher.profiles?.full_name ?? '—'}
             </Text>
+            <Badge label={t('availability.newTeacher')} variant="sky" size="sm" />
           </View>
+
+          {languageNames ? (
+            <Text style={styles.languages} numberOfLines={1}>
+              {languageNames}
+            </Text>
+          ) : null}
+
+          <Text style={styles.capacity}>
+            {t('availability.studentsCount', {
+              current: teacher.active_student_count,
+              max: teacher.max_students,
+            })}
+          </Text>
         </View>
       </View>
 
-      <Button
-        title={
-          isAtCapacity
-            ? t('teacherAvailability.inSession')
-            : t('teacherAvailability.joinSession')
-        }
-        onPress={() => onJoinSession(teacher)}
-        variant={isAtCapacity ? 'ghost' : 'primary'}
-        size="sm"
-        fullWidth
-        disabled={isAtCapacity}
-        style={styles.joinButton}
-      />
+      {/* Action */}
+      {isFull ? (
+        <View style={styles.fullBadge}>
+          <Text style={styles.fullText}>{t('availability.teacherFull')}</Text>
+        </View>
+      ) : hasNoLink ? (
+        <View style={styles.fullBadge}>
+          <Text style={styles.fullText}>{t('availability.meetingLinkNotConfigured')}</Text>
+        </View>
+      ) : (
+        <Button
+          title={t('availability.joinSession')}
+          onPress={() => onJoin(teacher)}
+          variant="primary"
+          size="md"
+          loading={isJoining}
+        />
+      )}
     </Card>
   );
-};
+}
+
+// ─── Skeleton ────────────────────────────────────────────────────────────────
+
+export function AvailableTeacherCardSkeleton() {
+  return (
+    <Card variant="outlined" style={styles.card}>
+      <View style={styles.row}>
+        <View style={[styles.skeletonCircle, styles.skeleton]} />
+        <View style={styles.info}>
+          <View style={[styles.skeletonLine, styles.skeleton, { width: '60%' }]} />
+          <View style={[styles.skeletonLine, styles.skeleton, { width: '40%' }]} />
+        </View>
+      </View>
+      <View style={[styles.skeletonButton, styles.skeleton]} />
+    </Card>
+  );
+}
 
 const styles = StyleSheet.create({
   card: {
-    padding: spacing.base,
+    padding: spacing.md,
+    gap: spacing.md,
   },
   row: {
     flexDirection: 'row',
     gap: spacing.md,
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    position: 'relative',
   },
   info: {
     flex: 1,
-    gap: spacing.xs,
+    gap: normalize(3),
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   name: {
     ...typography.textStyles.bodyMedium,
-    color: lightTheme.text,
+    color: colors.neutral[900],
+    flex: 1,
   },
-  languagesRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  languagesText: {
+  languages: {
     ...typography.textStyles.caption,
-    color: lightTheme.textSecondary,
+    color: colors.neutral[600],
   },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  concurrentText: {
+  capacity: {
     ...typography.textStyles.caption,
-    color: lightTheme.textSecondary,
+    color: colors.neutral[400],
   },
-  joinButton: {
-    marginBlockStart: spacing.md,
+  fullBadge: {
+    backgroundColor: colors.neutral[100],
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: normalize(8),
+    alignItems: 'center',
+  },
+  fullText: {
+    ...typography.textStyles.label,
+    color: colors.neutral[500],
+  },
+  // Skeleton styles
+  skeleton: {
+    backgroundColor: colors.neutral[100],
+    borderRadius: normalize(4),
+  },
+  skeletonCircle: {
+    width: normalize(48),
+    height: normalize(48),
+    borderRadius: normalize(24),
+  },
+  skeletonLine: {
+    height: normalize(14),
+  },
+  skeletonButton: {
+    height: normalize(40),
+    borderRadius: normalize(8),
   },
 });

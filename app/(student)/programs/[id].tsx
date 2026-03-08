@@ -16,6 +16,7 @@ import { useCohorts } from '@/features/programs/hooks/useCohorts';
 import { useEnroll, useJoinFreeProgram } from '@/features/programs/hooks/useEnroll';
 import { useEnrollments } from '@/features/programs/hooks/useEnrollments';
 import { useLeaveProgram } from '@/features/programs/hooks/useLeaveProgram';
+import { useAvailableTeachers } from '@/features/teacher-availability/hooks/useAvailableTeachers';
 import { useLocalizedField, getEnrollErrorKey } from '@/features/programs/utils/enrollment-helpers';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui';
@@ -39,6 +40,12 @@ export default function ProgramDetailScreen() {
   const enroll = useEnroll(id!);
   const joinFree = useJoinFreeProgram(id!);
   const leaveProgram = useLeaveProgram();
+
+  // Available teachers — only for free/mixed programs
+  const showAvailableTeachers = program?.category === 'free' || program?.category === 'mixed';
+  const { data: availableTeachers } = useAvailableTeachers(
+    showAvailableTeachers ? id : undefined,
+  );
 
   // Find user's enrollment for this program (per track)
   const myEnrollments = useMemo(
@@ -148,6 +155,18 @@ export default function ProgramDetailScreen() {
       </Pressable>
       <ScrollView contentContainerStyle={styles.content}>
         <ProgramDetailHeader program={program} />
+
+        {/* Available Teachers — free/mixed programs */}
+        {showAvailableTeachers && (
+          <View style={styles.section}>
+            <Button
+              title={`${t('availability.availableNow')}${availableTeachers?.length ? ` (${availableTeachers.length})` : ''}`}
+              onPress={() => router.push(`/(student)/available-now/${id}`)}
+              variant="default"
+              icon={<Ionicons name="radio-button-on" size={16} color="#22C55E" />}
+            />
+          </View>
+        )}
 
         {/* Free program with no tracks — direct join */}
         {program.category === 'free' && program.program_tracks.length === 0 && (

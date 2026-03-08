@@ -10,6 +10,7 @@ import { LoadingState, ErrorState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeacherDashboard } from '@/features/dashboard/hooks/useTeacherDashboard';
 import { useTeacherUpcomingSessions } from '@/features/scheduling/hooks/useScheduledSessions';
+import { useMyAvailability } from '@/features/teacher-availability/hooks/useMyAvailability';
 import { useRoleTheme } from '@/hooks/useRoleTheme';
 import {
   useToggleAvailability,
@@ -31,11 +32,12 @@ export default function TeacherDashboard() {
   const teacherId = profile?.id ?? '';
   const displayName = profile?.display_name ?? profile?.full_name ?? '';
 
-  // For MVP, we use the first program the teacher is associated with
-  // A full program selector can be added later
-  const [selectedProgramId] = useState<string | undefined>(undefined);
+  const { data, isLoading, error, refetch } = useTeacherDashboard(profile?.id);
+  const { data: upcomingSessions = [] } = useTeacherUpcomingSessions(profile?.id, schoolId ?? undefined);
+  const { data: myAvailability = [] } = useMyAvailability();
 
-  const toggleAvailability = useToggleAvailability();
+  const availableCount = myAvailability.filter((a) => a.is_available).length;
+  const nextSession = upcomingSessions[0] ?? null;
 
   // Track whether teacher is currently available
   const [isAvailable, setIsAvailable] = useState(false);
@@ -122,23 +124,107 @@ export default function TeacherDashboard() {
           </>
         )}
 
-        {/* Active Draft Sessions */}
-        {draftSessions.length > 0 && (
-          <>
-            <Text style={styles.sectionTitle}>
-              {t('sessions.recentSessions')}
-            </Text>
-            <FlatList
-              data={draftSessions.slice(0, 5)}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-              renderItem={({ item }) => (
-                <Card variant="outlined" style={styles.sessionCard}>
-                  <View style={styles.sessionRow}>
-                    <Ionicons
-                      name="time-outline"
-                      size={20}
-                      color={accent.sky[500]}
+        {/* My Schedule */}
+        <Card
+          variant="glass"
+          onPress={() => router.navigate('/(teacher)/(tabs)/sessions')}
+          style={styles.scheduleCard}
+        >
+          <View style={styles.scheduleRow}>
+            <View style={[styles.insightIcon, { backgroundColor: colors.accent.indigo[50] }]}>
+              <Ionicons name="calendar" size={22} color={colors.accent.indigo[500]} />
+            </View>
+            <View style={styles.scheduleInfo}>
+              <Text style={styles.scheduleLabel}>{t('scheduling.mySchedule')}</Text>
+              <Text style={styles.scheduleHint}>{t('scheduling.viewUpcoming')}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+          </View>
+        </Card>
+
+        {/* Availability */}
+        <Card
+          variant="glass"
+          onPress={() => router.push('/(teacher)/availability')}
+          style={styles.scheduleCard}
+        >
+          <View style={styles.scheduleRow}>
+            <View style={[styles.insightIcon, { backgroundColor: availableCount > 0 ? '#DCFCE7' : colors.neutral[100] }]}>
+              <Ionicons name="radio-button-on" size={22} color={availableCount > 0 ? '#22C55E' : colors.neutral[400]} />
+            </View>
+            <View style={styles.scheduleInfo}>
+              <Text style={styles.scheduleLabel}>{t('availability.title')}</Text>
+              <Text style={styles.scheduleHint}>
+                {availableCount > 0
+                  ? t('availability.availableForPrograms', { count: availableCount })
+                  : t('availability.offline')}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.neutral[300]} />
+          </View>
+        </Card>
+
+        {/* Student Insights */}
+        <Text style={styles.sectionTitle}>{t('teacher.todayOverview')}</Text>
+        <View style={styles.actionsRow}>
+          <Card
+            variant="glass"
+            onPress={() => router.push('/(teacher)/students/top-performers')}
+            style={styles.insightCard}
+          >
+            <View style={[styles.insightIcon, { backgroundColor: colors.secondary[50] }]}>
+              <Ionicons name="trophy" size={22} color={colors.secondary[500]} />
+            </View>
+            <Text style={styles.insightLabel}>{t('teacher.topPerformers')}</Text>
+          </Card>
+          <Card
+            variant="glass"
+            onPress={() => router.push('/(teacher)/students/needs-support')}
+            style={styles.insightCard}
+          >
+            <View style={[styles.insightIcon, { backgroundColor: colors.accent.rose[50] }]}>
+              <Ionicons name="hand-left-outline" size={22} color={semantic.warning} />
+            </View>
+            <Text style={styles.insightLabel}>{t('teacher.needsSupport')}</Text>
+          </Card>
+        </View>
+
+        {/* Recent Sessions */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t('dashboard.recentSessions')}</Text>
+          <Badge label={String(data?.totalStudents ?? 0)} variant="sky" />
+        </View>
+        {(data?.recentSessions ?? []).length === 0 ? (
+          <Card variant="outlined" style={styles.emptyCard}>
+            <Text style={styles.emptyText}>{t('teacher.dashboard.noRecentSessions')}</Text>
+          </Card>
+        ) : (
+          data?.recentSessions.map((session) => {
+            const score = session.evaluation?.memorization_score;
+            return (
+              <Card
+                key={session.id}
+                variant="default"
+                onPress={() => router.push(`/(teacher)/schedule/${session.id}`)}
+                style={styles.recentCard}
+              >
+                <View style={styles.recentCardRow}>
+                  <View style={styles.recentCardInfo}>
+                    <Text style={styles.recentCardTitle} numberOfLines={1}>
+                      {resolveName(session.class?.name_localized, session.class?.name) ?? t('scheduling.individualSession')}
+                    </Text>
+                    <Text style={styles.recentCardMeta}>
+                      {session.start_time?.slice(0, 5)} – {session.end_time?.slice(0, 5)}
+                      {session.student?.profiles?.full_name
+                        ? `  ·  ${resolveName(session.student.profiles?.name_localized, session.student.profiles.full_name)}`
+                        : ''}
+                    </Text>
+                  </View>
+                  {score != null && (
+                    <Badge
+                      label={`${score}/5`}
+                      variant={score >= 4 ? 'success' : 'warning'}
+                      size="sm"
                     />
                     <View style={styles.sessionInfo}>
                       <Text style={styles.sessionStudent} numberOfLines={1}>

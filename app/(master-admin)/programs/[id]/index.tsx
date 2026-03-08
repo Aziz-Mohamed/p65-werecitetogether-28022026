@@ -1,11 +1,10 @@
 import React from 'react';
-import { StyleSheet, View, Text, Alert, Switch } from 'react-native';
+import { StyleSheet, View, Text, Alert, Switch, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Picker } from '@react-native-picker/picker';
 
 import { Screen } from '@/components/layout';
 import { TextField, Button } from '@/components/ui';
@@ -156,11 +155,19 @@ export default function MasterAdminEditProgram() {
           render={({ field: { onChange, value } }) => (
             <View>
               <Text style={styles.pickerLabel}>{t('programs.labels.selectCategory')}</Text>
-              <Picker selectedValue={value} onValueChange={onChange}>
-                <Picker.Item label={t('programs.category.free')} value="free" />
-                <Picker.Item label={t('programs.category.structured')} value="structured" />
-                <Picker.Item label={t('programs.category.mixed')} value="mixed" />
-              </Picker>
+              <View style={styles.segmentedControl}>
+                {(['free', 'structured', 'mixed'] as const).map((cat) => (
+                  <Pressable
+                    key={cat}
+                    style={[styles.segment, value === cat && styles.segmentActive]}
+                    onPress={() => onChange(cat)}
+                  >
+                    <Text style={[styles.segmentText, value === cat && styles.segmentTextActive]}>
+                      {t(`programs.category.${cat}`)}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
             </View>
           )}
         />
@@ -245,6 +252,30 @@ const styles = StyleSheet.create({
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
     marginBottom: spacing.xs,
+  },
+  segmentedControl: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: lightTheme.border,
+    overflow: 'hidden',
+  },
+  segment: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    backgroundColor: lightTheme.surface,
+  },
+  segmentActive: {
+    backgroundColor: lightTheme.primary,
+  },
+  segmentText: {
+    ...typography.textStyles.body,
+    color: lightTheme.text,
+  },
+  segmentTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
   switchRow: {
     flexDirection: 'row',

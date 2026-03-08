@@ -1044,5 +1044,39 @@
       "pendingApprovals": "الموافقات المعلّقة",
       "allPrograms": "جميع البرامج"
     }
+  },
+  "availability": {
+    "title": "التوفر",
+    "goAvailable": "أصبح متاحاً",
+    "goOffline": "أصبح غير متاح",
+    "availableNow": "المتاحون الآن",
+    "teacherFull": "المعلّم مكتمل",
+    "noTeachersAvailable": "لا يوجد معلّمون متاحون حالياً — يُرجى المراجعة لاحقاً.",
+    "joinSession": "انضمام للحصة",
+    "meetingLinkNotConfigured": "رابط الاجتماع غير مُعَدّ",
+    "selectPrograms": "اختيار البرامج",
+    "studentsCount": "{{current}}/{{max}} طالب",
+    "meetingLink": "رابط الاجتماع",
+    "meetingLinkPlaceholder": "https://meet.google.com/...",
+    "meetingPlatform": "منصة الاجتماع",
+    "languages": "اللغات",
+    "configureMeetingLink": "يُرجى إعداد رابط الاجتماع قبل أن تصبح متاحاً.",
+    "availabilityTimeout": "انتهت مدة التوفر بعد ٤ ساعات.",
+    "newTeacher": "جديد",
+    "available": "متاح",
+    "connectionLost": "انقطع الاتصال — قد تكون بيانات التوفر غير محدّثة.",
+    "joinFailed": "تعذّر الانضمام للحصة. قد يكون المعلّم مكتملاً أو غير متاح.",
+    "copyLink": "نسخ الرابط",
+    "openLinkFailed": "تعذّر فتح رابط الاجتماع. تم نسخ الرابط إلى الحافظة.",
+    "availableForPrograms": "متاح في {{count}} برامج",
+    "offline": "غير متاح",
+    "meetingSettings": "إعدادات الاجتماع",
+    "noFreePrograms": "لم يتم تعيينك في أي برنامج حر أو مختلط.",
+    "platformLabels": {
+      "google_meet": "Google Meet",
+      "zoom": "Zoom",
+      "jitsi": "Jitsi",
+      "other": "أخرى"
+    }
   }
 }
