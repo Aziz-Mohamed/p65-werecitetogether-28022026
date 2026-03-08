@@ -223,6 +223,49 @@ export default function ProgramDetailScreen() {
     );
   };
 
+  // Build track hierarchy (hooks must be before early returns)
+  const tracks = program?.program_tracks ?? [];
+
+  const trackTree = useMemo(
+    () => buildTrackTree(tracks),
+    [tracks],
+  );
+
+  const leafTracks = useMemo(() => {
+    const leaves: ProgramTrack[] = [];
+    const collectLeaves = (nodes: ProgramTrackNode[]) => {
+      for (const node of nodes) {
+        if (node.children.length === 0) {
+          leaves.push(node);
+        } else {
+          collectLeaves(node.children);
+        }
+      }
+    };
+    collectLeaves(trackTree);
+    return leaves;
+  }, [trackTree]);
+
+  const enrolledTracks = leafTracks.filter((t) => isEnrolledInTrack(t.id));
+  const availableTracks = leafTracks.filter((t) => !isEnrolledInTrack(t.id));
+
+  const availableTrackTree = useMemo(() => {
+    const availableIds = new Set(availableTracks.map((t) => t.id));
+    const filterTree = (nodes: ProgramTrackNode[]): ProgramTrackNode[] => {
+      return nodes
+        .map((node) => {
+          if (node.children.length === 0) {
+            return availableIds.has(node.id) ? node : null;
+          }
+          const filteredChildren = filterTree(node.children);
+          if (filteredChildren.length === 0) return null;
+          return { ...node, children: filteredChildren };
+        })
+        .filter((n): n is ProgramTrackNode => n !== null);
+    };
+    return filterTree(trackTree);
+  }, [trackTree, availableTracks]);
+
   if (isLoading) {
     return (
       <Screen>
@@ -247,49 +290,6 @@ export default function ProgramDetailScreen() {
 
   const classesForTrack = (trackId: string) =>
     programClasses?.filter((c) => c.track_id === trackId) ?? [];
-
-  // Get all leaf tracks (tracks with no children — these are enrollable)
-  const trackTree = useMemo(
-    () => buildTrackTree(program.program_tracks),
-    [program.program_tracks],
-  );
-
-  const leafTracks = useMemo(() => {
-    const leaves: ProgramTrack[] = [];
-    const collectLeaves = (nodes: ProgramTrackNode[]) => {
-      for (const node of nodes) {
-        if (node.children.length === 0) {
-          leaves.push(node);
-        } else {
-          collectLeaves(node.children);
-        }
-      }
-    };
-    collectLeaves(trackTree);
-    return leaves;
-  }, [trackTree]);
-
-  // Separate enrolled tracks from available tracks (leaf tracks only)
-  const enrolledTracks = leafTracks.filter((t) => isEnrolledInTrack(t.id));
-  const availableTracks = leafTracks.filter((t) => !isEnrolledInTrack(t.id));
-
-  // Build available track tree for hierarchical display
-  const availableTrackTree = useMemo(() => {
-    const availableIds = new Set(availableTracks.map((t) => t.id));
-    const filterTree = (nodes: ProgramTrackNode[]): ProgramTrackNode[] => {
-      return nodes
-        .map((node) => {
-          if (node.children.length === 0) {
-            return availableIds.has(node.id) ? node : null;
-          }
-          const filteredChildren = filterTree(node.children);
-          if (filteredChildren.length === 0) return null;
-          return { ...node, children: filteredChildren };
-        })
-        .filter((n): n is ProgramTrackNode => n !== null);
-    };
-    return filterTree(trackTree);
-  }, [trackTree, availableTracks]);
 
   // Show quick actions row?
   const showQuickActions =
