@@ -1,133 +1,167 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
+import { Alert, Linking, Platform } from 'react-native';
 import { Audio } from 'expo-av';
+import { useTranslation } from 'react-i18next';
 
-const MAX_DURATION_MS = 120_000; // 120 seconds
+const MAX_DURATION_MS = 120_000; // 2 minutes
+const METERING_UPDATE_MS = 100;
 
-interface AudioRecorderState {
+interface RecorderState {
   isRecording: boolean;
   durationMs: number;
-  uri: string | null;
-  error: string | null;
+  meteringLevels: number[];
+  fileUri: string | null;
+  permissionDenied: boolean;
 }
 
 export function useAudioRecorder() {
+  const { t } = useTranslation();
   const recordingRef = useRef<Audio.Recording | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [state, setState] = useState<AudioRecorderState>({
+  const [state, setState] = useState<RecorderState>({
     isRecording: false,
     durationMs: 0,
-    uri: null,
-    error: null,
+    meteringLevels: [],
+    fileUri: null,
+    permissionDenied: false,
   });
 
-  const cleanup = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+  const requestPermission = useCallback(async (): Promise<boolean> => {
+    const { status } = await Audio.requestPermissionsAsync();
+    if (status !== 'granted') {
+      setState((prev) => ({ ...prev, permissionDenied: true }));
+      Alert.alert(
+        t('voiceMemo.micPermissionDenied'),
+        '',
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('voiceMemo.openSettings'),
+            onPress: () => Linking.openSettings(),
+          },
+        ],
+      );
+      return false;
     }
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      cleanup();
-      if (recordingRef.current) {
-        recordingRef.current.stopAndUnloadAsync().catch(() => {});
-      }
-    };
-  }, [cleanup]);
+    setState((prev) => ({ ...prev, permissionDenied: false }));
+    return true;
+  }, [t]);
 
   const startRecording = useCallback(async () => {
-    try {
-      const permission = await Audio.requestPermissionsAsync();
-      if (!permission.granted) {
-        setState((s) => ({ ...s, error: 'Microphone permission denied' }));
-        return;
+    const hasPermission = await requestPermission();
+    if (!hasPermission) return;
+
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
+    });
+
+    const recording = new Audio.Recording();
+    await recording.prepareToRecordAsync({
+      android: {
+        extension: '.m4a',
+        outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+        audioEncoder: Audio.AndroidAudioEncoder.AAC,
+        sampleRate: 22050,
+        numberOfChannels: 1,
+        bitRate: 64000,
+      },
+      ios: {
+        extension: '.m4a',
+        audioQuality: Audio.IOSAudioQuality.MEDIUM,
+        sampleRate: 22050,
+        numberOfChannels: 1,
+        bitRate: 64000,
+        outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
+      },
+      web: {
+        mimeType: 'audio/mp4',
+        bitsPerSecond: 64000,
+      },
+      isMeteringEnabled: true,
+    });
+
+    recording.setOnRecordingStatusUpdate((status) => {
+      if (!status.isRecording) return;
+
+      const durationMs = status.durationMillis ?? 0;
+      const metering = status.metering ?? -160;
+
+      setState((prev) => ({
+        ...prev,
+        durationMs,
+        meteringLevels: [...prev.meteringLevels.slice(-59), metering],
+      }));
+
+      // Auto-stop at max duration
+      if (durationMs >= MAX_DURATION_MS) {
+        stopRecording();
       }
+    });
 
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
+    recording.setProgressUpdateInterval(METERING_UPDATE_MS);
+    await recording.startAsync();
 
-      const recording = new Audio.Recording();
-      await recording.prepareToRecordAsync({
-        isMeteringEnabled: false,
-        android: {
-          extension: '.m4a',
-          outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-          audioEncoder: Audio.AndroidAudioEncoder.AAC,
-          sampleRate: 22050,
-          numberOfChannels: 1,
-          bitRate: 32000,
-        },
-        ios: {
-          extension: '.m4a',
-          outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
-          audioQuality: Audio.IOSAudioQuality.LOW,
-          sampleRate: 22050,
-          numberOfChannels: 1,
-          bitRate: 32000,
-        },
-        web: {},
-      });
-
-      await recording.startAsync();
-      recordingRef.current = recording;
-
-      setState({ isRecording: true, durationMs: 0, uri: null, error: null });
-
-      const startTime = Date.now();
-      timerRef.current = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        if (elapsed >= MAX_DURATION_MS) {
-          stopRecording();
-        } else {
-          setState((s) => ({ ...s, durationMs: elapsed }));
-        }
-      }, 100);
-    } catch (err) {
-      setState((s) => ({ ...s, error: (err as Error).message }));
-    }
-  }, []);
+    recordingRef.current = recording;
+    setState((prev) => ({
+      ...prev,
+      isRecording: true,
+      durationMs: 0,
+      meteringLevels: [],
+      fileUri: null,
+    }));
+  }, [requestPermission]);
 
   const stopRecording = useCallback(async () => {
-    cleanup();
-
     const recording = recordingRef.current;
     if (!recording) return;
 
     try {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
-      const status = await recording.getStatusAsync();
-      recordingRef.current = null;
 
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-
-      setState({
-        isRecording: false,
-        durationMs: status.durationMillis ?? 0,
-        uri: uri ?? null,
-        error: null,
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
       });
-    } catch (err) {
-      setState((s) => ({ ...s, isRecording: false, error: (err as Error).message }));
-    }
-  }, [cleanup]);
 
-  const reset = useCallback(() => {
-    setState({ isRecording: false, durationMs: 0, uri: null, error: null });
+      setState((prev) => ({
+        ...prev,
+        isRecording: false,
+        fileUri: uri,
+      }));
+    } catch {
+      setState((prev) => ({ ...prev, isRecording: false }));
+    }
+
+    recordingRef.current = null;
+  }, []);
+
+  const cancelRecording = useCallback(async () => {
+    const recording = recordingRef.current;
+    if (!recording) return;
+
+    try {
+      await recording.stopAndUnloadAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+      });
+    } catch {
+      // Ignore errors during cancel
+    }
+
+    recordingRef.current = null;
+    setState({
+      isRecording: false,
+      durationMs: 0,
+      meteringLevels: [],
+      fileUri: null,
+      permissionDenied: false,
+    });
   }, []);
 
   return {
-    isRecording: state.isRecording,
-    durationMs: state.durationMs,
-    durationSeconds: Math.floor(state.durationMs / 1000),
-    remainingSeconds: Math.max(0, Math.floor((MAX_DURATION_MS - state.durationMs) / 1000)),
-    uri: state.uri,
-    error: state.error,
+    ...state,
     startRecording,
     stopRecording,
-    reset,
+    cancelRecording,
   };
 }

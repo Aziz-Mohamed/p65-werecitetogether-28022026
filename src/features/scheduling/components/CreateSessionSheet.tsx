@@ -26,6 +26,8 @@ import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { useTeacherClasses } from '@/features/reports/hooks/useTeacherReports';
 import { useStudents } from '@/features/students/hooks/useStudents';
 import { useCreateScheduledSession } from '@/features/scheduling/hooks/useScheduledSessions';
+import { useTeacherPrograms } from '@/features/sessions/hooks/useTeacherPrograms';
+import { useCreateSession } from '@/features/sessions/hooks/useSessions';
 import type { SessionType } from '@/features/scheduling/types/scheduling.types';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
@@ -43,15 +45,25 @@ export const CreateSessionSheet = forwardRef<BottomSheetModal>((_props, ref) => 
   const { resolveName } = useLocalizedName();
 
   const createMutation = useCreateScheduledSession();
+  const draftMutation = useCreateSession();
   const teacherClasses = useTeacherClasses(profile?.id ?? null);
+  const { data: teacherPrograms = [] } = useTeacherPrograms();
 
   // ── Form state ──────────────────────────────────────────────────────────
   const [sessionType, setSessionType] = useState<SessionType>('class');
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
   const [sessionDate, setSessionDate] = useState<Date | null>(null);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
+
+  // Auto-select if teacher has exactly one program (FR-028)
+  React.useEffect(() => {
+    if (teacherPrograms.length === 1 && !selectedProgramId) {
+      setSelectedProgramId((teacherPrograms[0] as any).program_id);
+    }
+  }, [teacherPrograms, selectedProgramId]);
 
   // ── Student list (filtered by selected class) ───────────────────────────
   const { data: students = [], isLoading: studentsLoading } = useStudents(
@@ -83,6 +95,7 @@ export const CreateSessionSheet = forwardRef<BottomSheetModal>((_props, ref) => 
     setSessionType('class');
     setSelectedClassId(null);
     setSelectedStudentId(null);
+    setSelectedProgramId(null);
     setSessionDate(null);
     setStartTime(null);
     setEndTime(null);
@@ -125,6 +138,42 @@ export const CreateSessionSheet = forwardRef<BottomSheetModal>((_props, ref) => 
       },
     );
   }, [canSubmit, profile, schoolId, sessionDate, startTime, endTime, sessionType, selectedClassId, selectedStudentId, createMutation, t, ref, resetForm]);
+
+  // Can save as draft if student is selected (scores not required)
+  const canSaveDraft = useMemo(() => {
+    if (sessionType === 'individual' && selectedStudentId) return true;
+    if (sessionType === 'class' && selectedClassId) return true;
+    return false;
+  }, [sessionType, selectedStudentId, selectedClassId]);
+
+  const handleSaveDraft = useCallback(() => {
+    if (!profile?.id || !canSaveDraft) return;
+
+    // For class sessions, student_id is not selected yet — need individual student
+    const studentId = selectedStudentId;
+    if (!studentId) {
+      Alert.alert(t('common.error'), t('scheduling.selectStudent'));
+      return;
+    }
+
+    draftMutation.mutate(
+      {
+        student_id: studentId,
+        teacher_id: profile.id,
+        program_id: selectedProgramId ?? null,
+        status: 'draft',
+      },
+      {
+        onSuccess: () => {
+          (ref as React.RefObject<BottomSheetModal>)?.current?.dismiss();
+          resetForm();
+        },
+        onError: (err: Error) => {
+          Alert.alert(t('common.error'), err.message);
+        },
+      },
+    );
+  }, [profile, canSaveDraft, selectedStudentId, selectedProgramId, draftMutation, t, ref, resetForm]);
 
   const pushModal = useUIStore((s) => s.pushModal);
   const popModal = useUIStore((s) => s.popModal);
@@ -204,6 +253,35 @@ export const CreateSessionSheet = forwardRef<BottomSheetModal>((_props, ref) => 
               })}
             </View>
           </View>
+
+          {/* ── Program Selector (optional) ── */}
+          {teacherPrograms.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>{t('sessions.program')}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+                <View style={styles.chipRow}>
+                  {teacherPrograms.map((tp: any) => {
+                    const isSelected = selectedProgramId === tp.program_id;
+                    const name = resolveName(
+                      tp.programs?.name_ar ? { ar: tp.programs.name_ar, en: tp.programs.name } : null,
+                      tp.programs?.name,
+                    );
+                    return (
+                      <Pressable
+                        key={tp.program_id}
+                        style={[styles.chip, isSelected && styles.chipActive]}
+                        onPress={() => setSelectedProgramId(isSelected ? null : tp.program_id)}
+                      >
+                        <Text style={[styles.chipText, isSelected && styles.chipTextActive]}>
+                          {name}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+            </View>
+          )}
 
           {/* ── Class Selector ── */}
           <View style={styles.section}>
@@ -295,14 +373,28 @@ export const CreateSessionSheet = forwardRef<BottomSheetModal>((_props, ref) => 
 
       {/* Fixed footer */}
       <View style={styles.footer}>
-        <Button
-          title={t('scheduling.createSession')}
-          onPress={handleSubmit}
-          variant="primary"
-          size="lg"
-          loading={createMutation.isPending}
-          disabled={!canSubmit}
-        />
+        <View style={styles.footerRow}>
+          {selectedStudentId && (
+            <Button
+              title={t('sessions.saveDraft')}
+              onPress={handleSaveDraft}
+              variant="default"
+              size="lg"
+              loading={draftMutation.isPending}
+              disabled={!canSaveDraft}
+              style={styles.footerButton}
+            />
+          )}
+          <Button
+            title={t('scheduling.createSession')}
+            onPress={handleSubmit}
+            variant="primary"
+            size="lg"
+            loading={createMutation.isPending}
+            disabled={!canSubmit}
+            style={styles.footerButton}
+          />
+        </View>
       </View>
     </BottomSheetModal>
   );
@@ -460,5 +552,12 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.neutral[200],
     backgroundColor: colors.white,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  footerButton: {
+    flex: 1,
   },
 });

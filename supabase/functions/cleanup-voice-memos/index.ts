@@ -1,68 +1,49 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-Deno.serve(async (req: Request) => {
-  try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+Deno.serve(async (_req) => {
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Find expired voice memos
-    const { data: expiredMemos, error: fetchError } = await supabase
-      .from("session_voice_memos")
-      .select("id, storage_path")
-      .lt("expires_at", new Date().toISOString());
+  // Find expired voice memos that haven't been marked yet
+  const { data: expiredMemos, error: fetchError } = await supabase
+    .from('session_voice_memos')
+    .select('id, storage_path')
+    .lte('expires_at', new Date().toISOString())
+    .eq('is_expired', false);
 
-    if (fetchError) {
-      return new Response(
-        JSON.stringify({ error: fetchError.message }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-    if (!expiredMemos || expiredMemos.length === 0) {
-      return new Response(
-        JSON.stringify({ message: "No expired voice memos", deleted: 0 }),
-        { headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-    // Delete from Storage
-    const storagePaths = expiredMemos.map((m: { storage_path: string }) => m.storage_path);
-    const { error: storageError } = await supabase.storage
-      .from("voice-memos")
-      .remove(storagePaths);
-
-    if (storageError) {
-      console.error("Storage deletion error:", storageError.message);
-    }
-
-    // Delete DB rows
-    const ids = expiredMemos.map((m: { id: string }) => m.id);
-    const { error: deleteError } = await supabase
-      .from("session_voice_memos")
-      .delete()
-      .in("id", ids);
-
-    if (deleteError) {
-      return new Response(
-        JSON.stringify({ error: deleteError.message }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-    return new Response(
-      JSON.stringify({
-        message: `Cleaned up ${expiredMemos.length} expired voice memos`,
-        deleted: expiredMemos.length,
-      }),
-      { headers: { "Content-Type": "application/json" } },
-    );
-  } catch (err) {
-    return new Response(
-      JSON.stringify({ error: (err as Error).message }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+  if (fetchError) {
+    console.error('Failed to fetch expired memos:', fetchError.message);
+    return new Response(JSON.stringify({ error: fetchError.message }), { status: 500 });
   }
+
+  if (!expiredMemos || expiredMemos.length === 0) {
+    return new Response(JSON.stringify({ deleted: 0 }), { status: 200 });
+  }
+
+  // Delete storage files
+  const storagePaths = expiredMemos.map((m) => m.storage_path);
+  const { error: removeError } = await supabase.storage
+    .from('voice-memos')
+    .remove(storagePaths);
+
+  if (removeError) {
+    console.error('Failed to remove storage files:', removeError.message);
+  }
+
+  // Mark as expired
+  const ids = expiredMemos.map((m) => m.id);
+  const { error: updateError } = await supabase
+    .from('session_voice_memos')
+    .update({ is_expired: true })
+    .in('id', ids);
+
+  if (updateError) {
+    console.error('Failed to mark memos as expired:', updateError.message);
+    return new Response(JSON.stringify({ error: updateError.message }), { status: 500 });
+  }
+
+  console.log(`Cleaned up ${ids.length} expired voice memos`);
+  return new Response(JSON.stringify({ deleted: ids.length }), { status: 200 });
 });

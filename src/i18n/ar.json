@@ -1078,5 +1078,44 @@
       "jitsi": "Jitsi",
       "other": "أخرى"
     }
+  },
+  "sessions": {
+    "program": "البرنامج",
+    "draft": "مسودة",
+    "draftBadge": "مسودة",
+    "saveDraft": "حفظ كمسودة",
+    "submitSession": "إرسال",
+    "draftsSection": "المسودات",
+    "noDrafts": "لا توجد مسودات",
+    "deleteDraft": "حذف المسودة",
+    "deleteDraftConfirm": "هل أنت متأكد من حذف هذه المسودة؟",
+    "programUnavailable": "البرنامج غير متاح"
+  },
+  "voiceMemo": {
+    "record": "تسجيل",
+    "skip": "تخطي",
+    "send": "إرسال",
+    "reRecord": "إعادة التسجيل",
+    "preview": "معاينة",
+    "uploading": "جارٍ رفع الرسالة الصوتية...",
+    "uploadSuccess": "تم إرسال الرسالة الصوتية بنجاح",
+    "uploadFailed": "فشل رفع الرسالة الصوتية. ستتم إعادة المحاولة لاحقاً.",
+    "expired": "انتهت صلاحية الرسالة الصوتية",
+    "expiredWithDate": "انتهت صلاحية الرسالة الصوتية في {{date}}",
+    "availableFor": "متاحة لمدة {{days}} يوماً",
+    "addVoiceMemo": "إضافة رسالة صوتية",
+    "recordPrompt": "هل تريد تسجيل رسالة صوتية لـ{{name}}؟",
+    "timeRemaining": "{{time}} متبقي",
+    "speed": "السرعة",
+    "micPermissionDenied": "يجب السماح بالوصول إلى الميكروفون لتسجيل الرسائل الصوتية.",
+    "openSettings": "فتح الإعدادات",
+    "playbackSpeed": "سرعة التشغيل",
+    "duration": "{{minutes}}:{{seconds}}",
+    "retryPending": "{{count}} رسالة/رسائل صوتية بانتظار الرفع",
+    "warning15s": "١٥ ثانية متبقية"
+  },
+  "notification": {
+    "voiceMemoReceived": "ترك لك معلمك رسالة صوتية",
+    "draftsExpired": "تم حذف {{count}} جلسة/جلسات مسودة بعد ٧ أيام"
   }
 }
