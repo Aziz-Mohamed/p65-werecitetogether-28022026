@@ -174,8 +174,8 @@ BEGIN
   -- ── 6. Program classes (unified — formerly cohorts) ───────────────────────
   INSERT INTO classes (id, school_id, name, teacher_id, max_students, is_active, program_id, track_id, status, supervisor_id, start_date)
   VALUES
-    (_class_a_id, _school_id, 'Morning Cohort A', _teacher_id, 15, true, _prog1_id, _track1_id, 'enrollment_open', _supervisor_id, CURRENT_DATE),
-    (_class_b_id, _school_id, 'Evening Cohort B', _teacher_id, 10, true, _prog1_id, _track1_id, 'in_progress', _supervisor_id, CURRENT_DATE - INTERVAL '14 days')
+    (_class_a_id, _school_id, 'Morning Class A', _teacher_id, 15, true, _prog1_id, _track1_id, 'enrollment_open', _supervisor_id, CURRENT_DATE),
+    (_class_b_id, _school_id, 'Evening Class B', _teacher_id, 10, true, _prog1_id, _track1_id, 'in_progress', _supervisor_id, CURRENT_DATE - INTERVAL '14 days')
   ON CONFLICT (id) DO NOTHING;
 
   -- ── 7. Enrollments ────────────────────────────────────────────────────────
