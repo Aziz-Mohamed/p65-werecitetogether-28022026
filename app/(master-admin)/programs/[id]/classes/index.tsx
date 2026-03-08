@@ -8,7 +8,7 @@ import { FlashList } from '@shopify/flash-list';
 import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { useProgramClasses } from '@/features/programs/hooks/useCohorts';
+import { useProgramClasses } from '@/features/programs/hooks/useClasses';
 import { typography } from '@/theme/typography';
 import { colors, lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -56,7 +56,7 @@ export default function ProgramClassesScreen() {
                   variant="default"
                   style={styles.card}
                   onPress={() =>
-                    router.push(`/(master-admin)/programs/${id}/cohorts/${item.id}`)
+                    router.push(`/(master-admin)/programs/${id}/classes/${item.id}`)
                   }
                 >
                   <View style={styles.cardRow}>

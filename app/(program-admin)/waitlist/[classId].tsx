@@ -17,7 +17,7 @@ import { normalize } from '@/theme/normalize';
 import type { WaitlistEntryWithStudent } from '@/features/programs/types/programs.types';
 
 export default function WaitlistScreen() {
-  const { cohortId: classId } = useLocalSearchParams<{ cohortId: string }>();
+  const { classId } = useLocalSearchParams<{ classId: string }>();
   const { t } = useTranslation();
   const router = useRouter();
 

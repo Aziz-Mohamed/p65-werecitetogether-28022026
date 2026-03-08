@@ -127,7 +127,7 @@ export default function ProgramOverviewScreen() {
             title={t('admin.masterAdmin.programs.viewClasses')}
             subtitle={t('admin.masterAdmin.programs.activeClasses', { count: stats?.active_classes ?? 0 })}
             color={colors.accent.sky[500]}
-            onPress={() => router.push(`/(master-admin)/programs/${id}/cohorts`)}
+            onPress={() => router.push(`/(master-admin)/programs/${id}/classes`)}
           />
           <NavCard
             icon="settings-outline"

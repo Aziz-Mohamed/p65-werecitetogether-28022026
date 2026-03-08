@@ -12,7 +12,7 @@ import { TrackList } from '@/features/programs/components/TrackList';
 import { ProgramClassCard } from '@/features/programs/components/ProgramClassCard';
 import { EnrollmentStatusBadge } from '@/features/programs/components/EnrollmentStatusBadge';
 import { useProgram } from '@/features/programs/hooks/useProgram';
-import { useProgramClasses } from '@/features/programs/hooks/useCohorts';
+import { useProgramClasses } from '@/features/programs/hooks/useClasses';
 import { useEnroll, useJoinFreeProgram } from '@/features/programs/hooks/useEnroll';
 import { useEnrollments } from '@/features/programs/hooks/useEnrollments';
 import { useLeaveProgram } from '@/features/programs/hooks/useLeaveProgram';

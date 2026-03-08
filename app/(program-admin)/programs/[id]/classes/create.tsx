@@ -8,7 +8,7 @@ import { z } from 'zod';
 
 import { Screen } from '@/components/layout';
 import { TextField, Button } from '@/components/ui';
-import { useCreateProgramClass } from '@/features/programs/hooks/useAdminCohorts';
+import { useCreateProgramClass } from '@/features/programs/hooks/useAdminClasses';
 import { typography } from '@/theme/typography';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';

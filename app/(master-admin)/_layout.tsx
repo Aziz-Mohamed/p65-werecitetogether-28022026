@@ -17,8 +17,8 @@ export default function MasterAdminLayout() {
         <Stack.Screen name="programs/[id]/edit" />
         <Stack.Screen name="programs/[id]/team" />
         <Stack.Screen name="programs/[id]/tracks" />
-        <Stack.Screen name="programs/[id]/cohorts/index" />
-        <Stack.Screen name="programs/[id]/cohorts/[cohortId]" />
+        <Stack.Screen name="programs/[id]/classes/index" />
+        <Stack.Screen name="programs/[id]/classes/[classId]" />
         {/* Certifications */}
         <Stack.Screen name="certifications/index" />
         <Stack.Screen name="certifications/[id]" />

@@ -9,8 +9,8 @@ import { Card } from '@/components/ui/Card';
 import { Button, Badge } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useClassEnrollments, useUpdateEnrollmentStatus } from '@/features/programs/hooks/useAdminEnrollments';
-import { useUpdateClassStatus, useBulkApproveEnrollments } from '@/features/programs/hooks/useAdminCohorts';
-import { useProgramClasses } from '@/features/programs/hooks/useCohorts';
+import { useUpdateClassStatus, useBulkApproveEnrollments } from '@/features/programs/hooks/useAdminClasses';
+import { useProgramClasses } from '@/features/programs/hooks/useClasses';
 import { useClassWaitlist } from '@/features/programs/hooks/useWaitlist';
 import { getNextClassStatus } from '@/features/programs/utils/enrollment-helpers';
 import { typography } from '@/theme/typography';
@@ -19,7 +19,7 @@ import { spacing } from '@/theme/spacing';
 import type { ClassStatus } from '@/features/programs/types/programs.types';
 
 export default function ClassDetailScreen() {
-  const { id, cohortId: classId } = useLocalSearchParams<{ id: string; cohortId: string }>();
+  const { id, classId } = useLocalSearchParams<{ id: string; classId: string }>();
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -98,8 +98,8 @@ export default function ClassDetailScreen() {
             title={`${t('programs.labels.waitlist')} (${waitlist.length})`}
             onPress={() =>
               router.push({
-                pathname: '/(program-admin)/waitlist/[cohortId]',
-                params: { cohortId: classId! },
+                pathname: '/(program-admin)/waitlist/[classId]',
+                params: { classId: classId! },
               })
             }
             variant="secondary"

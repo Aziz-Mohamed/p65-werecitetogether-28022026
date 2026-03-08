@@ -12,14 +12,14 @@ export default function ProgramAdminLayout() {
       <Stack.Screen name="programs/index" />
       <Stack.Screen name="programs/[id]/index" />
       <Stack.Screen name="programs/[id]/tracks" />
-      <Stack.Screen name="programs/[id]/cohorts/index" />
-      <Stack.Screen name="programs/[id]/cohorts/create" />
-      <Stack.Screen name="programs/[id]/cohorts/[cohortId]" />
+      <Stack.Screen name="programs/[id]/classes/index" />
+      <Stack.Screen name="programs/[id]/classes/create" />
+      <Stack.Screen name="programs/[id]/classes/[classId]" />
       <Stack.Screen name="programs/[id]/team" />
       <Stack.Screen name="certifications/index" />
       <Stack.Screen name="certifications/[id]" />
       <Stack.Screen name="rewards/index" />
-      <Stack.Screen name="waitlist/[cohortId]" />
+      <Stack.Screen name="waitlist/[classId]" />
     </Stack>
   );
 }

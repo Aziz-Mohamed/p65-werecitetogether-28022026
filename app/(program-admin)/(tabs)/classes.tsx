@@ -112,7 +112,7 @@ export default function ProgramAdminClasses() {
           style={styles.fab}
           onPress={() =>
             router.push({
-              pathname: '/(program-admin)/programs/[id]/cohorts/create',
+              pathname: '/(program-admin)/programs/[id]/classes/create',
               params: { id: programId! },
             })
           }

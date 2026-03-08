@@ -10,8 +10,8 @@ import { Card } from '@/components/ui/Card';
 import { Button, Badge } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useClassEnrollments, useUpdateEnrollmentStatus } from '@/features/programs/hooks/useAdminEnrollments';
-import { useUpdateClassStatus, useBulkApproveEnrollments } from '@/features/programs/hooks/useAdminCohorts';
-import { useProgramClasses } from '@/features/programs/hooks/useCohorts';
+import { useUpdateClassStatus, useBulkApproveEnrollments } from '@/features/programs/hooks/useAdminClasses';
+import { useProgramClasses } from '@/features/programs/hooks/useClasses';
 import { getNextClassStatus } from '@/features/programs/utils/enrollment-helpers';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
@@ -19,7 +19,7 @@ import { spacing } from '@/theme/spacing';
 import { normalize } from '@/theme/normalize';
 
 export default function MasterAdminClassDetailScreen() {
-  const { id, cohortId: classId } = useLocalSearchParams<{ id: string; cohortId: string }>();
+  const { id, classId } = useLocalSearchParams<{ id: string; classId: string }>();
   const { t } = useTranslation();
   const router = useRouter();
 

@@ -10,13 +10,13 @@ export { EmptyProgramState } from './components/EmptyProgramState';
 // ─── Hooks ──────────────────────────────────────────────────────────────────
 export { usePrograms } from './hooks/usePrograms';
 export { useProgram } from './hooks/useProgram';
-export { useProgramClasses } from './hooks/useCohorts';
+export { useProgramClasses } from './hooks/useClasses';
 export { useEnroll, useJoinFreeProgram } from './hooks/useEnroll';
 export { useEnrollments } from './hooks/useEnrollments';
 export { useLeaveProgram } from './hooks/useLeaveProgram';
 export { useProgramRoles, useAssignProgramRole, useRemoveProgramRole } from './hooks/useProgramRoles';
 export { useAllPrograms, useUpdateProgram, useCreateProgram, useCreateTrack } from './hooks/useAdminPrograms';
-export { useCreateProgramClass, useUpdateClassStatus, useBulkApproveEnrollments } from './hooks/useAdminCohorts';
+export { useCreateProgramClass, useUpdateClassStatus, useBulkApproveEnrollments } from './hooks/useAdminClasses';
 export { useClassEnrollments, useUpdateEnrollmentStatus } from './hooks/useAdminEnrollments';
 export { useClassWaitlist, useMyWaitlistEntry, useCancelWaitlist, usePromoteFromWaitlist } from './hooks/useWaitlist';
 

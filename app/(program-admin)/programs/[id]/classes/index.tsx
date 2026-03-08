@@ -9,7 +9,7 @@ import { Screen } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Button, Badge } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { useProgramClasses } from '@/features/programs/hooks/useCohorts';
+import { useProgramClasses } from '@/features/programs/hooks/useClasses';
 import { colors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { lightTheme } from '@/theme/colors';
@@ -34,7 +34,7 @@ export default function ClassListScreen() {
           <Text style={styles.title}>{t('programs.labels.classes')}</Text>
           <Button
             title={t('common.create')}
-            onPress={() => router.push(`/(program-admin)/programs/${id}/cohorts/create`)}
+            onPress={() => router.push(`/(program-admin)/programs/${id}/classes/create`)}
             variant="primary"
             size="sm"
             icon={<Ionicons name="add" size={18} color={colors.white} />}
@@ -59,7 +59,7 @@ export default function ClassListScreen() {
                   variant="outlined"
                   style={styles.card}
                   onPress={() =>
-                    router.push(`/(program-admin)/programs/${id}/cohorts/${item.id}`)
+                    router.push(`/(program-admin)/programs/${id}/classes/${item.id}`)
                   }
                 >
                   <View style={styles.cardRow}>
