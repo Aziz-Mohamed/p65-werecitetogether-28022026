@@ -2,8 +2,8 @@
 
 **Role:** Program Admin
 **Dashboard route:** `/(program-admin)/`
-**First screen:** Program selector (if multiple programs), then 5-tab dashboard
-**Tabs:** Home, Classes, Team, Reports, Settings (5 tabs)
+**First screen:** Program selector (if multiple programs), then 6-tab dashboard
+**Tabs:** Home, Classes, Team, Reports, Settings, Profile (6 tabs)
 **Data scope:** Assigned programs only — can manage everything within their programs
 **Program role:** Assigned via `program_roles` table with `role='program_admin'`
 
@@ -23,6 +23,23 @@
 
 ---
 
+## Quick Smoke Test
+
+> Run these first. If any fail, stop and investigate before continuing with the full script.
+
+- [ ] **QS-01** Login → program selector (if multi-program) or directly to dashboard
+- [ ] **QS-02** Dashboard shows 6 tabs: Home, Classes, Team, Reports, Settings, Profile
+- [ ] **QS-03** Dashboard stats load without errors (enrollment, class, teacher counts)
+- [ ] **QS-04** Classes tab loads with program-scoped class list
+- [ ] **QS-05** Team tab loads with program-scoped team members
+- [ ] **QS-06** Can create a new class (form loads, submission works)
+- [ ] **QS-07** Can add a team member (form loads, submission works)
+- [ ] **QS-08** Reports tab loads with charts/data
+- [ ] **QS-09** Profile tab loads and shows profile info
+- [ ] **QS-10** Cannot navigate to `/(master-admin)/` (RLS blocks data)
+
+---
+
 ## 1. Dashboard Verification
 
 ### 1.1 Program Selector (`select.tsx`)
@@ -30,7 +47,7 @@
 - [ ] If assigned to multiple programs, program selector screen (`select.tsx`) appears first
 - [ ] Program selector lists only programs the admin is assigned to
 - [ ] Programs not assigned to this admin are NOT shown
-- [ ] Tapping a program navigates to the 5-tab dashboard for that program
+- [ ] Tapping a program navigates to the 6-tab dashboard for that program
 - [ ] Selected program name is displayed in the dashboard header
 
 ### 1.2 Single Program Redirect (`index.tsx`)
@@ -49,7 +66,7 @@
 - [ ] Stats reflect only data from the selected program
 
 ### 1.4 Tab Bar Verification
-- [ ] Bottom tab bar displays exactly 5 tabs: Home, Classes, Team, Settings, Profile
+- [ ] Bottom tab bar displays exactly 6 tabs: Home, Classes, Team, Reports, Settings, Profile
 - [ ] Tapping each tab navigates to the correct screen
 - [ ] Active tab is visually highlighted
 - [ ] No admin-only tabs (e.g., platform config) are visible
@@ -293,7 +310,7 @@
 
 ---
 
-## 11. Profile & Settings
+## 11. Settings & Profile
 
 ### 11.1 Program Settings (`(tabs)/settings.tsx`)
 - [ ] Settings tab loads with program-level configuration options
@@ -301,11 +318,21 @@
 - [ ] Changes persist after save
 - [ ] Settings are scoped to the current program only (not platform-wide)
 
-### 11.2 Personal Profile
-- [ ] Admin can view their own profile
+### 11.2 Profile Tab (`(tabs)/profile.tsx`)
+- [ ] Profile is its own tab in the tab bar (separate from Settings)
+- [ ] Profile tab loads with admin's profile data (name, email, role)
 - [ ] Admin can edit their own profile (name, contact info, etc.)
 - [ ] Profile changes persist after save
 - [ ] Validation errors shown for invalid input
+- [ ] Logout action is available and functional
+
+### 11.3 Notification Preferences
+- [ ] Navigate to notification preferences from Profile tab
+- [ ] Notification categories listed with on/off toggles
+- [ ] Toggle a category off — preference saved
+- [ ] Toggle it back on — preference restored
+
+> **Note:** The notification preferences route may not exist yet under `/(program-admin)/`. If tapping the link results in a 404, file a bug.
 
 ---
 
