@@ -5,22 +5,33 @@
 - **Dashboard route:** `/(master-admin)/`
 - **Layout:** Scroll dashboard with stat cards + navigation buttons (no tabs)
 - **Scope:** Entire platform — unrestricted access
-- **Nav buttons:** Users, Programs, Reports, Settings
+- **Nav buttons:** Users, Program Admins, Supervisors, Teachers, Students, Classes, Programs, Stickers, Reports, Certifications, Settings, Permissions, Reset Password, Language
 
 ## Screens Under Test
 
 | Screen | Route | Purpose |
 |--------|-------|---------|
-| Dashboard | `index.tsx` | Total students, total teachers, active sessions, program list |
+| Dashboard | `index.tsx` | Stats + nav cards (students, teachers, sessions, programs) |
+| User Management | `users/index.tsx` | User search and filter |
+| User Details | `users/[id].tsx` | User details + role management |
+| Student List | `students/index.tsx` | All students |
+| Create Student | `students/create.tsx` | Create new student |
+| Teacher List | `teachers/index.tsx` | All teachers |
+| Create Teacher | `teachers/create.tsx` | Create new teacher |
+| Class List | `classes/index.tsx` | All classes |
+| Create Class | `classes/create.tsx` | Create new class |
 | Programs List | `programs/index.tsx` | All programs list |
 | Create Program | `programs/create.tsx` | Create new program |
 | Program Details | `programs/[id]/index.tsx` | Program details |
-| User Management | `users/index.tsx` | User search and filter |
-| User Details | `users/[id].tsx` | User details + role management |
-| Reports | `reports.tsx` | Platform-wide analytics |
-| Settings | `settings.tsx` | Platform config |
+| Reports | `reports/index.tsx` | Platform-wide analytics |
+| Settings | `settings/index.tsx` | Platform config |
+| Permissions | `settings/permissions.tsx` | Feature permissions |
+| Sticker Catalog | `stickers/index.tsx` | Manage sticker catalog |
 | Certifications List | `certifications/index.tsx` | All certifications |
 | Certification Details | `certifications/[id].tsx` | Single certification view |
+| Supervisors | `supervisors/index.tsx` | Supervisor management |
+| Program Admins | `program-admins/index.tsx` | Program admin management |
+| Reset Password | `members/reset-password.tsx` | Reset member passwords |
 
 ## Key Permissions (Unrestricted)
 
@@ -40,8 +51,9 @@
 - [ ] **1.2** Confirm the dashboard uses a scroll layout (not tab-based navigation)
 - [ ] **1.3** Verify stat cards are displayed: total students, total teachers, active sessions
 - [ ] **1.4** Verify a program list section is visible on the dashboard
-- [ ] **1.5** Confirm navigation buttons are present: Users, Programs, Reports, Settings
-- [ ] **1.6** Tap each navigation button and verify it navigates to the correct screen
+- [ ] **1.5** Confirm quick action buttons are present: Add Student, Add Teacher, Add Class
+- [ ] **1.6** Confirm nav cards are present: Users, Program Admins, Supervisors, Teachers, Students, Classes, Programs, Stickers, Reports, Certifications, Settings, Permissions, Reset Password, Language
+- [ ] **1.7** Tap each nav card and verify it navigates to the correct screen
 - [ ] **1.7** Verify stats are fetched via `get_master_admin_dashboard_stats()` RPC (check network/logs)
 - [ ] **1.8** Pull to refresh (if supported) and confirm stats update
 

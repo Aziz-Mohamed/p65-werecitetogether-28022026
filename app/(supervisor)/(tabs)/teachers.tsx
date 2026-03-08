@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { Screen } from '@/components/layout';
-import { ErrorState } from '@/components/feedback/ErrorState';
+import { ErrorState, LoadingState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -66,17 +66,17 @@ export default function SupervisorTeachers() {
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
-            !teachers.isLoading ? (
-              teachers.isError ? (
-                <ErrorState onRetry={() => teachers.refetch()} />
-              ) : (
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>
-                    {t('admin.supervisor.teacherList.empty')}
-                  </Text>
-                </View>
-              )
-            ) : null
+            teachers.isLoading ? (
+              <LoadingState />
+            ) : teachers.isError ? (
+              <ErrorState onRetry={() => teachers.refetch()} />
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>
+                  {t('admin.supervisor.teacherList.empty')}
+                </Text>
+              </View>
+            )
           }
         />
       </View>

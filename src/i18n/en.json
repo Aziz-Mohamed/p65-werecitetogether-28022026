@@ -457,6 +457,7 @@
       "noStickersDescription": "Ask your admin to add stickers to the catalog",
       "successTitle": "Sticker Awarded!",
       "successMessage": "The sticker has been awarded successfully",
+      "stickerAwarded": "Sticker awarded successfully",
       "awardAnother": "Award Another"
     }
   },

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 
 import { Screen } from '@/components/layout';
-import { ErrorState } from '@/components/feedback/ErrorState';
+import { ErrorState, LoadingState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -68,15 +68,15 @@ export default function TeacherCertificationsScreen() {
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
-            !isLoading ? (
-              isError ? (
-                <ErrorState onRetry={refetch} />
-              ) : (
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>{t('certifications.teacher.empty')}</Text>
-                </View>
-              )
-            ) : null
+            isLoading ? (
+              <LoadingState />
+            ) : isError ? (
+              <ErrorState onRetry={refetch} />
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>{t('certifications.teacher.empty')}</Text>
+              </View>
+            )
           }
         />
       </View>

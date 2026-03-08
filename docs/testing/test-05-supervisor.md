@@ -190,7 +190,6 @@
 ### 9.1 Route Restrictions
 - [ ] Navigating to `/(teacher)/` URL directly does not show teacher dashboard (RLS blocks)
 - [ ] Navigating to `/(student)/` URL directly does not show student dashboard (RLS blocks)
-- [ ] Navigating to `/(admin)/` URL directly does not show admin dashboard (RLS blocks)
 - [ ] Navigating to `/(program-admin)/` URL directly does not show program admin data (RLS blocks)
 - [ ] Navigating to `/(master-admin)/` URL directly does not show master admin data (RLS blocks)
 

@@ -395,15 +395,20 @@ export default function StudentDashboard() {
               {t('student.dashboard.mySchedule')}
             </Text>
           </Pressable>
-          <Pressable
-            style={[styles.explorePill, { backgroundColor: colors.secondary[50] }]}
-            onPress={() => router.push('/(student)/leaderboard')}
-          >
-            <Ionicons name="podium" size={14} color={colors.secondary[500]} />
-            <Text style={[styles.explorePillText, { color: colors.secondary[600] }]}>
-              {t('student.dashboard.viewLeaderboard')}
-            </Text>
-          </Pressable>
+          {enrollments?.[0]?.program_id && (
+            <Pressable
+              style={[styles.explorePill, { backgroundColor: colors.secondary[50] }]}
+              onPress={() => router.push({
+                pathname: '/(student)/program/[programId]/leaderboard',
+                params: { programId: enrollments[0].program_id },
+              })}
+            >
+              <Ionicons name="podium" size={14} color={colors.secondary[500]} />
+              <Text style={[styles.explorePillText, { color: colors.secondary[600] }]}>
+                {t('student.dashboard.viewLeaderboard')}
+              </Text>
+            </Pressable>
+          )}
         </View>
 
       </View>

@@ -59,6 +59,16 @@ class GamificationService {
   }
 
   /**
+   * GS-003a: Remove an awarded sticker (undo within grace period).
+   */
+  async removeSticker(studentStickerId: string) {
+    return supabase
+      .from('student_stickers')
+      .delete()
+      .eq('id', studentStickerId);
+  }
+
+  /**
    * GS-003b: Mark stickers as seen (clear is_new flag).
    */
   async markStickersAsSeen(studentStickerId: string) {

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { I18nManager, Pressable, StyleSheet, View, Text } from 'react-native';
+import { I18nManager, Pressable, RefreshControl, StyleSheet, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -33,7 +33,7 @@ export default function MemorizationScreen() {
   const isRTL = I18nManager.isRTL;
 
   const { data: stats } = useMemorizationStats(profile?.id);
-  const { data: dashboardData, isLoading: dashboardLoading } = useStudentDashboard(profile?.id);
+  const { data: dashboardData, isLoading: dashboardLoading, refetch } = useStudentDashboard(profile?.id);
   const { enriched: certifications } = useRubCertifications(profile?.id);
   const { data: progress = [], isLoading: progressLoading } = useMemorizationProgress({
     studentId: profile?.id ?? '',
@@ -97,7 +97,7 @@ export default function MemorizationScreen() {
 
   return (
     <>
-      <Screen scroll hasTabBar>
+      <Screen scroll hasTabBar refreshControl={<RefreshControl refreshing={false} onRefresh={refetch} />}>
         <View style={styles.content}>
           {/* Header */}
           <Text style={styles.title}>{t('memorization.title')}</Text>

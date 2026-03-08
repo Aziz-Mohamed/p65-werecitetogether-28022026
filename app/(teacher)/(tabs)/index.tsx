@@ -138,8 +138,8 @@ export default function TeacherDashboard() {
           style={styles.scheduleCard}
         >
           <View style={styles.scheduleRow}>
-            <View style={[styles.insightIcon, { backgroundColor: availableCount > 0 ? '#DCFCE7' : colors.neutral[100] }]}>
-              <Ionicons name="radio-button-on" size={22} color={availableCount > 0 ? '#22C55E' : colors.neutral[400]} />
+            <View style={[styles.insightIcon, { backgroundColor: availableCount > 0 ? colors.accent.emerald[50] : colors.neutral[100] }]}>
+              <Ionicons name="radio-button-on" size={22} color={availableCount > 0 ? colors.accent.emerald[500] : colors.neutral[400]} />
             </View>
             <View style={styles.scheduleInfo}>
               <Text style={styles.scheduleLabel}>{t('availability.title')}</Text>

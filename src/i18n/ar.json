@@ -457,6 +457,7 @@
       "noStickersDescription": "اطلب من المدير إضافة ملصقات إلى الكتالوج",
       "successTitle": "تم منح الملصق!",
       "successMessage": "تم منح الملصق بنجاح",
+      "stickerAwarded": "تم منح الملصق بنجاح",
       "awardAnother": "منح ملصق آخر"
     }
   },

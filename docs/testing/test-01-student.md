@@ -10,7 +10,7 @@
 ## Prerequisites
 
 - [ ] Test account with role `student` (credentials documented separately)
-- [ ] Enrolled in at least 1 program/cohort
+- [ ] Enrolled in at least 1 program/class
 - [ ] At least 1 completed session exists for the student
 - [ ] At least 1 sticker has been awarded to the student
 - [ ] At least 1 badge has been earned (or is close to threshold)
@@ -219,23 +219,16 @@
 - [ ] Locked/unearned badges are shown as greyed out or with progress toward them
 - [ ] Tapping a badge shows details or earning criteria
 
-### F3. Global Leaderboard
+### F3. Program Leaderboard
 
-1. Navigate to the **Leaderboard** (`leaderboard.tsx`).
-
-- [ ] Leaderboard loads with ranked list of students
-- [ ] Current student's position is highlighted
-- [ ] Leaderboard shows rank, name, and points/level
-- [ ] Student cannot see other students' private data (only public leaderboard info)
-
-### F4. Program Leaderboard
-
-1. Navigate to a **Program Leaderboard** (`program/[programId]/leaderboard.tsx`).
+1. From the dashboard, tap "View Leaderboard" (navigates to `program/[programId]/leaderboard.tsx` using the student's first enrolled program).
 
 - [ ] Program-specific leaderboard loads
 - [ ] Only students enrolled in the same program are shown
 - [ ] Current student's rank within the program is highlighted
-- [ ] If student is not enrolled in the program, access is restricted
+- [ ] Leaderboard shows rank, name, and level
+- [ ] Student cannot see other students' private data (only public leaderboard info)
+- [ ] If the student has no enrollments, the leaderboard button is hidden on the dashboard
 
 ---
 

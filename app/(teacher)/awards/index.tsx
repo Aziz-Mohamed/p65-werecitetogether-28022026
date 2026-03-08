@@ -12,7 +12,8 @@ import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useAuth } from '@/hooks/useAuth';
 import { useRTL } from '@/hooks/useRTL';
 import { useStudents } from '@/features/students/hooks/useStudents';
-import { useStickers, useAwardSticker } from '@/features/gamification/hooks/useStickers';
+import { useStickers, useAwardSticker, useRemoveSticker } from '@/features/gamification/hooks/useStickers';
+import { useUndoTimer } from '@/hooks/useUndoTimer';
 import { getStickerImageUrl } from '@/lib/storage';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
@@ -37,11 +38,19 @@ export default function AwardStickerScreen() {
   const { data: students = [] } = useStudents({ isActive: true });
   const { data: stickers = [], isLoading: stickersLoading } = useStickers();
   const awardSticker = useAwardSticker();
+  const removeSticker = useRemoveSticker();
+  const undoTimer = useUndoTimer<{ studentStickerId: string; studentId: string }>();
 
   const studentOptions: SelectOption[] = students.map((s: any) => ({
     label: resolveName(s.profiles?.name_localized, s.profiles?.full_name) ?? s.id,
     value: s.id,
   }));
+
+  const handleUndo = () => {
+    if (!undoTimer.data) return;
+    removeSticker.mutate(undoTimer.data);
+    undoTimer.clear();
+  };
 
   const handleAward = () => {
     if (!selectedStudentId || !selectedStickerId || !profile?.id) {
@@ -57,17 +66,13 @@ export default function AwardStickerScreen() {
         reason: reason.trim() || undefined,
       },
       {
-        onSuccess: () => {
-          Alert.alert(t('teacher.awards.successTitle'), t('teacher.awards.successMessage'), [
-            { text: t('common.done'), onPress: () => router.back() },
-            {
-              text: t('teacher.awards.awardAnother'),
-              onPress: () => {
-                setSelectedStickerId(null);
-                setReason('');
-              },
-            },
-          ]);
+        onSuccess: (result) => {
+          const awardedId = result?.data?.id;
+          if (awardedId) {
+            undoTimer.set({ studentStickerId: awardedId, studentId: selectedStudentId });
+          }
+          setSelectedStickerId(null);
+          setReason('');
         },
         onError: (err) => {
           Alert.alert(t('common.error'), err.message);
@@ -87,6 +92,13 @@ export default function AwardStickerScreen() {
         />
 
         <Text style={styles.title}>{t('teacher.awards.title')}</Text>
+
+        {undoTimer.data && (
+          <Pressable style={styles.undoBanner} onPress={handleUndo}>
+            <Text style={styles.undoText}>{t('teacher.awards.stickerAwarded')}</Text>
+            <Text style={styles.undoAction}>{t('common.undo')}</Text>
+          </Pressable>
+        )}
 
         <Select
           label={t('teacher.sessions.student')}
@@ -232,6 +244,26 @@ const styles = StyleSheet.create({
     ...typography.textStyles.caption,
     color: lightTheme.textSecondary,
     fontSize: typography.fontSize.xs,
+  },
+  undoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.primary[50],
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+    borderRadius: radius.md,
+    padding: spacing.md,
+  },
+  undoText: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.primary[700],
+    flex: 1,
+  },
+  undoAction: {
+    ...typography.textStyles.bodyMedium,
+    color: colors.primary[500],
+    fontFamily: typography.fontFamily.bold,
   },
   actions: {
     flexDirection: 'row',

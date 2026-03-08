@@ -3,15 +3,15 @@
 **Role:** Program Admin
 **Dashboard route:** `/(program-admin)/`
 **First screen:** Program selector (if multiple programs), then 5-tab dashboard
-**Tabs:** Home, Cohorts, Team, Reports, Settings (5 tabs)
+**Tabs:** Home, Classes, Team, Reports, Settings (5 tabs)
 **Data scope:** Assigned programs only — can manage everything within their programs
 **Program role:** Assigned via `program_roles` table with `role='program_admin'`
 
 **Prerequisites:**
 - Program admin account exists with an entry in `program_roles` where `role = 'program_admin'`
 - Admin is assigned to at least 2 programs (to test program selector)
-- At least 1 program has 2+ cohorts with enrolled students
-- At least 1 cohort has a waitlist with pending students
+- At least 1 program has 2+ classes with enrolled students
+- At least 1 class has a waitlist with pending students
 - At least 1 teacher and 1 supervisor are assigned to the program via `program_roles`
 - A supervisor is linked to a teacher via `supervisor_id` on `program_roles`
 - At least 1 memorization track exists in the program
@@ -40,7 +40,7 @@
 ### 1.3 Dashboard Home (`(tabs)/index.tsx`)
 - [ ] Dashboard home screen loads with program-scoped stats
 - [ ] Enrollment stats visible (total enrolled, pending, approved counts)
-- [ ] Cohort stats visible (total cohorts, active cohorts)
+- [ ] Class stats visible (total classes, active classes)
 - [ ] Teacher stats visible (total teachers assigned)
 - [ ] Session stats visible (total sessions, recent activity)
 - [ ] Stats are fetched via `get_program_admin_dashboard_stats()` RPC
@@ -49,7 +49,7 @@
 - [ ] Stats reflect only data from the selected program
 
 ### 1.4 Tab Bar Verification
-- [ ] Bottom tab bar displays exactly 5 tabs: Home, Cohorts, Team, Reports, Settings
+- [ ] Bottom tab bar displays exactly 5 tabs: Home, Classes, Team, Settings, Profile
 - [ ] Tapping each tab navigates to the correct screen
 - [ ] Active tab is visually highlighted
 - [ ] No admin-only tabs (e.g., platform config) are visible
@@ -63,13 +63,13 @@
 - [ ] Program list screen loads
 - [ ] Only programs assigned to this admin are listed
 - [ ] Programs from other admins or unassigned programs are NOT shown
-- [ ] Program cards display name and basic info (cohort count, enrollment count)
+- [ ] Program cards display name and basic info (class count, enrollment count)
 - [ ] Tapping a program navigates to program details
 
 ### 2.2 Program Details (`programs/[id]/index.tsx`)
 - [ ] Program details screen loads for a selected program
 - [ ] Program name, description, and metadata are displayed
-- [ ] Navigation options visible for: Cohorts, Team, Tracks
+- [ ] Navigation options visible for: Classes, Team, Tracks
 - [ ] Edit/update options are available for program settings
 - [ ] Back navigation returns to program list
 
@@ -81,40 +81,40 @@
 
 ---
 
-## 3. Cohort Management
+## 3. Class Management
 
-### 3.1 Cohort List — Tab (`(tabs)/cohorts.tsx`)
-- [ ] Cohorts tab loads with list of cohorts in the selected program
-- [ ] Only cohorts from the current program are shown
-- [ ] Cohort cards display name, student count, and status
+### 3.1 Class List — Tab (`(tabs)/cohorts.tsx`)
+- [ ] Classes tab loads with list of classes in the selected program
+- [ ] Only classes from the current program are shown
+- [ ] Class cards display name, student count, and status
 - [ ] "Create" button/action is visible and accessible
-- [ ] Empty state shown if no cohorts exist
+- [ ] Empty state shown if no classes exist
 
-### 3.2 Cohort List — Program Scoped (`programs/[id]/cohorts/index.tsx`)
-- [ ] Navigating from program details to cohorts shows cohorts for that specific program
-- [ ] Cohort list matches the cohorts tab for the same program
+### 3.2 Class List — Program Scoped (`programs/[id]/cohorts/index.tsx`)
+- [ ] Navigating from program details to classes shows classes for that specific program
+- [ ] Class list matches the classes tab for the same program
 
-### 3.3 Create Cohort (`programs/[id]/cohorts/create.tsx`)
-- [ ] Create cohort form loads with required fields (name, capacity, start date, etc.)
-- [ ] Submitting valid data creates a new cohort
-- [ ] New cohort appears in the cohort list after creation
-- [ ] New cohort is scoped to the current program
+### 3.3 Create Class (`programs/[id]/cohorts/create.tsx`)
+- [ ] Create class form loads with required fields (name, capacity, start date, etc.)
+- [ ] Submitting valid data creates a new class
+- [ ] New class appears in the class list after creation
+- [ ] New class is scoped to the current program
 - [ ] Validation errors shown for missing/invalid fields
-- [ ] Cancel/back navigation returns to cohort list without creating
+- [ ] Cancel/back navigation returns to class list without creating
 
-### 3.4 Cohort Details (`programs/[id]/cohorts/[cohortId].tsx`)
-- [ ] Tapping a cohort navigates to cohort details
-- [ ] Cohort details show: name, capacity, enrolled student roster, assigned teacher(s)
-- [ ] Student list within the cohort is accurate
+### 3.4 Class Details (`programs/[id]/cohorts/[cohortId].tsx`)
+- [ ] Tapping a class navigates to class details
+- [ ] Class details show: name, capacity, enrolled student roster, assigned teacher(s)
+- [ ] Student list within the class is accurate
 - [ ] Edit options are available
-- [ ] Back navigation returns to cohort list
+- [ ] Back navigation returns to class list
 
-### 3.5 Edit Cohort
-- [ ] Edit form pre-fills with current cohort data
+### 3.5 Edit Class
+- [ ] Edit form pre-fills with current class data
 - [ ] Updating fields (name, capacity, status) and saving persists changes
-- [ ] Changes reflected on cohort details after save
+- [ ] Changes reflected on class details after save
 - [ ] Validation errors shown for invalid input (e.g., capacity below current enrollment)
-- [ ] Cancel returns to cohort details without saving
+- [ ] Cancel returns to class details without saving
 
 ---
 
@@ -183,21 +183,21 @@
 ## 6. Enrollment Management
 
 ### 6.1 View Enrollments
-- [ ] Admin can view all enrollments across cohorts in the program
-- [ ] Enrollment list shows student name, cohort, and status (pending, approved, rejected)
+- [ ] Admin can view all enrollments across classes in the program
+- [ ] Enrollment list shows student name, class, and status (pending, approved, rejected)
 - [ ] Only enrollments from the admin's assigned programs are shown
 - [ ] Can filter by enrollment status
 
 ### 6.2 Approve Enrollment
 - [ ] Admin can approve a pending enrollment
 - [ ] Approved enrollment status changes to `approved`
-- [ ] Student gains access to the cohort after approval
+- [ ] Student gains access to the class after approval
 - [ ] Enrollment count updates on dashboard stats
 
 ### 6.3 Reject Enrollment
 - [ ] Admin can reject a pending enrollment
 - [ ] Rejected enrollment status changes to `rejected`
-- [ ] Student does not gain access to the cohort
+- [ ] Student does not gain access to the class
 - [ ] Confirmation dialog shown before rejection
 
 ---
@@ -205,17 +205,17 @@
 ## 7. Waitlist Management
 
 ### 7.1 View Waitlist (`waitlist/[cohortId].tsx`)
-- [ ] Waitlist screen loads for a specific cohort
+- [ ] Waitlist screen loads for a specific class
 - [ ] Shows students on the waitlist with their position/order
-- [ ] Only waitlist entries for the selected cohort are shown
+- [ ] Only waitlist entries for the selected class are shown
 - [ ] Empty state shown if waitlist is empty
 
 ### 7.2 Promote from Waitlist
 - [ ] Admin can promote a student from the waitlist to enrolled status
 - [ ] Promoted student is removed from the waitlist
-- [ ] Promoted student appears in the cohort's enrolled student roster
-- [ ] Cohort enrollment count updates accordingly
-- [ ] If cohort is at capacity, promotion is blocked with appropriate message
+- [ ] Promoted student appears in the class's enrolled student roster
+- [ ] Class enrollment count updates accordingly
+- [ ] If class is at capacity, promotion is blocked with appropriate message
 - [ ] Confirmation dialog shown before promotion
 
 ---
@@ -224,7 +224,7 @@
 
 ### 8.1 Dashboard Stats
 - [ ] Dashboard home displays aggregated stats from `get_program_admin_dashboard_stats()` RPC
-- [ ] Stats include: enrollment totals, cohort activity, teacher activity, session counts
+- [ ] Stats include: enrollment totals, class activity, teacher activity, session counts
 - [ ] Stats are scoped to the selected program only
 - [ ] Stats update after changes (new enrollments, sessions, etc.)
 
@@ -232,7 +232,7 @@
 - [ ] Reports tab loads with program-scoped analytics
 - [ ] Charts/tables display meaningful data (enrollment trends, session activity, student progress)
 - [ ] Data is read-only (no editing from reports screen)
-- [ ] Can filter by date range or cohort
+- [ ] Can filter by date range or class
 - [ ] Empty state shown if insufficient data for charts
 - [ ] Reports do NOT include data from other programs
 
@@ -320,7 +320,7 @@
 - [ ] Program admin CANNOT see programs they are not assigned to
 - [ ] Navigating to a program ID the admin is not assigned to returns an error or empty state
 - [ ] API calls scoped to unassigned programs are blocked by RLS
-- [ ] Cohorts, team, tracks from other programs are NOT accessible
+- [ ] Classes, team, tracks from other programs are NOT accessible
 
 ### 12.3 Cannot Assign Master Admin Role
 - [ ] Role picker when adding team members does NOT include `master_admin` option
@@ -331,14 +331,12 @@
 ### 12.4 Cannot Access Platform Config
 - [ ] No "Platform Config" or global settings menu exists in program admin UI
 - [ ] Navigating to `/(master-admin)/` URL directly does not show master admin data (RLS blocks)
-- [ ] Navigating to `/(admin)/` URL directly does not show school admin data (RLS blocks)
 - [ ] `platform_config` table is not readable by program admin (RLS blocks)
 
 ### 12.5 Route Restrictions
 - [ ] Navigating to `/(student)/` URL directly does not show student dashboard
 - [ ] Navigating to `/(teacher)/` URL directly does not show teacher dashboard
 - [ ] Navigating to `/(supervisor)/` URL directly does not show supervisor dashboard
-- [ ] Navigating to `/(parent)/` URL directly does not show parent dashboard
 
 ---
 
@@ -350,11 +348,11 @@
 - [ ] All screens function correctly without the selector step
 - [ ] Program switching UI is hidden or disabled
 
-### 13.2 No Cohorts
-- [ ] Program with zero cohorts shows empty state on Cohorts tab
-- [ ] Dashboard stats show 0 cohorts without errors
-- [ ] "Create Cohort" action is still accessible
-- [ ] Enrollment and waitlist screens handle the absence of cohorts gracefully
+### 13.2 No Classes
+- [ ] Program with zero classes shows empty state on Classes tab
+- [ ] Dashboard stats show 0 classes without errors
+- [ ] "Create Class" action is still accessible
+- [ ] Enrollment and waitlist screens handle the absence of classes gracefully
 
 ### 13.3 Empty Team
 - [ ] Program with no assigned teachers or supervisors shows empty state on Team tab
@@ -362,11 +360,11 @@
 - [ ] Dashboard stats show 0 teachers without errors
 - [ ] Reports handle absence of team data gracefully
 
-### 13.4 Full Cohort
-- [ ] Cohort at maximum capacity does not allow new enrollments (approval blocked)
+### 13.4 Full Class
+- [ ] Class at maximum capacity does not allow new enrollments (approval blocked)
 - [ ] Waitlist promotion is blocked with an appropriate capacity message
-- [ ] Error message clearly indicates the cohort is full
-- [ ] Cohort capacity is displayed on the cohort details screen
+- [ ] Error message clearly indicates the class is full
+- [ ] Class capacity is displayed on the class details screen
 
 ### 13.5 No Enrollments
 - [ ] Program with zero enrollments shows empty state on enrollment views
@@ -380,7 +378,7 @@
 ### 13.7 Program Switching
 - [ ] Switching between programs via the selector updates all tabs with the new program's data
 - [ ] No stale data from the previous program is shown after switching
-- [ ] Stats, cohorts, team, reports, and settings all reflect the newly selected program
+- [ ] Stats, classes, team, reports, and settings all reflect the newly selected program
 
 ### 13.8 Network & Loading
 - [ ] Slow network shows loading indicators on all data screens
@@ -389,6 +387,6 @@
 - [ ] Navigating between tabs while data is loading does not cause crashes
 
 ### 13.9 Concurrent Operations
-- [ ] Two program admins on the same program editing the same cohort do not cause data corruption
+- [ ] Two program admins on the same program editing the same class do not cause data corruption
 - [ ] Approving an enrollment while another admin rejects the same enrollment is handled gracefully
-- [ ] Promoting from waitlist while another admin fills the last cohort spot shows an appropriate error
+- [ ] Promoting from waitlist while another admin fills the last class spot shows an appropriate error
