@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect } from 'react';
-import { StyleSheet, View, Text, Alert } from 'react-native';
+import { StyleSheet, View, Text, Alert, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -134,6 +135,14 @@ export default function HimamScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
+        <Pressable
+          onPress={() => router.back()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+        >
+          <Ionicons name="arrow-back" size={normalize(24)} color={lightTheme.text} />
+        </Pressable>
         <Text style={styles.title}>{t('himam.title')}</Text>
         <Text style={styles.subtitle}>{t('himam.subtitle')}</Text>
 
@@ -246,6 +255,10 @@ export default function HimamScreen() {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    alignSelf: 'flex-start',
+    marginBottom: spacing.xs,
+  },
   container: {
     flex: 1,
     padding: spacing.lg,

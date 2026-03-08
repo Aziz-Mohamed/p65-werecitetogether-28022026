@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { View, Text, ScrollView, StyleSheet, Alert, Pressable } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 
 // Safe require — native modules may not be available (e.g. Expo Go)
 let ViewShot: any = null;
@@ -28,6 +29,7 @@ import type { CertificationWithDetails } from '@/features/certifications/types/c
 
 export default function StudentCertificateDetailScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const viewShotRef = useRef(null);
 
@@ -60,6 +62,14 @@ export default function StudentCertificateDetailScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
+        <Pressable
+          onPress={() => router.back()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+        >
+          <Ionicons name="arrow-back" size={24} color={lightTheme.text} />
+        </Pressable>
         {ViewShot ? (
           <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }}>
             {certContent}
@@ -82,6 +92,10 @@ export default function StudentCertificateDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    alignSelf: 'flex-start',
+    marginBottom: spacing.sm,
+  },
   content: {
     padding: spacing.base,
     paddingBottom: spacing['3xl'],

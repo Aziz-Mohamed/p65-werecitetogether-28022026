@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, RefreshControl, Pressable } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '@/components/layout';
 import { ErrorState } from '@/components/feedback';
@@ -15,6 +17,7 @@ import { normalize } from '@/theme/normalize';
 
 export default function HimamHistoryScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { session } = useAuth();
   const userId = session?.user?.id;
 
@@ -25,6 +28,14 @@ export default function HimamHistoryScreen() {
   return (
     <Screen>
       <View style={styles.container}>
+        <Pressable
+          onPress={() => router.back()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+        >
+          <Ionicons name="arrow-back" size={normalize(24)} color={lightTheme.text} />
+        </Pressable>
         <Text style={styles.title}>{t('himam.history.title')}</Text>
 
         <FlashList
@@ -89,6 +100,10 @@ export default function HimamHistoryScreen() {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    alignSelf: 'flex-start',
+    marginBottom: spacing.xs,
+  },
   container: {
     flex: 1,
     padding: spacing.lg,
