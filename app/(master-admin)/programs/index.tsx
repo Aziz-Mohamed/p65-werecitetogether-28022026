@@ -20,13 +20,11 @@ import type { Program } from '@/features/programs/types/programs.types';
 const CATEGORY_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   structured: 'layers-outline',
   free: 'sparkles-outline',
-  mixed: 'shuffle-outline',
 };
 
 const CATEGORY_COLOR: Record<string, string> = {
   structured: colors.accent.indigo[500],
   free: colors.primary[500],
-  mixed: colors.accent.violet[500],
 };
 
 export default function MasterAdminProgramsList() {

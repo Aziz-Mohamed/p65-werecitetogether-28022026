@@ -19,7 +19,7 @@ const createSchema = z.object({
   name_ar: z.string().min(1),
   description: z.string().optional(),
   description_ar: z.string().optional(),
-  category: z.enum(['free', 'structured', 'mixed']),
+  category: z.enum(['free', 'structured']),
 });
 
 type CreateFormData = z.infer<typeof createSchema>;
@@ -130,7 +130,7 @@ export default function MasterAdminCreateProgram() {
             <View>
               <Text style={styles.pickerLabel}>{t('programs.labels.selectCategory')}</Text>
               <View style={styles.segmentedControl}>
-                {(['free', 'structured', 'mixed'] as const).map((cat) => (
+                {(['free', 'structured'] as const).map((cat) => (
                   <Pressable
                     key={cat}
                     style={[styles.segment, value === cat && styles.segmentActive]}

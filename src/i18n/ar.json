@@ -1164,8 +1164,13 @@
     "programDetail": "تفاصيل البرنامج",
     "category": {
       "free": "حر",
-      "structured": "مقيّد",
-      "mixed": "مختلط"
+      "structured": "منظّم"
+    },
+    "sections": {
+      "open": "القسم الحر",
+      "structured": "القسم المنظم",
+      "openDescription": "مفتوح للانضمام في أي وقت — بدون فصول أو مواعيد منظمة",
+      "structuredDescription": "فصول بمواعيد محددة وعدد طلاب لكل فصل"
     },
     "status": {
       "pending": "بانتظار الموافقة",
@@ -1364,7 +1369,7 @@
     "availableForPrograms": "متاح في {{count}} برامج",
     "offline": "غير متاح",
     "meetingSettings": "إعدادات الاجتماع",
-    "noFreePrograms": "لم يتم تعيينك في أي برنامج حر أو مختلط.",
+    "noFreePrograms": "لم يتم تعيينك في أي برنامج حر.",
     "platformLabels": {
       "google_meet": "Google Meet",
       "zoom": "Zoom",

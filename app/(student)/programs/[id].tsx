@@ -27,7 +27,107 @@ import { lightTheme, colors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { normalize } from '@/theme/normalize';
 import { radius } from '@/theme/radius';
-import type { ProgramClassWithTeacher, ProgramTrack } from '@/features/programs/types/programs.types';
+import { buildTrackTree } from '@/features/programs/utils/enrollment-helpers';
+import type { ProgramClassWithTeacher, ProgramTrack, ProgramTrackNode } from '@/features/programs/types/programs.types';
+
+function AvailableTrackNode({
+  node,
+  depth,
+  localize,
+  isFreeProgramOrTrack,
+  classesForTrack,
+  handleJoinFree,
+  handleEnroll,
+  joinFreePending,
+  enrollPending,
+  t,
+}: {
+  node: ProgramTrackNode;
+  depth: number;
+  localize: (en: string | null | undefined, ar: string | null | undefined) => string;
+  isFreeProgramOrTrack: (track?: ProgramTrack) => boolean;
+  classesForTrack: (trackId: string) => ProgramClassWithTeacher[];
+  handleJoinFree: (trackId?: string) => void;
+  handleEnroll: (classId: string, trackId: string | null) => void;
+  joinFreePending: boolean;
+  enrollPending: boolean;
+  t: (key: string) => string;
+}) {
+  const isParent = node.children.length > 0;
+
+  if (isParent) {
+    return (
+      <View style={depth > 0 ? styles.childTrackContainer : undefined}>
+        <Text style={styles.parentTrackLabel}>
+          {localize(node.name, node.name_ar)}
+        </Text>
+        {(node.description || node.description_ar) && (
+          <Text style={styles.trackDescription}>
+            {localize(node.description, node.description_ar)}
+          </Text>
+        )}
+        {node.children.map((child) => (
+          <AvailableTrackNode
+            key={child.id}
+            node={child}
+            depth={depth + 1}
+            localize={localize}
+            isFreeProgramOrTrack={isFreeProgramOrTrack}
+            classesForTrack={classesForTrack}
+            handleJoinFree={handleJoinFree}
+            handleEnroll={handleEnroll}
+            joinFreePending={joinFreePending}
+            enrollPending={enrollPending}
+            t={t}
+          />
+        ))}
+      </View>
+    );
+  }
+
+  const trackClasses = classesForTrack(node.id);
+  const isFree = isFreeProgramOrTrack(node);
+
+  return (
+    <View style={depth > 0 ? styles.childTrackContainer : undefined}>
+      <Card variant="outlined" style={styles.trackCard}>
+        <Text style={styles.trackCardName} numberOfLines={2}>
+          {localize(node.name, node.name_ar)}
+        </Text>
+
+        {(node.description || node.description_ar) && (
+          <Text style={styles.trackDescription}>
+            {localize(node.description, node.description_ar)}
+          </Text>
+        )}
+
+        {isFree ? (
+          <Button
+            title={t('programs.actions.join')}
+            onPress={() => handleJoinFree(node.id)}
+            loading={joinFreePending}
+            size="sm"
+          />
+        ) : trackClasses.length > 0 ? (
+          <View style={styles.classesContainer}>
+            {trackClasses.map((pc: ProgramClassWithTeacher) => (
+              <ProgramClassCard
+                key={pc.id}
+                programClass={pc}
+                onEnroll={() => handleEnroll(pc.id, node.id)}
+                disabled={enrollPending}
+              />
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.noClasses}>
+            {t('programs.labels.noClasses')}
+          </Text>
+        )}
+      </Card>
+    </View>
+  );
+}
 
 export default function ProgramDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,8 +144,8 @@ export default function ProgramDetailScreen() {
   const joinFree = useJoinFreeProgram(id!);
   const leaveProgram = useLeaveProgram();
 
-  // Available teachers — only for free/mixed programs
-  const showAvailableTeachers = program?.category === 'free' || program?.category === 'mixed';
+  // Available teachers — only for free programs
+  const showAvailableTeachers = program?.category === 'free';
   const { data: availableTeachers } = useAvailableTeachers(
     showAvailableTeachers ? id : undefined,
   );
@@ -123,6 +223,49 @@ export default function ProgramDetailScreen() {
     );
   };
 
+  // Build track hierarchy (hooks must be before early returns)
+  const tracks = program?.program_tracks ?? [];
+
+  const trackTree = useMemo(
+    () => buildTrackTree(tracks),
+    [tracks],
+  );
+
+  const leafTracks = useMemo(() => {
+    const leaves: ProgramTrack[] = [];
+    const collectLeaves = (nodes: ProgramTrackNode[]) => {
+      for (const node of nodes) {
+        if (node.children.length === 0) {
+          leaves.push(node);
+        } else {
+          collectLeaves(node.children);
+        }
+      }
+    };
+    collectLeaves(trackTree);
+    return leaves;
+  }, [trackTree]);
+
+  const enrolledTracks = leafTracks.filter((t) => isEnrolledInTrack(t.id));
+  const availableTracks = leafTracks.filter((t) => !isEnrolledInTrack(t.id));
+
+  const availableTrackTree = useMemo(() => {
+    const availableIds = new Set(availableTracks.map((t) => t.id));
+    const filterTree = (nodes: ProgramTrackNode[]): ProgramTrackNode[] => {
+      return nodes
+        .map((node) => {
+          if (node.children.length === 0) {
+            return availableIds.has(node.id) ? node : null;
+          }
+          const filteredChildren = filterTree(node.children);
+          if (filteredChildren.length === 0) return null;
+          return { ...node, children: filteredChildren };
+        })
+        .filter((n): n is ProgramTrackNode => n !== null);
+    };
+    return filterTree(trackTree);
+  }, [trackTree, availableTracks]);
+
   if (isLoading) {
     return (
       <Screen>
@@ -141,16 +284,12 @@ export default function ProgramDetailScreen() {
 
   const isFreeProgramOrTrack = (track?: ProgramTrack) => {
     if (program.category === 'free') return true;
-    if (program.category === 'mixed' && track?.track_type === 'free') return true;
+    if (track?.track_type === 'free') return true;
     return false;
   };
 
   const classesForTrack = (trackId: string) =>
     programClasses?.filter((c) => c.track_id === trackId) ?? [];
-
-  // Separate enrolled tracks from available tracks
-  const enrolledTracks = program.program_tracks.filter((t) => isEnrolledInTrack(t.id));
-  const availableTracks = program.program_tracks.filter((t) => !isEnrolledInTrack(t.id));
 
   // Show quick actions row?
   const showQuickActions =
@@ -319,51 +458,24 @@ export default function ProgramDetailScreen() {
         )}
 
         {/* ── Available Tracks ── */}
-        {availableTracks.length > 0 && (
+        {availableTrackTree.length > 0 && (
           <View style={styles.tracksSection}>
             <Text style={styles.sectionTitle}>{t('programs.labels.tracks')}</Text>
-            {availableTracks.map((track) => {
-              const trackClasses = classesForTrack(track.id);
-              const isFree = isFreeProgramOrTrack(track);
-
-              return (
-                <Card key={track.id} variant="outlined" style={styles.trackCard}>
-                  <Text style={styles.trackCardName} numberOfLines={2}>
-                    {localize(track.name, track.name_ar)}
-                  </Text>
-
-                  {(track.description || track.description_ar) && (
-                    <Text style={styles.trackDescription}>
-                      {localize(track.description, track.description_ar)}
-                    </Text>
-                  )}
-
-                  {isFree ? (
-                    <Button
-                      title={t('programs.actions.join')}
-                      onPress={() => handleJoinFree(track.id)}
-                      loading={joinFree.isPending}
-                      size="sm"
-                    />
-                  ) : trackClasses.length > 0 ? (
-                    <View style={styles.classesContainer}>
-                      {trackClasses.map((pc: ProgramClassWithTeacher) => (
-                        <ProgramClassCard
-                          key={pc.id}
-                          programClass={pc}
-                          onEnroll={() => handleEnroll(pc.id, track.id)}
-                          disabled={enroll.isPending}
-                        />
-                      ))}
-                    </View>
-                  ) : (
-                    <Text style={styles.noClasses}>
-                      {t('programs.labels.noClasses')}
-                    </Text>
-                  )}
-                </Card>
-              );
-            })}
+            {availableTrackTree.map((node) => (
+              <AvailableTrackNode
+                key={node.id}
+                node={node}
+                depth={0}
+                localize={localize}
+                isFreeProgramOrTrack={isFreeProgramOrTrack}
+                classesForTrack={classesForTrack}
+                handleJoinFree={handleJoinFree}
+                handleEnroll={handleEnroll}
+                joinFreePending={joinFree.isPending}
+                enrollPending={enroll.isPending}
+                t={t}
+              />
+            ))}
           </View>
         )}
       </ScrollView>
@@ -456,6 +568,16 @@ const styles = StyleSheet.create({
   },
 
   /* ── Track Cards ── */
+  parentTrackLabel: {
+    ...typography.textStyles.bodyMedium,
+    fontFamily: typography.fontFamily.semiBold,
+    color: lightTheme.text,
+    marginBottom: spacing.xs,
+    marginTop: spacing.sm,
+  },
+  childTrackContainer: {
+    paddingStart: spacing.lg,
+  },
   trackCard: {
     gap: spacing.sm,
   },

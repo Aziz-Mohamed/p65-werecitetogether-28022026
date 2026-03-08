@@ -41,7 +41,7 @@ class AvailabilityService {
       .single()) as any;
   }
 
-  /** Get teacher's eligible (free/mixed) program assignments */
+  /** Get teacher's eligible (free) program assignments */
   async getEligiblePrograms() {
     const { data: { user } } = await supabase.auth.getUser();
     return (supabase

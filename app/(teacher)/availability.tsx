@@ -29,13 +29,13 @@ export default function AvailabilityScreen() {
     },
   });
 
-  // Filter to free/mixed programs only
+  // Filter to free (open) programs only
   const eligiblePrograms = useMemo(() => {
     if (!programRoles) return [];
     return programRoles
       .filter((pr) => {
         const cat = pr.programs?.category;
-        return cat === 'free' || cat === 'mixed';
+        return cat === 'free';
       })
       .map((pr) => ({
         program_id: pr.program_id,

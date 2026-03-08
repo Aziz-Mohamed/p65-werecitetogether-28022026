@@ -56,7 +56,7 @@ export interface MasterAdminProgramEnriched {
   name_ar: string;
   description: string | null;
   description_ar: string | null;
-  category: 'free' | 'structured' | 'mixed';
+  category: 'free' | 'structured';
   is_active: boolean;
   settings: Record<string, unknown>;
   sort_order: number;

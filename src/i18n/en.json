@@ -1481,9 +1481,14 @@
     "browsePrograms": "Browse Programs",
     "programDetail": "Program Detail",
     "category": {
-      "free": "Free",
-      "structured": "Structured",
-      "mixed": "Mixed"
+      "free": "Open",
+      "structured": "Structured"
+    },
+    "sections": {
+      "open": "Open Division",
+      "structured": "Structured Division",
+      "openDescription": "Open to join at any time — no fixed schedules",
+      "structuredDescription": "Fixed classes with set schedules and student limits"
     },
     "status": {
       "pending": "Pending Approval",
@@ -1682,7 +1687,7 @@
     "availableForPrograms": "Available for {{count}} programs",
     "offline": "Offline",
     "meetingSettings": "Meeting Settings",
-    "noFreePrograms": "You are not assigned to any free or mixed programs.",
+    "noFreePrograms": "You are not assigned to any open programs.",
     "platformLabels": {
       "google_meet": "Google Meet",
       "zoom": "Zoom",
