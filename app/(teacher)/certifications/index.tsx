@@ -1,58 +1,84 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 
 import { Screen } from '@/components/layout';
-import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { useAuth } from '@/hooks/useAuth';
-import { useCertificationRequests } from '@/features/certifications/hooks/useCertificationRequests';
-import { CertificationRequestCard } from '@/features/certifications/components/CertificationRequestCard';
-import { typography } from '@/theme/typography';
 import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { typography } from '@/theme/typography';
+import { CertificationCard } from '@/features/certifications/components/CertificationCard';
+import { certificationsService } from '@/features/certifications/services/certifications.service';
 
 export default function TeacherCertificationsScreen() {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const { session } = useAuth();
+  const router = useRouter();
+  const userId = session?.user?.id;
 
-  // TODO: Get programId from context/store when program selector is implemented
-  const programId = undefined as string | undefined;
-
-  const {
-    data: requests = [],
-    isLoading,
-    error,
-    refetch,
-  } = useCertificationRequests(programId, 'recommended');
-
-  if (isLoading && programId) return <LoadingState />;
-  if (error) return <ErrorState description={(error as Error).message} onRetry={refetch} />;
+  const { data, isLoading, isRefetching, isError, refetch } = useQuery({
+    queryKey: ['certifications', 'teacher', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const { data, error } = await certificationsService.getTeacherCertifications(userId);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!userId,
+  });
 
   return (
-    <Screen scroll={false}>
+    <Screen>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('certifications.requests.title')}</Text>
-        </View>
-
-        {!programId || requests.length === 0 ? (
-          <EmptyState
-            icon="ribbon-outline"
-            title={t('certifications.requests.empty')}
-            description={t('certifications.requests.emptyDesc')}
-          />
-        ) : (
-          <FlashList
-            data={requests}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => (
-              <CertificationRequestCard request={item as any} />
-            )}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-          />
-        )}
+        <Text style={styles.title}>{t('certifications.teacher.title')}</Text>
+        <FlashList
+          data={data ?? []}
+          estimatedItemSize={140}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+          }
+          renderItem={({ item }) => (
+            <CertificationCard
+              id={item.id}
+              studentName={(item as Record<string, unknown>).student
+                ? ((item as Record<string, unknown>).student as { full_name: string }).full_name
+                : ''}
+              programName={(item as Record<string, unknown>).program
+                ? ((item as Record<string, unknown>).program as { name: string }).name
+                : ''}
+              trackName={(item as Record<string, unknown>).track
+                ? ((item as Record<string, unknown>).track as { name: string }).name
+                : null}
+              type={item.type as 'ijazah' | 'graduation' | 'completion'}
+              status={item.status as 'recommended' | 'supervisor_approved' | 'issued' | 'returned' | 'rejected' | 'revoked'}
+              title={item.title}
+              createdAt={item.created_at}
+              onPress={() =>
+                router.push({
+                  pathname: '/(teacher)/certifications/[id]',
+                  params: { id: item.id },
+                })
+              }
+            />
+          )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ListEmptyComponent={
+            !isLoading ? (
+              isError ? (
+                <ErrorState onRetry={refetch} />
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>{t('certifications.teacher.empty')}</Text>
+                </View>
+              )
+            ) : null
+          }
+        />
       </View>
     </Screen>
   );
@@ -61,19 +87,27 @@ export default function TeacherCertificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    paddingBlockStart: spacing.lg,
-    paddingBlockEnd: spacing.base,
+    paddingTop: spacing.xl,
   },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.base,
   },
   listContent: {
-    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.base,
   },
   separator: {
     height: spacing.sm,
+  },
+  emptyContainer: {
+    padding: spacing['2xl'],
+    alignItems: 'center',
+  },
+  emptyText: {
+    ...typography.textStyles.body,
+    color: lightTheme.textSecondary,
+    textAlign: 'center',
   },
 });

@@ -7,6 +7,8 @@ export default function SupervisorLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="teachers/[id]/index" />
       <Stack.Screen name="teachers/[id]/students" />
+      <Stack.Screen name="certifications/index" />
+      <Stack.Screen name="certifications/[id]" />
     </Stack>
   );
 }

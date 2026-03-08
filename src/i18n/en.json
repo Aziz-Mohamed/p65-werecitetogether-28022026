@@ -1741,5 +1741,134 @@
         "settings": "Settings"
       }
     }
+  },
+  "certifications": {
+    "types": {
+      "ijazah": "Ijazah",
+      "graduation": "Graduation",
+      "completion": "Completion"
+    },
+    "statuses": {
+      "recommended": "Recommended",
+      "supervisor_approved": "Approved",
+      "issued": "Issued",
+      "returned": "Returned",
+      "rejected": "Rejected",
+      "revoked": "Revoked"
+    },
+    "form": {
+      "title": "Recommend for Certification",
+      "certType": "Certification Type",
+      "certTitle": "Certificate Title",
+      "certTitleAr": "Certificate Title (Arabic)",
+      "notes": "Notes (optional)",
+      "notesPlaceholder": "Describe the student's achievement...",
+      "submit": "Submit Recommendation",
+      "resubmit": "Re-submit Recommendation",
+      "resubmitTitle": "Re-submit Certification",
+      "duplicateWarning": "An active certification already exists for this student in this program/track.",
+      "enrollmentError": "Student is not actively enrolled in this program.",
+      "success": "Recommendation submitted successfully.",
+      "resubmitSuccess": "Recommendation re-submitted successfully."
+    },
+    "review": {
+      "approve": "Approve",
+      "return": "Return to Teacher",
+      "issue": "Issue Certificate",
+      "reject": "Reject",
+      "revoke": "Revoke Certificate",
+      "returnTitle": "Return to Teacher",
+      "returnDescription": "Provide feedback so the teacher can revise and re-submit.",
+      "rejectTitle": "Reject Certification",
+      "rejectDescription": "Provide a reason for rejecting this certification.",
+      "notesPlaceholder": "Enter your notes...",
+      "reviewNotes": "Review Notes",
+      "reviewNotesPlaceholder": "Provide feedback...",
+      "reviewNotesRequired": "Notes are required when returning or rejecting.",
+      "revocationReason": "Revocation Reason",
+      "revocationReasonPlaceholder": "Explain why this certificate is being revoked...",
+      "revocationReasonRequired": "A reason is required for revocation.",
+      "confirmApprove": "Are you sure you want to approve this recommendation?",
+      "confirmIssue": "Are you sure you want to issue this certificate?",
+      "confirmReject": "Are you sure you want to reject this certification?",
+      "confirmRevoke": "Are you sure you want to revoke this certificate? This action cannot be undone.",
+      "approveSuccess": "Recommendation approved.",
+      "returnSuccess": "Recommendation returned to teacher.",
+      "issueSuccess": "Certificate issued successfully.",
+      "rejectSuccess": "Certification rejected.",
+      "revokeSuccess": "Certificate revoked."
+    },
+    "queue": {
+      "supervisorTitle": "Certification Reviews",
+      "programAdminTitle": "Certification Approvals",
+      "empty": "No pending certifications to review.",
+      "emptyAdmin": "No pending certifications to approve."
+    },
+    "pipeline": {
+      "title": "Certification Pipeline",
+      "total": "Total"
+    },
+    "detail": {
+      "title": "Certification Details",
+      "student": "Student",
+      "teacher": "Recommended by",
+      "reviewer": "Reviewed by",
+      "issuedBy": "Issued by",
+      "program": "Program",
+      "track": "Track",
+      "type": "Type",
+      "status": "Status",
+      "certificateNumber": "Certificate Number",
+      "issueDate": "Issue Date",
+      "chainOfNarration": "Chain of Narration (Sanad)",
+      "chainOfNarrationPlaceholder": "Enter the chain of narration...",
+      "reviewNotes": "Review Notes",
+      "revocationReason": "Revocation Reason",
+      "revokedAt": "Revoked on",
+      "revokedBy": "Revoked by",
+      "createdAt": "Submitted on",
+      "enrollmentInfo": "Enrollment Info"
+    },
+    "student": {
+      "title": "My Certificates",
+      "empty": "You have no certificates yet.",
+      "share": "Share Certificate",
+      "shareError": "Could not share certificate image.",
+      "verifyQR": "Scan QR code to verify"
+    },
+    "teacher": {
+      "title": "My Recommendations",
+      "empty": "You have not submitted any recommendations yet.",
+      "recommend": "Recommend for Certification"
+    },
+    "masterAdmin": {
+      "title": "All Certifications",
+      "filterProgram": "Program",
+      "filterType": "Type",
+      "filterStatus": "Status",
+      "allPrograms": "All Programs",
+      "allTypes": "All Types",
+      "allStatuses": "All Statuses"
+    },
+    "errors": {
+      "CERT_NOT_TEACHER": "You are not a teacher in this program.",
+      "CERT_NOT_ENROLLED": "Student is not actively enrolled in this program.",
+      "CERT_DUPLICATE": "An active certification already exists.",
+      "CERT_NOT_FOUND": "Certification not found.",
+      "CERT_INVALID_STATUS": "This certification has already been updated.",
+      "CERT_NOT_SUPERVISOR": "You are not a supervisor in this program.",
+      "CERT_SELF_APPROVAL": "You cannot review your own recommendation.",
+      "CERT_NOT_PROGRAM_ADMIN": "You are not a program admin in this program.",
+      "CERT_NOT_AUTHORIZED": "You do not have permission for this action.",
+      "CERT_RETURN_NOTES_REQUIRED": "Notes are required when returning.",
+      "CERT_REJECT_NOTES_REQUIRED": "Notes are required when rejecting.",
+      "CERT_REASON_REQUIRED": "A revocation reason is required.",
+      "unknown": "An unexpected error occurred."
+    },
+    "certificate": {
+      "orgName": "WeReciteTogether",
+      "orgNameAr": "نتلو معاً",
+      "issuedByOrg": "WeReciteTogether (نتلو معاً)"
+    }
   }
 }

@@ -67,7 +67,13 @@ type NotificationCategory =
   | "recovered_alert"
   | "queue_available"
   | "teacher_demand"
-  | "supervisor_flag";
+  | "supervisor_flag"
+  | "certification_recommended"
+  | "certification_supervisor_approved"
+  | "certification_returned"
+  | "certification_issued"
+  | "certification_rejected"
+  | "certification_revoked";
 
 // Direct notification categories (invoked via pg_net or Edge Functions, not standard webhooks)
 const DIRECT_CATEGORIES = new Set<string>([
@@ -76,6 +82,12 @@ const DIRECT_CATEGORIES = new Set<string>([
   "queue_available",
   "teacher_demand",
   "supervisor_flag",
+  "certification_recommended",
+  "certification_supervisor_approved",
+  "certification_returned",
+  "certification_issued",
+  "certification_rejected",
+  "certification_revoked",
 ]);
 
 // ─── Table → Categories Mapping ─────────────────────────────────────────────
@@ -268,6 +280,117 @@ async function getRecipients(
       }
     }
 
+    return recipients;
+  }
+
+  // Certification: recommended → notify supervisor(s)
+  if (category === "certification_recommended") {
+    const programId = record.program_id as string | undefined;
+    const teacherId = record.teacher_id as string | undefined;
+    if (!programId || !teacherId) return recipients;
+
+    // Find supervisors for this teacher in this program
+    const { data: roles } = await supabase
+      .from("program_roles")
+      .select("supervisor_id")
+      .eq("profile_id", teacherId)
+      .eq("program_id", programId)
+      .not("supervisor_id", "is", null);
+
+    if (roles) {
+      for (const r of roles) {
+        if (r.supervisor_id && !recipients.includes(r.supervisor_id)) {
+          recipients.push(r.supervisor_id);
+        }
+      }
+    }
+    return recipients;
+  }
+
+  // Certification: supervisor approved → notify program admins
+  if (category === "certification_supervisor_approved") {
+    const programId = record.program_id as string | undefined;
+    if (!programId) return recipients;
+
+    const { data: admins } = await supabase
+      .from("program_roles")
+      .select("profile_id")
+      .eq("program_id", programId)
+      .eq("role", "program_admin");
+
+    if (admins) {
+      for (const a of admins) {
+        if (!recipients.includes(a.profile_id)) {
+          recipients.push(a.profile_id);
+        }
+      }
+    }
+    return recipients;
+  }
+
+  // Certification: returned → notify teacher
+  if (category === "certification_returned") {
+    const teacherId = record.teacher_id as string | undefined;
+    if (teacherId) recipients.push(teacherId);
+    return recipients;
+  }
+
+  // Certification: issued → notify student
+  if (category === "certification_issued") {
+    const certStudentId = record.student_id as string | undefined;
+    if (certStudentId) recipients.push(certStudentId);
+    return recipients;
+  }
+
+  // Certification: rejected → notify teacher + supervisor
+  if (category === "certification_rejected") {
+    const teacherId = record.teacher_id as string | undefined;
+    if (teacherId) recipients.push(teacherId);
+
+    const programId = record.program_id as string | undefined;
+    if (programId && teacherId) {
+      const { data: roles } = await supabase
+        .from("program_roles")
+        .select("supervisor_id")
+        .eq("profile_id", teacherId)
+        .eq("program_id", programId)
+        .not("supervisor_id", "is", null);
+
+      if (roles) {
+        for (const r of roles) {
+          if (r.supervisor_id && !recipients.includes(r.supervisor_id)) {
+            recipients.push(r.supervisor_id);
+          }
+        }
+      }
+    }
+    return recipients;
+  }
+
+  // Certification: revoked → notify student + teacher + program admins
+  if (category === "certification_revoked") {
+    const certStudentId = record.student_id as string | undefined;
+    const teacherId = record.teacher_id as string | undefined;
+    const programId = record.program_id as string | undefined;
+
+    if (certStudentId) recipients.push(certStudentId);
+    if (teacherId && !recipients.includes(teacherId)) recipients.push(teacherId);
+
+    if (programId) {
+      const { data: admins } = await supabase
+        .from("program_roles")
+        .select("profile_id")
+        .eq("program_id", programId)
+        .eq("role", "program_admin");
+
+      if (admins) {
+        for (const a of admins) {
+          if (!recipients.includes(a.profile_id)) {
+            recipients.push(a.profile_id);
+          }
+        }
+      }
+    }
     return recipients;
   }
 
@@ -680,6 +803,89 @@ async function buildNotificationContent(
         data: {
           screen: `/(program-admin)/teachers/${flagTeacherId}`,
         },
+      };
+    }
+
+    case "certification_recommended": {
+      const certStudentId = record.student_id as string;
+      const { data: certStudent } = await supabase
+        .from("profiles").select("full_name").eq("id", certStudentId).single();
+      const certStudentName = certStudent?.full_name ?? "";
+      const certTitle = record.title as string ?? "";
+
+      return {
+        title: lang === "ar" ? "ترشيح جديد للشهادة" : "New Certification Recommendation",
+        body: lang === "ar"
+          ? `${certStudentName} مرشح للشهادة: ${certTitle}`
+          : `${certStudentName} recommended for: ${certTitle}`,
+        data: { screen: "/(supervisor)/certifications" },
+      };
+    }
+
+    case "certification_supervisor_approved": {
+      const certTitle = record.title as string ?? "";
+      return {
+        title: lang === "ar" ? "ترشيح جاهز للإصدار" : "Certification Ready for Issuance",
+        body: lang === "ar"
+          ? `ترشيح "${certTitle}" تمت الموافقة عليه من المشرف`
+          : `"${certTitle}" approved by supervisor — ready to issue`,
+        data: { screen: "/(program-admin)/certifications" },
+      };
+    }
+
+    case "certification_returned": {
+      const certTitle = record.title as string ?? "";
+      const reviewNotes = record.review_notes as string | undefined;
+      const notePreview = reviewNotes
+        ? (reviewNotes.length > 60 ? reviewNotes.substring(0, 60) + "…" : reviewNotes)
+        : "";
+
+      return {
+        title: lang === "ar" ? "ترشيح مُعاد" : "Certification Returned",
+        body: lang === "ar"
+          ? `"${certTitle}" أُعيد للمراجعة${notePreview ? `: ${notePreview}` : ""}`
+          : `"${certTitle}" returned for revision${notePreview ? `: ${notePreview}` : ""}`,
+        data: { screen: "/(teacher)/certifications" },
+      };
+    }
+
+    case "certification_issued": {
+      const certTitle = record.title as string ?? "";
+      const certNumber = record.certificate_number as string ?? "";
+
+      return {
+        title: lang === "ar" ? "تم إصدار شهادتك!" : "Certificate Issued!",
+        body: lang === "ar"
+          ? `شهادة "${certTitle}" صدرت — رقم: ${certNumber}`
+          : `"${certTitle}" has been issued — #${certNumber}`,
+        data: { screen: "/(student)/certificates" },
+      };
+    }
+
+    case "certification_rejected": {
+      const certTitle = record.title as string ?? "";
+      return {
+        title: lang === "ar" ? "ترشيح مرفوض" : "Certification Rejected",
+        body: lang === "ar"
+          ? `ترشيح "${certTitle}" تم رفضه`
+          : `"${certTitle}" has been rejected`,
+        data: { screen: "/(teacher)/certifications" },
+      };
+    }
+
+    case "certification_revoked": {
+      const certTitle = record.title as string ?? "";
+      const revokeReason = record.revocation_reason as string | undefined;
+      const reasonPreview = revokeReason
+        ? (revokeReason.length > 60 ? revokeReason.substring(0, 60) + "…" : revokeReason)
+        : "";
+
+      return {
+        title: lang === "ar" ? "شهادة مُلغاة" : "Certificate Revoked",
+        body: lang === "ar"
+          ? `شهادة "${certTitle}" تم إلغاؤها${reasonPreview ? `: ${reasonPreview}` : ""}`
+          : `"${certTitle}" has been revoked${reasonPreview ? `: ${reasonPreview}` : ""}`,
+        data: { screen: "/(student)/certificates" },
       };
     }
 

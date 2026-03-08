@@ -1,146 +1,159 @@
 import { supabase } from '@/lib/supabase';
-import type { RecommendInput } from '../types/certifications.types';
+import type {
+  RecommendInput,
+  ReviewInput,
+  IssueInput,
+  RevokeInput,
+  ResubmitInput,
+  CertificationFilters,
+} from '../types/certifications.types';
 
 class CertificationsService {
-  /**
-   * Get all issued/revoked certificates for a student.
-   */
-  async getCertificationsForStudent(studentId: string) {
+  // ─── RPC Operations ──────────────────────────────────────────────────────
+
+  /** RPC-001: Teacher submits certification recommendation */
+  async recommend(input: RecommendInput) {
+    return supabase.rpc('recommend_certification', {
+      p_student_id: input.studentId,
+      p_program_id: input.programId,
+      p_track_id: input.trackId ?? null,
+      p_type: input.type,
+      p_title: input.title,
+      p_title_ar: input.titleAr ?? null,
+      p_notes: input.notes ?? null,
+      p_metadata: input.metadata ?? {},
+    });
+  }
+
+  /** RPC-002: Supervisor approves or returns a recommendation */
+  async review(input: ReviewInput) {
+    return supabase.rpc('review_certification', {
+      p_certification_id: input.certificationId,
+      p_action: input.action,
+      p_review_notes: input.reviewNotes ?? null,
+    });
+  }
+
+  /** RPC-003: Teacher re-submits a returned certification */
+  async resubmit(input: ResubmitInput) {
+    return supabase.rpc('resubmit_certification', {
+      p_certification_id: input.certificationId,
+      p_notes: input.notes ?? null,
+      p_title: input.title ?? null,
+      p_title_ar: input.titleAr ?? null,
+    });
+  }
+
+  /** RPC-004: Program admin issues or rejects a certification */
+  async issue(input: IssueInput) {
+    return supabase.rpc('issue_certification', {
+      p_certification_id: input.certificationId,
+      p_action: input.action,
+      p_chain_of_narration: input.chainOfNarration ?? null,
+      p_review_notes: input.reviewNotes ?? null,
+    });
+  }
+
+  /** RPC-005: Revoke an issued certificate */
+  async revoke(input: RevokeInput) {
+    return supabase.rpc('revoke_certification', {
+      p_certification_id: input.certificationId,
+      p_revocation_reason: input.revocationReason,
+    });
+  }
+
+  /** RPC-006: Get pipeline counts for a program */
+  async getPipeline(programId: string) {
+    return supabase.rpc('get_certification_pipeline', {
+      p_program_id: programId,
+    });
+  }
+
+  /** RPC-007: Get review queue for supervisor or program admin */
+  async getQueue(programId: string, role: 'supervisor' | 'program_admin') {
+    return supabase.rpc('get_certification_queue', {
+      p_program_id: programId,
+      p_role: role,
+    });
+  }
+
+  // ─── Direct Queries ────────────────────────────────────────────────────
+
+  /** Get student's issued certificates */
+  async getStudentCertificates(studentId: string) {
     return supabase
       .from('certifications')
-      .select(
-        '*, program:programs(name, name_ar), track:program_tracks(name, name_ar), teacher:profiles!certifications_teacher_id_fkey(full_name, display_name)',
-      )
+      .select(`
+        *,
+        profiles!certifications_teacher_id_fkey ( id, full_name ),
+        programs!certifications_program_id_fkey ( id, name, name_ar, category ),
+        program_tracks!certifications_track_id_fkey ( id, name, name_ar )
+      `)
       .eq('student_id', studentId)
-      .in('status', ['issued', 'revoked'])
+      .eq('status', 'issued')
       .order('issue_date', { ascending: false });
   }
 
-  /**
-   * Get a single certification by ID with full joined details.
-   */
-  async getCertificationById(certificationId: string) {
+  /** Get single certification with all joins */
+  async getCertificationById(id: string) {
     return supabase
       .from('certifications')
-      .select(
-        '*, program:programs(name, name_ar), track:program_tracks(name, name_ar), teacher:profiles!certifications_teacher_id_fkey(full_name, display_name), issuer:profiles!certifications_issued_by_fkey(full_name, display_name)',
-      )
-      .eq('id', certificationId)
+      .select(`
+        *,
+        student:profiles!certifications_student_id_fkey ( id, full_name, avatar_url ),
+        teacher:profiles!certifications_teacher_id_fkey ( id, full_name ),
+        program:programs!certifications_program_id_fkey ( id, name, name_ar, category ),
+        track:program_tracks!certifications_track_id_fkey ( id, name, name_ar ),
+        issuer:profiles!certifications_issued_by_fkey ( id, full_name ),
+        reviewer:profiles!certifications_reviewed_by_fkey ( id, full_name )
+      `)
+      .eq('id', id)
       .single();
   }
 
-  /**
-   * Get certification requests for a program, optionally filtered by status.
-   */
-  async getCertificationRequests(programId: string, status?: string) {
+  /** Get all certifications with filters (master admin) */
+  async getAllCertifications(filters: CertificationFilters) {
     let query = supabase
       .from('certifications')
-      .select(
-        '*, student:profiles!certifications_student_id_fkey(full_name, display_name, avatar_url), teacher:profiles!certifications_teacher_id_fkey(full_name)',
-      )
-      .eq('program_id', programId)
+      .select(`
+        *,
+        student:profiles!certifications_student_id_fkey ( id, full_name ),
+        teacher:profiles!certifications_teacher_id_fkey ( id, full_name ),
+        program:programs!certifications_program_id_fkey ( id, name, name_ar )
+      `)
       .order('created_at', { ascending: false });
 
-    if (status) {
-      query = query.eq('status', status);
+    if (filters.programId) {
+      query = query.eq('program_id', filters.programId);
+    }
+    if (filters.type) {
+      query = query.eq('type', filters.type);
+    }
+    if (filters.status) {
+      query = query.eq('status', filters.status);
+    }
+    if (filters.dateFrom) {
+      query = query.gte('created_at', filters.dateFrom);
+    }
+    if (filters.dateTo) {
+      query = query.lte('created_at', filters.dateTo);
     }
 
     return query;
   }
 
-  /**
-   * Teacher recommends a student for certification.
-   * Calls get_certification_eligibility RPC to validate first.
-   */
-  async recommendForCertification(input: RecommendInput) {
-    return supabase.from('certifications').insert({
-      student_id: input.student_id,
-      program_id: input.program_id,
-      track_id: input.track_id,
-      enrollment_id: input.enrollment_id,
-      type: input.type,
-      title: input.title,
-      title_ar: input.title_ar,
-      teacher_id: input.teacher_id,
-      recommended_by: input.teacher_id,
-      status: 'recommended',
-    }).select().single();
-  }
-
-  /**
-   * Supervisor approves or rejects a certification request.
-   */
-  async reviewCertification(
-    certificationId: string,
-    action: 'approve' | 'reject',
-    supervisorId: string,
-    note?: string,
-  ) {
-    if (action === 'approve') {
-      return supabase
-        .from('certifications')
-        .update({ status: 'supervisor_approved', supervisor_id: supervisorId })
-        .eq('id', certificationId)
-        .select()
-        .single();
-    }
-
+  /** Get teacher's own certifications */
+  async getTeacherCertifications(teacherId: string) {
     return supabase
       .from('certifications')
-      .update({ status: 'rejected', rejection_reason: note, supervisor_id: supervisorId })
-      .eq('id', certificationId)
-      .select()
-      .single();
-  }
-
-  /**
-   * Program admin issues a certification. Certificate number is auto-generated by trigger.
-   */
-  async issueCertification(
-    certificationId: string,
-    issuedBy: string,
-    chainOfNarration?: string,
-  ) {
-    return supabase
-      .from('certifications')
-      .update({
-        status: 'issued',
-        issued_by: issuedBy,
-        issue_date: new Date().toISOString(),
-        chain_of_narration: chainOfNarration ?? null,
-      })
-      .eq('id', certificationId)
-      .select()
-      .single();
-  }
-
-  /**
-   * Revoke an issued certificate with a mandatory reason.
-   */
-  async revokeCertification(
-    certificationId: string,
-    revokedBy: string,
-    reason: string,
-  ) {
-    return supabase
-      .from('certifications')
-      .update({
-        status: 'revoked',
-        revoked_by: revokedBy,
-        revocation_reason: reason,
-      })
-      .eq('id', certificationId)
-      .select()
-      .single();
-  }
-
-  /**
-   * Check if a student is eligible for certification via RPC.
-   */
-  async checkCertificationEligibility(enrollmentId: string) {
-    return supabase.rpc('get_certification_eligibility', {
-      p_enrollment_id: enrollmentId,
-    });
+      .select(`
+        *,
+        student:profiles!certifications_student_id_fkey ( id, full_name ),
+        program:programs!certifications_program_id_fkey ( id, name, name_ar ),
+        track:program_tracks!certifications_track_id_fkey ( id, name, name_ar )
+      `)
+      .eq('teacher_id', teacherId)
+      .order('created_at', { ascending: false });
   }
 }
 

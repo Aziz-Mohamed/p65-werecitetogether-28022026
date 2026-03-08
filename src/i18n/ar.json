@@ -1418,5 +1418,134 @@
         "settings": "الإعدادات"
       }
     }
+  },
+  "certifications": {
+    "types": {
+      "ijazah": "إجازة",
+      "graduation": "تخرج",
+      "completion": "إتمام"
+    },
+    "statuses": {
+      "recommended": "مرشح",
+      "supervisor_approved": "معتمد",
+      "issued": "صادر",
+      "returned": "مُعاد",
+      "rejected": "مرفوض",
+      "revoked": "ملغي"
+    },
+    "form": {
+      "title": "ترشيح للشهادة",
+      "certType": "نوع الشهادة",
+      "certTitle": "عنوان الشهادة",
+      "certTitleAr": "عنوان الشهادة (بالعربية)",
+      "notes": "ملاحظات (اختياري)",
+      "notesPlaceholder": "صِف إنجاز الطالب...",
+      "submit": "تقديم الترشيح",
+      "resubmit": "إعادة تقديم الترشيح",
+      "resubmitTitle": "إعادة تقديم الشهادة",
+      "duplicateWarning": "يوجد ترشيح نشط لهذا الطالب في هذا البرنامج/المسار.",
+      "enrollmentError": "الطالب غير مسجل في هذا البرنامج.",
+      "success": "تم تقديم الترشيح بنجاح.",
+      "resubmitSuccess": "تمت إعادة تقديم الترشيح بنجاح."
+    },
+    "review": {
+      "approve": "اعتماد",
+      "return": "إعادة للمعلم",
+      "issue": "إصدار الشهادة",
+      "reject": "رفض",
+      "revoke": "إلغاء الشهادة",
+      "returnTitle": "إعادة إلى المعلم",
+      "returnDescription": "أضف ملاحظاتك ليتمكن المعلم من المراجعة وإعادة الإرسال.",
+      "rejectTitle": "رفض الشهادة",
+      "rejectDescription": "أضف سبب رفض هذه الشهادة.",
+      "notesPlaceholder": "أدخل ملاحظاتك...",
+      "reviewNotes": "ملاحظات المراجعة",
+      "reviewNotesPlaceholder": "أضف ملاحظاتك...",
+      "reviewNotesRequired": "الملاحظات مطلوبة عند الإعادة أو الرفض.",
+      "revocationReason": "سبب الإلغاء",
+      "revocationReasonPlaceholder": "اشرح سبب إلغاء هذه الشهادة...",
+      "revocationReasonRequired": "سبب الإلغاء مطلوب.",
+      "confirmApprove": "هل أنت متأكد من اعتماد هذا الترشيح؟",
+      "confirmIssue": "هل أنت متأكد من إصدار هذه الشهادة؟",
+      "confirmReject": "هل أنت متأكد من رفض هذا الترشيح؟",
+      "confirmRevoke": "هل أنت متأكد من إلغاء هذه الشهادة؟ لا يمكن التراجع عن هذا الإجراء.",
+      "approveSuccess": "تم اعتماد الترشيح.",
+      "returnSuccess": "تمت إعادة الترشيح للمعلم.",
+      "issueSuccess": "تم إصدار الشهادة بنجاح.",
+      "rejectSuccess": "تم رفض الترشيح.",
+      "revokeSuccess": "تم إلغاء الشهادة."
+    },
+    "queue": {
+      "supervisorTitle": "مراجعة الشهادات",
+      "programAdminTitle": "اعتماد الشهادات",
+      "empty": "لا توجد شهادات معلقة للمراجعة.",
+      "emptyAdmin": "لا توجد شهادات معلقة للاعتماد."
+    },
+    "pipeline": {
+      "title": "مسار الشهادات",
+      "total": "الإجمالي"
+    },
+    "detail": {
+      "title": "تفاصيل الشهادة",
+      "student": "الطالب",
+      "teacher": "ترشيح من",
+      "reviewer": "مراجعة من",
+      "issuedBy": "صدرت من",
+      "program": "البرنامج",
+      "track": "المسار",
+      "type": "النوع",
+      "status": "الحالة",
+      "certificateNumber": "رقم الشهادة",
+      "issueDate": "تاريخ الإصدار",
+      "chainOfNarration": "سلسلة السند",
+      "chainOfNarrationPlaceholder": "أدخل سلسلة السند...",
+      "reviewNotes": "ملاحظات المراجعة",
+      "revocationReason": "سبب الإلغاء",
+      "revokedAt": "تاريخ الإلغاء",
+      "revokedBy": "ألغيت من قبل",
+      "createdAt": "تاريخ التقديم",
+      "enrollmentInfo": "معلومات التسجيل"
+    },
+    "student": {
+      "title": "شهاداتي",
+      "empty": "لا توجد لديك شهادات حتى الآن.",
+      "share": "مشاركة الشهادة",
+      "shareError": "تعذرت مشاركة صورة الشهادة.",
+      "verifyQR": "امسح رمز QR للتحقق"
+    },
+    "teacher": {
+      "title": "ترشيحاتي",
+      "empty": "لم تقدم أي ترشيحات حتى الآن.",
+      "recommend": "ترشيح للشهادة"
+    },
+    "masterAdmin": {
+      "title": "جميع الشهادات",
+      "filterProgram": "البرنامج",
+      "filterType": "النوع",
+      "filterStatus": "الحالة",
+      "allPrograms": "جميع البرامج",
+      "allTypes": "جميع الأنواع",
+      "allStatuses": "جميع الحالات"
+    },
+    "errors": {
+      "CERT_NOT_TEACHER": "أنت لست معلماً في هذا البرنامج.",
+      "CERT_NOT_ENROLLED": "الطالب غير مسجل في هذا البرنامج.",
+      "CERT_DUPLICATE": "يوجد ترشيح نشط بالفعل.",
+      "CERT_NOT_FOUND": "الشهادة غير موجودة.",
+      "CERT_INVALID_STATUS": "تم تحديث هذه الشهادة بالفعل.",
+      "CERT_NOT_SUPERVISOR": "أنت لست مشرفاً في هذا البرنامج.",
+      "CERT_SELF_APPROVAL": "لا يمكنك مراجعة ترشيحك الخاص.",
+      "CERT_NOT_PROGRAM_ADMIN": "أنت لست مدير برنامج في هذا البرنامج.",
+      "CERT_NOT_AUTHORIZED": "ليس لديك صلاحية لهذا الإجراء.",
+      "CERT_RETURN_NOTES_REQUIRED": "الملاحظات مطلوبة عند الإعادة.",
+      "CERT_REJECT_NOTES_REQUIRED": "الملاحظات مطلوبة عند الرفض.",
+      "CERT_REASON_REQUIRED": "سبب الإلغاء مطلوب.",
+      "unknown": "حدث خطأ غير متوقع."
+    },
+    "certificate": {
+      "orgName": "WeReciteTogether",
+      "orgNameAr": "نتلو معاً",
+      "issuedByOrg": "WeReciteTogether (نتلو معاً)"
+    }
   }
 }

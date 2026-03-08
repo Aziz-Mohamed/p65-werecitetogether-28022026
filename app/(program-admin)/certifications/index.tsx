@@ -1,123 +1,95 @@
-import React, { useState, useCallback } from 'react';
-import { StyleSheet, View, Text, TextInput } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { Screen } from '@/components/layout';
-import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
-import { useAuth } from '@/hooks/useAuth';
-import {
-  useCertificationRequests,
-  useIssueCertification,
-} from '@/features/certifications/hooks/useCertificationRequests';
-import { CertificationRequestCard } from '@/features/certifications/components/CertificationRequestCard';
-import { Button } from '@/components/ui/Button';
-import { typography } from '@/theme/typography';
-import { lightTheme, neutral } from '@/theme/colors';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { lightTheme } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import { radius } from '@/theme/radius';
+import { typography } from '@/theme/typography';
+import { CertificationCard } from '@/features/certifications/components/CertificationCard';
+import { CertificatePipelineView } from '@/features/certifications/components/CertificatePipeline';
+import { useCertificationQueue } from '@/features/certifications/hooks/useCertificationQueue';
+import { useCertificationPipeline } from '@/features/certifications/hooks/useCertificationPipeline';
+import type { CertificationStatus } from '@/features/certifications/types/certifications.types';
 
 export default function ProgramAdminCertificationsScreen() {
   const { t } = useTranslation();
-  const { profile } = useAuth();
-  const [issuingId, setIssuingId] = useState<string | null>(null);
-  const [chainOfNarration, setChainOfNarration] = useState('');
+  const router = useRouter();
+  const { programId } = useLocalSearchParams<{ programId: string }>();
+  const [filterStatus, setFilterStatus] = useState<CertificationStatus | null>(null);
 
-  // TODO: Get programId from context/store when program selector is implemented
-  const programId = undefined as string | undefined;
+  const pipeline = useCertificationPipeline(programId);
+  const queue = useCertificationQueue(programId, 'program_admin');
 
-  const {
-    data: requests = [],
-    isLoading,
-    error,
-    refetch,
-  } = useCertificationRequests(programId, 'supervisor_approved');
+  const filteredData = filterStatus
+    ? (queue.data ?? []).filter((item) => item.status === filterStatus)
+    : queue.data ?? [];
 
-  const issueMutation = useIssueCertification();
-
-  const handleIssue = useCallback(
-    (certificationId: string) => {
-      if (!profile?.id) return;
-      issueMutation.mutate(
-        {
-          certificationId,
-          issuedBy: profile.id,
-          chainOfNarration: chainOfNarration.trim() || undefined,
-        },
-        { onSuccess: () => { setIssuingId(null); setChainOfNarration(''); } },
-      );
-    },
-    [profile?.id, chainOfNarration, issueMutation],
-  );
-
-  if (isLoading && programId) return <LoadingState />;
-  if (error) return <ErrorState description={(error as Error).message} onRetry={refetch} />;
+  const handleRefresh = () => {
+    pipeline.refetch();
+    queue.refetch();
+  };
 
   return (
-    <Screen scroll={false}>
+    <Screen>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('certifications.issue')}</Text>
-        </View>
+        <Text style={styles.title}>{t('certifications.queue.programAdminTitle')}</Text>
 
-        {!programId || requests.length === 0 ? (
-          <EmptyState
-            icon="ribbon-outline"
-            title={t('certifications.requests.empty')}
-            description={t('certifications.requests.emptyDesc')}
-          />
-        ) : (
-          <FlashList
-            data={requests}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => (
-              <View>
-                <CertificationRequestCard
-                  request={item as any}
-                  showActions={issuingId !== item.id}
-                  actionType="issue"
-                  onIssue={() => setIssuingId(item.id)}
-                />
-                {issuingId === item.id ? (
-                  <View style={styles.issueForm}>
-                    {(item as any).type === 'ijazah' ? (
-                      <View style={styles.inputGroup}>
-                        <Text style={styles.label}>{t('certifications.chainOfNarration')}</Text>
-                        <TextInput
-                          style={[styles.textInput, styles.arabicInput]}
-                          value={chainOfNarration}
-                          onChangeText={setChainOfNarration}
-                          placeholder={t('certifications.chainOfNarrationAr')}
-                          placeholderTextColor={neutral[400]}
-                          multiline
-                        />
-                      </View>
-                    ) : null}
-                    <View style={styles.issueActions}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onPress={() => { setIssuingId(null); setChainOfNarration(''); }}
-                        style={styles.actionBtn}
-                        title={t('common.cancel')}
-                      />
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onPress={() => handleIssue(item.id)}
-                        loading={issueMutation.isPending}
-                        style={styles.actionBtn}
-                        title={t('certifications.issue')}
-                      />
-                    </View>
-                  </View>
-                ) : null}
-              </View>
-            )}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
+        {pipeline.data && (
+          <CertificatePipelineView
+            pipeline={pipeline.data}
+            selectedStatus={filterStatus}
+            onFilterStatus={setFilterStatus}
           />
         )}
+
+        <FlashList
+          data={filteredData}
+          estimatedItemSize={140}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={queue.isRefetching || pipeline.isRefetching}
+              onRefresh={handleRefresh}
+            />
+          }
+          renderItem={({ item }) => (
+            <CertificationCard
+              id={item.id}
+              studentName={item.student_name}
+              teacherName={item.teacher_name}
+              programName={item.program_name}
+              trackName={item.track_name}
+              type={item.type}
+              status={item.status}
+              title={item.title}
+              createdAt={item.created_at}
+              onPress={() =>
+                router.push({
+                  pathname: '/(program-admin)/certifications/[id]',
+                  params: { id: item.id, programId: programId ?? '' },
+                })
+              }
+            />
+          )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ListEmptyComponent={
+            !queue.isLoading ? (
+              queue.isError ? (
+                <ErrorState onRetry={handleRefresh} />
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>
+                    {t('certifications.queue.emptyAdmin')}
+                  </Text>
+                </View>
+              )
+            ) : null
+          }
+        />
       </View>
     </Screen>
   );
@@ -126,51 +98,27 @@ export default function ProgramAdminCertificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    paddingBlockStart: spacing.lg,
-    paddingBlockEnd: spacing.base,
+    paddingTop: spacing.xl,
   },
   title: {
     ...typography.textStyles.heading,
     color: lightTheme.text,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.base,
   },
   listContent: {
-    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.base,
   },
   separator: {
     height: spacing.sm,
   },
-  issueForm: {
-    padding: spacing.base,
-    gap: spacing.sm,
+  emptyContainer: {
+    padding: spacing['2xl'],
+    alignItems: 'center',
   },
-  inputGroup: {
-    gap: spacing.xs,
-  },
-  label: {
-    ...typography.textStyles.label,
-    color: lightTheme.text,
-  },
-  textInput: {
+  emptyText: {
     ...typography.textStyles.body,
-    color: lightTheme.text,
-    borderWidth: 1,
-    borderColor: neutral[200],
-    borderRadius: radius.md,
-    padding: spacing.base,
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  arabicInput: {
-    writingDirection: 'rtl',
-    textAlign: 'right',
-  },
-  issueActions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  actionBtn: {
-    flex: 1,
+    color: lightTheme.textSecondary,
+    textAlign: 'center',
   },
 });
