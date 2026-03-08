@@ -15,25 +15,6 @@ beforeEach(() => {
 });
 
 describe('authService', () => {
-  describe('createMember (deprecated)', () => {
-    it('returns DEPRECATED error', async () => {
-      const result = await authService.createMember({} as any);
-      expect(result.error).toBeDefined();
-      expect(result.error!.code).toBe('DEPRECATED');
-    });
-  });
-
-  describe('resetMemberPassword (deprecated)', () => {
-    it('returns DEPRECATED error', async () => {
-      const result = await authService.resetMemberPassword({
-        userId: 'u1',
-        newPassword: 'pwd',
-      });
-      expect(result.error).toBeDefined();
-      expect(result.error!.code).toBe('DEPRECATED');
-    });
-  });
-
   describe('logout', () => {
     it('returns empty result on success', async () => {
       mockAuth().signOut.mockResolvedValue({ error: null });

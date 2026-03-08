@@ -34,35 +34,6 @@ export interface UpdateRoleResponse {
   };
 }
 
-// ─── Legacy Types (backward compat — used by admin create screens) ───────────
-
-/** @deprecated Member creation via password is removed (FR-022). */
-export interface CreateMemberInput {
-  fullName: string;
-  username: string;
-  password: string;
-  role: 'student' | 'teacher';
-  classId?: string;
-  dateOfBirth?: string;
-  nameLocalized?: Record<string, string>;
-}
-
-/** @deprecated Member creation via password is removed (FR-022). */
-export interface CreateMemberResponse {
-  profile: {
-    id: string;
-    username: string;
-    role: string;
-    full_name: string;
-    school_id: string;
-  };
-  student?: {
-    id: string;
-    class_id: string | null;
-    current_level: number;
-  };
-}
-
 // ─── Error Type ──────────────────────────────────────────────────────────────
 
 export type OAuthErrorCategory = 'network' | 'cancelled' | 'provider' | 'unknown';
