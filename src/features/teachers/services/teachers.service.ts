@@ -9,7 +9,7 @@ class TeachersService {
   async getTeachers(filters?: TeacherFilters) {
     let query = supabase
       .from('profiles')
-      .select('id, full_name, name_localized, username, avatar_url, classes(id, name, name_localized)')
+      .select('id, full_name, name_localized, username, avatar_url, classes!teacher_id(id, name, name_localized)')
       .eq('role', 'teacher');
 
     if (filters?.searchQuery) {
@@ -28,7 +28,7 @@ class TeachersService {
   async getTeacherById(id: string) {
     return supabase
       .from('profiles')
-      .select('id, full_name, name_localized, username, avatar_url, phone, created_at, classes(id, name, name_localized, students(id))')
+      .select('id, full_name, name_localized, username, avatar_url, phone, created_at, classes!teacher_id(id, name, name_localized, students(id))')
       .eq('id', id)
       .eq('role', 'teacher')
       .single();
