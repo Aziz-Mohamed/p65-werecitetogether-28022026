@@ -122,10 +122,10 @@ export const UserSearchSheet = forwardRef<BottomSheetModal, UserSearchSheetProps
                 <View style={styles.rowText}>
                   <Text style={styles.rowName} numberOfLines={1}>{item.full_name}</Text>
                   <Text style={styles.rowRole} numberOfLines={1}>
-                    {item.role.replace('_', ' ')}
+                    {t(`roles.${item.role}` as any)}
                   </Text>
                 </View>
-                <Badge label={item.role} variant="default" size="sm" />
+                <Badge label={t(`roles.${item.role}` as any)} variant="default" size="sm" />
               </Pressable>
             )}
           />

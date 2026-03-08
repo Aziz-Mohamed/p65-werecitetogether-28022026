@@ -25,7 +25,7 @@ const STATUSES: CertificationStatus[] = [
 ];
 
 export default function MasterAdminCertificationsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
 
   const [filters, setFilters] = useState<CertificationFilters>({});
@@ -39,7 +39,7 @@ export default function MasterAdminCertificationsScreen() {
       options: [
         { label: t('certifications.masterAdmin.allPrograms'), value: 'all' },
         ...(programs.data ?? []).map((p) => ({
-          label: (p as { name: string }).name,
+          label: i18n.language === 'ar' ? (p as { name_ar: string }).name_ar : (p as { name: string }).name,
           value: (p as { id: string }).id,
         })),
       ],
@@ -85,13 +85,13 @@ export default function MasterAdminCertificationsScreen() {
           renderItem={({ item }) => {
             const student = (item as Record<string, unknown>).student as { full_name: string } | null;
             const teacher = (item as Record<string, unknown>).teacher as { full_name: string } | null;
-            const program = (item as Record<string, unknown>).program as { name: string } | null;
+            const program = (item as Record<string, unknown>).program as { name: string; name_ar: string } | null;
             return (
               <CertificationCard
                 id={(item as { id: string }).id}
                 studentName={student?.full_name ?? ''}
                 teacherName={teacher?.full_name}
-                programName={program?.name}
+                programName={i18n.language === 'ar' ? (program?.name_ar ?? program?.name) : program?.name}
                 type={(item as { type: CertificationType }).type}
                 status={(item as { status: CertificationStatus }).status}
                 title={(item as { title: string }).title}

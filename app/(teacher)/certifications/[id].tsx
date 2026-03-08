@@ -15,7 +15,7 @@ import { certificationsService } from '@/features/certifications/services/certif
 import type { CertificationStatus } from '@/features/certifications/types/certifications.types';
 
 export default function TeacherCertificationDetailScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const queryClient = useQueryClient();
@@ -60,8 +60,8 @@ export default function TeacherCertificationDetailScreen() {
 
   const isReturned = cert.status === 'returned';
   const student = cert.student as { full_name: string } | null;
-  const program = cert.program as { name: string } | null;
-  const track = cert.track as { name: string } | null;
+  const program = cert.program as { name: string; name_ar: string } | null;
+  const track = cert.track as { name: string; name_ar: string } | null;
 
   return (
     <Screen>
@@ -72,8 +72,8 @@ export default function TeacherCertificationDetailScreen() {
         </View>
 
         <InfoRow label={t('certifications.detail.student')} value={student?.full_name} />
-        <InfoRow label={t('certifications.detail.program')} value={program?.name} />
-        {track && <InfoRow label={t('certifications.detail.track')} value={track.name} />}
+        <InfoRow label={t('certifications.detail.program')} value={i18n.language === 'ar' ? program?.name_ar : program?.name} />
+        {track && <InfoRow label={t('certifications.detail.track')} value={i18n.language === 'ar' ? track.name_ar : track.name} />}
         <InfoRow label={t('certifications.detail.type')} value={t(`certifications.types.${cert.type}`)} />
         <InfoRow label={t('certifications.detail.createdAt')} value={new Date(cert.created_at).toLocaleDateString()} />
 

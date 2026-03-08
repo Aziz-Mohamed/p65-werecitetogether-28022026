@@ -15,7 +15,7 @@ import { StatusBadge } from '@/features/certifications/components/StatusBadge';
 import { useStudentCertificates } from '@/features/certifications/hooks/useStudentCertificates';
 
 export default function StudentCertificatesScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { session } = useAuth();
   const router = useRouter();
   const userId = session?.user?.id;
@@ -34,8 +34,8 @@ export default function StudentCertificatesScreen() {
             <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
           }
           renderItem={({ item }) => {
-            const program = item.programs as { name: string } | null;
-            const track = item.program_tracks as { name: string } | null;
+            const program = item.programs as { name: string; name_ar: string } | null;
+            const track = item.program_tracks as { name: string; name_ar: string } | null;
             return (
               <Pressable
                 style={({ pressed }) => [styles.card, pressed && styles.pressed]}
@@ -53,7 +53,8 @@ export default function StudentCertificatesScreen() {
                   <StatusBadge status="issued" />
                 </View>
                 <Text style={styles.cardProgram} numberOfLines={1}>
-                  {program?.name}{track?.name ? ` - ${track.name}` : ''}
+                  {i18n.language === 'ar' ? (program?.name_ar ?? program?.name) : program?.name}
+                  {track ? ` - ${i18n.language === 'ar' ? (track.name_ar ?? track.name) : track.name}` : ''}
                 </Text>
                 <View style={styles.cardFooter}>
                   <View style={styles.typeBadge}>

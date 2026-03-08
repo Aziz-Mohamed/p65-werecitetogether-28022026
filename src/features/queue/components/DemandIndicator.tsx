@@ -12,10 +12,12 @@ import { normalize } from '@/theme/normalize';
 interface DemandIndicatorProps {
   programId: string;
   programName: string;
+  programNameAr?: string;
 }
 
-export function DemandIndicator({ programId, programName }: DemandIndicatorProps) {
-  const { t } = useTranslation();
+export function DemandIndicator({ programId, programName, programNameAr }: DemandIndicatorProps) {
+  const { t, i18n } = useTranslation();
+  const displayName = i18n.language === 'ar' ? (programNameAr ?? programName) : programName;
   const { data } = useProgramDemand(programId);
 
   if (!data || data.waiting_count === 0) return null;
@@ -24,7 +26,7 @@ export function DemandIndicator({ programId, programName }: DemandIndicatorProps
     <View style={styles.container}>
       <Ionicons name="people" size={normalize(16)} color={colors.accent.amber[600]} />
       <View style={styles.textContainer}>
-        <Text style={styles.programName} numberOfLines={1}>{programName}</Text>
+        <Text style={styles.programName} numberOfLines={1}>{displayName}</Text>
         <Text style={styles.demandText}>
           {t('queue.demand.studentsWaiting', { count: data.waiting_count })}
         </Text>

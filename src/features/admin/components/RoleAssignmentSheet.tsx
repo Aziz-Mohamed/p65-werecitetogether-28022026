@@ -39,7 +39,7 @@ function getRoleBadgeVariant(role: string): BadgeVariant {
 }
 
 export function RoleAssignmentSheet({ isOpen, onClose, user }: RoleAssignmentSheetProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { session } = useAuth();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['80%'], []);
@@ -181,10 +181,10 @@ export function RoleAssignmentSheet({ isOpen, onClose, user }: RoleAssignmentShe
           <View style={styles.programRolesList}>
             {user.program_roles_data.map((pr, i) => (
               <View key={i} style={styles.roleRow}>
-                <Text style={styles.roleProgram} numberOfLines={1}>{pr.program_name}</Text>
-                <Badge label={pr.role.replace('_', ' ')} variant={getRoleBadgeVariant(pr.role)} size="sm" />
+                <Text style={styles.roleProgram} numberOfLines={1}>{i18n.language === 'ar' ? pr.program_name_ar : pr.program_name}</Text>
+                <Badge label={t(`roles.${pr.role}` as any)} variant={getRoleBadgeVariant(pr.role)} size="sm" />
                 <Pressable
-                  onPress={() => handleRemoveProgramRole(pr.role_id, pr.program_name, pr.role)}
+                  onPress={() => handleRemoveProgramRole(pr.role_id, i18n.language === 'ar' ? pr.program_name_ar : pr.program_name, t(`roles.${pr.role}` as any))}
                   hitSlop={8}
                   style={styles.removeButton}
                 >
@@ -219,7 +219,7 @@ export function RoleAssignmentSheet({ isOpen, onClose, user }: RoleAssignmentShe
                     onPress={() => setSelectedProgramId(p.id)}
                   >
                     <Text style={[styles.chipText, selectedProgramId === p.id && styles.chipTextActive]} numberOfLines={1}>
-                      {p.name_ar || p.name}
+                      {i18n.language === 'ar' ? p.name_ar : p.name}
                     </Text>
                   </Pressable>
                 ))}
@@ -235,7 +235,7 @@ export function RoleAssignmentSheet({ isOpen, onClose, user }: RoleAssignmentShe
                   onPress={() => setSelectedRole(role)}
                 >
                   <Text style={[styles.chipText, selectedRole === role && styles.chipTextActive]}>
-                    {role.replace('_', ' ')}
+                    {t(`roles.${role}` as any)}
                   </Text>
                 </Pressable>
               ))}
