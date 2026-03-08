@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, I18nManager } from 'react-native';
+import { StyleSheet, View, Text, Pressable, I18nManager } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui';
-import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { SearchBar } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
@@ -37,22 +36,18 @@ export default function AdminStudentsScreen() {
   return (
     <Screen scroll={false}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Button
-            title={t('common.back')}
-            onPress={() => router.back()}
-            variant="ghost"
-            size="sm"
-          />
-          <Text style={styles.title}>{t('admin.students.title')}</Text>
-          <Button
-            title={t('admin.addStudent')}
-            onPress={() => router.push('/(master-admin)/students/create')}
-            variant="primary"
-            size="sm"
-            icon={<Ionicons name="add" size={18} color={colors.white} />}
-          />
-        </View>
+        <PageHeader
+          title={t('admin.students.title')}
+          rightAction={
+            <Pressable
+              style={styles.addButton}
+              onPress={() => router.push('/(master-admin)/students/create')}
+              hitSlop={8}
+            >
+              <Ionicons name="add" size={24} color={lightTheme.text} />
+            </Pressable>
+          }
+        />
 
         <SearchBar
           value={searchQuery}
@@ -125,16 +120,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
+  addButton: {
+    width: normalize(38),
+    height: normalize(38),
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
+    justifyContent: 'center',
   },
   searchBar: {
     marginBottom: spacing.xs,

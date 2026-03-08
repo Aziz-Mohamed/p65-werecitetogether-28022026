@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { lightTheme } from '@/theme/colors';
@@ -71,6 +71,8 @@ export default function MasterAdminCertificationDetailScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
+        <PageHeader title={t('certifications.detail.title')} />
+
         <View style={styles.headerRow}>
           <Text style={styles.title}>{cert.title}</Text>
           <StatusBadge status={cert.status as CertificationStatus} />

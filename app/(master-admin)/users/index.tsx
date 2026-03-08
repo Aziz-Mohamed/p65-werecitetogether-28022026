@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -69,11 +69,7 @@ export default function UserListScreen() {
   return (
     <Screen>
       <View style={styles.container}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backText}>{t('common.back')}</Text>
-        </Pressable>
-
-        <Text style={styles.title}>{t('admin.masterAdmin.users.title')}</Text>
+        <PageHeader title={t('admin.masterAdmin.users.title')} />
 
         <View style={styles.searchRow}>
           <View style={styles.searchContainer}>
@@ -145,20 +141,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: spacing.xl,
-  },
-  backButton: {
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.sm,
-  },
-  backText: {
-    ...typography.textStyles.bodyMedium,
-    color: colors.primary[500],
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    paddingHorizontal: spacing.base,
-    marginBottom: spacing.base,
   },
   searchRow: {
     paddingHorizontal: spacing.base,

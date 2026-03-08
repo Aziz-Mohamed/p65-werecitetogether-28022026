@@ -5,9 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useCohorts } from '@/features/programs/hooks/useCohorts';
 import { typography } from '@/theme/typography';
@@ -28,10 +27,8 @@ export default function ProgramCohortsScreen() {
   return (
     <Screen scroll={false}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title}>{t('programs.labels.cohorts')}</Text>
-          <View style={styles.headerSpacer} />
+        <View style={styles.headerContainer}>
+          <PageHeader title={t('programs.labels.cohorts')} />
         </View>
 
         {cohorts.length === 0 ? (
@@ -94,20 +91,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     gap: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  headerContainer: {
     paddingHorizontal: spacing.lg,
-  },
-  headerSpacer: {
-    width: 60,
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
   },
   listContent: {
     paddingHorizontal: spacing.lg,

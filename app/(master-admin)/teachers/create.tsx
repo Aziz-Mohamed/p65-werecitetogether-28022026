@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Alert } from 'react-native';
+import { StyleSheet, View, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { useCreateTeacher } from '@/features/teachers/hooks/useTeachers';
 import { generateUsername } from '@/lib/username';
-import { typography } from '@/theme/typography';
-import { lightTheme, colors } from '@/theme/colors';
+import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 // ─── Create Teacher Screen ───────────────────────────────────────────────────
@@ -61,14 +60,7 @@ export default function CreateTeacherScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <Button
-          title={t('common.back')}
-          onPress={() => router.back()}
-          variant="ghost"
-          size="sm"
-        />
-
-        <Text style={styles.title}>{t('admin.teachers.createTitle')}</Text>
+        <PageHeader title={t('admin.teachers.createTitle')} />
 
         <TextField
           label={t('admin.teachers.fullName')}
@@ -125,10 +117,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.md,
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
   },
   usernameRow: {
     flexDirection: 'row',

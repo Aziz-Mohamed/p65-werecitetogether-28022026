@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { TextField, Button } from '@/components/ui';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { useProgram } from '@/features/programs/hooks/useProgram';
@@ -97,11 +97,7 @@ export default function EditProgramScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title}>{t('programs.admin.editProgram')}</Text>
-          <View style={{ width: 60 }} />
-        </View>
+        <PageHeader title={t('programs.admin.editProgram')} />
 
         <Controller
           control={control}
@@ -267,18 +263,6 @@ const styles = StyleSheet.create({
   container: {
     padding: spacing.lg,
     gap: spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
   },
   pickerLabel: {
     ...typography.textStyles.caption,

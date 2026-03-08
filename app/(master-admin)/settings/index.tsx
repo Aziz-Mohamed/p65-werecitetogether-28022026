@@ -1,10 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TextInput, ScrollView, Switch, Alert, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { usePlatformConfig } from '@/features/admin/hooks/usePlatformConfig';
 import { colors, lightTheme } from '@/theme/colors';
@@ -33,7 +32,6 @@ interface FormValues {
 
 export default function PlatformSettings() {
   const { t } = useTranslation();
-  const router = useRouter();
   const config = usePlatformConfig();
   const notificationDefaults = config.data?.settings?.notification_defaults;
 
@@ -71,11 +69,7 @@ export default function PlatformSettings() {
   return (
     <Screen>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backText}>{t('common.back')}</Text>
-        </Pressable>
-
-        <Text style={styles.title}>{t('admin.masterAdmin.settings.title')}</Text>
+        <PageHeader title={t('admin.masterAdmin.settings.title')} />
 
         <Text style={styles.label}>{t('admin.masterAdmin.settings.platformName')}</Text>
         <Controller
@@ -167,9 +161,6 @@ export default function PlatformSettings() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingTop: spacing.xl, paddingHorizontal: spacing.base, paddingBottom: spacing['3xl'] },
-  backButton: { paddingVertical: spacing.sm },
-  backText: { ...typography.textStyles.bodyMedium, color: colors.primary[500] },
-  title: { ...typography.textStyles.heading, color: lightTheme.text, marginBottom: spacing.xl },
   label: { ...typography.textStyles.label, color: lightTheme.textSecondary, marginTop: spacing.base, marginBottom: spacing.xs, textTransform: 'uppercase' },
   input: { ...typography.textStyles.body, color: lightTheme.text, borderWidth: 1, borderColor: lightTheme.border, borderRadius: radius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, height: normalize(44) },
   rtlInput: { textAlign: 'right' },

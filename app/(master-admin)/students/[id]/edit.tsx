@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { Select } from '@/components/forms/Select';
@@ -113,14 +113,7 @@ export default function EditStudentScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <Button
-          title={t('common.back')}
-          onPress={() => router.back()}
-          variant="ghost"
-          size="sm"
-        />
-
-        <Text style={styles.title}>{t('admin.students.editTitle')}</Text>
+        <PageHeader title={t('admin.students.editTitle')} />
         <Text style={styles.subtitle}>
           {resolveName((student as any).profiles?.name_localized, (student as any).profiles?.full_name)}
         </Text>
@@ -208,10 +201,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.md,
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
   },
   subtitle: {
     ...typography.textStyles.body,

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui';
 import { Avatar } from '@/components/ui/Avatar';
@@ -57,12 +57,7 @@ export default function StudentDetailScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <Button
-          title={t('common.back')}
-          onPress={() => router.back()}
-          variant="ghost"
-          size="sm"
-        />
+        <PageHeader title={t('admin.students.title')} />
 
         {/* Profile Header */}
         <View style={styles.profileHeader}>

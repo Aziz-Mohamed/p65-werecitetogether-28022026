@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 
-import { Screen } from '@/components/layout';
-import { Button } from '@/components/ui/Button';
+import { Screen, PageHeader } from '@/components/layout';
 import { LoadingState, ErrorState, EmptyState } from '@/components/feedback';
 import { useStickers } from '@/features/gamification/hooks/useStickers';
 import { useRTL } from '@/hooks/useRTL';
@@ -35,16 +34,7 @@ export default function StickerCatalogScreen() {
   return (
     <Screen scroll>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Button
-            title={t('common.back')}
-            onPress={() => router.back()}
-            variant="ghost"
-            size="sm"
-          />
-          <Text style={styles.title}>{t('admin.stickers.title')}</Text>
-          <View style={{ width: normalize(70) }} />
-        </View>
+        <PageHeader title={t('admin.stickers.title')} />
 
         <Text style={styles.subtitle}>
           {t('admin.stickers.catalogCount', { count: stickers.length })}
@@ -118,17 +108,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
   },
   subtitle: {
     ...typography.textStyles.caption,

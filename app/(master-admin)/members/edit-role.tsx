@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Button } from '@/components/ui';
 import { RoleSelector } from '@/features/auth/components/RoleSelector';
 import { authService } from '@/features/auth/services/auth.service';
@@ -88,6 +88,8 @@ export default function EditRoleScreen() {
   return (
     <Screen>
       <View style={styles.container}>
+        <PageHeader title={t('admin.masterAdmin.users.detail.manageRoles')} />
+
         {targetProfile && (
           <Text style={styles.userName}>{targetProfile.full_name}</Text>
         )}
@@ -124,11 +126,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingBlockStart: spacing.xl,
     paddingInline: spacing.base,
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    marginBlockEnd: spacing.sm,
   },
   userName: {
     ...typography.textStyles.subheading,

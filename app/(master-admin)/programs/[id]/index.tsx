@@ -4,9 +4,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Screen } from '@/components/layout';
+import { Screen, PageHeader } from '@/components/layout';
 import { Card } from '@/components/ui/Card';
-import { Button, Badge } from '@/components/ui';
+import { Badge } from '@/components/ui';
 import { LoadingState, ErrorState } from '@/components/feedback';
 import { useProgram } from '@/features/programs/hooks/useProgram';
 import { useProgramTeam } from '@/features/admin/hooks/useProgramTeam';
@@ -47,16 +47,18 @@ export default function ProgramOverviewScreen() {
     <Screen scroll>
       <View style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
-          <Button title={t('common.back')} onPress={() => router.back()} variant="ghost" size="sm" />
-          <Text style={styles.title} numberOfLines={1}>{name}</Text>
-          <Pressable
-            onPress={() => router.push(`/(master-admin)/programs/${id}/edit`)}
-            hitSlop={8}
-          >
-            <Ionicons name="settings-outline" size={24} color={colors.neutral[600]} />
-          </Pressable>
-        </View>
+        <PageHeader
+          title={name}
+          rightAction={
+            <Pressable
+              onPress={() => router.push(`/(master-admin)/programs/${id}/edit`)}
+              hitSlop={8}
+              style={styles.headerAction}
+            >
+              <Ionicons name="settings-outline" size={24} color={colors.neutral[600]} />
+            </Pressable>
+          }
+        />
 
         {/* Status */}
         <View style={styles.statusRow}>
@@ -193,17 +195,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.lg,
   },
-  header: {
-    flexDirection: 'row',
+  headerAction: {
+    width: normalize(38),
+    height: normalize(38),
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  title: {
-    ...typography.textStyles.heading,
-    color: lightTheme.text,
-    flex: 1,
-    textAlign: 'center',
+    justifyContent: 'center',
   },
   statusRow: {
     flexDirection: 'row',
