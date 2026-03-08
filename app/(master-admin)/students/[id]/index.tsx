@@ -10,12 +10,23 @@ import { Badge } from '@/components/ui';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { LoadingState, ErrorState } from '@/components/feedback';
-import { useStudentById, useUpdateStudent } from '@/features/students/hooks/useStudents';
-import { useStudentGuardians } from '@/features/profile/hooks/useGuardians';
+import { useUpdateStudent } from '@/features/students/hooks/useStudents';
+import { useStudentProfileData } from '@/features/students/hooks/useStudentProfileData';
+import {
+  StudentStatsGrid,
+  StudentSessionsList,
+  StudentStickersList,
+  StudentGuardiansList,
+  StudentEnrollmentHistory,
+  CollapsibleRubProgress,
+} from '@/features/students/components/StudentProfileSections';
+import { MemorizationProgressBar } from '@/features/memorization';
+import { RubProgressMap } from '@/features/gamification/components/RubProgressMap';
 import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { typography } from '@/theme/typography';
 import { lightTheme, colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { normalize } from '@/theme/normalize';
 
 // ─── Student Detail Screen ───────────────────────────────────────────────────
 
@@ -25,15 +36,14 @@ export default function StudentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const { resolveName } = useLocalizedName();
-  const { data: student, isLoading, error, refetch } = useStudentById(id);
-  const { data: guardians = [] } = useStudentGuardians(id);
+  const data = useStudentProfileData(id);
   const updateStudent = useUpdateStudent();
 
-  if (isLoading) return <LoadingState />;
-  if (error) return <ErrorState description={(error as Error).message} onRetry={refetch} />;
-  if (!student) return <ErrorState description={t('admin.students.notFound')} />;
+  if (data.isLoading) return <LoadingState />;
+  if (data.error) return <ErrorState description={(data.error as Error).message} onRetry={data.refetch} />;
+  if (!data.student) return <ErrorState description={t('admin.students.notFound')} />;
 
-  const profile = (student as any).profiles;
+  const { student, studentProfile: profile, guardians } = data;
 
   const handleToggleActive = () => {
     Alert.alert(
@@ -69,7 +79,6 @@ export default function StudentDetailScreen() {
           <Text style={styles.name}>
             {resolveName(profile?.name_localized, profile?.full_name)}
           </Text>
-          <Text style={styles.username}>@{profile?.username ?? '—'}</Text>
           <Badge
             label={student.is_active ? t('common.active') : t('common.inactive')}
             variant={student.is_active ? 'success' : 'warning'}
@@ -77,61 +86,40 @@ export default function StudentDetailScreen() {
           />
         </View>
 
-        {/* Personal Info */}
-        <Text style={styles.sectionLabel}>{t('admin.detail.personalInfo')}</Text>
-        <Card variant="default" style={styles.infoCard}>
-          {profile?.phone && (
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>{t('admin.detail.phone')}</Text>
-              <Text style={styles.infoValue}>{profile.phone}</Text>
-            </View>
-          )}
-          {student.date_of_birth && (
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>{t('admin.students.dateOfBirth')}</Text>
-              <Text style={styles.infoValue}>{student.date_of_birth}</Text>
-            </View>
-          )}
-          {profile?.created_at && (
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>{t('admin.detail.joined')}</Text>
-              <Text style={styles.infoValue}>
-                {new Date(profile.created_at).toLocaleDateString()}
-              </Text>
-            </View>
-          )}
-        </Card>
+        {/* Personal Info — only show if there's data */}
+        {(profile?.phone || student.date_of_birth) && (
+          <>
+            <Text style={styles.sectionLabel}>{t('admin.detail.personalInfo')}</Text>
+            <Card variant="default" style={styles.infoCard}>
+              {profile?.phone && (
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>{t('admin.detail.phone')}</Text>
+                  <Text style={styles.infoValue}>{profile.phone}</Text>
+                </View>
+              )}
+              {student.date_of_birth && (
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>{t('admin.students.dateOfBirth')}</Text>
+                  <Text style={styles.infoValue}>{student.date_of_birth}</Text>
+                </View>
+              )}
+            </Card>
+          </>
+        )}
 
         {/* Academic Info */}
         <Card variant="default" style={styles.infoCard}>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>{t('admin.students.class')}</Text>
             <Text style={styles.infoValue}>
-              {resolveName((student as any).classes?.name_localized, (student as any).classes?.name) ?? t('admin.students.noClass')}
+              {data.studentClass
+                ? resolveName(data.studentClass.name_localized, data.studentClass.name)
+                : t('admin.students.noClass')}
             </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>{t('admin.students.level')}</Text>
-            <Text style={styles.infoValue}>
-              {t('common.level')} {student.current_level ?? 0}/240
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>{t('student.streak')}</Text>
-            <Text style={styles.infoValue}>{student.current_streak}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>{t('admin.students.longestStreak')}</Text>
-
             <Text style={styles.infoValue}>{student.longest_streak ?? 0}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>{t('admin.students.guardian')}</Text>
-            <Text style={styles.infoValue}>
-              {guardians.length > 0
-                ? guardians.map((g: any) => g.guardian_name).join(', ')
-                : t('admin.students.noGuardian')}
-            </Text>
           </View>
           {student.enrollment_date && (
             <View style={styles.infoRow}>
@@ -142,6 +130,38 @@ export default function StudentDetailScreen() {
             </View>
           )}
         </Card>
+
+        {/* Performance Stats */}
+        <StudentStatsGrid
+          activeCount={data.activeCount}
+          streak={student.current_streak ?? 0}
+          stickersCount={data.stickers.length}
+          attendanceRate={data.attendanceRate}
+        />
+
+        {/* Memorization Progress */}
+        {data.memStats && (
+          <MemorizationProgressBar stats={data.memStats} compact />
+        )}
+
+        {/* Recent Sessions */}
+        <StudentSessionsList sessions={data.sessions} />
+
+        {/* Rub Progress Map */}
+        <CollapsibleRubProgress activeCount={data.activeCount}>
+          <View style={styles.progressMapContainer}>
+            <RubProgressMap studentId={id!} mode="readonly" />
+          </View>
+        </CollapsibleRubProgress>
+
+        {/* Sticker History */}
+        <StudentStickersList stickers={data.stickers} />
+
+        {/* Guardians */}
+        <StudentGuardiansList guardians={guardians} />
+
+        {/* Enrollment History */}
+        <StudentEnrollmentHistory enrollments={data.enrollments} />
 
         {/* Actions */}
         <View style={styles.actions}>
@@ -185,10 +205,6 @@ const styles = StyleSheet.create({
     color: lightTheme.text,
     marginTop: spacing.sm,
   },
-  username: {
-    ...typography.textStyles.caption,
-    color: lightTheme.textSecondary,
-  },
   sectionLabel: {
     ...typography.textStyles.label,
     color: lightTheme.textSecondary,
@@ -213,6 +229,9 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.medium,
     flexShrink: 1,
     textAlign: 'right',
+  },
+  progressMapContainer: {
+    minHeight: normalize(400),
   },
   actions: {
     flexDirection: 'row',
