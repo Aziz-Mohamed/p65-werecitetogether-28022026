@@ -20,6 +20,23 @@ Manual test script for the **Teacher** role in WeReciteTogether.
 
 ---
 
+## Quick Smoke Test
+
+> Run these first. If any fail, stop and investigate before continuing with the full script.
+
+- [ ] **QS-01** Login → teacher dashboard with 5 tabs: Dashboard, Students, Sessions, Class Progress, Profile
+- [ ] **QS-02** Dashboard loads with stats cards (student count, session count)
+- [ ] **QS-03** Students tab loads with enrolled students in teacher's class
+- [ ] **QS-04** Sessions tab loads with teacher's sessions
+- [ ] **QS-05** Can open session workspace and see recitation logging fields
+- [ ] **QS-06** Awards screen loads with student list and sticker catalog
+- [ ] **QS-07** Class Progress tab loads with charts/analytics
+- [ ] **QS-08** Profile tab loads with name, email, role
+- [ ] **QS-09** Cannot access `/(student)/` or `/(master-admin)/` routes
+- [ ] **QS-10** Can toggle teacher availability on/off
+
+---
+
 ## A. Dashboard Verification
 
 ### A1. Login and Routing

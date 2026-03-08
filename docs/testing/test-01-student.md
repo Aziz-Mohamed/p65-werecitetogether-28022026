@@ -22,6 +22,22 @@
 
 ---
 
+## Quick Smoke Test
+
+> Run these first. If any fail, stop and investigate before continuing with the full script.
+
+- [ ] **QS-01** Login → student dashboard with 6 tabs: Dashboard, Programs, Memorization, Revision, Journey, Profile
+- [ ] **QS-02** Dashboard loads with level and points displayed
+- [ ] **QS-03** Programs tab loads with available programs
+- [ ] **QS-04** Memorization tab shows progress data
+- [ ] **QS-05** Revision tab loads with revision schedule
+- [ ] **QS-06** Journey tab shows gamification overview (stickers, badges, level)
+- [ ] **QS-07** Profile tab loads with name, email, and role
+- [ ] **QS-08** Can view a session detail (read-only)
+- [ ] **QS-09** Cannot access `/(teacher)/` or `/(master-admin)/` routes
+
+---
+
 ## A. Dashboard Verification
 
 ### A1. Tab Bar
