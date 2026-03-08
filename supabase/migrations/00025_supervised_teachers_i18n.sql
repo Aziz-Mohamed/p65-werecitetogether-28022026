@@ -1,6 +1,9 @@
 -- Add name_localized and program_name_ar to get_supervised_teachers RPC
 -- for proper i18n support in supervisor UI screens.
 
+-- Must DROP first because the return type is changing (adding new OUT columns)
+DROP FUNCTION IF EXISTS get_supervised_teachers(uuid);
+
 CREATE OR REPLACE FUNCTION get_supervised_teachers(p_supervisor_id uuid)
 RETURNS TABLE(
   teacher_id uuid,
